@@ -1,5 +1,5 @@
 // ==============================================================================
-// FrevIA Data Store & State Management (Instagram-style Layout)
+// FREVAI - STATE MANAGEMENT, RBAC & UNIFIED DATA STORE
 // ==============================================================================
 
 const DB = {
@@ -12,10 +12,9 @@ const DB = {
       bio: 'Regente e arranjador à frente da OPBH. Transformando o Frevo com fusões globais e energia visceral.',
       avatar_url: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80',
       cover_url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80',
-      followers: '14.2k',
-      following: '420',
-      posts_count: 12,
-      is_authorized_editor: true,
+      email: 'forro@cultura.pe.gov.br',
+      phone: '+55 (81) 99876-1111',
+      is_approved: true,
       has_story: true,
     },
     {
@@ -26,10 +25,9 @@ const DB = {
       bio: 'Liderada pelo saxofonista Spok, elevando o Frevo instrumental ao circuito mundial do jazz.',
       avatar_url: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=400&q=80',
       cover_url: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=1200&q=80',
-      followers: '38.9k',
-      following: '190',
-      posts_count: 24,
-      is_authorized_editor: true,
+      email: 'spok@cultura.pe.gov.br',
+      phone: '+55 (81) 99876-2222',
+      is_approved: true,
       has_story: true,
     },
     {
@@ -40,10 +38,9 @@ const DB = {
       bio: 'Tradição dos blocos líricos de pau e corda do Recife desde 1974 com coro feminino e poesia.',
       avatar_url: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=400&q=80',
       cover_url: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=1200&q=80',
-      followers: '21.5k',
-      following: '310',
-      posts_count: 18,
-      is_authorized_editor: false,
+      email: 'saudade@cultura.pe.gov.br',
+      phone: '+55 (81) 99876-3333',
+      is_approved: true,
       has_story: true,
     },
     {
@@ -54,25 +51,23 @@ const DB = {
       bio: 'Patrimônio Vivo de Pernambuco, a mais marcante voz dos frevos de Capiba e Nelson Ferreira.',
       avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
       cover_url: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=1200&q=80',
-      followers: '54.0k',
-      following: '85',
-      posts_count: 45,
-      is_authorized_editor: false,
+      email: 'claudionor@cultura.pe.gov.br',
+      phone: '+55 (81) 99876-4444',
+      is_approved: true,
       has_story: true,
     },
     {
       id: 'a5',
-      name: 'Paço do Frevo',
-      handle: '@pacodofrevo',
-      genre: 'Centro Cultural',
-      bio: 'O coração da salvaguarda do Frevo no Bairro do Recife. Memória, pesquisa e difusão.',
-      avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-      cover_url: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=1200&q=80',
-      followers: '92.1k',
-      following: '520',
-      posts_count: 89,
-      is_authorized_editor: true,
-      has_story: true,
+      name: 'Orquestra Popular da Bomba',
+      handle: '@opbh_recife',
+      genre: 'Frevo Contemporâneo',
+      bio: 'Nova geração de metais e percussão unindo frevo de rua e ritmos afro-brasileiros.',
+      avatar_url: 'https://images.unsplash.com/photo-1520523839898-507127053c37?auto=format&fit=crop&w=400&q=80',
+      cover_url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80',
+      email: 'contato@opbh.com.br',
+      phone: '+55 (81) 99876-5555',
+      is_approved: false, // Pendente de moderação CMS
+      has_story: false,
     }
   ],
 
@@ -92,6 +87,7 @@ const DB = {
       is_liked: false,
       is_saved: false,
       time_ago: 'HÁ 2 HORAS',
+      created_at: '2026-09-16T12:00:00Z',
       comments: [
         { user: 'mariana.passista', text: 'Estarei lá com toda a turma do passo!' },
         { user: 'carlos_metais', text: 'Os arranjos deste ano estão impecáveis.' }
@@ -111,9 +107,10 @@ const DB = {
       likes: 589,
       is_liked: true,
       is_saved: true,
-      time_ago: 'HÁ 5 HORAS',
+      time_ago: 'HÁ 6 HORAS',
+      created_at: '2026-09-16T08:30:00Z',
       comments: [
-        { user: 'lucas_trompete', text: 'Baixei a partitura agora mesmo Maestro, muito obrigado!' }
+        { user: 'orquestra_olinda', text: 'Já baixamos e vamos ensaiar hoje à noite!' }
       ]
     },
     {
@@ -122,66 +119,68 @@ const DB = {
       handle: 'spokfrevo',
       avatar: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=400&q=80',
       image: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=1000&q=80',
-      location: 'Teatro Santa Isabel',
+      location: 'Teatro Santa Isabel, Recife',
       type: 'culture',
-      title: 'Ensaio Geral da Temporada',
-      content: 'A força do Frevo tocado na veia! Cada compasso acelerado homenageia os mestres que pavimentaram a estrada da nossa música imaterial.',
-      tags: ['SpokFrevo', 'MusicaBrasileira', 'Saxofone'],
-      likes: 812,
+      title: 'Concerto Sinfônico do Frevo Instrumental',
+      content: 'Uma noite inesquecível de celebração aos mestres do Frevo de Rua com arranjos sinfônicos contemporâneos.',
+      tags: ['SpokFrevo', 'Instrumental', 'SantaIsabel'],
+      likes: 820,
       is_liked: false,
       is_saved: false,
-      time_ago: 'HÁ 1 DIA',
-      comments: [
-        { user: 'renata_cultura', text: 'Incrível ver essa orquestra ao vivo.' }
-      ]
+      time_ago: 'ONTEM',
+      created_at: '2026-09-15T20:00:00Z',
+      comments: []
     }
   ],
 
   songs: [
     {
       id: 's1',
-      title: 'Passo da Fervura',
-      artist: 'Maestro Forró & OPBH',
-      genre: 'Frevo Livre',
-      description: 'Diálogo vigoroso entre trompetes e saxofones com andamento vivo a 152 BPM.',
-      lyrics: `(Instrumental — Frevo de Rua Fervente)
-Entrada vibrante de trompetes em staccato.
-Trombones respondem com contracanto sincopado.
-A percussão acelera o andamento a 152 BPM.
-O solo de saxofone alto corta a multidão em espiral.`,
-      score_file: 'passo-da-fervura.pdf',
-      status: 'published'
+      title: 'Vassourinhas',
+      artist: 'Matias da Rocha & Joana Batista',
+      genre: 'Frevo de Rua',
+      description: 'O mais emblemático e executado frevo instrumental de todos os tempos.',
+      lyrics: '(Instrumental - Execução enérgica de sopros e percussão sincopada)',
+      score_file: 'vassourinhas-orquestra.pdf',
+      status: 'published',
+      downloads_count: 1420,
+      author_id: 'a1'
     },
     {
       id: 's2',
-      title: 'Valores do Passado',
-      artist: 'Bloco da Saudade',
+      title: 'Madeira Que Cupim Não Rói',
+      artist: 'Capiba',
       genre: 'Frevo de Bloco',
-      description: 'Hino memorável de Edgar Moraes que resgata a nostalgia dos antigos blocos líricos.',
-      lyrics: `Bloco das Flores, Vassourinhas
-Prateado, Toureiros, Lenhadores
-Batutas de São José
-Tanta saudade dos velhos carnavais
-
-Quando a orquestra entoava a canção
-Toda a cidade cantava com emoção
-E pelas ruas de pedra a brilhar
-O frevo não parava de ecoar...`,
-      score_file: 'valores-do-passado.pdf',
-      status: 'published'
+      description: 'Hino lírico da resistência e orgulho carnavalesco pernambucano.',
+      lyrics: 'Madeira do Rosário vem a ver contar / Como é que se faz pra vencer / Pernambuco é terra de cabra da peste...',
+      score_file: 'madeira-cupim-coro.pdf',
+      status: 'published',
+      downloads_count: 980,
+      author_id: 'a3'
     },
     {
       id: 's3',
-      title: 'Voltei Recife',
-      artist: 'Claudionor Germano',
+      title: 'Valores do Passado',
+      artist: 'Edgar Moraes',
+      genre: 'Frevo de Bloco',
+      description: 'Poesia nostálgica sobre os antigos carnavais de pau e corda do Recife.',
+      lyrics: 'Bloco das Flores, Batutas de São José / Pavão Dourado, Flor da Lira...',
+      score_file: 'valores-do-passado.pdf',
+      status: 'published',
+      downloads_count: 650,
+      author_id: 'a3'
+    },
+    {
+      id: 's4',
+      title: 'Frevo Mulher',
+      artist: 'Zé Ramalho',
       genre: 'Frevo Canção',
-      description: 'Composição antológica de Luiz Bandeira que expressa o amor à cidade dos rios e pontes.',
-      lyrics: `Voltei, Recife
-Foi a saudade que me trouxe pelo braço
-Quero rever a minha terra tão querida
-E reencontrar velhos amigos no compasso...`,
-      score_file: 'voltei-recife.pdf',
-      status: 'published'
+      description: 'Fusão antológica do frevo com a poesia telúrica nordestina.',
+      lyrics: 'Quantos aqui ouvem a voz do povo / Que vem de dentro do coração...',
+      score_file: 'frevo-mulher-metais.pdf',
+      status: 'published',
+      downloads_count: 830,
+      author_id: 'a1'
     }
   ],
 
@@ -191,8 +190,9 @@ E reencontrar velhos amigos no compasso...`,
       name: 'Tesoura',
       difficulty: 'Iniciante',
       category: 'Tradicional',
-      description: 'Um dos movimentos mais emblemáticos do Frevo, com cruzamento ágil e rítmico das pernas.',
-      instructions: '1. Inicie na ponta dos pés com joelhos semiflexionados.\n2. Cruze a perna direita pela frente da esquerda.\n3. Abra com salto suave e cruze a esquerda.\n4. Gire a sombrinha em contrapeso na mão direita.'
+      description: 'Cruzamento ágil dos pés com pequenos saltos no tempo da música, mantendo o tronco ereto e sombrinha em rotação.',
+      instructions: '1. Inicie com os pés paralelos.\n2. Salte cruzando a perna direita à frente da esquerda.\n3. Salte novamente descruzando e invertendo a posição.\n4. Gire a sombrinha em sincronia rítmica.',
+      author_role: 'admin'
     },
     {
       id: 'st2',
@@ -200,7 +200,8 @@ E reencontrar velhos amigos no compasso...`,
       difficulty: 'Intermediário',
       category: 'Acrobático',
       description: 'Agachamento em cócoras com extensão lateral veloz simulando o mecanismo de um ferrolho.',
-      instructions: '1. Agache em posição de cócoras na ponta dos pés.\n2. Estenda o calcanhar direito para a lateral.\n3. Recolha e estenda alternadamente o esquerdo.\n4. Mantenha o equilíbrio com a sombrinha no alto.'
+      instructions: '1. Agache em posição de cócoras na ponta dos pés.\n2. Estenda o calcanhar direito para a lateral.\n3. Recolha e estenda alternadamente o esquerdo.\n4. Mantenha o equilíbrio com a sombrinha no alto.',
+      author_role: 'admin'
     },
     {
       id: 'st3',
@@ -208,7 +209,8 @@ E reencontrar velhos amigos no compasso...`,
       difficulty: 'Avançado',
       category: 'Acrobático',
       description: 'Flexão profunda e rápida dos joelhos para frente enquanto o corpo desce em suspensão.',
-      instructions: '1. Junte os pés na ponta.\n2. Lance os joelhos para a frente mantendo o tronco ereto.\n3. Retorne com impulsão potente no ritmo sincopado do Frevo.'
+      instructions: '1. Junte os pés na ponta.\n2. Lance os joelhos para a frente mantendo o tronco ereto.\n3. Retorne com impulsão potente no ritmo sincopado do Frevo.',
+      author_role: 'admin'
     }
   ],
 
@@ -265,7 +267,316 @@ E reencontrar velhos amigos no compasso...`,
 };
 
 // ==============================================================================
-// App Router & View Controller
+// GESTÃO DE SESSÃO & CONTROLE DE ACESSO (RBAC)
+// Roles: 'guest' (Visitante), 'user' (Usuário Comum), 'artist' (Artista), 'admin' (Admin)
+// ==============================================================================
+
+let currentUserSession = {
+  role: 'guest', // Inicia como visitante sem login por padrão
+  name: 'Visitante',
+  handle: '@visitante',
+  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+  email: '',
+  artist_id: null,
+  favorites: ['a1'] // IDs dos artistas favoritados
+};
+
+// Carregar sessão salva do LocalStorage se houver
+const savedSession = localStorage.getItem('frevai_user_session');
+if (savedSession) {
+  try {
+    currentUserSession = JSON.parse(savedSession);
+  } catch (e) {}
+}
+
+function saveCurrentSession() {
+  localStorage.setItem('frevai_user_session', JSON.stringify(currentUserSession));
+  updateSessionUI();
+}
+
+function updateSessionUI() {
+  const userNameEl = document.getElementById('header-user-name');
+  const cmsBtn = document.getElementById('header-cms-btn');
+  const addStepBtn = document.getElementById('btn-add-step');
+
+  if (userNameEl) {
+    if (currentUserSession.role === 'guest') {
+      userNameEl.innerText = 'Entrar';
+    } else {
+      userNameEl.innerText = currentUserSession.name.split(' ')[0] + ` (${currentUserSession.role === 'admin' ? 'Admin' : currentUserSession.role === 'artist' ? 'Artista' : 'Usuário'})`;
+    }
+  }
+
+  // Visibilidade de botões com base no papel
+  if (cmsBtn) {
+    cmsBtn.style.display = currentUserSession.role === 'admin' ? 'flex' : 'flex'; // Mantém acessível para testes
+  }
+  if (addStepBtn) {
+    addStepBtn.style.display = (currentUserSession.role === 'artist' || currentUserSession.role === 'admin') ? 'block' : 'none';
+  }
+}
+
+function switchTestRole(role) {
+  if (role === 'admin') {
+    currentUserSession = {
+      role: 'admin',
+      name: 'Administrador FrevAI',
+      handle: '@admin_cultura',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      email: 'admin@cultura.pe.gov.br',
+      artist_id: null,
+      favorites: ['a1', 'a2', 'a3']
+    };
+  } else if (role === 'artist') {
+    currentUserSession = {
+      role: 'artist',
+      name: 'Maestro Forró',
+      handle: '@maestroforro',
+      avatar: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80',
+      email: 'forro@cultura.pe.gov.br',
+      artist_id: 'a1',
+      favorites: ['a2']
+    };
+  } else if (role === 'user') {
+    currentUserSession = {
+      role: 'user',
+      name: 'Folião do Passo',
+      handle: '@foliao_recife',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
+      email: 'foliao@gmail.com',
+      artist_id: null,
+      favorites: ['a1']
+    };
+  } else {
+    currentUserSession = {
+      role: 'guest',
+      name: 'Visitante',
+      handle: '@visitante',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+      email: '',
+      artist_id: null,
+      favorites: []
+    };
+  }
+
+  saveCurrentSession();
+  closeModal();
+  renderArtists();
+  renderFeed();
+  renderProfileGallery();
+  renderSteps();
+  renderAdminCMS();
+  alert(`Papel alterado para: ${role.toUpperCase()} com sucesso!`);
+}
+
+// ==============================================================================
+// MODAL UNIFICADO DE SESSÃO / LOGIN / CADASTRO (SUPABASE & GOOGLE)
+// ==============================================================================
+function openSessionModal() {
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+
+  const isGuest = currentUserSession.role === 'guest';
+
+  modalBody.innerHTML = `
+    <div class="space-y-4 text-left">
+      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+        <div>
+          <h3 class="font-display font-bold text-lg text-ink">${isGuest ? 'Acessar o FrevAI' : 'Minha Conta FrevAI'}</h3>
+          <p class="text-[11px] text-muted">${isGuest ? 'Entre para comentar e favoritar artistas' : `Logado como: ${currentUserSession.name}`}</p>
+        </div>
+        <span class="badge ${currentUserSession.role === 'admin' ? 'bg-frevo-red/15 text-frevo-red' : currentUserSession.role === 'artist' ? 'bg-frevo-orange/15 text-frevo-orange' : 'bg-frevo-cyan/15 text-frevo-cyan'} text-[11px] font-bold">
+          ${currentUserSession.role.toUpperCase()}
+        </span>
+      </div>
+
+      ${isGuest ? `
+        <!-- Botão Google OAuth Oficial -->
+        <button onclick="loginWithGoogle()" class="btn btn-outline w-full py-2.5 rounded-2xl flex items-center justify-center gap-2.5 text-xs font-bold shadow-sm hover:bg-gray-50 transition-all">
+          <svg width="18" height="18" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          Continuar com o Google
+        </button>
+
+        <div class="flex items-center my-2 text-center">
+          <div class="flex-1 border-t border-gray-200"></div>
+          <span class="px-2 text-[10px] text-muted uppercase font-bold tracking-wider">Ou E-mail & Senha</span>
+          <div class="flex-1 border-t border-gray-200"></div>
+        </div>
+
+        <!-- Formulário E-mail e Senha -->
+        <form onsubmit="handleEmailLogin(event)" class="space-y-3">
+          <div>
+            <label class="block text-[11px] font-bold text-ink uppercase mb-1">E-mail</label>
+            <input type="email" id="auth-email" required placeholder="seuemail@exemplo.com" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-ink uppercase mb-1">Senha</label>
+            <input type="password" id="auth-password" required placeholder="••••••••" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+          </div>
+          <button type="submit" class="btn btn-primary w-full text-xs rounded-xl py-2.5 font-bold shadow-md">
+            Entrar na Plataforma
+          </button>
+        </form>
+      ` : `
+        <div class="p-4 bg-surface-soft rounded-2xl flex items-center gap-3 border border-gray-100">
+          <img src="${currentUserSession.avatar}" alt="${currentUserSession.name}" class="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm" />
+          <div>
+            <h4 class="font-display font-bold text-sm text-ink">${currentUserSession.name}</h4>
+            <span class="text-xs text-muted block">${currentUserSession.handle}</span>
+            <span class="text-[11px] text-ink-soft">${currentUserSession.email || 'Conta Local'}</span>
+          </div>
+        </div>
+
+        <button onclick="logoutSession()" class="btn btn-outline text-xs w-full rounded-xl py-2 font-bold text-frevo-red hover:bg-red-50">
+          Encerrar Sessão (Sair)
+        </button>
+      `}
+
+      <!-- Atalhos de Simulação e Teste de Papéis -->
+      <div class="pt-3 border-t border-gray-100 space-y-1.5">
+        <span class="text-[10px] font-bold text-muted uppercase tracking-wider block">Simular Papel para Testes:</span>
+        <div class="grid grid-cols-2 gap-1.5">
+          <button onclick="switchTestRole('guest')" class="p-2 rounded-xl text-[11px] font-bold bg-gray-100 hover:bg-gray-200 text-ink text-left">
+            Visitante (Sem Login)
+          </button>
+          <button onclick="switchTestRole('user')" class="p-2 rounded-xl text-[11px] font-bold bg-frevo-cyan/15 hover:bg-frevo-cyan/25 text-ink text-left">
+            Usuário Comum
+          </button>
+          <button onclick="switchTestRole('artist')" class="p-2 rounded-xl text-[11px] font-bold bg-frevo-orange/15 hover:bg-frevo-orange/25 text-ink text-left">
+            Artista (Maestro Forró)
+          </button>
+          <button onclick="switchTestRole('admin')" class="p-2 rounded-xl text-[11px] font-bold bg-frevo-red/15 hover:bg-frevo-red/25 text-ink text-left">
+            Administrador (CMS)
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  modal.classList.add('open');
+}
+
+async function loginWithGoogle() {
+  if (window.supabaseService && window.supabaseService.isConnected()) {
+    await window.supabaseService.signInWithGoogle();
+  } else {
+    // Simulação caso as chaves não estejam online
+    switchTestRole('user');
+  }
+}
+
+async function handleEmailLogin(e) {
+  e.preventDefault();
+  const email = document.getElementById('auth-email').value;
+  const password = document.getElementById('auth-password').value;
+
+  if (window.supabaseService && window.supabaseService.isConnected()) {
+    const { data, error } = await window.supabaseService.signInWithEmail(email, password);
+    if (error) {
+      alert('Erro no login Supabase: ' + error.message);
+      return;
+    }
+    currentUserSession = {
+      role: data.user.user_metadata?.role || 'user',
+      name: data.user.user_metadata?.display_name || email.split('@')[0],
+      handle: '@' + email.split('@')[0],
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      email: email,
+      artist_id: null,
+      favorites: []
+    };
+    saveCurrentSession();
+    closeModal();
+    alert('Login realizado com sucesso!');
+  } else {
+    // Fallback local
+    currentUserSession = {
+      role: email.includes('admin') ? 'admin' : email.includes('artista') ? 'artist' : 'user',
+      name: email.split('@')[0],
+      handle: '@' + email.split('@')[0],
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      email: email,
+      artist_id: null,
+      favorites: []
+    };
+    saveCurrentSession();
+    closeModal();
+    alert(`Conectado com sucesso como: ${currentUserSession.role.toUpperCase()}`);
+  }
+}
+
+function logoutSession() {
+  if (window.supabaseService && window.supabaseService.isConnected()) {
+    window.supabaseService.signOut();
+  }
+  switchTestRole('guest');
+}
+
+// Modal do Sino de Notificações
+function openNotificationsModal() {
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+
+  modalBody.innerHTML = `
+    <div class="space-y-4 text-left">
+      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-frevo-orange/15 text-frevo-orange flex items-center justify-center">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+          </div>
+          <h3 class="font-display font-bold text-lg text-ink">Notificações</h3>
+        </div>
+        <span class="badge bg-frevo-orange/15 text-frevo-orange text-[10px] font-bold">3 Novas</span>
+      </div>
+
+      <div class="space-y-2.5 max-h-64 overflow-y-auto pr-1">
+        <div class="p-3 bg-surface-soft rounded-2xl border border-gray-100 flex items-start gap-2.5">
+          <div class="w-2 h-2 rounded-full bg-frevo-orange mt-1.5 flex-shrink-0"></div>
+          <div>
+            <strong class="text-ink text-xs block font-bold">Nova Partitura Disponível!</strong>
+            <p class="text-[11px] text-muted">Maestro Forró publicou o arranjo de "Passo da Fervura".</p>
+            <span class="text-[9px] text-gray-400 mt-1 block">Há 2 horas</span>
+          </div>
+        </div>
+
+        <div class="p-3 bg-surface-soft rounded-2xl border border-gray-100 flex items-start gap-2.5">
+          <div class="w-2 h-2 rounded-full bg-frevo-cyan mt-1.5 flex-shrink-0"></div>
+          <div>
+            <strong class="text-ink text-xs block font-bold">Acerto de Marcha Confirmado</strong>
+            <p class="text-[11px] text-muted">Domingo no Recife Antigo às 16h na Praça do Arsenal.</p>
+            <span class="text-[9px] text-gray-400 mt-1 block">Há 5 horas</span>
+          </div>
+        </div>
+
+        <div class="p-3 bg-surface-soft rounded-2xl border border-gray-100 flex items-start gap-2.5">
+          <div class="w-2 h-2 rounded-full bg-frevo-green mt-1.5 flex-shrink-0"></div>
+          <div>
+            <strong class="text-ink text-xs block font-bold">Novo Passo de Frevo</strong>
+            <p class="text-[11px] text-muted">Aprenda o passo "Dobradiça" no guia pedagógico.</p>
+            <span class="text-[9px] text-gray-400 mt-1 block">Ontem</span>
+          </div>
+        </div>
+      </div>
+
+      <button onclick="closeModal()" class="btn btn-primary w-full text-xs rounded-xl py-2">
+        Fechar Notificações
+      </button>
+    </div>
+  `;
+
+  modal.classList.add('open');
+}
+
+// ==============================================================================
+// RENDERIZADORES DO APLICATIVO
 // ==============================================================================
 
 function switchView(viewName) {
@@ -280,13 +591,8 @@ function switchView(viewName) {
   document.querySelectorAll('.nav-item').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.view === viewName);
   });
-  
-  document.querySelectorAll('.header-link').forEach(link => {
-    link.classList.toggle('text-frevo-orange', link.dataset.view === viewName);
-  });
 }
 
-// Renderizadores de Componentes
 function renderStories() {
   const container = document.getElementById('stories-list');
   if (!container) return;
@@ -301,16 +607,12 @@ function renderStories() {
   `).join('');
 }
 
-// ==============================================================================
-// RENDERIZAÇÃO DO FEED (MATCH DO MOCKUP COM BOTÕES E PILL FLUTUANTES)
-// ==============================================================================
 function renderFeed() {
   const container = document.getElementById('feed-list');
   if (!container) return;
 
   container.innerHTML = DB.posts.map(post => `
     <article class="feed-card-immersive">
-      <!-- Media Container com Elementos Flutuantes -->
       <div class="feed-card-media">
         <img src="${post.image}" alt="${post.title}" loading="lazy" />
 
@@ -324,22 +626,21 @@ function renderFeed() {
         </div>
 
         <!-- Top-Right Floating Bookmark Button -->
-        <button onclick="toggleSave('${post.id}')" class="floating-save-btn" aria-label="Salvar Publicação">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="${post.is_saved ? '#171717' : 'none'}" stroke="currentColor" stroke-width="2.2">
+        <button onclick="toggleSave('${post.id}')" class="floating-save-btn ${post.is_saved ? 'is-saved' : ''}" aria-label="Salvar Publicação">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="${post.is_saved ? '#FF8A00' : 'none'}" stroke="${post.is_saved ? '#FF8A00' : 'currentColor'}" stroke-width="2.2">
             <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
           </svg>
         </button>
 
         <!-- Bottom Floating Actions Bar -->
         <div class="floating-actions-bar">
-          <!-- Left: Comment & Share Circle Buttons -->
           <div class="flex items-center gap-2">
             <button onclick="openCommentsModal('${post.id}')" class="floating-circle-btn" aria-label="Comentários">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                 <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
               </svg>
             </button>
-            <button onclick="sharePost('${post.title}')" class="floating-circle-btn" aria-label="Compartilhar">
+            <button onclick="sharePost('${post.id}')" class="floating-circle-btn" aria-label="Compartilhar">
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                 <line x1="22" y1="2" x2="11" y2="13"></line>
                 <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
@@ -347,7 +648,6 @@ function renderFeed() {
             </button>
           </div>
 
-          <!-- Right: Like Button with Red Heart Pill -->
           <button onclick="toggleLike('${post.id}')" class="floating-like-btn" aria-label="Curtir">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="${post.is_liked ? '#F0442E' : '#F0442E'}" stroke="#F0442E" stroke-width="${post.is_liked ? '0' : '2'}">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
@@ -357,7 +657,6 @@ function renderFeed() {
         </div>
       </div>
 
-      <!-- Caption & Tags Bottom Card Area -->
       <div class="feed-card-caption-container">
         <div class="flex items-center justify-between mb-1.5">
           <h4 class="font-bold text-xs text-ink">${post.title}</h4>
@@ -372,131 +671,56 @@ function renderFeed() {
   `).join('');
 }
 
-// ==============================================================================
-// RENDERIZAÇÃO DO PERFIL E GALERIA ASSIMÉTRICA (MOCKUP MATCH)
-// ==============================================================================
-const profileGalleryItems = [
-  {
-    id: 'g1',
-    image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80',
-    type: 'tall',
-    title: 'Acerto de Marcha no Recife Antigo'
-  },
-  {
-    id: 'g2',
-    image: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80',
-    type: 'tall',
-    title: 'Arte e Expressão Visual'
-  },
-  {
-    id: 'g3',
-    image: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80',
-    type: 'regular',
-    title: 'Céu e Sombrinhas de Frevo'
-  },
-  {
-    id: 'g4',
-    image: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=600&q=80',
-    type: 'tall',
-    title: 'Orquestra de Metais'
-  },
-  {
-    id: 'g5',
-    image: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=600&q=80',
-    type: 'regular',
-    title: 'Carnaval Lírico e Saudade'
-  },
-  {
-    id: 'g6',
-    image: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=600&q=80',
-    type: 'regular',
-    title: 'Trompetes e Ritmo Fervente'
-  }
-];
-
-let currentProfileTab = 'scores';
-
-function switchProfileTab(tabName, btnElement) {
-  currentProfileTab = tabName;
-  document.querySelectorAll('.profile-tab-btn').forEach(btn => btn.classList.remove('active'));
-  if (btnElement) btnElement.classList.add('active');
-  renderProfileGallery();
-}
-
-function renderProfileGallery() {
-  const container = document.getElementById('profile-gallery-container');
-  if (!container) return;
-
-  if (currentProfileTab === 'scores') {
-    // Aba 1: Partituras do Artista
-    container.innerHTML = `
-      <div class="space-y-3 pb-6">
-        <div class="flex items-center justify-between px-1">
-          <span class="text-xs font-bold text-ink">Partituras & Obras Publicadas (${DB.songs.length})</span>
-          <button onclick="openSubmitSongModal()" class="text-xs font-bold text-frevo-orange hover:underline">+ Nova Obra</button>
-        </div>
-        ${DB.songs.map(song => `
-          <div class="bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
-            <div class="space-y-0.5">
-              <span class="badge bg-frevo-cyan/15 text-frevo-cyan text-[10px] font-bold">${song.genre}</span>
-              <h4 class="font-bold text-xs text-ink leading-tight">${song.title}</h4>
-              <p class="text-[11px] text-muted line-clamp-1">${song.description}</p>
-            </div>
-            <button onclick="openScoreModal('${song.title}', '${song.artist}')" class="btn btn-cyan text-xs py-1.5 px-3 h-8 rounded-xl font-bold flex-shrink-0">
-              Ver Partitura
-            </button>
-          </div>
-        `).join('')}
-      </div>
-    `;
-  } else if (currentProfileTab === 'saved') {
-    // Aba 2: Itens Salvos / Bookmarks
-    const savedPosts = DB.posts.filter(p => p.is_saved);
-    if (savedPosts.length === 0) {
-      container.innerHTML = `
-        <div class="text-center py-12 px-4 bg-white border border-gray-100 rounded-2xl shadow-sm">
-          <div class="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto text-gray-400 mb-2">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-            </svg>
-          </div>
-          <h4 class="font-bold text-xs text-ink">Nenhum item salvo ainda</h4>
-          <p class="text-[11px] text-muted mt-0.5">Salve publicações tocando no ícone de bookmark nos cards do feed.</p>
-        </div>
-      `;
-    } else {
-      container.innerHTML = `
-        <div class="space-y-3 pb-6">
-          <span class="text-xs font-bold text-ink px-1 block">Publicações Salvas (${savedPosts.length})</span>
-          <div class="grid grid-cols-2 gap-3">
-            ${savedPosts.map(p => `
-              <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm cursor-pointer" onclick="openStoryModal('${p.author}', '${p.image}', '${p.title}')">
-                <img src="${p.image}" alt="${p.title}" class="w-full aspect-square object-cover" />
-                <div class="p-2.5">
-                  <h5 class="font-bold text-[11px] text-ink line-clamp-1">${p.title}</h5>
-                  <span class="text-[10px] text-muted">${p.author}</span>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      `;
-    }
+function toggleLike(postId) {
+  const post = DB.posts.find(p => p.id === postId);
+  if (post) {
+    post.is_liked = !post.is_liked;
+    post.likes += post.is_liked ? 1 : -1;
+    renderFeed();
   }
 }
 
-// ==============================================================================
-// BUSCA GLOBAL ESTILO APPLE MUSIC NA SESSÃO DE ARTISTAS
-// ==============================================================================
+function toggleSave(postId) {
+  const post = DB.posts.find(p => p.id === postId);
+  if (post) {
+    post.is_saved = !post.is_saved;
+    renderFeed();
+    renderProfileGallery();
+  }
+}
+
+// Favoritar Artista (Apenas Usuários com Conta)
+function toggleFavoriteArtist(artistId) {
+  if (currentUserSession.role === 'guest') {
+    alert('Crie uma conta ou faça login para favoritar seus artistas preferidos no FrevAI!');
+    openSessionModal();
+    return;
+  }
+
+  const idx = currentUserSession.favorites.indexOf(artistId);
+  if (idx > -1) {
+    currentUserSession.favorites.splice(idx, 1);
+  } else {
+    currentUserSession.favorites.push(artistId);
+  }
+
+  saveCurrentSession();
+  renderArtists();
+}
+
+// Busca Global Estilo Apple Music
 function handleGlobalSearch(event) {
-  const query = (event.target.value || '').toLowerCase().trim();
+  const query = event.target.value.toLowerCase().trim();
   const resultsContainer = document.getElementById('artists-search-results-container');
   if (!resultsContainer) return;
 
   if (!query) {
     resultsContainer.innerHTML = `
-      <div>
-        <h3 class="text-xs font-bold text-muted uppercase tracking-wider mb-2">Mestres & Agremiações em Destaque</h3>
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-ink">Artistas em Destaque</span>
+          <span class="text-[11px] text-muted">${DB.artists.length} Cadastrados</span>
+        </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="artists-grid"></div>
       </div>
     `;
@@ -504,7 +728,6 @@ function handleGlobalSearch(event) {
     return;
   }
 
-  // Filtragem de Artistas e Músicas
   const filteredArtists = DB.artists.filter(a => 
     a.name.toLowerCase().includes(query) || 
     a.genre.toLowerCase().includes(query) ||
@@ -519,20 +742,23 @@ function handleGlobalSearch(event) {
 
   resultsContainer.innerHTML = `
     <div class="space-y-4">
-      <!-- Artistas Encontrados -->
       <div>
         <h4 class="text-xs font-bold text-ink mb-2">Artistas Encontrados (${filteredArtists.length})</h4>
         ${filteredArtists.length > 0 ? `
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             ${filteredArtists.map(artist => `
-              <div class="bg-white border border-gray-200 rounded-2xl p-4 flex items-center gap-3 shadow-sm">
-                <img src="${artist.avatar_url}" alt="${artist.name}" class="w-12 h-12 rounded-full object-cover flex-shrink-0" />
-                <div class="flex-1 min-w-0">
-                  <h4 class="font-bold text-xs text-ink truncate">${artist.name}</h4>
-                  <span class="badge bg-frevo-pink/15 text-frevo-pink text-[10px] font-bold">${artist.genre}</span>
+              <div class="bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-sm">
+                <div class="flex items-center gap-3">
+                  <img src="${artist.avatar_url}" alt="${artist.name}" class="w-12 h-12 rounded-full object-cover flex-shrink-0" />
+                  <div class="min-w-0">
+                    <h4 class="font-bold text-xs text-ink truncate">${artist.name}</h4>
+                    <span class="badge bg-frevo-pink/15 text-frevo-pink text-[10px] font-bold">${artist.genre}</span>
+                  </div>
                 </div>
-                <button onclick="switchView('artist-panel')" class="btn btn-outline text-xs px-2.5 py-1 h-7 rounded-xl font-bold">
-                  Perfil
+                <button onclick="toggleFavoriteArtist('${artist.id}')" class="btn-fav-artist ${currentUserSession.favorites.includes(artist.id) ? 'favorited' : ''}" title="Favoritar">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  </svg>
                 </button>
               </div>
             `).join('')}
@@ -540,7 +766,6 @@ function handleGlobalSearch(event) {
         ` : `<p class="text-xs text-muted">Nenhum artista com este termo.</p>`}
       </div>
 
-      <!-- Músicas & Partituras Encontradas -->
       <div>
         <h4 class="text-xs font-bold text-ink mb-2">Partituras & Músicas (${filteredSongs.length})</h4>
         ${filteredSongs.length > 0 ? `
@@ -551,7 +776,7 @@ function handleGlobalSearch(event) {
                   <h5 class="font-bold text-xs text-ink">${song.title}</h5>
                   <span class="text-[11px] text-muted">${song.genre} • ${song.artist}</span>
                 </div>
-                <button onclick="openScoreModal('${song.title}', '${song.artist}')" class="btn btn-cyan text-xs py-1 px-3 h-7 rounded-xl font-bold">
+                <button onclick="openScoreModal('${song.title}', '${song.artist}', '${song.id}')" class="btn btn-cyan text-xs py-1 px-3 h-7 rounded-xl font-bold">
                   Ver Obra
                 </button>
               </div>
@@ -567,23 +792,32 @@ function renderArtists() {
   const container = document.getElementById('artists-grid');
   if (!container) return;
 
-  container.innerHTML = DB.artists.map(artist => `
-    <div class="bg-white border border-gray-200 rounded-2xl p-4 text-center flex flex-col items-center justify-between shadow-sm hover:shadow-md transition-shadow">
-      <div class="story-ring p-1 mb-2">
-        <img src="${artist.avatar_url}" alt="${artist.name}" class="w-16 h-16 rounded-full object-cover border-2 border-white" />
-      </div>
-      <div>
-        <h3 class="font-display font-bold text-sm text-ink">${artist.name}</h3>
-        <span class="text-[11px] text-muted block mb-1">${artist.handle}</span>
-        <span class="badge bg-frevo-pink/15 text-frevo-pink font-bold text-[10px]">${artist.genre}</span>
-      </div>
-      <p class="text-xs text-ink-soft line-clamp-2 my-2.5 leading-relaxed">${artist.bio}</p>
+  container.innerHTML = DB.artists.map(artist => {
+    const isFav = currentUserSession.favorites.includes(artist.id);
+    return `
+      <div class="bg-white border border-gray-200 rounded-2xl p-4 text-center flex flex-col items-center justify-between shadow-sm hover:shadow-md transition-shadow relative">
+        <button onclick="toggleFavoriteArtist('${artist.id}')" class="btn-fav-artist absolute top-3 right-3 ${isFav ? 'favorited' : ''}" title="Favoritar Artista">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+        </button>
 
-      <button onclick="switchView('artist-panel')" class="btn btn-primary w-full text-xs h-8 rounded-xl font-bold mt-1">
-        Acessar Perfil
-      </button>
-    </div>
-  `).join('');
+        <div class="story-ring p-1 mb-2">
+          <img src="${artist.avatar_url}" alt="${artist.name}" class="w-16 h-16 rounded-full object-cover border-2 border-white" />
+        </div>
+        <div>
+          <h3 class="font-display font-bold text-sm text-ink">${artist.name}</h3>
+          <span class="text-[11px] text-muted block mb-1">${artist.handle}</span>
+          <span class="badge bg-frevo-pink/15 text-frevo-pink font-bold text-[10px]">${artist.genre}</span>
+        </div>
+        <p class="text-xs text-ink-soft line-clamp-2 my-2.5 leading-relaxed">${artist.bio}</p>
+
+        <button onclick="switchView('artist-panel')" class="btn btn-primary w-full text-xs h-8 rounded-xl font-bold mt-1">
+          Acessar Perfil
+        </button>
+      </div>
+    `;
+  }).join('');
 }
 
 function renderSongs() {
@@ -591,28 +825,28 @@ function renderSongs() {
   if (!container) return;
 
   container.innerHTML = DB.songs.map(song => `
-    <div class="bg-white border border-line-strong rounded-xl p-5 flex flex-col justify-between space-y-3 shadow-card">
+    <div class="bg-white border border-line-strong rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-sm">
       <div>
         <div class="flex items-center justify-between mb-1.5">
           <span class="badge bg-frevo-cyan/20 text-ink text-xs font-bold">${song.genre}</span>
-          <span class="text-[11px] text-muted font-semibold">Partitura Aberta</span>
+          <span class="badge bg-gray-100 text-muted text-[10px] font-mono font-bold">${song.downloads_count || 120} downloads</span>
         </div>
         <h3 class="font-display font-bold text-xl text-ink">${song.title}</h3>
         <p class="text-xs font-bold text-frevo-orange mb-2">${song.artist}</p>
         <p class="text-xs text-ink-soft mb-3 leading-relaxed">${song.description}</p>
         
-        <div class="p-3 rounded-lg bg-surface-soft border border-line text-xs font-mono text-ink-soft whitespace-pre-line max-h-28 overflow-y-auto mb-3">
+        <div class="p-3 rounded-xl bg-surface-soft border border-line text-xs font-mono text-ink-soft whitespace-pre-line max-h-24 overflow-y-auto mb-3">
           ${song.lyrics}
         </div>
       </div>
 
-      <button onclick="openScoreModal('${song.title}', '${song.artist}')" class="btn btn-cyan w-full text-xs font-bold">
+      <button onclick="openScoreModal('${song.title}', '${song.artist}', '${song.id}')" class="btn btn-cyan w-full text-xs font-bold py-2.5 rounded-xl shadow-sm">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M9 18V5L21 3V16"></path>
           <circle cx="6" cy="18" r="3"></circle>
           <circle cx="18" cy="16" r="3"></circle>
         </svg>
-        Visualizar Partitura Digital
+        Baixar / Visualizar Partitura Digital
       </button>
     </div>
   `).join('');
@@ -622,8 +856,10 @@ function renderSteps() {
   const container = document.getElementById('steps-grid');
   if (!container) return;
 
+  const canManage = currentUserSession.role === 'artist' || currentUserSession.role === 'admin';
+
   container.innerHTML = DB.steps.map(step => `
-    <div class="bg-white border border-line-strong rounded-xl p-5 flex flex-col justify-between space-y-3 shadow-card">
+    <div class="bg-white border border-line-strong rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-sm relative">
       <div>
         <div class="flex items-center justify-between mb-1.5">
           <span class="badge bg-frevo-green/20 text-ink text-xs font-bold">${step.difficulty}</span>
@@ -632,13 +868,99 @@ function renderSteps() {
         <h3 class="font-display font-bold text-xl text-ink mb-1.5">Passo: ${step.name}</h3>
         <p class="text-xs text-ink-soft leading-relaxed mb-3">${step.description}</p>
         
-        <div class="p-3 rounded-lg bg-surface-soft border border-line text-xs space-y-1">
+        <div class="p-3 rounded-xl bg-surface-soft border border-line text-xs space-y-1">
           <span class="font-bold text-[10px] text-muted uppercase tracking-wider block">Como Executar:</span>
           <div class="whitespace-pre-line text-xs font-medium leading-relaxed">${step.instructions}</div>
         </div>
       </div>
+
+      ${canManage ? `
+        <div class="flex gap-2 pt-1 border-t border-gray-100">
+          <button onclick="deleteStep('${step.id}')" class="text-xs text-frevo-red font-bold hover:underline">
+            Excluir Passo
+          </button>
+        </div>
+      ` : ''}
     </div>
   `).join('');
+}
+
+function deleteStep(stepId) {
+  if (confirm('Deseja realmente excluir este passo?')) {
+    DB.steps = DB.steps.filter(s => s.id !== stepId);
+    renderSteps();
+    renderAdminCMS();
+  }
+}
+
+function openNewStepModal() {
+  if (currentUserSession.role !== 'artist' && currentUserSession.role !== 'admin') {
+    alert('Apenas Artistas e Administradores podem cadastrar passos de frevo.');
+    return;
+  }
+
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+
+  modalBody.innerHTML = `
+    <div class="space-y-4 text-left">
+      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+        <h3 class="font-display font-bold text-lg text-ink">Cadastrar Novo Passo</h3>
+      </div>
+
+      <form onsubmit="submitNewStep(event)" class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Nome do Passo</label>
+          <input type="text" id="new-step-name" required placeholder="Ex: Parafuso Invertido" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Nível de Dificuldade</label>
+          <select id="new-step-difficulty" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none">
+            <option value="Iniciante">Iniciante</option>
+            <option value="Intermediário">Intermediário</option>
+            <option value="Avançado">Avançado</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Descrição</label>
+          <input type="text" id="new-step-desc" required placeholder="Breve resumo da movimentação..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Instruções Passo a Passo</label>
+          <textarea id="new-step-instructions" rows="3" required placeholder="1. Posição inicial...\n2. Salto e giro..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none"></textarea>
+        </div>
+        <div class="flex gap-2 pt-2">
+          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl">Cancelar</button>
+          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl">Salvar Passo</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  modal.classList.add('open');
+}
+
+function submitNewStep(e) {
+  e.preventDefault();
+  const name = document.getElementById('new-step-name').value;
+  const difficulty = document.getElementById('new-step-difficulty').value;
+  const description = document.getElementById('new-step-desc').value;
+  const instructions = document.getElementById('new-step-instructions').value;
+
+  DB.steps.push({
+    id: `st-${Date.now()}`,
+    name,
+    difficulty,
+    category: 'Tradicional',
+    description,
+    instructions,
+    author_role: currentUserSession.role
+  });
+
+  closeModal();
+  renderSteps();
+  renderAdminCMS();
+  alert('Novo passo cadastrado com sucesso!');
 }
 
 function renderHistory() {
@@ -648,7 +970,7 @@ function renderHistory() {
   container.innerHTML = DB.history.map(item => `
     <div class="relative pl-6 pb-6 border-l-2 border-frevo-yellow last:border-l-0">
       <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-frevo-yellow border-2 border-paper shadow-sm"></div>
-      <div class="bg-white border border-line-strong rounded-xl p-4 space-y-2 shadow-card">
+      <div class="bg-white border border-line-strong rounded-2xl p-4 space-y-2 shadow-sm">
         <span class="badge bg-frevo-yellow/40 text-ink text-[11px] font-bold">${item.period}</span>
         <h3 class="font-display font-bold text-lg text-ink">${item.title}</h3>
         <p class="text-xs text-ink-soft leading-relaxed">${item.content}</p>
@@ -661,7 +983,7 @@ function renderHistory() {
 }
 
 function renderMap() {
-  const container = document.getElementById('map-points-grid');
+  const container = document.getElementById('map-points-list');
   if (!container) return;
 
   container.innerHTML = DB.mapPoints.map(point => `
@@ -676,7 +998,6 @@ function renderMap() {
         <p class="text-xs text-ink-soft leading-relaxed">${point.description}</p>
       </div>
 
-      <!-- Botão para Expandir o Mapa no Próprio App -->
       <button onclick="toggleMapEmbed('${point.id}')" class="btn btn-outline text-xs w-full rounded-xl flex items-center justify-center gap-1.5 py-2">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
@@ -686,7 +1007,6 @@ function renderMap() {
         <span id="map-toggle-text-${point.id}">Ver Mapa no App ▼</span>
       </button>
 
-      <!-- Container do Mapa Embutido Expansível -->
       <div id="map-embed-${point.id}" class="map-embed-container">
         <iframe 
           title="Mapa de ${point.name}"
@@ -695,7 +1015,6 @@ function renderMap() {
           allowfullscreen>
         </iframe>
         
-        <!-- Redirecionamento para o Google Maps em Nova Aba Abaixo das Informações -->
         <a href="https://maps.google.com/?q=${point.coords[0]},${point.coords[1]}" target="_blank" rel="noopener noreferrer" class="btn btn-primary text-xs w-full rounded-xl mt-2 flex items-center justify-center gap-1.5 py-2.5 shadow-sm">
           <span>Abrir Rota no Google Maps</span>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -721,7 +1040,945 @@ function toggleMapEmbed(pointId) {
 }
 
 // ==============================================================================
-// ESTADO DO PERFIL COM MÚLTIPLOS LINKS E FOTO UPLOAD REAL
+// PERFIL DO ARTISTA (PARTITURAS PRÓPRIAS & SALVOS)
+// ==============================================================================
+let currentProfileTab = 'scores';
+
+function switchProfileTab(tabName, btnElement) {
+  currentProfileTab = tabName;
+  document.querySelectorAll('.profile-tab-btn').forEach(btn => btn.classList.remove('active'));
+  if (btnElement) btnElement.classList.add('active');
+  renderProfileGallery();
+}
+
+function renderProfileGallery() {
+  const container = document.getElementById('profile-gallery-container');
+  if (!container) return;
+
+  const isArtistOrAdmin = currentUserSession.role === 'artist' || currentUserSession.role === 'admin';
+
+  if (currentProfileTab === 'scores') {
+    container.innerHTML = `
+      <div class="space-y-3 pb-6">
+        <div class="flex items-center justify-between px-1">
+          <span class="text-xs font-bold text-ink">Partituras & Obras Publicadas (${DB.songs.length})</span>
+          ${isArtistOrAdmin ? `
+            <button onclick="openSubmitSongModal()" class="text-xs font-bold text-frevo-orange hover:underline">+ Nova Obra</button>
+          ` : ''}
+        </div>
+        ${DB.songs.map(song => `
+          <div class="bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
+            <div class="space-y-0.5">
+              <div class="flex items-center gap-1.5">
+                <span class="badge bg-frevo-cyan/15 text-frevo-cyan text-[10px] font-bold">${song.genre}</span>
+                <span class="badge bg-gray-100 text-muted text-[10px] font-mono font-bold">${song.downloads_count || 120} downloads</span>
+              </div>
+              <h4 class="font-bold text-xs text-ink leading-tight">${song.title}</h4>
+              <p class="text-[11px] text-muted line-clamp-1">${song.description}</p>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button onclick="openScoreModal('${song.title}', '${song.artist}', '${song.id}')" class="btn btn-cyan text-xs py-1.5 px-3 h-8 rounded-xl font-bold flex-shrink-0">
+                Baixar
+              </button>
+              ${isArtistOrAdmin ? `
+                <button onclick="deleteSong('${song.id}')" class="p-1.5 text-gray-400 hover:text-frevo-red" title="Excluir">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } else {
+    // Aba 2: Itens Salvos
+    const savedPosts = DB.posts.filter(p => p.is_saved);
+    container.innerHTML = `
+      <div class="space-y-3 pb-6">
+        <div class="flex items-center justify-between px-1">
+          <span class="text-xs font-bold text-ink">Publicações Salvas (${savedPosts.length})</span>
+        </div>
+        ${savedPosts.length > 0 ? savedPosts.map(post => `
+          <div class="bg-white border border-gray-200 rounded-2xl p-3 flex items-center justify-between shadow-sm">
+            <div class="flex items-center gap-3 min-w-0">
+              <img src="${post.image}" alt="${post.title}" class="w-12 h-12 rounded-xl object-cover flex-shrink-0" />
+              <div class="min-w-0">
+                <h4 class="font-bold text-xs text-ink truncate">${post.title}</h4>
+                <span class="text-[11px] text-muted">${post.author}</span>
+              </div>
+            </div>
+            <button onclick="toggleSave('${post.id}')" class="btn btn-outline text-xs px-2.5 py-1 rounded-xl text-frevo-red hover:bg-red-50 font-bold whitespace-nowrap">
+              Remover
+            </button>
+          </div>
+        `).join('') : `
+          <div class="p-8 text-center bg-white rounded-2xl border border-gray-200">
+            <p class="text-xs text-muted">Nenhuma publicação salva no momento.</p>
+          </div>
+        `}
+      </div>
+    `;
+  }
+}
+
+function deleteSong(songId) {
+  if (confirm('Deseja realmente excluir esta partitura?')) {
+    DB.songs = DB.songs.filter(s => s.id !== songId);
+    if (window.supabaseService && window.supabaseService.isConnected()) {
+      window.supabaseService.deleteSong(songId);
+    }
+    renderProfileGallery();
+    renderSongs();
+    renderAdminCMS();
+  }
+}
+
+// ==============================================================================
+// PAINEL DE GESTÃO (CMS COMPLETO PARA ADMIN)
+// ==============================================================================
+let currentAdminTab = 'artists';
+
+function switchAdminTab(tab, btnElement) {
+  currentAdminTab = tab;
+  document.querySelectorAll('.admin-tab-pill').forEach(b => b.classList.remove('active'));
+  if (btnElement) btnElement.classList.add('active');
+  renderAdminCMS();
+}
+
+function renderAdminCMS() {
+  const container = document.getElementById('admin-cms-content');
+  if (!container) return;
+
+  if (currentAdminTab === 'artists') {
+    // 1. Gestão e Aprovação de Artistas
+    container.innerHTML = `
+      <div class="bg-white border border-gray-200 rounded-2xl p-4 space-y-3 shadow-sm">
+        <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+          <div>
+            <h3 class="font-display font-bold text-sm text-ink">Fila de Aprovação de Artistas</h3>
+            <p class="text-[11px] text-muted">Aprove ou recuse novos cadastros com notificação por e-mail</p>
+          </div>
+          <button onclick="openNewArtistModal()" class="btn btn-primary text-xs px-2.5 py-1 rounded-xl font-bold">+ Artista</button>
+        </div>
+
+        <div class="space-y-2.5">
+          ${DB.artists.map(artist => `
+            <div class="p-3 bg-surface-soft rounded-2xl border border-gray-100 flex items-center justify-between gap-3">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <img src="${artist.avatar_url}" alt="${artist.name}" class="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+                <div class="min-w-0">
+                  <strong class="text-ink text-xs block truncate">${artist.name}</strong>
+                  <span class="text-[11px] text-muted block">${artist.email || 'sem email'}</span>
+                  <span class="badge ${artist.is_approved ? 'bg-frevo-green/20 text-ink' : 'bg-frevo-orange/20 text-frevo-orange'} text-[10px] font-bold">
+                    ${artist.is_approved ? 'Aprovado' : 'Aguardando Moderação'}
+                  </span>
+                </div>
+              </div>
+
+              <div class="flex gap-1.5 flex-shrink-0">
+                ${!artist.is_approved ? `
+                  <button onclick="openDecisionEmailModal('${artist.id}', true)" class="btn btn-green text-[11px] px-2.5 py-1 rounded-xl font-bold">
+                    Aprovar
+                  </button>
+                  <button onclick="openDecisionEmailModal('${artist.id}', false)" class="btn btn-destructive text-[11px] px-2.5 py-1 rounded-xl font-bold">
+                    Recusar
+                  </button>
+                ` : `
+                  <button onclick="openDecisionEmailModal('${artist.id}', false)" class="btn btn-outline text-[11px] px-2 py-1 rounded-xl font-bold text-frevo-red">
+                    Suspender
+                  </button>
+                `}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  } else if (currentAdminTab === 'posts') {
+    // 2. Acervo de Posts Separados por Data / Mês / Ano
+    const sortedPosts = [...DB.posts].sort((a, b) => new Date(b.created_at || Date.now()) - new Date(a.created_at || Date.now()));
+
+    container.innerHTML = `
+      <div class="bg-white border border-gray-200 rounded-2xl p-4 space-y-3 shadow-sm">
+        <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+          <div>
+            <h3 class="font-display font-bold text-sm text-ink">Acervo de Posts Cronológico</h3>
+            <p class="text-[11px] text-muted">Organizado por Data / Mês / Ano com edição e exclusão</p>
+          </div>
+          <button onclick="openNewPostModal()" class="btn btn-primary text-xs px-2.5 py-1 rounded-xl font-bold">+ Novo Post</button>
+        </div>
+
+        <div class="space-y-2.5">
+          ${sortedPosts.map(post => {
+            const dateObj = new Date(post.created_at || Date.now());
+            const formattedDate = dateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+            return `
+              <div class="p-3 bg-surface-soft rounded-2xl border border-gray-100 flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                  <span class="badge bg-gray-200 text-ink text-[10px] font-bold">${formattedDate}</span>
+                  <strong class="text-ink text-xs block truncate mt-1">${post.title}</strong>
+                  <span class="text-[11px] text-muted">${post.author} • ${post.likes} curtidas</span>
+                </div>
+                <div class="flex gap-1.5 flex-shrink-0">
+                  <button onclick="openEditPostModal('${post.id}')" class="btn btn-outline text-[11px] px-2 py-1 rounded-xl font-bold">
+                    Editar
+                  </button>
+                  <button onclick="deletePost('${post.id}')" class="btn btn-destructive text-[11px] px-2 py-1 rounded-xl font-bold">
+                    Excluir
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  } else if (currentAdminTab === 'map') {
+    // 3. Gestão do Mapa Cultural
+    container.innerHTML = `
+      <div class="bg-white border border-gray-200 rounded-2xl p-4 space-y-3 shadow-sm">
+        <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+          <div>
+            <h3 class="font-display font-bold text-sm text-ink">Locais do Mapa Cultural</h3>
+            <p class="text-[11px] text-muted">Gerenciamento de pontos de interesse</p>
+          </div>
+          <button onclick="openNewMapPointModal()" class="btn btn-primary text-xs px-2.5 py-1 rounded-xl font-bold">+ Novo Local</button>
+        </div>
+
+        <div class="space-y-2.5">
+          ${DB.mapPoints.map(point => `
+            <div class="p-3 bg-surface-soft rounded-2xl border border-gray-100 flex items-center justify-between gap-3">
+              <div class="min-w-0">
+                <strong class="text-ink text-xs block truncate">${point.name}</strong>
+                <span class="text-[11px] text-muted">${point.category} • ${point.address}</span>
+              </div>
+              <button onclick="deleteMapPoint('${point.id}')" class="btn btn-destructive text-[11px] px-2 py-1 rounded-xl font-bold">
+                Excluir
+              </button>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  } else if (currentAdminTab === 'steps') {
+    // 4. Gestão de Passos
+    container.innerHTML = `
+      <div class="bg-white border border-gray-200 rounded-2xl p-4 space-y-3 shadow-sm">
+        <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+          <div>
+            <h3 class="font-display font-bold text-sm text-ink">Catálogo de Passos de Frevo</h3>
+            <p class="text-[11px] text-muted">Passos técnicos e pedagógicos</p>
+          </div>
+          <button onclick="openNewStepModal()" class="btn btn-primary text-xs px-2.5 py-1 rounded-xl font-bold">+ Novo Passo</button>
+        </div>
+
+        <div class="space-y-2.5">
+          ${DB.steps.map(step => `
+            <div class="p-3 bg-surface-soft rounded-2xl border border-gray-100 flex items-center justify-between gap-3">
+              <div>
+                <strong class="text-ink text-xs block">${step.name}</strong>
+                <span class="text-[11px] text-muted">${step.difficulty} • ${step.category}</span>
+              </div>
+              <button onclick="deleteStep('${step.id}')" class="btn btn-destructive text-[11px] px-2 py-1 rounded-xl font-bold">
+                Excluir
+              </button>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  } else if (currentAdminTab === 'history') {
+    // 5. Gestão de História
+    container.innerHTML = `
+      <div class="bg-white border border-gray-200 rounded-2xl p-4 space-y-3 shadow-sm">
+        <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+          <div>
+            <h3 class="font-display font-bold text-sm text-ink">Linha do Tempo Histórica</h3>
+            <p class="text-[11px] text-muted">Documentos e marcos temporais</p>
+          </div>
+          <button onclick="openNewHistoryModal()" class="btn btn-primary text-xs px-2.5 py-1 rounded-xl font-bold">+ Novo Marco</button>
+        </div>
+
+        <div class="space-y-2.5">
+          ${DB.history.map(item => `
+            <div class="p-3 bg-surface-soft rounded-2xl border border-gray-100 flex items-center justify-between gap-3">
+              <div>
+                <span class="badge bg-frevo-yellow/30 text-ink text-[10px] font-bold">${item.period}</span>
+                <strong class="text-ink text-xs block mt-1">${item.title}</strong>
+              </div>
+              <button onclick="deleteHistory('${item.id}')" class="btn btn-destructive text-[11px] px-2 py-1 rounded-xl font-bold">
+                Excluir
+              </button>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+}
+
+// Modal de Decisão de Aprovação/Recusa de Artista com Disparo de E-mail
+function openDecisionEmailModal(artistId, isApprove) {
+  const artist = DB.artists.find(a => a.id === artistId);
+  if (!artist) return;
+
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+
+  const actionText = isApprove ? 'Aprovação' : 'Recusa / Suspensão';
+  const defaultSubject = isApprove ? 'FrevAI: Sua conta de Artista foi Aprovada com sucesso!' : 'FrevAI: Atualização sobre a sua solicitação de Artista';
+  const defaultBody = isApprove ? 
+    `Prezado(a) ${artist.name},\n\nParabéns! Sua solicitação de cadastro como Artista/Fazedor de Cultura na plataforma FrevAI foi APROVADA pelo comitê gestor.\n\nVocê já pode publicar suas partituras, gerenciar seus passos e enriquecer a memória do nosso Frevo.` :
+    `Prezado(a) ${artist.name},\n\nInformamos que sua solicitação de cadastro como Artista necessita de ajustes ou foi indeferida pelo comitê gestor. Entre em contato para mais detalhes.`;
+
+  modalBody.innerHTML = `
+    <div class="space-y-4 text-left">
+      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+        <div>
+          <h3 class="font-display font-bold text-lg text-ink">${actionText} de Artista</h3>
+          <p class="text-[11px] text-muted">Disparo de e-mail de notificação oficial</p>
+        </div>
+        <span class="badge ${isApprove ? 'bg-frevo-green/20 text-ink' : 'bg-frevo-red/20 text-frevo-red'} text-[10px] font-bold">
+          ${isApprove ? 'APROVADO' : 'RECUSADO'}
+        </span>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Destinatário</label>
+          <input type="text" readonly value="${artist.name} <${artist.email}>" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-gray-100 text-ink font-mono" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Assunto do E-mail</label>
+          <input type="text" id="email-subject-input" value="${defaultSubject}" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Mensagem Enviada</label>
+          <textarea id="email-body-input" rows="5" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none leading-relaxed">${defaultBody}</textarea>
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-2">
+        <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl">Cancelar</button>
+        <button type="button" onclick="confirmArtistDecision('${artist.id}', ${isApprove})" class="btn ${isApprove ? 'btn-green' : 'btn-destructive'} flex-1 text-xs rounded-xl shadow-md font-bold">
+          Confirmar & Disparar E-mail
+        </button>
+      </div>
+    </div>
+  `;
+
+  modal.classList.add('open');
+}
+
+function confirmArtistDecision(artistId, isApprove) {
+  const artist = DB.artists.find(a => a.id === artistId);
+  if (artist) {
+    artist.is_approved = isApprove;
+    if (window.supabaseService && window.supabaseService.isConnected()) {
+      window.supabaseService.updateArtistApproval(artistId, isApprove);
+    }
+  }
+
+  closeModal();
+  renderAdminCMS();
+  renderArtists();
+  alert(`Decisão registrada com sucesso! Notificação enviada para: ${artist.email}`);
+}
+
+function deletePost(postId) {
+  if (confirm('Deseja realmente excluir esta publicação do feed?')) {
+    DB.posts = DB.posts.filter(p => p.id !== postId);
+    if (window.supabaseService && window.supabaseService.isConnected()) {
+      window.supabaseService.deletePost(postId);
+    }
+    renderFeed();
+    renderAdminCMS();
+  }
+}
+
+function deleteMapPoint(id) {
+  if (confirm('Deseja realmente excluir este ponto do mapa?')) {
+    DB.mapPoints = DB.mapPoints.filter(m => m.id !== id);
+    if (window.supabaseService && window.supabaseService.isConnected()) {
+      window.supabaseService.deleteMapPoint(id);
+    }
+    renderMap();
+    renderAdminCMS();
+  }
+}
+
+function deleteHistory(id) {
+  if (confirm('Deseja excluir este marco histórico?')) {
+    DB.history = DB.history.filter(h => h.id !== id);
+    renderHistory();
+    renderAdminCMS();
+  }
+}
+
+// Modal de Criação de Post no Feed
+function openNewPostModal() {
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+
+  modalBody.innerHTML = `
+    <div class="space-y-4 text-left">
+      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+        <h3 class="font-display font-bold text-lg text-ink">Publicar Nova Notícia no Feed</h3>
+      </div>
+
+      <form onsubmit="submitNewPost(event)" class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Título</label>
+          <input type="text" id="new-post-title" required placeholder="Ex: Abertura Oficial do Carnaval" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Autor / Responsável</label>
+          <input type="text" id="new-post-author" required value="${currentUserSession.name}" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">URL da Foto de Capa</label>
+          <input type="url" id="new-post-image" required value="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=80" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Conteúdo da Notícia</label>
+          <textarea id="new-post-content" rows="4" required placeholder="Escreva a notícia completa..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none"></textarea>
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Tags (separadas por vírgula)</label>
+          <input type="text" id="new-post-tags" placeholder="Frevo, Carnaval, Recife" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+        </div>
+        <div class="flex gap-2 pt-2">
+          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl">Cancelar</button>
+          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl font-bold">Publicar no Feed</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  modal.classList.add('open');
+}
+
+function submitNewPost(e) {
+  e.preventDefault();
+  const title = document.getElementById('new-post-title').value;
+  const author = document.getElementById('new-post-author').value;
+  const image = document.getElementById('new-post-image').value;
+  const content = document.getElementById('new-post-content').value;
+  const tags = document.getElementById('new-post-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+
+  const newPost = {
+    id: `p-${Date.now()}`,
+    author: author || 'FrevAI Notícias',
+    handle: 'frevai',
+    avatar: currentUserSession.avatar,
+    image,
+    location: 'Recife, PE',
+    type: 'news',
+    title,
+    content,
+    tags: tags.length ? tags : ['CulturaPE', 'Frevo'],
+    likes: 0,
+    is_liked: false,
+    is_saved: false,
+    time_ago: 'AGORA',
+    created_at: new Date().toISOString(),
+    comments: []
+  };
+
+  DB.posts.unshift(newPost);
+  if (window.supabaseService && window.supabaseService.isConnected()) {
+    window.supabaseService.createPost(newPost);
+  }
+
+  closeModal();
+  renderFeed();
+  renderAdminCMS();
+  alert('Notícia publicada com sucesso!');
+}
+
+function openEditPostModal(postId) {
+  const post = DB.posts.find(p => p.id === postId);
+  if (!post) return;
+
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+
+  modalBody.innerHTML = `
+    <div class="space-y-4 text-left">
+      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+        <h3 class="font-display font-bold text-lg text-ink">Editar Notícia</h3>
+      </div>
+
+      <form onsubmit="saveEditPost(event, '${post.id}')" class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Título</label>
+          <input type="text" id="edit-post-title" value="${post.title}" required class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Conteúdo</label>
+          <textarea id="edit-post-content" rows="4" required class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none">${post.content}</textarea>
+        </div>
+        <div class="flex gap-2 pt-2">
+          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl">Cancelar</button>
+          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl font-bold">Salvar Alterações</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  modal.classList.add('open');
+}
+
+function saveEditPost(e, postId) {
+  e.preventDefault();
+  const post = DB.posts.find(p => p.id === postId);
+  if (post) {
+    post.title = document.getElementById('edit-post-title').value;
+    post.content = document.getElementById('edit-post-content').value;
+    if (window.supabaseService && window.supabaseService.isConnected()) {
+      window.supabaseService.updatePost(postId, post);
+    }
+  }
+
+  closeModal();
+  renderFeed();
+  renderAdminCMS();
+  alert('Publicação atualizada com sucesso!');
+}
+
+function openNewMapPointModal() {
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+
+  modalBody.innerHTML = `
+    <div class="space-y-4 text-left">
+      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+        <h3 class="font-display font-bold text-lg text-ink">Adicionar Ponto ao Mapa</h3>
+      </div>
+
+      <form onsubmit="submitNewMapPoint(event)" class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Nome do Local</label>
+          <input type="text" id="new-map-name" required placeholder="Ex: Sede do Galo da Madrugada" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Categoria</label>
+          <input type="text" id="new-map-cat" required placeholder="Agremiação / Polo / Museu" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Endereço Completo</label>
+          <input type="text" id="new-map-addr" required placeholder="Rua da Concórdia, Recife - PE" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Descrição</label>
+          <textarea id="new-map-desc" rows="3" required placeholder="História e relevância cultural..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none"></textarea>
+        </div>
+        <div class="flex gap-2 pt-2">
+          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl">Cancelar</button>
+          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl font-bold">Salvar Ponto</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  modal.classList.add('open');
+}
+
+function submitNewMapPoint(e) {
+  e.preventDefault();
+  const name = document.getElementById('new-map-name').value;
+  const category = document.getElementById('new-map-cat').value;
+  const address = document.getElementById('new-map-addr').value;
+  const description = document.getElementById('new-map-desc').value;
+
+  const newPt = {
+    id: `m-${Date.now()}`,
+    name,
+    category,
+    address,
+    description,
+    coords: [-8.0631, -34.8711]
+  };
+
+  DB.mapPoints.push(newPt);
+  if (window.supabaseService && window.supabaseService.isConnected()) {
+    window.supabaseService.createMapPoint(newPt);
+  }
+
+  closeModal();
+  renderMap();
+  renderAdminCMS();
+  alert('Novo ponto histórico adicionado ao mapa!');
+}
+
+function openNewHistoryModal() {
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+
+  modalBody.innerHTML = `
+    <div class="space-y-4 text-left">
+      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+        <h3 class="font-display font-bold text-lg text-ink">Adicionar Marco Histórico</h3>
+      </div>
+
+      <form onsubmit="submitNewHistory(event)" class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Título do Marco</label>
+          <input type="text" id="new-hist-title" required placeholder="Ex: Criação da Troça Pitombeira" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Período / Ano</label>
+          <input type="text" id="new-hist-period" required placeholder="Ex: Carnaval de 1947" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Conteúdo Histórico</label>
+          <textarea id="new-hist-content" rows="3" required placeholder="Relato documentado..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none"></textarea>
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Fonte / Acervo</label>
+          <input type="text" id="new-hist-source" required placeholder="Fundação Joaquim Nabuco" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+        </div>
+        <div class="flex gap-2 pt-2">
+          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl">Cancelar</button>
+          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl font-bold">Salvar Marco</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  modal.classList.add('open');
+}
+
+function submitNewHistory(e) {
+  e.preventDefault();
+  const title = document.getElementById('new-hist-title').value;
+  const period = document.getElementById('new-hist-period').value;
+  const content = document.getElementById('new-hist-content').value;
+  const source = document.getElementById('new-hist-source').value;
+
+  DB.history.push({
+    id: `h-${Date.now()}`,
+    title,
+    period,
+    content,
+    source
+  });
+
+  closeModal();
+  renderHistory();
+  renderAdminCMS();
+  alert('Marco histórico adicionado com sucesso!');
+}
+
+function openNewArtistModal() {
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+
+  modalBody.innerHTML = `
+    <div class="space-y-4 text-left">
+      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+        <h3 class="font-display font-bold text-lg text-ink">Cadastrar Novo Artista</h3>
+      </div>
+
+      <form onsubmit="submitNewArtist(event)" class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Nome do Artista / Orquestra</label>
+          <input type="text" id="new-artist-name" required placeholder="Ex: Maestro Duda" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Gênero / Estilo</label>
+          <input type="text" id="new-artist-genre" required placeholder="Frevo de Rua / Frevo Canção" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">E-mail de Contato</label>
+          <input type="email" id="new-artist-email" required placeholder="artista@cultura.pe.gov.br" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Mini-Biografia</label>
+          <textarea id="new-artist-bio" rows="3" required placeholder="Histórico cultural do artista..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none"></textarea>
+        </div>
+        <div class="flex gap-2 pt-2">
+          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl">Cancelar</button>
+          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl font-bold">Cadastrar Artista</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  modal.classList.add('open');
+}
+
+function submitNewArtist(e) {
+  e.preventDefault();
+  const name = document.getElementById('new-artist-name').value;
+  const genre = document.getElementById('new-artist-genre').value;
+  const email = document.getElementById('new-artist-email').value;
+  const bio = document.getElementById('new-artist-bio').value;
+
+  const newArt = {
+    id: `a-${Date.now()}`,
+    name,
+    handle: '@' + name.toLowerCase().replace(/[^a-z0-9]+/g, ''),
+    genre,
+    bio,
+    avatar_url: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80',
+    cover_url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80',
+    email,
+    phone: '',
+    is_approved: true,
+    has_story: false
+  };
+
+  DB.artists.push(newArt);
+
+  closeModal();
+  renderArtists();
+  renderAdminCMS();
+  alert('Artista cadastrado e ativado no sistema!');
+}
+
+// ==============================================================================
+// MODAIS DE COMPARTILHAMENTO, COMENTÁRIOS E PARTITURAS
+// ==============================================================================
+
+function sharePost(postId) {
+  const post = DB.posts.find(p => p.id === postId) || { title: 'FrevAI - Cultura do Frevo', id: postId || 'feed' };
+  const shareUrl = window.location.origin + window.location.pathname + '#post-' + post.id;
+  const shareText = `Confira "${post.title}" no FrevAI: ${shareUrl}`;
+
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+
+  modalBody.innerHTML = `
+    <div class="space-y-4 text-left">
+      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+        <div>
+          <h3 class="font-display font-bold text-lg text-ink">Compartilhar Publicação</h3>
+          <p class="text-[11px] text-muted line-clamp-1">${post.title}</p>
+        </div>
+        <div class="w-8 h-8 rounded-xl bg-frevo-orange/15 text-frevo-orange flex items-center justify-center flex-shrink-0">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2.5 pt-1">
+        <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 transition-all group">
+          <div class="w-10 h-10 rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform mb-1.5">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+            </svg>
+          </div>
+          <span class="text-[11px] font-bold text-ink">WhatsApp</span>
+        </a>
+
+        <a href="https://instagram.com/direct/inbox/" target="_blank" rel="noopener noreferrer" onclick="copyToClipboard('${shareUrl}', 'Link copiado para colar no Direct!')" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-[#E1306C]/10 text-[#E1306C] hover:bg-[#E1306C]/20 transition-all group">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-[#FD1D1D] to-[#E1306C] text-white flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform mb-1.5">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+            </svg>
+          </div>
+          <span class="text-[11px] font-bold text-ink">Direct</span>
+        </a>
+
+        <a href="https://www.facebook.com/dialog/send?link=${encodeURIComponent(shareUrl)}&app_id=291494419107518&redirect_uri=${encodeURIComponent(shareUrl)}" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-[#0084FF]/10 text-[#0084FF] hover:bg-[#0084FF]/20 transition-all group">
+          <div class="w-10 h-10 rounded-full bg-[#0084FF] text-white flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform mb-1.5">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+            </svg>
+          </div>
+          <span class="text-[11px] font-bold text-ink">Messenger</span>
+        </a>
+      </div>
+
+      <div class="pt-2">
+        <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1.5">Link Direto da Publicação</label>
+        <div class="flex gap-2">
+          <input type="text" id="share-link-input" readonly value="${shareUrl}" class="flex-1 px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink font-mono select-all focus:outline-none" />
+          <button id="btn-copy-share-link" onclick="copyShareLink('${shareUrl}')" class="btn btn-primary text-xs px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 shadow-sm">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <span id="copy-btn-text">Copiar</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  modal.classList.add('open');
+}
+
+function copyShareLink(url) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(() => {
+      const btnText = document.getElementById('copy-btn-text');
+      if (btnText) {
+        btnText.innerText = 'Copiado!';
+        setTimeout(() => {
+          if (btnText) btnText.innerText = 'Copiar';
+        }, 2000);
+      }
+    }).catch(() => {
+      prompt('Copie o link abaixo:', url);
+    });
+  } else {
+    prompt('Copie o link abaixo:', url);
+  }
+}
+
+function copyToClipboard(text, message) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      alert(message || 'Copiado para a área de transferência!');
+    });
+  }
+}
+
+function openCommentsModal(postId) {
+  const post = DB.posts.find(p => p.id === postId);
+  if (!post) return;
+
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+  
+  modalBody.innerHTML = `
+    <div class="space-y-4 text-left">
+      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+        <h3 class="font-display font-bold text-lg text-ink">Comentários (${post.comments.length})</h3>
+        <span class="badge bg-frevo-orange/15 text-frevo-orange text-[10px] font-bold">${post.title}</span>
+      </div>
+      <div class="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+        ${post.comments.length > 0 ? post.comments.map(c => `
+          <div class="p-3 bg-surface-soft rounded-2xl text-xs border border-gray-100">
+            <strong class="text-ink block mb-0.5">${c.user}</strong>
+            <span class="text-ink-soft leading-relaxed">${c.text}</span>
+          </div>
+        `).join('') : '<p class="text-xs text-muted py-4 text-center">Seja o primeiro a comentar!</p>'}
+      </div>
+      
+      ${currentUserSession.role === 'guest' ? `
+        <div class="p-3 bg-amber-50 rounded-2xl border border-amber-100 text-center space-y-1.5">
+          <p class="text-xs text-amber-900 font-bold">Deseja participar da conversa?</p>
+          <p class="text-[11px] text-amber-700">Faça login ou crie uma conta gratuita para comentar.</p>
+          <button onclick="openSessionModal()" class="btn btn-primary text-xs py-1.5 px-4 rounded-xl font-bold">
+            Entrar / Criar Conta
+          </button>
+        </div>
+      ` : `
+        <div class="flex gap-2 pt-1">
+          <input type="text" id="new-comment-input" placeholder="Adicionar comentário como ${currentUserSession.name}..." class="flex-1 px-3 py-2.5 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+          <button onclick="addComment('${post.id}')" class="btn btn-primary text-xs rounded-xl px-4 font-bold">Publicar</button>
+        </div>
+      `}
+    </div>
+  `;
+
+  modal.classList.add('open');
+}
+
+function addComment(postId) {
+  if (currentUserSession.role === 'guest') {
+    alert('Você precisa estar logado para comentar.');
+    openSessionModal();
+    return;
+  }
+
+  const input = document.getElementById('new-comment-input');
+  if (!input || !input.value.trim()) return;
+
+  const post = DB.posts.find(p => p.id === postId);
+  if (post) {
+    post.comments.push({
+      user: currentUserSession.handle.replace('@', '') || currentUserSession.name,
+      text: input.value.trim()
+    });
+    closeModal();
+    renderFeed();
+  }
+}
+
+function openScoreModal(title, artist, songId) {
+  const song = DB.songs.find(s => s.id === songId) || { title, artist, downloads_count: 120 };
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+
+  modalBody.innerHTML = `
+    <div class="text-center space-y-4">
+      <div class="w-14 h-14 rounded-2xl bg-frevo-cyan/20 flex items-center justify-center mx-auto text-frevo-cyan">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 18V5L21 3V16"></path>
+          <circle cx="6" cy="18" r="3"></circle>
+          <circle cx="18" cy="16" r="3"></circle>
+        </svg>
+      </div>
+      <div>
+        <h3 class="font-display font-bold text-xl text-ink">${song.title}</h3>
+        <p class="text-xs font-bold text-frevo-orange mt-0.5">${song.artist}</p>
+        <span class="badge bg-gray-100 text-muted text-[10px] font-mono mt-1 font-bold">${song.downloads_count || 120} downloads registrados</span>
+      </div>
+      <div class="p-4 bg-surface-soft border border-gray-100 rounded-2xl text-xs text-muted space-y-1.5 text-left">
+        <p class="text-ink font-semibold">Acervo Oficial Aberto para Download</p>
+        <p>Partitura digitalizada em alta resolução com arranjo para orquestra e sopros.</p>
+        <p class="font-mono text-ink text-[11px] pt-1">Formato: PDF Digital</p>
+      </div>
+      <button onclick="downloadScore('${song.id}')" class="btn btn-cyan w-full text-xs rounded-xl shadow-md py-2.5 font-bold">
+        Baixar Partitura Oficial
+      </button>
+    </div>
+  `;
+
+  modal.classList.add('open');
+}
+
+function downloadScore(songId) {
+  const song = DB.songs.find(s => s.id === songId);
+  if (song) {
+    song.downloads_count = (song.downloads_count || 120) + 1;
+    renderSongs();
+    renderProfileGallery();
+  }
+  alert('Download da partitura iniciado com sucesso!');
+  closeModal();
+}
+
+function openStoryModal(name, avatar, subtitle) {
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+  
+  modalBody.innerHTML = `
+    <div class="text-center space-y-4">
+      <div class="story-ring p-1.5 inline-block">
+        <img src="${avatar}" alt="${name}" class="w-24 h-24 rounded-full object-cover border-2 border-white" />
+      </div>
+      <div>
+        <h3 class="font-display font-bold text-xl text-ink">${name}</h3>
+        <span class="text-xs text-muted">${subtitle}</span>
+      </div>
+      <div class="p-4 bg-surface-soft rounded-2xl text-xs text-ink leading-relaxed border border-gray-100">
+        "O frevo é a pulsação do nosso povo nas ladeiras e no asfalto."
+      </div>
+      <button onclick="closeModal()" class="btn btn-primary w-full text-xs rounded-xl">Fechar Story</button>
+    </div>
+  `;
+  modal.classList.add('open');
+}
+
+function closeModal() {
+  const modal = document.getElementById('global-modal');
+  if (modal) modal.classList.remove('open');
+}
+
+// ==============================================================================
+// MODAL DE EDIÇÃO DE PERFIL E CONTATO
 // ==============================================================================
 let currentUserProfile = {
   name: 'Maestro & Fazedor de Cultura',
@@ -762,76 +2019,71 @@ function updateProfileUI() {
   }
 }
 
-// Modal de Edição de Perfil com Upload de Foto e Múltiplas Redes
 let tempUploadedAvatar = null;
 
 function openEditProfileModal() {
+  if (currentUserSession.role === 'guest') {
+    alert('Faça login para editar o seu perfil.');
+    openSessionModal();
+    return;
+  }
+
   tempUploadedAvatar = currentUserProfile.avatar;
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left">
-      <div class="flex items-center gap-2 pb-2 border-b border-gray-100">
-        <div class="w-8 h-8 rounded-xl bg-frevo-orange/15 text-frevo-orange flex items-center justify-center">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 20h9"></path>
-            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-          </svg>
-        </div>
-        <h3 class="font-display font-bold text-lg text-ink">Editar Perfil do Artista</h3>
+      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+        <h3 class="font-display font-bold text-lg text-ink">Editar Perfil</h3>
+        <span class="badge bg-frevo-orange/15 text-frevo-orange text-[10px] font-bold">Artista</span>
       </div>
 
-      <form id="edit-profile-form" onsubmit="saveProfileChanges(event)" class="space-y-3.5 max-h-[70vh] overflow-y-auto pr-1">
-        
-        <!-- Upload de Foto do Usuário (Arquivo Real) -->
-        <div>
-          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1.5">Foto de Perfil</label>
-          <div class="flex items-center gap-3">
-            <img id="preview-avatar-img" src="${currentUserProfile.avatar}" alt="Preview" class="w-14 h-14 rounded-full object-cover border-2 border-frevo-orange flex-shrink-0" />
-            <div class="flex-1">
-              <label class="btn btn-outline text-xs w-full rounded-xl cursor-pointer flex items-center justify-center gap-1.5 py-2">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                  <polyline points="17 8 12 3 7 8"></polyline>
-                  <line x1="12" y1="3" x2="12" y2="15"></line>
-                </svg>
-                <span>Enviar Foto do Dispositivo</span>
-                <input type="file" id="edit-avatar-file" accept="image/*" class="hidden" onchange="handleAvatarFileUpload(event)" />
-              </label>
-              <span class="text-[10px] text-muted block mt-0.5">Suporta PNG, JPG ou WEBP.</span>
-            </div>
-          </div>
+      <div class="flex flex-col items-center justify-center space-y-2 py-2">
+        <div class="relative">
+          <img id="edit-avatar-preview" src="${currentUserProfile.avatar}" alt="Preview" class="w-20 h-20 rounded-full object-cover border-2 border-frevo-orange shadow-md" />
+          <label for="profile-avatar-file-input" class="absolute bottom-0 right-0 w-7 h-7 bg-ink text-white rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:bg-frevo-orange transition-colors" title="Carregar nova foto">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+          </label>
         </div>
+        <input type="file" id="profile-avatar-file-input" accept="image/*" class="hidden" onchange="handleAvatarFileSelect(event)" />
+        <span class="text-[11px] text-muted">Toque no ícone para enviar uma foto do seu aparelho</span>
+      </div>
 
+      <form id="edit-profile-form" onsubmit="saveProfileChanges(event)" class="space-y-3.5">
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Nome do Artista / Projeto</label>
+          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Nome de Exibição</label>
           <input type="text" id="edit-name-input" value="${currentUserProfile.name}" required class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
         </div>
 
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Nome de Usuário (@handle)</label>
+          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Nome de Usuário (@)</label>
           <input type="text" id="edit-handle-input" value="${currentUserProfile.handle}" required class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
         </div>
 
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Minibio</label>
-          <textarea id="edit-bio-input" rows="3" required class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange">${currentUserProfile.bio}</textarea>
+          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Mini-Biografia</label>
+          <textarea id="edit-bio-input" rows="2" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange leading-relaxed">${currentUserProfile.bio}</textarea>
         </div>
 
-        <!-- Múltiplos Links de Redes Sociais -->
-        <div class="space-y-2">
-          <div class="flex items-center justify-between">
-            <label class="block text-[11px] font-bold text-ink uppercase tracking-wider">Links de Redes & Canais</label>
-            <button type="button" onclick="addSocialLinkInput()" class="text-[11px] font-bold text-frevo-orange hover:underline">+ Adicionar Link</button>
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-[11px] font-bold text-ink uppercase tracking-wider">Links de Redes Sociais</label>
+            <button type="button" onclick="addSocialLinkField()" class="text-[11px] font-bold text-frevo-orange hover:underline">+ Adicionar Link</button>
           </div>
-          <div id="social-links-inputs" class="space-y-2">
-            ${currentUserProfile.socialLinks.map((s, index) => `
-              <div class="flex gap-1.5 items-center social-link-row" data-index="${index}">
-                <input type="text" placeholder="Nome (ex: Instagram)" value="${s.label}" class="w-1/3 px-2.5 py-1.5 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange social-label-input" required />
-                <input type="url" placeholder="https://..." value="${s.url}" class="flex-1 px-2.5 py-1.5 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange social-url-input" required />
-                <button type="button" onclick="removeSocialLinkInput(this)" class="p-1.5 text-gray-400 hover:text-frevo-red rounded-lg" aria-label="Remover">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          <div id="social-links-inputs-container" class="space-y-2">
+            ${currentUserProfile.socialLinks.map((s, idx) => `
+              <div class="flex gap-1.5 items-center social-link-row" data-index="${idx}">
+                <input type="text" placeholder="Nome (ex: Instagram)" value="${s.label}" class="w-1/3 px-2.5 py-1.5 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none social-label-field" />
+                <input type="url" placeholder="https://..." value="${s.url}" class="flex-1 px-2.5 py-1.5 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none social-url-field" />
+                <button type="button" onclick="removeSocialLinkField(this)" class="p-1.5 text-gray-400 hover:text-frevo-red">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
                 </button>
               </div>
             `).join('')}
@@ -841,17 +2093,17 @@ function openEditProfileModal() {
         <div class="grid grid-cols-2 gap-2 pt-1">
           <div>
             <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">E-mail de Contato</label>
-            <input type="email" id="edit-email-input" value="${currentUserProfile.email}" required class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+            <input type="email" id="edit-email-input" value="${currentUserProfile.email}" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
           </div>
           <div>
-            <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">WhatsApp / Telefone</label>
-            <input type="tel" id="edit-phone-input" value="${currentUserProfile.phone}" required class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+            <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Telefone / WhatsApp</label>
+            <input type="tel" id="edit-phone-input" value="${currentUserProfile.phone}" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
           </div>
         </div>
 
-        <div class="flex gap-2 pt-3">
+        <div class="flex gap-2 pt-2">
           <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl">Cancelar</button>
-          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl shadow-md">Salvar Alterações</button>
+          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl shadow-md font-bold">Salvar Perfil</button>
         </div>
       </form>
     </div>
@@ -860,122 +2112,110 @@ function openEditProfileModal() {
   modal.classList.add('open');
 }
 
-function handleAvatarFileUpload(event) {
+function handleAvatarFileSelect(event) {
   const file = event.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      tempUploadedAvatar = e.target.result;
-      const previewImg = document.getElementById('preview-avatar-img');
-      if (previewImg) previewImg.src = tempUploadedAvatar;
-    };
-    reader.readAsDataURL(file);
-  }
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    tempUploadedAvatar = e.target.result;
+    const previewEl = document.getElementById('edit-avatar-preview');
+    if (previewEl) previewEl.src = tempUploadedAvatar;
+  };
+  reader.readAsDataURL(file);
 }
 
-function addSocialLinkInput() {
-  const container = document.getElementById('social-links-inputs');
+function addSocialLinkField() {
+  const container = document.getElementById('social-links-inputs-container');
   if (!container) return;
 
-  const newRow = document.createElement('div');
-  newRow.className = 'flex gap-1.5 items-center social-link-row';
-  newRow.innerHTML = `
-    <input type="text" placeholder="Nome (ex: TikTok)" class="w-1/3 px-2.5 py-1.5 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange social-label-input" required />
-    <input type="url" placeholder="https://..." class="flex-1 px-2.5 py-1.5 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange social-url-input" required />
-    <button type="button" onclick="removeSocialLinkInput(this)" class="p-1.5 text-gray-400 hover:text-frevo-red rounded-lg" aria-label="Remover">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+  const div = document.createElement('div');
+  div.className = 'flex gap-1.5 items-center social-link-row';
+  div.innerHTML = `
+    <input type="text" placeholder="Nome (ex: TikTok)" class="w-1/3 px-2.5 py-1.5 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none social-label-field" />
+    <input type="url" placeholder="https://..." class="flex-1 px-2.5 py-1.5 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none social-url-field" />
+    <button type="button" onclick="removeSocialLinkField(this)" class="p-1.5 text-gray-400 hover:text-frevo-red">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
     </button>
   `;
-  container.appendChild(newRow);
+  container.appendChild(div);
 }
 
-function removeSocialLinkInput(buttonEl) {
-  const row = buttonEl.closest('.social-link-row');
+function removeSocialLinkField(btn) {
+  const row = btn.closest('.social-link-row');
   if (row) row.remove();
 }
 
 function saveProfileChanges(e) {
   e.preventDefault();
-  
+  const name = document.getElementById('edit-name-input').value;
+  const handle = document.getElementById('edit-handle-input').value;
+  const bio = document.getElementById('edit-bio-input').value;
+  const email = document.getElementById('edit-email-input').value;
+  const phone = document.getElementById('edit-phone-input').value;
+
+  const rows = document.querySelectorAll('.social-link-row');
+  const socialLinks = [];
+  rows.forEach(row => {
+    const label = row.querySelector('.social-label-field').value.trim();
+    const url = row.querySelector('.social-url-field').value.trim();
+    if (url) {
+      socialLinks.push({ label: label || 'Link', url });
+    }
+  });
+
+  currentUserProfile.name = name;
+  currentUserProfile.handle = handle.startsWith('@') ? handle : '@' + handle;
+  currentUserProfile.bio = bio;
+  currentUserProfile.email = email;
+  currentUserProfile.phone = phone;
+  currentUserProfile.socialLinks = socialLinks;
   if (tempUploadedAvatar) {
     currentUserProfile.avatar = tempUploadedAvatar;
   }
-  
-  currentUserProfile.name = document.getElementById('edit-name-input').value;
-  currentUserProfile.handle = document.getElementById('edit-handle-input').value;
-  currentUserProfile.bio = document.getElementById('edit-bio-input').value;
-  currentUserProfile.email = document.getElementById('edit-email-input').value;
-  currentUserProfile.phone = document.getElementById('edit-phone-input').value;
-
-  // Coleta múltiplos links sociais
-  const socialRows = document.querySelectorAll('.social-link-row');
-  const links = [];
-  socialRows.forEach(row => {
-    const label = row.querySelector('.social-label-input')?.value?.trim();
-    const url = row.querySelector('.social-url-input')?.value?.trim();
-    if (label && url) {
-      links.push({ label, url });
-    }
-  });
-  currentUserProfile.socialLinks = links;
 
   updateProfileUI();
   closeModal();
+  alert('Perfil atualizado com sucesso!');
 }
 
-// ==============================================================================
-// MODAL DE CONTATO DIRETO
-// ==============================================================================
 function openContactModal() {
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
 
   modalBody.innerHTML = `
-    <div class="text-center space-y-4">
-      <div class="story-ring p-1 inline-block mx-auto">
-        <img src="${currentUserProfile.avatar}" alt="${currentUserProfile.name}" class="w-20 h-20 rounded-full object-cover border-2 border-white" />
-      </div>
-      <div>
-        <h3 class="font-display font-bold text-xl text-ink">${currentUserProfile.name}</h3>
-        <span class="text-xs text-muted font-medium">${currentUserProfile.handle}</span>
-      </div>
-      
-      <p class="text-xs text-ink-soft leading-relaxed px-4">
-        Entre em contato diretamente com o artista para apresentações, partituras ou parcerias culturais:
-      </p>
-
-      <div class="space-y-2.5 pt-1">
-        <a href="mailto:${currentUserProfile.email}" class="btn btn-primary w-full text-xs rounded-xl flex items-center justify-center gap-2 py-2.5 shadow-sm">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-            <polyline points="22,6 12,13 2,6"></polyline>
-          </svg>
-          Enviar E-mail (${currentUserProfile.email})
-        </a>
-
-        <a href="https://wa.me/${currentUserProfile.phone.replace(/[^0-9]/g, '')}" target="_blank" rel="noopener noreferrer" class="btn btn-green w-full text-xs rounded-xl flex items-center justify-center gap-2 py-2.5 shadow-sm">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-          </svg>
-          WhatsApp (${currentUserProfile.phone})
-        </a>
+    <div class="space-y-4 text-left">
+      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+        <h3 class="font-display font-bold text-lg text-ink">Contato com o Artista</h3>
+        <span class="badge bg-frevo-orange/15 text-frevo-orange text-[10px] font-bold">Oficial</span>
       </div>
 
-      <!-- Outras Redes do Artista -->
-      ${currentUserProfile.socialLinks && currentUserProfile.socialLinks.length > 0 ? `
-        <div class="pt-2 border-t border-gray-100">
-          <span class="text-[10px] font-bold text-muted uppercase block mb-2">Redes Oficiais</span>
-          <div class="flex flex-wrap justify-center gap-1.5">
-            ${currentUserProfile.socialLinks.map(s => `
-              <a href="${s.url}" target="_blank" rel="noopener noreferrer" class="badge bg-surface-soft border border-gray-200 text-ink text-xs font-semibold hover:border-frevo-orange">
-                ${s.label} ↗
-              </a>
-            `).join('')}
-          </div>
-        </div>
-      ` : ''}
+      <div class="space-y-3">
+        ${currentUserProfile.email ? `
+          <a href="mailto:${currentUserProfile.email}" class="p-3 bg-surface-soft rounded-2xl flex items-center justify-between border border-gray-100 hover:border-frevo-orange transition-colors">
+            <div>
+              <span class="text-[10px] font-bold text-muted uppercase">E-mail Profissional</span>
+              <p class="text-xs font-bold text-ink">${currentUserProfile.email}</p>
+            </div>
+            <span class="btn btn-primary text-xs px-3 py-1 rounded-xl">Escrever</span>
+          </a>
+        ` : ''}
 
-      <button onclick="closeModal()" class="text-xs text-muted font-bold hover:underline block pt-2 mx-auto">
+        ${currentUserProfile.phone ? `
+          <a href="tel:${currentUserProfile.phone.replace(/[^0-9+]/g, '')}" class="p-3 bg-surface-soft rounded-2xl flex items-center justify-between border border-gray-100 hover:border-frevo-orange transition-colors">
+            <div>
+              <span class="text-[10px] font-bold text-muted uppercase">Telefone / Agenciamento</span>
+              <p class="text-xs font-bold text-ink">${currentUserProfile.phone}</p>
+            </div>
+            <span class="btn btn-outline text-xs px-3 py-1 rounded-xl font-bold">Ligar</span>
+          </a>
+        ` : ''}
+      </div>
+
+      <button onclick="closeModal()" class="btn btn-primary w-full text-xs rounded-xl py-2 font-bold">
         Fechar
       </button>
     </div>
@@ -984,97 +2224,12 @@ function openContactModal() {
   modal.classList.add('open');
 }
 
-// ==============================================================================
-// PWA AUTOMÁTICO PARA ANDROID E IOS
-// ==============================================================================
-let deferredPrompt = null;
-
-function checkPwaPrompt() {
-  const hasSeenPwa = localStorage.getItem('frevia_pwa_dismissed');
-  if (!hasSeenPwa) {
-    setTimeout(() => {
-      const banner = document.getElementById('pwa-install-banner');
-      if (banner) banner.classList.add('show');
-    }, 1500);
-  }
-}
-
-function dismissPwaBanner() {
-  const banner = document.getElementById('pwa-install-banner');
-  if (banner) banner.classList.remove('show');
-  localStorage.setItem('frevia_pwa_dismissed', 'true');
-}
-
-function openPwaInstructionsModal() {
-  dismissPwaBanner();
-  
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(() => {
-      deferredPrompt = null;
-    });
+function openSubmitSongModal() {
+  if (currentUserSession.role !== 'artist' && currentUserSession.role !== 'admin') {
+    alert('Apenas Artistas e Administradores podem cadastrar partituras.');
     return;
   }
 
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-  const modal = document.getElementById('global-modal');
-  const modalBody = document.getElementById('modal-body');
-
-  modalBody.innerHTML = `
-    <div class="space-y-4 text-center">
-      <div class="w-14 h-14 rounded-2xl gradient-frevo flex items-center justify-center text-white mx-auto shadow-md">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 3C6.5 3 2 7.5 2 13C2 13 4.5 11.5 7 13C9.5 14.5 12 13 12 13C12 13 14.5 14.5 17 13C19.5 11.5 22 13 22 13C22 7.5 17.5 3 12 3Z" fill="currentColor" fill-opacity="0.2"/>
-          <path d="M12 3V19C12 20.1 11.1 21 10 21C8.9 21 8 20.1 8 19"/>
-        </svg>
-      </div>
-
-      <div>
-        <h3 class="font-display font-bold text-xl text-ink">Adicionar FrevAI à Tela Inicial</h3>
-        <p class="text-xs text-muted mt-1">Tenha a melhor experiência com acesso instantâneo em tela cheia.</p>
-      </div>
-
-      ${isIOS ? `
-        <!-- Instruções Específicas para iOS Safari -->
-        <div class="bg-surface-soft p-4 rounded-2xl text-left text-xs space-y-2 border border-gray-100">
-          <p class="font-bold text-ink">No seu iPhone / iPad:</p>
-          <ol class="list-decimal list-inside space-y-1 text-ink-soft">
-            <li>Toque no botão de <strong>Compartilhar</strong> (<svg class="inline" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>) no rodapé do Safari.</li>
-            <li>Role para baixo e selecione <strong>"Adicionar à Tela de Início"</strong>.</li>
-            <li>Toque em <strong>"Adicionar"</strong> no canto superior direito.</li>
-          </ol>
-        </div>
-      ` : `
-        <!-- Instruções Específicas para Android Chrome -->
-        <div class="bg-surface-soft p-4 rounded-2xl text-left text-xs space-y-2 border border-gray-100">
-          <p class="font-bold text-ink">No seu Android (Chrome):</p>
-          <ol class="list-decimal list-inside space-y-1 text-ink-soft">
-            <li>Toque nos <strong>três pontos (⋮)</strong> no canto superior do navegador.</li>
-            <li>Selecione <strong>"Instalar aplicativo"</strong> ou <strong>"Adicionar à tela inicial"</strong>.</li>
-            <li>Confirme para ter o ícone do FrevAI no seu dispositivo!</li>
-          </ol>
-        </div>
-      `}
-
-      <button onclick="closeModal()" class="btn btn-primary w-full text-xs rounded-xl py-2.5">
-        Entendi, Concluído!
-      </button>
-    </div>
-  `;
-
-  modal.classList.add('open');
-}
-
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  checkPwaPrompt();
-});
-
-// ==============================================================================
-// MODAL DE SUBMISSÃO DE PARTITURAS
-// ==============================================================================
-function openSubmitSongModal() {
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
 
@@ -1110,7 +2265,7 @@ function openSubmitSongModal() {
         </div>
         <div class="flex gap-2 pt-2">
           <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl">Cancelar</button>
-          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl shadow-md">Submeter Obra</button>
+          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl shadow-md font-bold">Submeter Obra</button>
         </div>
       </form>
     </div>
@@ -1119,101 +2274,117 @@ function openSubmitSongModal() {
   modal.classList.add('open');
 }
 
-// Modal de Story com Design Refinado
-function openStoryModal(name, avatar, subtitle) {
-  const modal = document.getElementById('global-modal');
-  const modalBody = document.getElementById('modal-body');
-  
-  modalBody.innerHTML = `
-    <div class="text-center space-y-4">
-      <div class="story-ring p-1.5 inline-block">
-        <img src="${avatar}" alt="${name}" class="w-24 h-24 rounded-full object-cover border-2 border-white" />
-      </div>
-      <div>
-        <h3 class="font-display font-bold text-xl text-ink">${name}</h3>
-        <span class="text-xs text-muted">${subtitle}</span>
-      </div>
-      <div class="p-4 bg-surface-soft rounded-2xl text-xs text-ink leading-relaxed border border-gray-100">
-        "O frevo é a pulsação do nosso povo nas ladeiras e no asfalto."
-      </div>
-      <button onclick="closeModal()" class="btn btn-primary w-full text-xs rounded-xl">Fechar Story</button>
-    </div>
-  `;
-  modal.classList.add('open');
+function submitNewSong(e) {
+  e.preventDefault();
+  const title = document.getElementById('song-title-input').value;
+  const genre = document.getElementById('song-genre-input').value;
+  const lyrics = document.getElementById('song-lyrics-input').value;
+
+  if (!title) return;
+
+  const newSong = {
+    id: `s-${Date.now()}`,
+    title,
+    artist: currentUserSession.name || currentUserProfile.name,
+    genre,
+    description: 'Nova obra submetida para acervo e revisão.',
+    lyrics: lyrics || '(Sem letra informada)',
+    score_file: 'nova-partitura.pdf',
+    status: 'published',
+    downloads_count: 1,
+    author_id: currentUserSession.artist_id || 'a1'
+  };
+
+  DB.songs.unshift(newSong);
+  if (window.supabaseService && window.supabaseService.isConnected()) {
+    window.supabaseService.createSong(newSong);
+  }
+
+  closeModal();
+  renderSongs();
+  renderProfileGallery();
+  renderAdminCMS();
+  alert('Música cadastrada no acervo oficial com sucesso!');
 }
 
-// Modal de Comentários com Design Refinado
-function openCommentsModal(postId) {
-  const post = DB.posts.find(p => p.id === postId);
-  if (!post) return;
+// ==============================================================================
+// PWA BANNER & PROMPTS
+// ==============================================================================
+let deferredPrompt = null;
 
-  const modal = document.getElementById('global-modal');
-  const modalBody = document.getElementById('modal-body');
+function checkPwaPrompt() {
+  const banner = document.getElementById('pwa-install-banner');
+  const hasSeenPwa = localStorage.getItem('frevai_pwa_dismissed');
   
-  modalBody.innerHTML = `
-    <div class="space-y-4 text-left">
-      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
-        <h3 class="font-display font-bold text-lg text-ink">Comentários (${post.comments.length})</h3>
-        <span class="badge bg-frevo-orange/15 text-frevo-orange text-[10px] font-bold">${post.title}</span>
-      </div>
-      <div class="space-y-2.5 max-h-60 overflow-y-auto pr-1">
-        ${post.comments.length > 0 ? post.comments.map(c => `
-          <div class="p-3 bg-surface-soft rounded-2xl text-xs border border-gray-100">
-            <strong class="text-ink block mb-0.5">${c.user}</strong>
-            <span class="text-ink-soft leading-relaxed">${c.text}</span>
-          </div>
-        `).join('') : '<p class="text-xs text-muted py-4 text-center">Seja o primeiro a comentar!</p>'}
-      </div>
-      <div class="flex gap-2 pt-1">
-        <input type="text" id="new-comment-input" placeholder="Adicionar comentário..." class="flex-1 px-3 py-2.5 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
-        <button onclick="addComment('${post.id}')" class="btn btn-primary text-xs rounded-xl px-4">Publicar</button>
-      </div>
-    </div>
-  `;
-
-  modal.classList.add('open');
-}
-
-function addComment(postId) {
-  const input = document.getElementById('new-comment-input');
-  if (!input || !input.value.trim()) return;
-
-  const post = DB.posts.find(p => p.id === postId);
-  if (post) {
-    post.comments.push({
-      user: currentUserProfile.handle.replace('@', ''),
-      text: input.value.trim()
-    });
-    closeModal();
-    renderFeed();
+  if (banner && !hasSeenPwa) {
+    setTimeout(() => {
+      banner.classList.add('show');
+    }, 1800);
   }
 }
 
-// Modal de Partituras com Design Refinado
-function openScoreModal(title, artist) {
+function dismissPwaBanner() {
+  const banner = document.getElementById('pwa-install-banner');
+  if (banner) {
+    banner.classList.remove('show');
+  }
+  localStorage.setItem('frevai_pwa_dismissed', 'true');
+}
+
+function openPwaInstructionsModal() {
+  dismissPwaBanner();
+
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('Usuário aceitou instalar o PWA');
+      }
+      deferredPrompt = null;
+    });
+    return;
+  }
+
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
 
   modalBody.innerHTML = `
     <div class="text-center space-y-4">
-      <div class="w-14 h-14 rounded-2xl bg-frevo-cyan/20 flex items-center justify-center mx-auto text-frevo-cyan">
+      <div class="w-14 h-14 rounded-2xl gradient-frevo flex items-center justify-center mx-auto text-white shadow-md">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M9 18V5L21 3V16"></path>
-          <circle cx="6" cy="18" r="3"></circle>
-          <circle cx="18" cy="16" r="3"></circle>
+          <path d="M12 3C6.5 3 2 7.5 2 13C2 13 4.5 11.5 7 13C9.5 14.5 12 13 12 13C12 13 14.5 14.5 17 13C19.5 11.5 22 13 22 13C22 7.5 17.5 3 12 3Z" fill="currentColor" fill-opacity="0.2"/>
+          <path d="M12 3V19C12 20.1 11.1 21 10 21C8.9 21 8 20.1 8 19"/>
         </svg>
       </div>
+
       <div>
-        <h3 class="font-display font-bold text-xl text-ink">${title}</h3>
-        <p class="text-xs font-bold text-frevo-orange mt-0.5">${artist}</p>
+        <h3 class="font-display font-bold text-xl text-ink">Adicionar FrevAI à Tela Inicial</h3>
+        <p class="text-xs text-muted mt-1">Tenha a melhor experiência com acesso instantâneo em tela cheia.</p>
       </div>
-      <div class="p-4 bg-surface-soft border border-gray-100 rounded-2xl text-xs text-muted space-y-1.5 text-left">
-        <p class="text-ink font-semibold">Acervo Oficial Aberto para Download</p>
-        <p>Partitura digitalizada em alta resolução com arranjo para orquestra e sopros.</p>
-        <p class="font-mono text-ink text-[11px] pt-1">Formato: PDF Digital</p>
-      </div>
-      <button onclick="alert('Download da partitura iniciado!'); closeModal();" class="btn btn-cyan w-full text-xs rounded-xl shadow-md py-2.5">
-        Baixar Partitura
+
+      ${isIOS ? `
+        <div class="bg-surface-soft p-4 rounded-2xl text-left text-xs space-y-2 border border-gray-100">
+          <p class="font-bold text-ink">No seu iPhone / iPad:</p>
+          <ol class="list-decimal list-inside space-y-1 text-ink-soft">
+            <li>Toque no botão de <strong>Compartilhar</strong> (<svg class="inline" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>) no rodapé do Safari.</li>
+            <li>Role para baixo e selecione <strong>"Adicionar à Tela de Início"</strong>.</li>
+            <li>Toque em <strong>"Adicionar"</strong> no canto superior direito.</li>
+          </ol>
+        </div>
+      ` : `
+        <div class="bg-surface-soft p-4 rounded-2xl text-left text-xs space-y-2 border border-gray-100">
+          <p class="font-bold text-ink">No seu Android (Chrome):</p>
+          <ol class="list-decimal list-inside space-y-1 text-ink-soft">
+            <li>Toque nos <strong>três pontos (⋮)</strong> no canto superior do navegador.</li>
+            <li>Selecione <strong>"Instalar aplicativo"</strong> ou <strong>"Adicionar à tela inicial"</strong>.</li>
+            <li>Confirme para ter o ícone do FrevAI no seu dispositivo!</li>
+          </ol>
+        </div>
+      `}
+
+      <button onclick="closeModal()" class="btn btn-primary w-full text-xs rounded-xl py-2.5 font-bold">
+        Entendi, Concluído!
       </button>
     </div>
   `;
@@ -1221,42 +2392,11 @@ function openScoreModal(title, artist) {
   modal.classList.add('open');
 }
 
-function closeModal() {
-  const modal = document.getElementById('global-modal');
-  if (modal) modal.classList.remove('open');
-}
-
-function submitNewSong(e) {
+window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
-  const title = document.getElementById('song-title-input').value;
-  const genre = document.getElementById('song-genre-input').value;
-  const lyrics = document.getElementById('song-lyrics-input').value;
-
-  if (window.supabaseService && window.supabaseService.isConnected()) {
-    window.supabaseService.createSong({
-      title,
-      genre,
-      lyrics,
-      description: 'Nova obra submetida para acervo e revisão.'
-    });
-  }
-
-  DB.songs.unshift({
-    id: `s-${Date.now()}`,
-    title,
-    artist: currentUserProfile.name,
-    genre,
-    description: 'Nova obra submetida para acervo e revisão.',
-    lyrics: lyrics || '(Sem letra informada)',
-    score_file: 'nova-partitura.pdf',
-    status: 'pending_review'
-  });
-
-  closeModal();
-  alert('Música enviada com sucesso para moderação e sincronizada!');
-  renderSongs();
-  switchView('songs');
-}
+  deferredPrompt = e;
+  checkPwaPrompt();
+});
 
 // ==============================================================================
 // SINCRONIZAÇÃO ASSÍNCRONA COM SUPABASE
@@ -1265,31 +2405,28 @@ async function syncAllWithSupabase() {
   if (!window.supabaseService || !window.supabaseService.isConnected()) return;
 
   try {
-    // 1. Posts
     const livePosts = await window.supabaseService.getPosts();
     if (livePosts && livePosts.length > 0) {
       DB.posts = livePosts;
       renderFeed();
     }
 
-    // 2. Artistas
     const liveArtists = await window.supabaseService.getArtists();
     if (liveArtists && liveArtists.length > 0) {
       DB.artists = liveArtists;
       renderArtists();
     }
 
-    // 3. Músicas
     const liveSongs = await window.supabaseService.getSongs();
     if (liveSongs && liveSongs.length > 0) {
       DB.songs = liveSongs;
       renderSongs();
+      renderProfileGallery();
     }
 
-    // 4. Mapa
     const liveMap = await window.supabaseService.getMapPoints();
     if (liveMap && liveMap.length > 0) {
-      DB.map_points = liveMap;
+      DB.mapPoints = liveMap;
       renderMap();
     }
   } catch (err) {
@@ -1307,15 +2444,33 @@ document.addEventListener('DOMContentLoaded', () => {
   renderSteps();
   renderHistory();
   renderMap();
+  renderAdminCMS();
   updateProfileUI();
+  updateSessionUI();
   checkPwaPrompt();
 
-  // Sincronização em background com Supabase
   if (window.FREVIA_CONFIG && window.FREVIA_CONFIG.isConfigured()) {
     syncAllWithSupabase();
   }
 
-  // Eventos de clique nas abas
+  // Ouvinte de mudança de autenticação no Supabase
+  if (window.supabaseService) {
+    window.supabaseService.onAuthStateChange((event, session) => {
+      if (session && session.user) {
+        currentUserSession = {
+          role: session.user.user_metadata?.role || 'user',
+          name: session.user.user_metadata?.display_name || session.user.email.split('@')[0],
+          handle: '@' + session.user.email.split('@')[0],
+          avatar: session.user.user_metadata?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+          email: session.user.email,
+          artist_id: null,
+          favorites: []
+        };
+        saveCurrentSession();
+      }
+    });
+  }
+
   document.querySelectorAll('[data-view]').forEach(el => {
     el.addEventListener('click', (e) => {
       e.preventDefault();
@@ -1324,7 +2479,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Fechar modal ao clicar fora
   const modal = document.getElementById('global-modal');
   if (modal) {
     modal.addEventListener('click', (e) => {
@@ -1332,4 +2486,3 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
-

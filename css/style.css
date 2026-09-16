@@ -234,6 +234,17 @@ body {
   transform: scale(0.92);
 }
 
+.floating-save-btn.is-saved {
+  color: #FF8A00;
+  background: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(255, 138, 0, 0.3);
+}
+
+.floating-save-btn.is-saved svg {
+  fill: #FF8A00;
+  stroke: #FF8A00;
+}
+
 /* Barra de Ações Inferior Flutuante */
 .floating-actions-bar {
   position: absolute;
@@ -441,6 +452,36 @@ body {
   height: 2.5px;
   background-color: #171717;
   border-radius: 999px;
+}
+
+/* Cores Distintas para Abas Ativas do Perfil */
+.profile-tab-btn.tab-scores.active {
+  color: #16C7D9;
+}
+
+.profile-tab-btn.tab-scores.active::after {
+  background-color: #16C7D9;
+}
+
+.profile-tab-btn.tab-scores.active svg {
+  stroke: #16C7D9;
+}
+
+.profile-tab-btn.tab-scores.active svg circle {
+  fill: #16C7D9;
+}
+
+.profile-tab-btn.tab-saved.active {
+  color: #FF8A00;
+}
+
+.profile-tab-btn.tab-saved.active::after {
+  background-color: #FF8A00;
+}
+
+.profile-tab-btn.tab-saved.active svg {
+  fill: #FF8A00;
+  stroke: #FF8A00;
 }
 
 /* Galeria Assimétrica (Mural / Masonry / Staggered) */
@@ -699,7 +740,6 @@ body {
 }
 
 .profile-tab-btn.active svg {
-  fill: currentColor;
   stroke: currentColor;
 }
 
@@ -759,15 +799,15 @@ body {
   border-radius: 22px;
   padding: 14px 16px;
   color: #FFFFFF;
-  z-index: 990;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  z-index: 998;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  transform: translateY(150%);
+  transform: translateY(120%);
   opacity: 0;
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
   pointer-events: none;
 }
 
@@ -775,6 +815,61 @@ body {
   transform: translateY(0);
   opacity: 1;
   pointer-events: auto;
+}
+
+/* Abas de Navegação do Painel CMS */
+.admin-tab-pill {
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: #F4F1EA;
+  color: #737373;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.admin-tab-pill:hover {
+  background: #EAE6DC;
+  color: #171717;
+}
+
+.admin-tab-pill.active {
+  background: #171717;
+  color: #FFFFFF;
+  border-color: #171717;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Botão de Favoritar Artista */
+.btn-fav-artist {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F4F1EA;
+  color: #737373;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-fav-artist:hover {
+  background: #FFE5E0;
+  color: #F0442E;
+  transform: scale(1.08);
+}
+
+.btn-fav-artist.favorited {
+  background: #F0442E;
+  color: #FFFFFF;
+}
+
+.btn-fav-artist.favorited svg {
+  fill: #FFFFFF;
+  stroke: #FFFFFF;
 }
 
 /* Container de Mapa Embutido Expansível */
