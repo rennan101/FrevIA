@@ -483,17 +483,30 @@ body {
   fill: #16C7D9;
 }
 
-.profile-tab-btn.tab-saved.active {
+.profile-tab-btn.tab-favorites.active {
   color: #FF8A00;
 }
 
-.profile-tab-btn.tab-saved.active::after {
+.profile-tab-btn.tab-favorites.active::after {
   background-color: #FF8A00;
 }
 
-.profile-tab-btn.tab-saved.active svg {
+.profile-tab-btn.tab-favorites.active svg {
   fill: #FF8A00;
   stroke: #FF8A00;
+}
+
+.profile-tab-btn.tab-saved.active {
+  color: #7447E8;
+}
+
+.profile-tab-btn.tab-saved.active::after {
+  background-color: #7447E8;
+}
+
+.profile-tab-btn.tab-saved.active svg {
+  fill: #7447E8;
+  stroke: #7447E8;
 }
 
 /* Galeria Assimétrica (Mural / Masonry / Staggered) */
@@ -594,29 +607,32 @@ body {
   margin-bottom: 12px;
 }
 
-/* Botão Voltar Padronizado */
+/* Botão Voltar Padronizado (Apenas Ícone Compacto Circular) */
 .btn-back-header {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: rgba(0, 0, 0, 0.05);
-  border: none;
-  padding: 6px 12px;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 700;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: #F4F1EA;
+  border: 1px solid #EAEAEA;
+  border-radius: 50%;
   color: var(--ink);
   cursor: pointer;
-  transition: background-color 0.15s ease, transform 0.1s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 }
 
 .btn-back-header:hover {
-  background: rgba(0, 0, 0, 0.1);
-  transform: translateX(-2px);
+  background: #FFFFFF;
+  border-color: #FF8A00;
+  color: #FF8A00;
+  transform: scale(1.06);
+  box-shadow: 0 4px 12px rgba(255, 138, 0, 0.15);
 }
 
 .btn-back-header:active {
-  transform: scale(0.95);
+  transform: scale(0.92);
 }
 
 /* Botões do Design System */
@@ -1080,6 +1096,26 @@ body {
   width: 22px;
   background-color: #FF8A00;
   border-radius: 9999px;
+}
+
+@keyframes highlight-glow {
+  0% { box-shadow: 0 0 0 0 rgba(255, 138, 0, 0.7); transform: scale(1); }
+  50% { box-shadow: 0 0 0 8px rgba(255, 138, 0, 0.2); transform: scale(1.01); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 138, 0, 0); transform: scale(1); }
+}
+
+.highlight-pulse {
+  animation: highlight-glow 1.2s ease-in-out 3;
+  border-color: #FF8A00 !important;
+}
+
+.notification-item {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.notification-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 @media (prefers-reduced-motion: reduce) {

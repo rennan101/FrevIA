@@ -99,7 +99,7 @@
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
           </svg>
-          <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-frevo-orange"></span>
+          <span id="header-notification-badge" class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-frevo-orange animate-pulse"></span>
         </button>
 
         <!-- Botão de Sessão / Login / Seletor de Papel -->
@@ -139,16 +139,13 @@
 
     <!-- 2. VIEW: EXPLORAR (HUB CULTURAL - 3 CARDS ESTILO APPLE MUSIC) -->
     <section id="view-explore" class="view-section max-w-md mx-auto px-4 py-3 space-y-4">
-      <div class="pb-2 border-b border-gray-200 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <button onclick="switchView('feed')" class="btn-back-header" aria-label="Voltar para Home">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-            Voltar
-          </button>
-          <h2 class="font-display font-extrabold text-xl text-ink">Explorar o Frevo</h2>
-        </div>
+      <div class="pb-2 border-b border-gray-200 relative flex items-center justify-center min-h-[44px]">
+        <button onclick="switchView('feed')" class="btn-back-header absolute left-0" aria-label="Voltar para Home" title="Voltar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <h2 class="font-display font-extrabold text-xl text-ink text-center">Explorar o Frevo</h2>
       </div>
 
       <!-- 3 Cards Empilhados Estilo Apple Music com Novos Ícones -->
@@ -203,16 +200,13 @@
 
     <!-- 3. VIEW: ARTISTAS (ESTILO APPLE MUSIC COM STORIES E BUSCA) -->
     <section id="view-artists" class="view-section max-w-md mx-auto px-4 py-3 space-y-4">
-      <div class="pb-2 border-b border-gray-200 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <button onclick="switchView('feed')" class="btn-back-header" aria-label="Voltar para Home">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-            Voltar
-          </button>
-          <h2 class="font-display font-extrabold text-xl text-ink">Artistas</h2>
-        </div>
+      <div class="pb-2 border-b border-gray-200 relative flex items-center justify-center min-h-[44px]">
+        <button onclick="switchView('feed')" class="btn-back-header absolute left-0" aria-label="Voltar para Home" title="Voltar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <h2 class="font-display font-extrabold text-xl text-ink text-center">Artistas</h2>
       </div>
 
       <!-- Sessão de Artistas em Destaque (Stories Bar Acima da Busca) -->
@@ -254,19 +248,14 @@
 
     <!-- 4. VIEW: MÚSICAS & PARTITURAS -->
     <section id="view-songs" class="view-section max-w-md mx-auto px-4 py-3 space-y-4">
-      <div class="pb-2 border-b border-gray-200 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <button onclick="switchView('feed')" class="btn-back-header" aria-label="Voltar para Home">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-            Voltar
-          </button>
-          <div>
-            <h2 class="font-display font-extrabold text-xl text-ink">Letras & Partituras</h2>
-          </div>
-        </div>
-        <button onclick="openSubmitSongModal()" id="btn-submit-song" class="btn btn-primary text-xs px-3 py-1.5 h-8" style="display: none;">
+      <div class="pb-2 border-b border-gray-200 relative flex items-center justify-center min-h-[44px]">
+        <button onclick="switchView('feed')" class="btn-back-header absolute left-0" aria-label="Voltar para Home" title="Voltar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <h2 class="font-display font-extrabold text-xl text-ink text-center">Letras & Partituras</h2>
+        <button onclick="openSubmitSongModal()" id="btn-submit-song" class="btn btn-primary text-xs px-3 py-1.5 h-8 absolute right-0" style="display: none;">
           + Enviar
         </button>
       </div>
@@ -293,17 +282,14 @@
 
     <!-- 5. VIEW: PASSOS DE FREVO -->
     <section id="view-steps" class="view-section max-w-md mx-auto px-4 py-3 space-y-4">
-      <div class="pb-2 border-b border-gray-200 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <button onclick="switchView('explore')" class="btn-back-header" aria-label="Voltar para Explorar">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-            Voltar
-          </button>
-          <h2 class="font-display font-extrabold text-xl text-ink">Galeria de Passos</h2>
-        </div>
-        <button onclick="openNewStepModal()" id="btn-add-step" class="btn btn-primary text-[11px] px-2.5 py-1.5 rounded-xl font-bold" style="display: none;">
+      <div class="pb-2 border-b border-gray-200 relative flex items-center justify-center min-h-[44px]">
+        <button onclick="switchView('explore')" class="btn-back-header absolute left-0" aria-label="Voltar para Explorar" title="Voltar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <h2 class="font-display font-extrabold text-xl text-ink text-center">Galeria de Passos</h2>
+        <button onclick="openNewStepModal()" id="btn-add-step" class="btn btn-primary text-[11px] px-2.5 py-1.5 rounded-xl font-bold absolute right-0" style="display: none;">
           + Novo Passo
         </button>
       </div>
@@ -312,34 +298,26 @@
 
     <!-- 6. VIEW: HISTÓRIA & MEMÓRIA -->
     <section id="view-history" class="view-section max-w-md mx-auto px-4 py-3 space-y-4">
-      <div class="pb-2 border-b border-gray-200 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <button onclick="switchView('explore')" class="btn-back-header" aria-label="Voltar para Explorar">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-            Voltar
-          </button>
-          <h2 class="font-display font-extrabold text-xl text-ink">História do Frevo</h2>
-        </div>
-        <p class="text-xs text-muted">Linha do Tempo</p>
+      <div class="pb-2 border-b border-gray-200 relative flex items-center justify-center min-h-[44px]">
+        <button onclick="switchView('explore')" class="btn-back-header absolute left-0" aria-label="Voltar para Explorar" title="Voltar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <h2 class="font-display font-extrabold text-xl text-ink text-center">História do Frevo</h2>
       </div>
       <div class="space-y-4" id="history-timeline"></div>
     </section>
 
     <!-- 7. VIEW: MAPA CULTURAL -->
     <section id="view-map" class="view-section max-w-md mx-auto px-4 py-3 space-y-4">
-      <div class="pb-2 border-b border-gray-200 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <button onclick="switchView('explore')" class="btn-back-header" aria-label="Voltar para Explorar">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-            Voltar
-          </button>
-          <h2 class="font-display font-extrabold text-xl text-ink">Mapa Cultural</h2>
-        </div>
-        <p class="text-xs text-muted">Recife & Olinda</p>
+      <div class="pb-2 border-b border-gray-200 relative flex items-center justify-center min-h-[44px]">
+        <button onclick="switchView('explore')" class="btn-back-header absolute left-0" aria-label="Voltar para Explorar" title="Voltar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <h2 class="font-display font-extrabold text-xl text-ink text-center">Mapa Cultural</h2>
       </div>
       <div class="space-y-3.5" id="map-points-list"></div>
     </section>
@@ -399,18 +377,23 @@
         </div>
       </div>
 
-      <!-- Profile Content Tab Bar (Apenas 2 Abas: Partituras & Salvos com Cores Distintas) -->
+      <!-- Profile Content Tab Bar (3 Abas: Artistas Favoritos, Salvos & Partituras com Cores Distintas) -->
       <div class="profile-tab-bar" id="profile-tabs">
-        <button class="profile-tab-btn tab-scores active" onclick="switchProfileTab('scores', this)" aria-label="Partituras & Músicas">
+        <button class="profile-tab-btn tab-favorites active" onclick="switchProfileTab('favorites', this)" aria-label="Artistas Favoritados" title="Artistas Favoritados">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+        </button>
+        <button class="profile-tab-btn tab-saved" onclick="switchProfileTab('saved', this)" aria-label="Publicações Salvas" title="Publicações Salvas">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </button>
+        <button class="profile-tab-btn tab-scores" onclick="switchProfileTab('scores', this)" aria-label="Partituras & Músicas" title="Minhas Partituras">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M9 18V5L21 3V16"></path>
             <circle cx="6" cy="18" r="3"></circle>
             <circle cx="18" cy="16" r="3"></circle>
-          </svg>
-        </button>
-        <button class="profile-tab-btn tab-saved" onclick="switchProfileTab('saved', this)" aria-label="Itens Salvos">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
           </svg>
         </button>
       </div>
@@ -420,17 +403,14 @@
 
     <!-- 9. VIEW: PAINEL DE GESTÃO (CMS COMPLETO PARA ADMIN) -->
     <section id="view-admin-panel" class="view-section max-w-md mx-auto px-4 py-3 space-y-4">
-      <div class="pb-2 border-b border-gray-200 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <button onclick="switchView('feed')" class="btn-back-header" aria-label="Voltar para Home">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-            Voltar
-          </button>
-          <h2 class="font-display font-extrabold text-xl text-ink">Painel de Gestão (CMS)</h2>
-        </div>
-        <span class="badge bg-frevo-red/15 text-frevo-red text-xs font-bold">Administrador</span>
+      <div class="pb-2 border-b border-gray-200 relative flex items-center justify-center min-h-[44px]">
+        <button onclick="switchView('feed')" class="btn-back-header absolute left-0" aria-label="Voltar para Home" title="Voltar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <h2 class="font-display font-extrabold text-xl text-ink text-center">Painel de Gestão</h2>
+        <span class="badge bg-frevo-red/15 text-frevo-red text-[10px] font-bold absolute right-0">Admin</span>
       </div>
 
       <!-- Abas de Gestão do CMS -->

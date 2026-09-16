@@ -49,3 +49,55 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+
+// Push Notifications Event
+self.addEventListener('push', (event) => {
+  let data = {
+    title: 'FrevAI — Notificação Cultural',
+    body: 'Novidades no acervo do Frevo!',
+    icon: './assets/icons/icon-192x192.png',
+    badge: './assets/icons/icon-192x192.png',
+    data: { url: './#feed' }
+  };
+
+  if (event.data) {
+    try {
+      const payload = event.data.json();
+      data = { ...data, ...payload };
+    } catch {
+      data.body = event.data.text();
+    }
+  }
+
+  const options = {
+    body: data.body,
+    icon: data.icon || './assets/icons/icon-192x192.png',
+    badge: data.badge || './assets/icons/icon-192x192.png',
+    vibrate: [100, 50, 100],
+    data: data.data || { url: './#feed' }
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, options)
+  );
+});
+
+// Clique na Notificação Push: Abre o app e direciona para a partitura ou post específico
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const targetUrl = (event.notification.data && event.notification.data.url) ? event.notification.data.url : './#feed';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url && 'focus' in client) {
+          client.navigate(targetUrl);
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl);
+      }
+    })
+  );
+});

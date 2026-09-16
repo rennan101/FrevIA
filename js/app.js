@@ -263,6 +263,42 @@ const DB = {
       coords: [-7.9996, -34.8488],
       description: 'Coração do carnaval de rua e ponto de encontro emblemático das orquestras de frevo.'
     }
+  ],
+
+  notifications: [
+    {
+      id: 'notif-1',
+      type: 'score',
+      targetId: 's1',
+      title: 'Nova Partitura Disponível!',
+      message: 'Maestro Forró publicou o arranjo de "Último Regresso".',
+      author: 'Maestro Forró',
+      author_avatar: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80',
+      time_ago: 'Há 2 horas',
+      read: false
+    },
+    {
+      id: 'notif-2',
+      type: 'post',
+      targetId: 'p1',
+      title: 'Comunicado Cultural',
+      message: 'Edital do Festival Nacional do Frevo 2026 bate recorde de inscrições!',
+      author: 'FrevAI Notícias',
+      author_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+      time_ago: 'Há 5 horas',
+      read: false
+    },
+    {
+      id: 'notif-3',
+      type: 'score',
+      targetId: 's2',
+      title: 'Novo Frevo Instrumental!',
+      message: 'SpokFrevo lançou a partitura de "Moraes é Frevo".',
+      author: 'SpokFrevo',
+      author_avatar: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=400&q=80',
+      time_ago: 'Ontem',
+      read: true
+    }
   ]
 };
 
@@ -621,48 +657,144 @@ async function handleUserAvatarUpload(event) {
   reader.readAsDataURL(file);
 }
 
+// ==============================================================================
+// SISTEMA DE NOTIFICAÇÕES & PUSH COM DEEP LINKING
+// ==============================================================================
+
+function updateNotificationBadge() {
+  const badge = document.getElementById('header-notification-badge');
+  if (!badge) return;
+  const unreadCount = (DB.notifications || []).filter(n => !n.read).length;
+  badge.style.display = unreadCount > 0 ? 'block' : 'none';
+}
+
+function sendCulturalPushNotification({ title, message, url, type, targetId }) {
+  if (!('Notification' in window)) return;
+
+  const notifUrl = url || (type === 'post' ? `/#feed?post=${targetId}` : `/#songs?score=${targetId}`);
+
+  if (Notification.permission === 'granted') {
+    if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+      navigator.serviceWorker.ready.then(registration => {
+        registration.showNotification(title, {
+          body: message,
+          icon: '/icon-192.png',
+          badge: '/icon-192.png',
+          vibrate: [100, 50, 100],
+          data: {
+            url: notifUrl,
+            type,
+            targetId
+          }
+        });
+      }).catch(err => {
+        console.warn('SW push notification fallback:', err);
+      });
+    } else {
+      try {
+        const nativeNotif = new Notification(title, {
+          body: message,
+          icon: '/icon-192.png'
+        });
+        nativeNotif.onclick = () => {
+          window.focus();
+          handleNotificationClick(null, type, targetId);
+        };
+      } catch (e) {}
+    }
+  } else if (Notification.permission !== 'denied') {
+    Notification.requestPermission();
+  }
+}
+
+function markAllNotificationsAsRead() {
+  (DB.notifications || []).forEach(n => { n.read = true; });
+  updateNotificationBadge();
+  openNotificationsModal();
+}
+
+function handleNotificationClick(notifId, type, targetId) {
+  if (notifId) {
+    const notif = (DB.notifications || []).find(n => n.id === notifId);
+    if (notif) notif.read = true;
+  }
+  updateNotificationBadge();
+  closeModal();
+
+  if (type === 'post') {
+    switchView('feed');
+    setTimeout(() => {
+      const el = document.getElementById(`post-card-${targetId}`) || document.querySelector(`[data-post-id="${targetId}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('highlight-pulse');
+        setTimeout(() => el.classList.remove('highlight-pulse'), 3500);
+      }
+    }, 280);
+  } else if (type === 'score') {
+    switchView('songs');
+    const song = (DB.songs || []).find(s => s.id === targetId);
+    if (song) {
+      setTimeout(() => {
+        openScoreModal(song.title, song.artist, song.id);
+      }, 250);
+    }
+  }
+}
+
 // Modal do Sino de Notificações
 function openNotificationsModal() {
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
+  const notifications = DB.notifications || [];
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left">
-      <div class="pb-2 border-b border-gray-100 pr-10">
-        <h3 class="font-display font-bold text-lg text-ink">Notificações Culturais</h3>
+      <div class="flex items-center justify-between pb-3 border-b border-gray-100 pr-8">
+        <div>
+          <h3 class="font-display font-bold text-lg text-ink">Notificações Culturais</h3>
+          <p class="text-xs text-muted">${unreadCount > 0 ? `${unreadCount} não lida(s)` : 'Tudo em dia!'}</p>
+        </div>
+        ${unreadCount > 0 ? `
+          <button onclick="markAllNotificationsAsRead()" class="text-[11px] font-bold text-frevo-orange hover:underline">
+            Marcar todas como lidas
+          </button>
+        ` : ''}
       </div>
 
-      <div class="space-y-2.5 max-h-64 overflow-y-auto pr-1">
-        <div class="p-3 bg-surface-soft rounded-2xl border border-gray-100 flex items-start gap-2.5">
-          <div class="w-2 h-2 rounded-full bg-frevo-orange mt-1.5 flex-shrink-0"></div>
-          <div>
-            <strong class="text-ink text-xs block font-bold">Nova Partitura Disponível!</strong>
-            <p class="text-[11px] text-muted">Maestro Forró publicou o arranjo de "Passo da Fervura".</p>
-            <span class="text-[9px] text-gray-400 mt-1 block">Há 2 horas</span>
+      <div class="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+        ${notifications.length > 0 ? notifications.map(notif => `
+          <div onclick="handleNotificationClick('${notif.id}', '${notif.type}', '${notif.targetId}')" class="notification-item p-3.5 ${notif.read ? 'bg-white border border-gray-100 opacity-80' : 'bg-surface-soft border border-frevo-orange/30 shadow-sm'} rounded-2xl flex items-start gap-3 cursor-pointer hover:border-frevo-orange transition-all">
+            <div class="relative flex-shrink-0">
+              <img src="${notif.author_avatar || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80'}" alt="${notif.author || 'FrevAI'}" class="w-10 h-10 rounded-full object-cover border border-gray-200" />
+              <div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold text-white ${notif.type === 'score' ? 'bg-frevo-cyan' : 'bg-frevo-orange'}">
+                ${notif.type === 'score' ? '♫' : '★'}
+              </div>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-1 mb-0.5">
+                <strong class="text-ink text-xs font-bold truncate block">${notif.title}</strong>
+                ${!notif.read ? '<span class="w-2 h-2 rounded-full bg-frevo-orange flex-shrink-0 animate-pulse"></span>' : ''}
+              </div>
+              <p class="text-[11px] text-ink-soft leading-snug line-clamp-2">${notif.message}</p>
+              <div class="flex items-center justify-between mt-1.5 pt-1 border-t border-gray-100/60">
+                <span class="text-[10px] text-muted font-medium">${notif.time_ago || 'Recentemente'}</span>
+                <span class="text-[10px] font-bold text-frevo-orange flex items-center gap-0.5">
+                  ${notif.type === 'score' ? 'Ver Partitura' : 'Ver no Feed'} →
+                </span>
+              </div>
+            </div>
           </div>
-        </div>
-
-        <div class="p-3 bg-surface-soft rounded-2xl border border-gray-100 flex items-start gap-2.5">
-          <div class="w-2 h-2 rounded-full bg-frevo-cyan mt-1.5 flex-shrink-0"></div>
-          <div>
-            <strong class="text-ink text-xs block font-bold">Acerto de Marcha Confirmado</strong>
-            <p class="text-[11px] text-muted">Domingo no Recife Antigo às 16h na Praça do Arsenal.</p>
-            <span class="text-[9px] text-gray-400 mt-1 block">Há 5 horas</span>
+        `).join('') : `
+          <div class="p-6 text-center bg-surface-soft rounded-2xl border border-gray-100">
+            <p class="text-xs text-muted">Nenhuma notificação recebida ainda.</p>
           </div>
-        </div>
-
-        <div class="p-3 bg-surface-soft rounded-2xl border border-gray-100 flex items-start gap-2.5">
-          <div class="w-2 h-2 rounded-full bg-frevo-green mt-1.5 flex-shrink-0"></div>
-          <div>
-            <strong class="text-ink text-xs block font-bold">Novo Passo de Frevo</strong>
-            <p class="text-[11px] text-muted">Aprenda o passo "Dobradiça" no guia pedagógico.</p>
-            <span class="text-[9px] text-gray-400 mt-1 block">Ontem</span>
-          </div>
-        </div>
+        `}
       </div>
 
-      <button onclick="closeModal()" class="btn btn-primary w-full text-xs rounded-xl py-2">
-        Fechar Notificações
+      <button onclick="closeModal()" class="btn btn-outline w-full text-xs rounded-xl py-2 font-bold text-ink">
+        Fechar
       </button>
     </div>
   `;
@@ -1229,6 +1361,7 @@ function toggleFavoriteArtist(artistId) {
 
   saveCurrentSession();
   renderArtists();
+  renderProfileGallery();
 }
 
 function renderArtistCardHtml(artist) {
@@ -1661,14 +1794,14 @@ function toggleMapEmbed(pointId) {
 }
 
 // ==============================================================================
-// PERFIL DO USUÁRIO & ARTISTA (PARTITURAS PRÓPRIAS OU ITENS SALVOS)
+// PERFIL DO USUÁRIO & ARTISTA (ARTISTAS FAVORITOS, ITENS SALVOS OU PARTITURAS)
 // ==============================================================================
-let currentProfileTab = 'scores';
+let currentProfileTab = 'favorites';
 
 function switchProfileTab(tabName, btnElement) {
   const isArtistOrAdmin = currentUserSession.role === 'artist' || currentUserSession.role === 'admin';
   if (!isArtistOrAdmin && tabName === 'scores') {
-    tabName = 'saved';
+    tabName = 'favorites';
   }
 
   currentProfileTab = tabName;
@@ -1688,73 +1821,109 @@ function renderProfileGallery() {
 
   const isArtistOrAdmin = currentUserSession.role === 'artist' || currentUserSession.role === 'admin';
 
-  // Usuários comuns e visitantes não criam nem gerenciam partituras
-  if (!isArtistOrAdmin) {
-    const savedPosts = DB.posts.filter(p => p.is_saved);
+  // 1. ABA DE ARTISTAS FAVORITADOS
+  if (currentProfileTab === 'favorites') {
     const favoriteArtists = DB.artists.filter(a => (currentUserSession.favorites || []).includes(a.id));
 
     container.innerHTML = `
-      <div class="space-y-4 pb-6">
-        <!-- Seção de Publicações Salvas -->
-        <div>
-          <div class="flex items-center justify-between px-1 mb-2">
-            <span class="text-xs font-bold text-ink">Publicações Salvas (${savedPosts.length})</span>
-          </div>
-          ${savedPosts.length > 0 ? `
-            <div class="space-y-2.5">
-              ${savedPosts.map(post => `
-                <div class="bg-white border border-gray-200 rounded-2xl p-3 flex items-center justify-between shadow-sm">
-                  <div class="flex items-center gap-3 min-w-0">
-                    <img src="${post.image}" alt="${post.title}" class="w-12 h-12 rounded-xl object-cover flex-shrink-0" />
-                    <div class="min-w-0">
-                      <h4 class="font-bold text-xs text-ink truncate">${post.title}</h4>
-                      <span class="text-[11px] text-muted">${post.author}</span>
-                    </div>
-                  </div>
-                  <button onclick="toggleSave('${post.id}')" class="btn btn-outline text-xs px-2.5 py-1 rounded-xl text-frevo-red hover:bg-red-50 font-bold whitespace-nowrap">
-                    Remover
-                  </button>
-                </div>
-              `).join('')}
-            </div>
-          ` : `
-            <div class="p-6 text-center bg-white rounded-2xl border border-gray-200 shadow-sm">
-              <p class="text-xs text-muted">Você ainda não salvou nenhuma publicação do feed.</p>
-            </div>
-          `}
+      <div class="space-y-3 pb-6">
+        <div class="flex items-center justify-between px-1">
+          <span class="text-xs font-bold text-ink">Artistas Favoritados (${favoriteArtists.length})</span>
+          <button onclick="switchView('artists')" class="text-xs font-bold text-frevo-orange hover:underline">+ Descobrir Artistas</button>
         </div>
 
-        <!-- Seção de Artistas Favoritos -->
-        <div>
-          <div class="flex items-center justify-between px-1 mb-2">
-            <span class="text-xs font-bold text-ink">Artistas Favoritados (${favoriteArtists.length})</span>
-          </div>
-          ${favoriteArtists.length > 0 ? `
-            <div class="grid grid-cols-2 gap-2">
-              ${favoriteArtists.map(artist => `
-                <div onclick="openArtistModal('${artist.name}', '${artist.avatar_url}', '${artist.cover_url}', '${artist.genre}', '${artist.bio}', '${artist.email}', '${artist.phone}', '${artist.id}')" class="bg-white border border-gray-200 rounded-2xl p-3 flex items-center gap-2.5 shadow-sm cursor-pointer hover:border-frevo-orange transition-colors">
-                  <img src="${artist.avatar_url}" alt="${artist.name}" class="w-10 h-10 rounded-full object-cover border border-gray-200" />
+        ${favoriteArtists.length > 0 ? `
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            ${favoriteArtists.map(artist => `
+              <div class="bg-white border border-gray-200 rounded-2xl p-3 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
+                <div onclick="openArtistModal('${artist.name}', '${artist.avatar_url}', '${artist.cover_url}', '${artist.genre}', '${artist.bio}', '${artist.email}', '${artist.phone}', '${artist.id}')" class="flex items-center gap-3 min-w-0 cursor-pointer flex-1 mr-2">
+                  <img src="${artist.avatar_url}" alt="${artist.name}" class="w-12 h-12 rounded-full object-cover border border-gray-200 flex-shrink-0" />
                   <div class="min-w-0 flex-1">
                     <h5 class="font-bold text-xs text-ink truncate">${artist.name}</h5>
-                    <span class="text-[10px] text-muted truncate block">${artist.genre}</span>
+                    <span class="badge bg-frevo-orange/15 text-frevo-orange text-[10px] font-bold inline-block truncate mt-0.5">${artist.genre}</span>
                   </div>
                 </div>
-              `).join('')}
+                <button onclick="toggleFavoriteArtist('${artist.id}')" class="p-2 rounded-xl text-frevo-orange bg-frevo-orange/10 hover:bg-frevo-orange/20 transition-colors flex-shrink-0" title="Desfavoritar Artista">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  </svg>
+                </button>
+              </div>
+            `).join('')}
+          </div>
+        ` : `
+          <div class="p-8 text-center bg-white rounded-2xl border border-gray-200 shadow-sm">
+            <div class="w-12 h-12 rounded-full bg-frevo-orange/15 text-frevo-orange mx-auto flex items-center justify-center mb-3">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
             </div>
-          ` : `
-            <div class="p-4 text-center bg-white rounded-2xl border border-gray-200 shadow-sm">
-              <p class="text-xs text-muted">Favorite artistas na aba Artistas para acompanhá-los por aqui.</p>
-            </div>
-          `}
-        </div>
+            <p class="text-xs text-muted mb-3 font-medium">Você ainda não favoritou nenhum artista do acervo.</p>
+            <button onclick="switchView('artists')" class="btn btn-primary text-xs px-4 py-2 rounded-xl font-bold">
+              Explorar Artistas do Frevo
+            </button>
+          </div>
+        `}
       </div>
     `;
     return;
   }
 
-  // Visualização para Artistas e Administradores
+  // 2. ABA DE PUBLICAÇÕES SALVAS DO FEED
+  if (currentProfileTab === 'saved') {
+    const savedPosts = DB.posts.filter(p => p.is_saved);
+
+    container.innerHTML = `
+      <div class="space-y-3 pb-6">
+        <div class="flex items-center justify-between px-1">
+          <span class="text-xs font-bold text-ink">Publicações Salvas (${savedPosts.length})</span>
+          <button onclick="switchView('feed')" class="text-xs font-bold text-frevo-cyan hover:underline">Ver Feed</button>
+        </div>
+
+        ${savedPosts.length > 0 ? `
+          <div class="space-y-2.5">
+            ${savedPosts.map(post => `
+              <div class="bg-white border border-gray-200 rounded-2xl p-3 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
+                <div onclick="handleNotificationClick(null, 'post', '${post.id}')" class="flex items-center gap-3 min-w-0 cursor-pointer flex-1 mr-2">
+                  <img src="${post.image}" alt="${post.title}" class="w-12 h-12 rounded-xl object-cover flex-shrink-0" />
+                  <div class="min-w-0 flex-1">
+                    <h4 class="font-bold text-xs text-ink truncate">${post.title}</h4>
+                    <span class="text-[11px] text-muted truncate block">${post.author}</span>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1.5 flex-shrink-0">
+                  <button onclick="toggleSave('${post.id}')" class="btn btn-outline text-xs px-2.5 py-1 rounded-xl text-frevo-red hover:bg-red-50 font-bold whitespace-nowrap">
+                    Remover
+                  </button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        ` : `
+          <div class="p-8 text-center bg-white rounded-2xl border border-gray-200 shadow-sm">
+            <div class="w-12 h-12 rounded-full bg-frevo-cyan/15 text-frevo-cyan mx-auto flex items-center justify-center mb-3">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+              </svg>
+            </div>
+            <p class="text-xs text-muted mb-3 font-medium">Você ainda não salvou nenhuma publicação do feed.</p>
+            <button onclick="switchView('feed')" class="btn btn-cyan text-xs px-4 py-2 rounded-xl font-bold">
+              Ir para o Feed Cultural
+            </button>
+          </div>
+        `}
+      </div>
+    `;
+    return;
+  }
+
+  // 3. ABA DE PARTITURAS (Apenas Artistas e Administradores)
   if (currentProfileTab === 'scores') {
-    // Filtrar partituras do próprio artista se tiver ID ou exibir obras publicadas
+    if (!isArtistOrAdmin) {
+      switchProfileTab('favorites');
+      return;
+    }
+
     const artistSongs = currentUserSession.artist_id 
       ? DB.songs.filter(s => s.author_id === currentUserSession.artist_id)
       : DB.songs;
@@ -1793,34 +1962,6 @@ function renderProfileGallery() {
             <button onclick="openSubmitSongModal()" class="btn btn-primary text-xs px-3 py-1.5 rounded-xl font-bold">
               Cadastrar Minha Primeira Partitura
             </button>
-          </div>
-        `}
-      </div>
-    `;
-  } else {
-    // Aba 2: Itens Salvos do Artista/Admin
-    const savedPosts = DB.posts.filter(p => p.is_saved);
-    container.innerHTML = `
-      <div class="space-y-3 pb-6">
-        <div class="flex items-center justify-between px-1">
-          <span class="text-xs font-bold text-ink">Publicações Salvas (${savedPosts.length})</span>
-        </div>
-        ${savedPosts.length > 0 ? savedPosts.map(post => `
-          <div class="bg-white border border-gray-200 rounded-2xl p-3 flex items-center justify-between shadow-sm">
-            <div class="flex items-center gap-3 min-w-0">
-              <img src="${post.image}" alt="${post.title}" class="w-12 h-12 rounded-xl object-cover flex-shrink-0" />
-              <div class="min-w-0">
-                <h4 class="font-bold text-xs text-ink truncate">${post.title}</h4>
-                <span class="text-[11px] text-muted">${post.author}</span>
-              </div>
-            </div>
-            <button onclick="toggleSave('${post.id}')" class="btn btn-outline text-xs px-2.5 py-1 rounded-xl text-frevo-red hover:bg-red-50 font-bold whitespace-nowrap">
-              Remover
-            </button>
-          </div>
-        `).join('') : `
-          <div class="p-8 text-center bg-white rounded-2xl border border-gray-200">
-            <p class="text-xs text-muted">Nenhuma publicação salva no momento.</p>
           </div>
         `}
       </div>
@@ -2196,6 +2337,29 @@ function submitNewPost(e) {
   if (window.supabaseService && window.supabaseService.isConnected()) {
     window.supabaseService.createPost(newPost);
   }
+
+  // Notificação Cultural In-App & Push
+  const newNotif = {
+    id: `notif-${Date.now()}`,
+    type: 'post',
+    targetId: newPost.id,
+    title: 'Nova Publicação Oficial!',
+    message: `${newPost.author}: "${newPost.title}"`,
+    author: newPost.author,
+    author_avatar: newPost.avatar,
+    time_ago: 'Agora',
+    read: false
+  };
+  DB.notifications = DB.notifications || [];
+  DB.notifications.unshift(newNotif);
+  updateNotificationBadge();
+  sendCulturalPushNotification({
+    title: newNotif.title,
+    message: newNotif.message,
+    url: `/#feed?post=${newPost.id}`,
+    type: 'post',
+    targetId: newPost.id
+  });
 
   closeModal();
   renderFeed();
@@ -3643,6 +3807,29 @@ function submitNewSong(e) {
     window.supabaseService.createSong(newSong);
   }
 
+  // Notificação Cultural In-App & Push (Nova Partitura de Artista)
+  const newNotif = {
+    id: `notif-${Date.now()}`,
+    type: 'score',
+    targetId: newSong.id,
+    title: 'Nova Partitura Lançada!',
+    message: `${newSong.artist} disponibilizou a partitura de "${newSong.title}".`,
+    author: newSong.artist,
+    author_avatar: currentUserSession.avatar,
+    time_ago: 'Agora',
+    read: false
+  };
+  DB.notifications = DB.notifications || [];
+  DB.notifications.unshift(newNotif);
+  updateNotificationBadge();
+  sendCulturalPushNotification({
+    title: newNotif.title,
+    message: newNotif.message,
+    url: `/#songs?score=${newSong.id}`,
+    type: 'score',
+    targetId: newSong.id
+  });
+
   closeModal();
   renderSongs();
   renderProfileGallery();
@@ -3873,6 +4060,41 @@ document.addEventListener('DOMContentLoaded', () => {
       banner.classList.add('show');
     }
   });
+
+  updateNotificationBadge();
+
+  // Tratamento de Deep Linking de Notificações / Push (Hash e Query)
+  const handleDeepLink = () => {
+    const hash = window.location.hash || '';
+    if (hash.includes('post=')) {
+      const postId = hash.split('post=')[1]?.split('&')[0];
+      if (postId) {
+        switchView('feed');
+        setTimeout(() => {
+          const el = document.getElementById(`post-card-${postId}`);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.classList.add('highlight-pulse');
+            setTimeout(() => el.classList.remove('highlight-pulse'), 3500);
+          }
+        }, 300);
+      }
+    } else if (hash.includes('score=')) {
+      const scoreId = hash.split('score=')[1]?.split('&')[0];
+      if (scoreId) {
+        switchView('songs');
+        const song = (DB.songs || []).find(s => s.id === scoreId);
+        if (song) {
+          setTimeout(() => {
+            openScoreModal(song.title, song.artist, song.id);
+          }, 300);
+        }
+      }
+    }
+  };
+
+  handleDeepLink();
+  window.addEventListener('hashchange', handleDeepLink);
 
   const modal = document.getElementById('global-modal');
   if (modal) {
