@@ -270,6 +270,24 @@
           + Enviar
         </button>
       </div>
+
+      <!-- Barra de Busca de Partituras -->
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </div>
+        <input 
+          type="text" 
+          id="songs-search-input" 
+          oninput="handleSongsSearch(event)"
+          placeholder="Buscar partitura, compositor, título ou gênero..." 
+          class="w-full pl-10 pr-4 py-2.5 bg-gray-100/90 border border-gray-200/80 rounded-2xl text-xs text-ink placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-frevo-orange focus:bg-white transition-all shadow-sm" 
+        />
+      </div>
+
       <div class="space-y-4" id="songs-grid"></div>
     </section>
 
