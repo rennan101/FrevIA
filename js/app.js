@@ -89,8 +89,8 @@ const DB = {
       time_ago: 'HÁ 2 HORAS',
       created_at: '2026-09-16T12:00:00Z',
       comments: [
-        { user: 'mariana.passista', text: 'Estarei lá com toda a turma do passo!' },
-        { user: 'carlos_metais', text: 'Os arranjos deste ano estão impecáveis.' }
+        { id: 'c1', user: 'Mariana Silva', user_handle: 'mariana.passista', user_id: 'u_mariana', text: 'Estarei lá com toda a turma do passo!', created_at: '2026-09-16T12:30:00Z', time_ago: 'HÁ 1 HORA' },
+        { id: 'c2', user: 'Carlos Metais', user_handle: 'carlos_metais', user_id: 'u_carlos', text: 'Os arranjos deste ano estão impecáveis.', created_at: '2026-09-16T13:00:00Z', time_ago: 'HÁ 30 MIN' }
       ]
     },
     {
@@ -110,7 +110,7 @@ const DB = {
       time_ago: 'HÁ 6 HORAS',
       created_at: '2026-09-16T08:30:00Z',
       comments: [
-        { user: 'orquestra_olinda', text: 'Já baixamos e vamos ensaiar hoje à noite!' }
+        { id: 'c3', user: 'Orquestra Olinda', user_handle: 'orquestra_olinda', user_id: 'u_olinda', text: 'Já baixamos e vamos ensaiar hoje à noite!', created_at: '2026-09-16T09:15:00Z', time_ago: 'HÁ 5 HORAS' }
       ]
     },
     {
@@ -370,6 +370,7 @@ function switchTestRole(role, silent = false) {
   closeModal();
   renderArtists();
   renderFeed();
+  updateProfileUI();
   renderProfileGallery();
   renderSteps();
   renderAdminCMS();
@@ -504,32 +505,44 @@ async function handleEmailLogin(e) {
       alert('Erro no login Supabase: ' + error.message);
       return;
     }
+    const isNewProfile = !currentUserProfile.name;
     currentUserSession = {
       role: data.user.user_metadata?.role || 'user',
-      name: data.user.user_metadata?.display_name || email.split('@')[0],
-      handle: '@' + email.split('@')[0],
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      name: data.user.user_metadata?.display_name || '',
+      handle: '',
+      avatar: data.user.user_metadata?.avatar_url || data.user.user_metadata?.picture || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
       email: email,
       artist_id: null,
       favorites: []
     };
     saveCurrentSession();
+    updateProfileUI();
     closeModal();
-    alert('Login realizado com sucesso!');
+    setTimeout(() => {
+      openEditProfileModal(true);
+    }, 300);
   } else {
     // Fallback local
     currentUserSession = {
       role: email.includes('admin') ? 'admin' : email.includes('artista') ? 'artist' : 'user',
-      name: email.split('@')[0],
-      handle: '@' + email.split('@')[0],
+      name: '',
+      handle: '',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
       email: email,
       artist_id: null,
       favorites: []
     };
+    currentUserProfile.name = '';
+    currentUserProfile.handle = '';
+    currentUserProfile.bio = '';
+    currentUserProfile.email = email;
+    currentUserProfile.socialLinks = [];
     saveCurrentSession();
+    updateProfileUI();
     closeModal();
-    alert(`Conectado com sucesso!`);
+    setTimeout(() => {
+      openEditProfileModal(true);
+    }, 300);
   }
 }
 
@@ -746,19 +759,90 @@ function renderStories() {
   `).join('');
 }
 
-// Render HTML de Post do Feed com Comentários Inline e Infinite Scroll
-function renderFeedPostHtml(post) {
-  const commentsList = (post.comments || []).map(c => `
-    <div class="flex items-start gap-2 text-xs">
-      <div class="w-6 h-6 rounded-full bg-frevo-orange/20 text-frevo-orange font-bold flex items-center justify-center text-[10px] flex-shrink-0">
+function formatCommentRelativeTime(dateStr) {
+  if (!dateStr) return 'agora';
+  try {
+    const d = new Date(dateStr);
+    const diffMs = Date.now() - d.getTime();
+    const diffSecs = Math.floor(diffMs / 1000);
+    const diffMins = Math.floor(diffSecs / 60);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffSecs < 45) return 'agora';
+    if (diffMins < 60) return `há ${diffMins} min`;
+    if (diffHours < 24) return `há ${diffHours} h`;
+    if (diffDays === 1) return 'ontem';
+    if (diffDays < 7) return `há ${diffDays} dias`;
+    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+  } catch {
+    return 'recente';
+  }
+}
+
+function renderCommentItemHtml(c, postId) {
+  const currentUserId = currentUserSession.id || '';
+  const currentUserName = currentUserSession.name || '';
+  const currentUserHandle = (currentUserSession.handle || '').replace('@', '');
+  const isAdmin = currentUserSession.role === 'admin';
+
+  const isAuthor = (c.user_id && currentUserId && c.user_id === currentUserId) ||
+                   (c.user && currentUserName && c.user.toLowerCase() === currentUserName.toLowerCase()) ||
+                   (c.user_handle && currentUserHandle && c.user_handle.toLowerCase() === currentUserHandle.toLowerCase()) ||
+                   (c.user && currentUserHandle && c.user.toLowerCase() === currentUserHandle.toLowerCase());
+
+  const canEdit = isAuthor;
+  const canDelete = isAuthor || isAdmin;
+  const timeLabel = c.time_ago || formatCommentRelativeTime(c.created_at);
+
+  return `
+    <div class="flex items-start gap-2 text-xs group/comment" id="comment-item-${postId}-${c.id}">
+      <div class="w-6 h-6 rounded-full bg-frevo-orange/20 text-frevo-orange font-bold flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">
         ${(c.user || 'F').charAt(0).toUpperCase()}
       </div>
-      <div class="comment-bubble flex-1">
-        <span class="font-bold text-ink text-[11px] block">${c.user || 'Folião'}</span>
-        <span class="text-ink-soft text-[11px]">${c.text}</span>
+      <div class="comment-bubble flex-1 text-left relative">
+        <div class="flex items-center justify-between gap-1 mb-0.5">
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="font-bold text-ink text-[11px]">${c.user || 'Folião'}</span>
+            <span class="text-[9px] text-muted font-medium">${timeLabel}</span>
+          </div>
+          
+          <!-- Ações de Editar / Excluir (Disponíveis para Autor ou Admin) -->
+          ${(canEdit || canDelete) ? `
+            <div class="flex items-center gap-0.5">
+              ${canEdit ? `
+                <button type="button" onclick="editComment('${postId}', '${c.id}')" class="comment-action-btn edit" title="Editar comentário" aria-label="Editar">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                </button>
+              ` : ''}
+              ${canDelete ? `
+                <button type="button" onclick="deleteComment('${postId}', '${c.id}')" class="comment-action-btn delete" title="${isAdmin && !isAuthor ? 'Excluir comentário (Administrador)' : 'Excluir comentário'}" aria-label="Excluir">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                  </svg>
+                </button>
+              ` : ''}
+            </div>
+          ` : ''}
+        </div>
+        
+        <div id="comment-text-container-${postId}-${c.id}">
+          <span class="text-ink-soft text-[11px] leading-relaxed block">${c.text}</span>
+        </div>
       </div>
     </div>
-  `).join('');
+  `;
+}
+
+// Render HTML de Post do Feed com Comentários Inline e Infinite Scroll
+function renderFeedPostHtml(post) {
+  const commentsList = (post.comments || []).map(c => renderCommentItemHtml(c, post.id)).join('');
 
   return `
     <article class="feed-card-immersive infinite-scroll-item" id="post-card-${post.id}">
@@ -820,11 +904,11 @@ function renderFeedPostHtml(post) {
       <!-- Gaveta de Comentários Inline Abaixo do Post -->
       <div id="comments-drawer-${post.id}" class="comments-drawer space-y-3">
         <div class="flex items-center justify-between pb-1.5 border-b border-gray-100">
-          <span class="text-xs font-bold text-ink">Comentários (${(post.comments || []).length})</span>
+          <span class="text-xs font-bold text-ink" id="comments-count-${post.id}">Comentários (${(post.comments || []).length})</span>
           <button onclick="toggleCommentsDrawer('${post.id}')" class="text-[11px] text-muted hover:text-ink font-semibold">Fechar ✕</button>
         </div>
 
-        <div id="comments-list-${post.id}" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+        <div id="comments-list-${post.id}" class="space-y-2.5 max-h-56 overflow-y-auto pr-1">
           ${commentsList || `<p class="text-[11px] text-muted py-2 text-center">Seja o primeiro folião a comentar!</p>`}
         </div>
 
@@ -844,6 +928,149 @@ function renderFeedPostHtml(post) {
       </div>
     </article>
   `;
+}
+
+function updateCommentsDrawerUI(postId) {
+  const post = DB.posts.find(p => p.id === postId);
+  if (!post) return;
+
+  const countEl = document.getElementById(`comments-count-${postId}`);
+  if (countEl) countEl.innerText = `Comentários (${(post.comments || []).length})`;
+
+  const list = document.getElementById(`comments-list-${postId}`);
+  if (list) {
+    if (post.comments && post.comments.length > 0) {
+      list.innerHTML = post.comments.map(c => renderCommentItemHtml(c, postId)).join('');
+    } else {
+      list.innerHTML = `<p class="text-[11px] text-muted py-2 text-center">Seja o primeiro folião a comentar!</p>`;
+    }
+  }
+}
+
+// Submeter comentário inline diretamente no Feed
+async function submitInlineComment(event, postId) {
+  event.preventDefault();
+  if (currentUserSession.role === 'guest') {
+    alert('Crie uma conta ou faça login para comentar!');
+    openSessionModal();
+    return;
+  }
+
+  const input = document.getElementById(`inline-comment-input-${postId}`);
+  if (!input || !input.value.trim()) return;
+
+  const text = input.value.trim();
+  const post = DB.posts.find(p => p.id === postId);
+
+  if (post) {
+    if (!post.comments) post.comments = [];
+    
+    const newComment = {
+      id: 'c_' + Date.now(),
+      user_id: currentUserSession.id || null,
+      user_handle: currentUserSession.handle.replace('@', ''),
+      user: currentUserSession.name || currentUserSession.handle.replace('@', ''),
+      text: text,
+      created_at: new Date().toISOString(),
+      time_ago: 'agora'
+    };
+
+    post.comments.push(newComment);
+    input.value = '';
+    updateCommentsDrawerUI(postId);
+
+    // Persistência com Supabase
+    if (window.supabaseService && window.supabaseService.isConnected() && currentUserSession.id) {
+      const saved = await window.supabaseService.addComment(postId, currentUserSession.id, text);
+      if (saved && saved.id) {
+        newComment.id = saved.id;
+      }
+    }
+  }
+}
+
+// Editar comentário inline
+function editComment(postId, commentId) {
+  const post = DB.posts.find(p => p.id === postId);
+  if (!post) return;
+  const comment = (post.comments || []).find(c => c.id === commentId);
+  if (!comment) return;
+
+  const container = document.getElementById(`comment-text-container-${postId}-${commentId}`);
+  if (!container) return;
+
+  container.innerHTML = `
+    <form onsubmit="saveEditedComment(event, '${postId}', '${commentId}')" class="space-y-1.5 pt-1">
+      <input 
+        type="text" 
+        id="edit-comment-input-${postId}-${commentId}" 
+        value="${comment.text.replace(/"/g, '&quot;')}" 
+        required 
+        class="w-full px-2.5 py-1.5 text-xs border border-frevo-orange rounded-lg bg-white text-ink focus:outline-none" 
+      />
+      <div class="flex gap-1.5 justify-end">
+        <button type="button" onclick="cancelCommentEdit('${postId}', '${commentId}')" class="px-2 py-0.5 text-[10px] font-bold text-muted hover:text-ink">
+          Cancelar
+        </button>
+        <button type="submit" class="px-2.5 py-0.5 text-[10px] font-bold bg-frevo-orange text-white rounded-md shadow-sm">
+          Salvar
+        </button>
+      </div>
+    </form>
+  `;
+
+  const editInput = document.getElementById(`edit-comment-input-${postId}-${commentId}`);
+  if (editInput) editInput.focus();
+}
+
+// Salvar comentário editado
+async function saveEditedComment(event, postId, commentId) {
+  event.preventDefault();
+  const input = document.getElementById(`edit-comment-input-${postId}-${commentId}`);
+  if (!input || !input.value.trim()) return;
+
+  const newText = input.value.trim();
+  const post = DB.posts.find(p => p.id === postId);
+  if (!post) return;
+
+  const comment = (post.comments || []).find(c => c.id === commentId);
+  if (comment) {
+    comment.text = newText;
+    comment.time_ago = 'editado agora';
+    updateCommentsDrawerUI(postId);
+
+    if (window.supabaseService && window.supabaseService.isConnected()) {
+      window.supabaseService.updateComment(commentId, newText);
+    }
+  }
+}
+
+// Cancelar edição de comentário
+function cancelCommentEdit(postId, commentId) {
+  updateCommentsDrawerUI(postId);
+}
+
+// Excluir comentário (autor ou Administrador)
+async function deleteComment(postId, commentId) {
+  const post = DB.posts.find(p => p.id === postId);
+  if (!post) return;
+
+  const comment = (post.comments || []).find(c => c.id === commentId);
+  if (!comment) return;
+
+  const isAdmin = currentUserSession.role === 'admin';
+  const confirmMsg = isAdmin && comment.user_id !== currentUserSession.id
+    ? `Administrador: Deseja realmente excluir o comentário de "${comment.user}"?`
+    : 'Deseja excluir este comentário?';
+
+  if (confirm(confirmMsg)) {
+    post.comments = post.comments.filter(c => c.id !== commentId);
+    updateCommentsDrawerUI(postId);
+
+    if (window.supabaseService && window.supabaseService.isConnected()) {
+      window.supabaseService.deleteComment(commentId);
+    }
+  }
 }
 
 function renderFeed() {
@@ -1434,14 +1661,24 @@ function toggleMapEmbed(pointId) {
 }
 
 // ==============================================================================
-// PERFIL DO ARTISTA (PARTITURAS PRÓPRIAS & SALVOS)
+// PERFIL DO USUÁRIO & ARTISTA (PARTITURAS PRÓPRIAS OU ITENS SALVOS)
 // ==============================================================================
 let currentProfileTab = 'scores';
 
 function switchProfileTab(tabName, btnElement) {
+  const isArtistOrAdmin = currentUserSession.role === 'artist' || currentUserSession.role === 'admin';
+  if (!isArtistOrAdmin && tabName === 'scores') {
+    tabName = 'saved';
+  }
+
   currentProfileTab = tabName;
   document.querySelectorAll('.profile-tab-btn').forEach(btn => btn.classList.remove('active'));
-  if (btnElement) btnElement.classList.add('active');
+  if (btnElement) {
+    btnElement.classList.add('active');
+  } else {
+    const targetBtn = document.querySelector(`.profile-tab-btn.tab-${tabName}`);
+    if (targetBtn) targetBtn.classList.add('active');
+  }
   renderProfileGallery();
 }
 
@@ -1451,44 +1688,117 @@ function renderProfileGallery() {
 
   const isArtistOrAdmin = currentUserSession.role === 'artist' || currentUserSession.role === 'admin';
 
+  // Usuários comuns e visitantes não criam nem gerenciam partituras
+  if (!isArtistOrAdmin) {
+    const savedPosts = DB.posts.filter(p => p.is_saved);
+    const favoriteArtists = DB.artists.filter(a => (currentUserSession.favorites || []).includes(a.id));
+
+    container.innerHTML = `
+      <div class="space-y-4 pb-6">
+        <!-- Seção de Publicações Salvas -->
+        <div>
+          <div class="flex items-center justify-between px-1 mb-2">
+            <span class="text-xs font-bold text-ink">Publicações Salvas (${savedPosts.length})</span>
+          </div>
+          ${savedPosts.length > 0 ? `
+            <div class="space-y-2.5">
+              ${savedPosts.map(post => `
+                <div class="bg-white border border-gray-200 rounded-2xl p-3 flex items-center justify-between shadow-sm">
+                  <div class="flex items-center gap-3 min-w-0">
+                    <img src="${post.image}" alt="${post.title}" class="w-12 h-12 rounded-xl object-cover flex-shrink-0" />
+                    <div class="min-w-0">
+                      <h4 class="font-bold text-xs text-ink truncate">${post.title}</h4>
+                      <span class="text-[11px] text-muted">${post.author}</span>
+                    </div>
+                  </div>
+                  <button onclick="toggleSave('${post.id}')" class="btn btn-outline text-xs px-2.5 py-1 rounded-xl text-frevo-red hover:bg-red-50 font-bold whitespace-nowrap">
+                    Remover
+                  </button>
+                </div>
+              `).join('')}
+            </div>
+          ` : `
+            <div class="p-6 text-center bg-white rounded-2xl border border-gray-200 shadow-sm">
+              <p class="text-xs text-muted">Você ainda não salvou nenhuma publicação do feed.</p>
+            </div>
+          `}
+        </div>
+
+        <!-- Seção de Artistas Favoritos -->
+        <div>
+          <div class="flex items-center justify-between px-1 mb-2">
+            <span class="text-xs font-bold text-ink">Artistas Favoritados (${favoriteArtists.length})</span>
+          </div>
+          ${favoriteArtists.length > 0 ? `
+            <div class="grid grid-cols-2 gap-2">
+              ${favoriteArtists.map(artist => `
+                <div onclick="openArtistModal('${artist.name}', '${artist.avatar_url}', '${artist.cover_url}', '${artist.genre}', '${artist.bio}', '${artist.email}', '${artist.phone}', '${artist.id}')" class="bg-white border border-gray-200 rounded-2xl p-3 flex items-center gap-2.5 shadow-sm cursor-pointer hover:border-frevo-orange transition-colors">
+                  <img src="${artist.avatar_url}" alt="${artist.name}" class="w-10 h-10 rounded-full object-cover border border-gray-200" />
+                  <div class="min-w-0 flex-1">
+                    <h5 class="font-bold text-xs text-ink truncate">${artist.name}</h5>
+                    <span class="text-[10px] text-muted truncate block">${artist.genre}</span>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          ` : `
+            <div class="p-4 text-center bg-white rounded-2xl border border-gray-200 shadow-sm">
+              <p class="text-xs text-muted">Favorite artistas na aba Artistas para acompanhá-los por aqui.</p>
+            </div>
+          `}
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  // Visualização para Artistas e Administradores
   if (currentProfileTab === 'scores') {
+    // Filtrar partituras do próprio artista se tiver ID ou exibir obras publicadas
+    const artistSongs = currentUserSession.artist_id 
+      ? DB.songs.filter(s => s.author_id === currentUserSession.artist_id)
+      : DB.songs;
+
     container.innerHTML = `
       <div class="space-y-3 pb-6">
         <div class="flex items-center justify-between px-1">
-          <span class="text-xs font-bold text-ink">Partituras & Obras Publicadas (${DB.songs.length})</span>
-          ${isArtistOrAdmin ? `
-            <button onclick="openSubmitSongModal()" class="text-xs font-bold text-frevo-orange hover:underline">+ Nova Obra</button>
-          ` : ''}
+          <span class="text-xs font-bold text-ink">Minhas Obras & Partituras (${artistSongs.length})</span>
+          <button onclick="openSubmitSongModal()" class="text-xs font-bold text-frevo-orange hover:underline">+ Nova Obra</button>
         </div>
-        ${DB.songs.map(song => `
+        ${artistSongs.length > 0 ? artistSongs.map(song => `
           <div class="bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
-            <div class="space-y-0.5">
-              <div class="flex items-center gap-1.5">
+            <div class="space-y-0.5 min-w-0 pr-2">
+              <div class="flex items-center gap-1.5 flex-wrap">
                 <span class="badge bg-frevo-cyan/15 text-frevo-cyan text-[10px] font-bold">${song.genre}</span>
                 <span class="badge bg-gray-100 text-muted text-[10px] font-mono font-bold">${song.downloads_count || 120} downloads</span>
               </div>
-              <h4 class="font-bold text-xs text-ink leading-tight">${song.title}</h4>
+              <h4 class="font-bold text-xs text-ink leading-tight truncate">${song.title}</h4>
               <p class="text-[11px] text-muted line-clamp-1">${song.description}</p>
             </div>
-            <div class="flex items-center gap-1.5">
+            <div class="flex items-center gap-1.5 flex-shrink-0">
               <button onclick="openScoreModal('${song.title}', '${song.artist}', '${song.id}')" class="btn btn-cyan text-xs py-1.5 px-3 h-8 rounded-xl font-bold flex-shrink-0">
                 Baixar
               </button>
-              ${isArtistOrAdmin ? `
-                <button onclick="deleteSong('${song.id}')" class="p-1.5 text-gray-400 hover:text-frevo-red" title="Excluir">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                  </svg>
-                </button>
-              ` : ''}
+              <button onclick="deleteSong('${song.id}')" class="p-1.5 text-gray-400 hover:text-frevo-red" title="Excluir">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+              </button>
             </div>
           </div>
-        `).join('')}
+        `).join('') : `
+          <div class="p-8 text-center bg-white rounded-2xl border border-gray-200">
+            <p class="text-xs text-muted mb-2">Nenhuma partitura cadastrada ainda.</p>
+            <button onclick="openSubmitSongModal()" class="btn btn-primary text-xs px-3 py-1.5 rounded-xl font-bold">
+              Cadastrar Minha Primeira Partitura
+            </button>
+          </div>
+        `}
       </div>
     `;
   } else {
-    // Aba 2: Itens Salvos
+    // Aba 2: Itens Salvos do Artista/Admin
     const savedPosts = DB.posts.filter(p => p.is_saved);
     container.innerHTML = `
       <div class="space-y-3 pb-6">
@@ -2247,16 +2557,11 @@ function openCommentsModal(postId) {
   modalBody.innerHTML = `
     <div class="space-y-4 text-left">
       <div class="flex items-center justify-between pb-2 border-b border-gray-100">
-        <h3 class="font-display font-bold text-lg text-ink">Comentários (${post.comments.length})</h3>
+        <h3 class="font-display font-bold text-lg text-ink">Comentários (${(post.comments || []).length})</h3>
         <span class="badge bg-frevo-orange/15 text-frevo-orange text-[10px] font-bold">${post.title}</span>
       </div>
-      <div class="space-y-2.5 max-h-60 overflow-y-auto pr-1">
-        ${post.comments.length > 0 ? post.comments.map(c => `
-          <div class="p-3 bg-surface-soft rounded-2xl text-xs border border-gray-100">
-            <strong class="text-ink block mb-0.5">${c.user}</strong>
-            <span class="text-ink-soft leading-relaxed">${c.text}</span>
-          </div>
-        `).join('') : '<p class="text-xs text-muted py-4 text-center">Seja o primeiro a comentar!</p>'}
+      <div class="space-y-2.5 max-h-60 overflow-y-auto pr-1" id="modal-comments-list-${post.id}">
+        ${(post.comments && post.comments.length > 0) ? post.comments.map(c => renderCommentItemHtml(c, post.id)).join('') : '<p class="text-xs text-muted py-4 text-center">Seja o primeiro a comentar!</p>'}
       </div>
       
       ${currentUserSession.role === 'guest' ? `
@@ -2269,7 +2574,7 @@ function openCommentsModal(postId) {
         </div>
       ` : `
         <div class="flex gap-2 pt-1">
-          <input type="text" id="new-comment-input" placeholder="Adicionar comentário como ${currentUserSession.name}..." class="flex-1 px-3 py-2.5 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+          <input type="text" id="new-comment-input" placeholder="Adicionar comentário como ${currentUserSession.name || currentUserSession.handle}..." class="flex-1 px-3 py-2.5 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
           <button onclick="addComment('${post.id}')" class="btn btn-primary text-xs rounded-xl px-4 font-bold">Publicar</button>
         </div>
       `}
@@ -2279,7 +2584,7 @@ function openCommentsModal(postId) {
   modal.classList.add('open');
 }
 
-function addComment(postId) {
+async function addComment(postId) {
   if (currentUserSession.role === 'guest') {
     alert('Você precisa estar logado para comentar.');
     openSessionModal();
@@ -2289,14 +2594,31 @@ function addComment(postId) {
   const input = document.getElementById('new-comment-input');
   if (!input || !input.value.trim()) return;
 
+  const text = input.value.trim();
   const post = DB.posts.find(p => p.id === postId);
   if (post) {
-    post.comments.push({
-      user: currentUserSession.handle.replace('@', '') || currentUserSession.name,
-      text: input.value.trim()
-    });
+    if (!post.comments) post.comments = [];
+    
+    const newComment = {
+      id: 'c_' + Date.now(),
+      user_id: currentUserSession.id || null,
+      user_handle: currentUserSession.handle.replace('@', ''),
+      user: currentUserSession.name || currentUserSession.handle.replace('@', ''),
+      text: text,
+      created_at: new Date().toISOString(),
+      time_ago: 'agora'
+    };
+
+    post.comments.push(newComment);
     closeModal();
-    renderFeed();
+    updateCommentsDrawerUI(postId);
+
+    if (window.supabaseService && window.supabaseService.isConnected() && currentUserSession.id) {
+      const saved = await window.supabaseService.addComment(postId, currentUserSession.id, text);
+      if (saved && saved.id) {
+        newComment.id = saved.id;
+      }
+    }
   }
 }
 
@@ -2514,17 +2836,13 @@ function closeModal() {
 // MODAL DE EDIÇÃO DE PERFIL E CONTATO
 // ==============================================================================
 let currentUserProfile = {
-  name: 'Maestro & Fazedor de Cultura',
-  handle: '@maestro_cultural',
+  name: '',
+  handle: '',
   avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-  bio: 'Pesquisador musical e arranjador de orquestra de Frevo de Pernambuco. Preservando a memória sonora das nossas ladeiras.',
-  socialLinks: [
-    { label: 'Instagram', url: 'https://instagram.com/frevocultural' },
-    { label: 'Spotify', url: 'https://spotify.com/artist/frevocultural' },
-    { label: 'YouTube', url: 'https://youtube.com/@frevocultural' }
-  ],
-  email: 'maestro.frevo@cultura.pe.gov.br',
-  phone: '+55 (81) 99876-5432'
+  bio: '',
+  socialLinks: [],
+  email: '',
+  phone: ''
 };
 
 function updateProfileUI() {
@@ -2533,11 +2851,28 @@ function updateProfileUI() {
   const handleEl = document.getElementById('profile-display-handle');
   const bioEl = document.getElementById('profile-display-bio');
   const socialsContainer = document.getElementById('profile-display-socials');
+  const profileTabs = document.getElementById('profile-tabs');
 
-  if (avatarEl) avatarEl.src = currentUserProfile.avatar;
-  if (nameEl) nameEl.innerText = currentUserProfile.name;
-  if (handleEl) handleEl.innerText = currentUserProfile.handle;
-  if (bioEl) bioEl.innerText = currentUserProfile.bio;
+  // Sincronizar dados se o usuário estiver logado
+  if (currentUserSession.role !== 'guest') {
+    currentUserProfile.name = currentUserSession.name || currentUserProfile.name || '';
+    currentUserProfile.handle = currentUserSession.handle || currentUserProfile.handle || '';
+    currentUserProfile.avatar = currentUserSession.avatar || currentUserProfile.avatar;
+    if (currentUserSession.email) currentUserProfile.email = currentUserSession.email;
+  }
+
+  if (avatarEl) avatarEl.src = currentUserProfile.avatar || currentUserSession.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
+  if (nameEl) nameEl.innerText = currentUserProfile.name || (currentUserSession.role === 'guest' ? 'Visitante' : 'Novo Folião');
+  if (handleEl) handleEl.innerText = currentUserProfile.handle || (currentUserSession.role === 'guest' ? '@visitante' : '@foliao');
+  if (bioEl) {
+    if (currentUserProfile.bio) {
+      bioEl.innerText = currentUserProfile.bio;
+    } else {
+      bioEl.innerText = currentUserSession.role === 'guest'
+        ? 'Acesse ou crie sua conta para personalizar seu perfil, salvar itens e acompanhar artistas.'
+        : 'Toque em "Editar Perfil" para adicionar sua biografia e redes sociais!';
+    }
+  }
   
   if (socialsContainer) {
     if (currentUserProfile.socialLinks && currentUserProfile.socialLinks.length > 0) {
@@ -2548,6 +2883,19 @@ function updateProfileUI() {
       `).join('');
     } else {
       socialsContainer.innerHTML = '';
+    }
+  }
+
+  // Se for usuário comum ou visitante, ocultar a aba de partituras criadas (ele não cria partituras)
+  const isArtistOrAdmin = currentUserSession.role === 'artist' || currentUserSession.role === 'admin';
+  if (profileTabs) {
+    const scoresTabBtn = profileTabs.querySelector('.tab-scores');
+    if (scoresTabBtn) {
+      scoresTabBtn.style.display = isArtistOrAdmin ? 'inline-flex' : 'none';
+    }
+    const savedTabBtn = profileTabs.querySelector('.tab-saved');
+    if (savedTabBtn && !isArtistOrAdmin) {
+      savedTabBtn.classList.add('active');
     }
   }
 }
@@ -2719,14 +3067,16 @@ function openSettingsModal() {
 }
 
 let tempUploadedAvatar = null;
+let isFirstLoginFlow = false;
 
-function openEditProfileModal() {
+function openEditProfileModal(isFirstLogin = false) {
   if (currentUserSession.role === 'guest') {
     alert('Faça login para editar o seu perfil.');
     openSessionModal();
     return;
   }
 
+  isFirstLoginFlow = isFirstLogin;
   tempUploadedAvatar = currentUserProfile.avatar;
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
@@ -2734,12 +3084,16 @@ function openEditProfileModal() {
   modalBody.innerHTML = `
     <div class="space-y-4 text-left">
       <div class="pb-2 border-b border-gray-100 pr-10">
-        <h3 class="font-display font-bold text-lg text-ink">Editar Perfil</h3>
+        <div class="flex items-center gap-2">
+          ${isFirstLogin ? '<span class="badge bg-frevo-orange text-white text-[10px] font-bold px-2 py-0.5">Bem-vindo(a)!</span>' : ''}
+          <h3 class="font-display font-bold text-lg text-ink">${isFirstLogin ? 'Complete seu Perfil' : 'Editar Perfil'}</h3>
+        </div>
+        <p class="text-[11px] text-muted mt-0.5">${isFirstLogin ? 'Configure seu nome e foto antes de explorar o universo do Frevo.' : 'Atualize suas informações visíveis no FrevAI'}</p>
       </div>
 
       <div class="flex flex-col items-center justify-center space-y-2 py-2">
         <div class="relative">
-          <img id="edit-avatar-preview" src="${currentUserProfile.avatar}" alt="Preview" class="w-20 h-20 rounded-full object-cover border-2 border-frevo-orange shadow-md" />
+          <img id="edit-avatar-preview" src="${currentUserProfile.avatar || currentUserSession.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'}" alt="Preview" class="w-20 h-20 rounded-full object-cover border-2 border-frevo-orange shadow-md" />
           <label for="profile-avatar-file-input" class="absolute bottom-0 right-0 w-7 h-7 bg-ink text-white rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:bg-frevo-orange transition-colors" title="Carregar nova foto">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
@@ -2754,17 +3108,17 @@ function openEditProfileModal() {
       <form id="edit-profile-form" onsubmit="saveProfileChanges(event)" class="space-y-3.5">
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Nome de Exibição</label>
-          <input type="text" id="edit-name-input" value="${currentUserProfile.name}" required class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+          <input type="text" id="edit-name-input" value="${currentUserProfile.name}" placeholder="Seu nome ou apelido carnavalesco" required class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
         </div>
 
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Nome de Usuário (@)</label>
-          <input type="text" id="edit-handle-input" value="${currentUserProfile.handle}" required class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+          <input type="text" id="edit-handle-input" value="${currentUserProfile.handle}" placeholder="@seu_usuario" required class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
         </div>
 
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Mini-Biografia</label>
-          <textarea id="edit-bio-input" rows="2" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange leading-relaxed">${currentUserProfile.bio}</textarea>
+          <textarea id="edit-bio-input" rows="2" placeholder="Ex: Amante do Frevo de Rua e passista nas horas vagas!" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange leading-relaxed">${currentUserProfile.bio}</textarea>
         </div>
 
         <div>
@@ -2791,17 +3145,21 @@ function openEditProfileModal() {
         <div class="grid grid-cols-2 gap-2 pt-1">
           <div>
             <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">E-mail de Contato</label>
-            <input type="email" id="edit-email-input" value="${currentUserProfile.email}" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+            <input type="email" id="edit-email-input" value="${currentUserProfile.email}" placeholder="seu@email.com" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
           </div>
           <div>
             <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Telefone / WhatsApp</label>
-            <input type="tel" id="edit-phone-input" value="${currentUserProfile.phone}" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+            <input type="tel" id="edit-phone-input" value="${currentUserProfile.phone}" placeholder="(81) 99999-9999" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
           </div>
         </div>
 
         <div class="flex gap-2 pt-2">
-          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl">Cancelar</button>
-          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl shadow-md font-bold">Salvar Perfil</button>
+          ${isFirstLogin ? `
+            <button type="button" onclick="skipProfileAndOpenOnboarding()" class="btn btn-outline flex-1 text-xs rounded-xl">Pular por enquanto</button>
+          ` : `
+            <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl">Cancelar</button>
+          `}
+          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl shadow-md font-bold">${isFirstLogin ? 'Salvar e Continuar →' : 'Salvar Perfil'}</button>
         </div>
       </form>
     </div>
@@ -2810,6 +3168,12 @@ function openEditProfileModal() {
   modal.classList.add('open');
 }
 
+function skipProfileAndOpenOnboarding() {
+  closeModal();
+  setTimeout(() => {
+    openOnboardingModal();
+  }, 250);
+}
 function handleUserAvatarUpload(event) {
   handleAvatarFileSelect(event);
 }
@@ -2851,13 +3215,13 @@ function removeSocialLinkField(btn) {
   if (row) row.remove();
 }
 
-function saveProfileChanges(e) {
+async function saveProfileChanges(e) {
   e.preventDefault();
-  const name = document.getElementById('edit-name-input').value;
-  const handle = document.getElementById('edit-handle-input').value;
-  const bio = document.getElementById('edit-bio-input').value;
-  const email = document.getElementById('edit-email-input').value;
-  const phone = document.getElementById('edit-phone-input').value;
+  const name = document.getElementById('edit-name-input').value.trim();
+  const handle = document.getElementById('edit-handle-input').value.trim();
+  const bio = document.getElementById('edit-bio-input').value.trim();
+  const email = document.getElementById('edit-email-input').value.trim();
+  const phone = document.getElementById('edit-phone-input').value.trim();
 
   const rows = document.querySelectorAll('.social-link-row');
   const socialLinks = [];
@@ -2870,18 +3234,302 @@ function saveProfileChanges(e) {
   });
 
   currentUserProfile.name = name;
-  currentUserProfile.handle = handle.startsWith('@') ? handle : '@' + handle;
+  currentUserProfile.handle = handle ? (handle.startsWith('@') ? handle : '@' + handle) : '';
   currentUserProfile.bio = bio;
   currentUserProfile.email = email;
   currentUserProfile.phone = phone;
   currentUserProfile.socialLinks = socialLinks;
   if (tempUploadedAvatar) {
     currentUserProfile.avatar = tempUploadedAvatar;
+    currentUserSession.avatar = tempUploadedAvatar;
+  }
+  if (name) currentUserSession.name = name;
+  if (handle) currentUserSession.handle = currentUserProfile.handle;
+
+  saveCurrentSession();
+  updateProfileUI();
+
+  // Persistir no Supabase se conectado
+  if (window.supabaseService && window.supabaseService.isConnected() && currentUserSession.id) {
+    window.supabaseService.upsertProfile({
+      id: currentUserSession.id,
+      email: currentUserSession.email,
+      user_metadata: {
+        full_name: currentUserProfile.name,
+        name: currentUserProfile.name,
+        display_name: currentUserProfile.name,
+        avatar_url: currentUserProfile.avatar
+      }
+    }, {
+      display_name: currentUserProfile.name,
+      avatar_url: currentUserProfile.avatar
+    });
   }
 
-  updateProfileUI();
+  const wasFirstLogin = isFirstLoginFlow;
+  isFirstLoginFlow = false;
   closeModal();
-  alert('Perfil atualizado com sucesso!');
+
+  if (wasFirstLogin) {
+    setTimeout(() => {
+      openOnboardingModal();
+    }, 250);
+  } else {
+    alert('Perfil atualizado com sucesso!');
+  }
+}
+
+// ==============================================================================
+// ONBOARDING INTERATIVO EM CARDS (SWIPABLE / NAVEGÁVEL COM BREADCRUMBS)
+// ==============================================================================
+let currentOnboardingIndex = 0;
+const totalOnboardingSlides = 5;
+
+function openOnboardingModal() {
+  currentOnboardingIndex = 0;
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+
+  modalBody.innerHTML = `
+    <div class="text-left space-y-4">
+      <div class="flex items-center justify-between pb-2 border-b border-gray-100 pr-8">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-frevo-orange animate-pulse"></span>
+          <span class="font-display font-bold text-sm text-ink uppercase tracking-wider">Tour do FrevAI</span>
+        </div>
+        <button type="button" onclick="closeModal(); localStorage.setItem('frevai_onboarding_completed', 'true');" class="text-xs text-muted hover:text-ink font-bold">
+          Pular Tour
+        </button>
+      </div>
+
+      <!-- Carrossel de Cards -->
+      <div class="onboarding-carousel relative rounded-3xl overflow-hidden shadow-inner bg-surface-soft p-1">
+        <div id="onboarding-track" class="onboarding-track flex">
+          
+          <!-- Slide 1: Boas-vindas -->
+          <div class="onboarding-slide">
+            <div class="bg-gradient-to-br from-[#FF8A00] to-[#F0442E] p-5 rounded-2xl text-white min-h-[260px] flex flex-col justify-between shadow-lg">
+              <div>
+                <div class="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center mb-3">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 8v4l3 3"></path>
+                  </svg>
+                </div>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-white/80">Bem-vindo(a) ao FrevAI</span>
+                <h4 class="font-display font-extrabold text-xl leading-tight mt-1 text-white">O Universo do Frevo no seu Bolso</h4>
+                <p class="text-xs text-white/90 mt-2 leading-relaxed">
+                  Conecte-se com a tradição pernambucana: partituras, passos acrobáticos, rotas históricas e os grandes mestres do Frevo.
+                </p>
+              </div>
+              <div class="flex items-center gap-2 pt-3 border-t border-white/20 text-[11px] font-semibold text-white/90">
+                <span class="w-2 h-2 rounded-full bg-white"></span>
+                Patrimônio Cultural Imaterial da Humanidade
+              </div>
+            </div>
+          </div>
+
+          <!-- Slide 2: Feed & Comunidade -->
+          <div class="onboarding-slide">
+            <div class="bg-gradient-to-br from-[#7447E8] to-[#F04FA3] p-5 rounded-2xl text-white min-h-[260px] flex flex-col justify-between shadow-lg">
+              <div>
+                <div class="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center mb-3">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                  </svg>
+                </div>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-white/80">Feed & Interações</span>
+                <h4 class="font-display font-extrabold text-xl leading-tight mt-1 text-white">Comunidade e Notícias Vivas</h4>
+                <p class="text-xs text-white/90 mt-2 leading-relaxed">
+                  Curta publicações, salve seus posts favoritos e participe das conversas com a caixa de comentários instantânea abaixo de cada publicação.
+                </p>
+              </div>
+              <div class="flex items-center gap-2 pt-3 border-t border-white/20 text-[11px] font-semibold text-white/90">
+                <span class="w-2 h-2 rounded-full bg-white"></span>
+                Comente e interaja com mestres e passistas
+              </div>
+            </div>
+          </div>
+
+          <!-- Slide 3: Letras & Partituras -->
+          <div class="onboarding-slide">
+            <div class="bg-gradient-to-br from-[#00A86B] to-[#16C7D9] p-5 rounded-2xl text-white min-h-[260px] flex flex-col justify-between shadow-lg">
+              <div>
+                <div class="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center mb-3">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M9 18V5l12-2v13"></path>
+                    <circle cx="6" cy="18" r="3"></circle>
+                    <circle cx="18" cy="16" r="3"></circle>
+                  </svg>
+                </div>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-white/80">Acervo Musical</span>
+                <h4 class="font-display font-extrabold text-xl leading-tight mt-1 text-white">Partituras & Letras em PDF</h4>
+                <p class="text-xs text-white/90 mt-2 leading-relaxed">
+                  Acesse arranjos autênticos de Frevo de Rua, Canção e Bloco. Toque no botão de download para salvar a pauta musical formatada em PDF.
+                </p>
+              </div>
+              <div class="flex items-center gap-2 pt-3 border-t border-white/20 text-[11px] font-semibold text-white/90">
+                <span class="w-2 h-2 rounded-full bg-white"></span>
+                Download de partituras e letras para ensaiar
+              </div>
+            </div>
+          </div>
+
+          <!-- Slide 4: Passos & Mapa Cultural -->
+          <div class="onboarding-slide">
+            <div class="bg-gradient-to-br from-[#FFD928] to-[#FF8A00] p-5 rounded-2xl text-ink min-h-[260px] flex flex-col justify-between shadow-lg">
+              <div>
+                <div class="w-11 h-11 rounded-2xl bg-ink/10 backdrop-blur-md flex items-center justify-center mb-3 text-ink">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                </div>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-ink/70">Passos & Mapa Cultural</span>
+                <h4 class="font-display font-extrabold text-xl leading-tight mt-1 text-ink">Aprenda e Trace sua Rota</h4>
+                <p class="text-xs text-ink/90 mt-2 leading-relaxed">
+                  Aprenda passos como Ferrolho e Tesoura com guias passo a passo, e visite pontos históricos com rotas diretas no Google Maps ou Waze.
+                </p>
+              </div>
+              <div class="flex items-center gap-2 pt-3 border-t border-ink/20 text-[11px] font-semibold text-ink/80">
+                <span class="w-2 h-2 rounded-full bg-ink"></span>
+                Navegação via Waze e Google Maps integrada
+              </div>
+            </div>
+          </div>
+
+          <!-- Slide 5: Artistas & Conexão -->
+          <div class="onboarding-slide">
+            <div class="bg-gradient-to-br from-[#1E293B] to-[#0F172A] p-5 rounded-2xl text-white min-h-[260px] flex flex-col justify-between shadow-lg">
+              <div>
+                <div class="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center mb-3 text-frevo-orange">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  </svg>
+                </div>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-white/70">Tudo Pronto!</span>
+                <h4 class="font-display font-extrabold text-xl leading-tight mt-1 text-white">Viva o Frevo o Ano Inteiro</h4>
+                <p class="text-xs text-white/80 mt-2 leading-relaxed">
+                  Explore o catálogo de artistas, favorite seus mestres prediletos e mantenha a chama do carnaval de Pernambuco acesa.
+                </p>
+              </div>
+              <div class="flex items-center gap-2 pt-3 border-t border-white/20 text-[11px] font-semibold text-white/90">
+                <span class="w-2 h-2 rounded-full bg-frevo-orange"></span>
+                Experiência cultural fluida e responsiva
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Breadcrumbs em Bolinhas (Dots) -->
+      <div class="flex items-center justify-center gap-2 py-1">
+        <button onclick="goToOnboardingSlide(0)" class="onboarding-dot active" id="onb-dot-0" aria-label="Slide 1"></button>
+        <button onclick="goToOnboardingSlide(1)" class="onboarding-dot" id="onb-dot-1" aria-label="Slide 2"></button>
+        <button onclick="goToOnboardingSlide(2)" class="onboarding-dot" id="onb-dot-2" aria-label="Slide 3"></button>
+        <button onclick="goToOnboardingSlide(3)" class="onboarding-dot" id="onb-dot-3" aria-label="Slide 4"></button>
+        <button onclick="goToOnboardingSlide(4)" class="onboarding-dot" id="onb-dot-4" aria-label="Slide 5"></button>
+      </div>
+
+      <!-- Ações de Navegação -->
+      <div class="flex items-center gap-2 pt-1">
+        <button id="onb-btn-prev" onclick="onboardingPrev()" class="btn btn-outline text-xs rounded-xl px-4 py-2.5 font-bold opacity-40 cursor-not-allowed" disabled>
+          Anterior
+        </button>
+        <button id="onb-btn-next" onclick="onboardingNext()" class="btn btn-primary flex-1 text-xs rounded-xl py-2.5 font-bold shadow-md">
+          Próximo →
+        </button>
+      </div>
+    </div>
+  `;
+
+  // Adicionar suporte a gestos de arrasto touch (Swipe)
+  const track = document.getElementById('onboarding-track');
+  if (track) {
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    track.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    track.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      if (touchStartX - touchEndX > 45) {
+        onboardingNext();
+      } else if (touchEndX - touchStartX > 45) {
+        onboardingPrev();
+      }
+    }, { passive: true });
+  }
+
+  modal.classList.add('open');
+}
+
+function updateOnboardingView() {
+  const track = document.getElementById('onboarding-track');
+  if (track) {
+    track.style.transform = `translateX(-${currentOnboardingIndex * 100}%)`;
+  }
+
+  // Atualizar dots
+  for (let i = 0; i < totalOnboardingSlides; i++) {
+    const dot = document.getElementById(`onb-dot-${i}`);
+    if (dot) {
+      if (i === currentOnboardingIndex) {
+        dot.classList.add('active');
+      } else {
+        dot.classList.remove('active');
+      }
+    }
+  }
+
+  // Atualizar botões
+  const btnPrev = document.getElementById('onb-btn-prev');
+  const btnNext = document.getElementById('onb-btn-next');
+
+  if (btnPrev) {
+    if (currentOnboardingIndex === 0) {
+      btnPrev.disabled = true;
+      btnPrev.classList.add('opacity-40', 'cursor-not-allowed');
+    } else {
+      btnPrev.disabled = false;
+      btnPrev.classList.remove('opacity-40', 'cursor-not-allowed');
+    }
+  }
+
+  if (btnNext) {
+    if (currentOnboardingIndex === totalOnboardingSlides - 1) {
+      btnNext.innerText = 'Começar a Explorar 🎉';
+    } else {
+      btnNext.innerText = 'Próximo →';
+    }
+  }
+}
+
+function onboardingNext() {
+  if (currentOnboardingIndex < totalOnboardingSlides - 1) {
+    currentOnboardingIndex++;
+    updateOnboardingView();
+  } else {
+    localStorage.setItem('frevai_onboarding_completed', 'true');
+    closeModal();
+  }
+}
+
+function onboardingPrev() {
+  if (currentOnboardingIndex > 0) {
+    currentOnboardingIndex--;
+    updateOnboardingView();
+  }
+}
+
+function goToOnboardingSlide(index) {
+  if (index >= 0 && index < totalOnboardingSlides) {
+    currentOnboardingIndex = index;
+    updateOnboardingView();
+  }
 }
 
 function openContactModal() {
@@ -3159,21 +3807,41 @@ document.addEventListener('DOMContentLoaded', () => {
       if (session && session.user) {
         // Tenta obter perfil do banco ou cria se não existir
         let dbProfile = await window.supabaseService.getProfile(session.user.id);
+        const isBrandNew = !dbProfile;
         if (!dbProfile) {
           dbProfile = await window.supabaseService.upsertProfile(session.user);
         }
 
+        const googleAvatar = session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture;
+        const currentAvatar = dbProfile?.avatar_url || googleAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
+
         currentUserSession = {
           id: session.user.id,
           role: dbProfile?.role || session.user.user_metadata?.role || 'user',
-          name: dbProfile?.display_name || session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email.split('@')[0],
-          handle: '@' + (session.user.email ? session.user.email.split('@')[0] : 'foliao'),
-          avatar: dbProfile?.avatar_url || session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+          name: dbProfile?.display_name || session.user.user_metadata?.full_name || session.user.user_metadata?.name || '',
+          handle: dbProfile?.handle || (session.user.email ? '@' + session.user.email.split('@')[0] : ''),
+          avatar: currentAvatar,
           email: session.user.email,
           artist_id: null,
           favorites: []
         };
+
+        currentUserProfile.name = currentUserSession.name;
+        currentUserProfile.handle = currentUserSession.handle;
+        currentUserProfile.avatar = currentAvatar;
+        currentUserProfile.email = session.user.email;
+        if (dbProfile?.bio) currentUserProfile.bio = dbProfile.bio;
+
         saveCurrentSession();
+        updateProfileUI();
+        renderProfileGallery();
+
+        // Se o usuário acabou de entrar e o perfil está em branco ou é novo login, abrir modal de edição
+        if (event === 'SIGNED_IN' && (!currentUserProfile.name || !localStorage.getItem('frevai_onboarding_completed'))) {
+          setTimeout(() => {
+            openEditProfileModal(true);
+          }, 350);
+        }
       }
     });
   }

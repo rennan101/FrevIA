@@ -154,7 +154,7 @@ class SupabaseService {
           created_at,
           author:author_id(display_name, avatar_url),
           artist:artist_id(name, handle:slug, avatar_url),
-          comments(id, user:user_id(display_name), content, created_at),
+          comments(id, user_id, user:user_id(display_name, avatar_url), content, created_at),
           post_likes(id, user_id)
         `)
         .order('created_at', { ascending: false });
@@ -178,8 +178,13 @@ class SupabaseService {
           time_ago: this.formatDate(p.created_at),
           created_at: p.created_at,
           comments: (p.comments || []).map(c => ({
+            id: c.id,
+            user_id: c.user_id,
             user: c.user?.display_name || 'Folião',
-            text: c.content
+            avatar: c.user?.avatar_url || null,
+            text: c.content,
+            created_at: c.created_at,
+            time_ago: this.formatRelativeTime(c.created_at)
           }))
         }));
       }
@@ -197,6 +202,27 @@ class SupabaseService {
       return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).toUpperCase();
     } catch {
       return 'RECENTE';
+    }
+  }
+
+  formatRelativeTime(dateStr) {
+    if (!dateStr) return 'agora';
+    try {
+      const d = new Date(dateStr);
+      const diffMs = Date.now() - d.getTime();
+      const diffSecs = Math.floor(diffMs / 1000);
+      const diffMins = Math.floor(diffSecs / 60);
+      const diffHours = Math.floor(diffMins / 60);
+      const diffDays = Math.floor(diffHours / 24);
+
+      if (diffSecs < 45) return 'agora';
+      if (diffMins < 60) return `há ${diffMins} min`;
+      if (diffHours < 24) return `há ${diffHours} h`;
+      if (diffDays === 1) return 'ontem';
+      if (diffDays < 7) return `há ${diffDays} dias`;
+      return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+    } catch {
+      return 'recente';
     }
   }
 
@@ -253,6 +279,73 @@ class SupabaseService {
       return true;
     } catch (err) {
       console.error('[Supabase] Erro ao excluir post:', err.message);
+      return false;
+    }
+  }
+
+  // ============================================================================
+  // COMENTÁRIOS (CRUD)
+  // ============================================================================
+  async addComment(postId, userId, content) {
+    if (!this.client || !postId || !content) return null;
+    try {
+      const { data, error } = await this.client
+        .from('comments')
+        .insert([{
+          post_id: postId,
+          user_id: userId,
+          content: content,
+          status: 'visible'
+        }])
+        .select(`
+          id,
+          content,
+          created_at,
+          user:user_id(display_name, avatar_url)
+        `)
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (err) {
+      console.warn('[Supabase] Falha ao adicionar comentário:', err.message);
+      return null;
+    }
+  }
+
+  async updateComment(commentId, content) {
+    if (!this.client || !commentId || !content) return null;
+    try {
+      const { data, error } = await this.client
+        .from('comments')
+        .update({
+          content: content,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', commentId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (err) {
+      console.warn('[Supabase] Falha ao atualizar comentário:', err.message);
+      return null;
+    }
+  }
+
+  async deleteComment(commentId) {
+    if (!this.client || !commentId) return false;
+    try {
+      const { error } = await this.client
+        .from('comments')
+        .delete()
+        .eq('id', commentId);
+
+      if (error) throw error;
+      return true;
+    } catch (err) {
+      console.warn('[Supabase] Falha ao remover comentário:', err.message);
       return false;
     }
   }
