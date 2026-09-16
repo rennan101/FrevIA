@@ -90,6 +90,51 @@ class SupabaseService {
     });
   }
 
+  // Obter perfil do usuário
+  async getProfile(userId) {
+    if (!this.client || !userId) return null;
+    try {
+      const { data, error } = await this.client
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    } catch (err) {
+      console.warn('[Supabase] Falha ao carregar perfil:', err.message);
+      return null;
+    }
+  }
+
+  // Inserir ou atualizar perfil do usuário logado
+  async upsertProfile(user, extraData = {}) {
+    if (!this.client || !user) return null;
+    try {
+      const displayName = extraData.display_name || user.user_metadata?.full_name || user.user_metadata?.name || user.user_metadata?.display_name || user.email?.split('@')[0] || 'Folião';
+      const avatarUrl = extraData.avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
+      const role = extraData.role || user.user_metadata?.role || 'user';
+
+      const { data, error } = await this.client
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          display_name: displayName,
+          avatar_url: avatarUrl,
+          role: role,
+          updated_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (err) {
+      console.warn('[Supabase] Falha ao salvar perfil:', err.message);
+      return null;
+    }
+  }
+
   // ============================================================================
   // POSTS & FEED (CRUD & CRONOLOGIA)
   // ============================================================================
@@ -383,14 +428,33 @@ class SupabaseService {
     }
   }
 
-  async deleteMapPoint(id) {
-    if (!this.client) return false;
+  // ============================================================================
+  // UPLOAD DE AVATAR (STORAGE)
+  // ============================================================================
+  async uploadAvatar(file, userId) {
+    if (!this.client || !file) return null;
     try {
-      const { error } = await this.client.from('map_points').delete().eq('id', id);
+      const fileExt = file.name ? file.name.split('.').pop() : 'jpg';
+      const fileName = `${userId || 'user'}-${Date.now()}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      const { data, error } = await this.client.storage
+        .from('avatars')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
       if (error) throw error;
-      return true;
-    } catch {
-      return false;
+
+      const { data: { publicUrl } } = this.client.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (err) {
+      console.warn('[Supabase] Falha no upload do avatar:', err.message);
+      return null;
     }
   }
 }

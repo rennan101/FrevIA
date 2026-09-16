@@ -298,21 +298,28 @@ function updateSessionUI() {
   const userNameEl = document.getElementById('header-user-name');
   const cmsBtn = document.getElementById('header-cms-btn');
   const addStepBtn = document.getElementById('btn-add-step');
+  const submitSongBtn = document.getElementById('btn-submit-song');
 
   if (userNameEl) {
     if (currentUserSession.role === 'guest') {
       userNameEl.innerText = 'Entrar';
     } else {
-      userNameEl.innerText = currentUserSession.name.split(' ')[0];
+      userNameEl.innerText = (currentUserSession.name || 'Folião').split(' ')[0];
     }
   }
 
-  // Visibilidade de botões com base no papel
+  // Visibilidade estrita com base no papel do usuário
+  const isAdmin = currentUserSession.role === 'admin';
+  const isArtist = currentUserSession.role === 'artist';
+
   if (cmsBtn) {
-    cmsBtn.style.display = currentUserSession.role === 'admin' ? 'flex' : 'flex'; // Mantém acessível para testes
+    cmsBtn.style.display = isAdmin ? 'inline-flex' : 'none';
   }
   if (addStepBtn) {
-    addStepBtn.style.display = (currentUserSession.role === 'artist' || currentUserSession.role === 'admin') ? 'block' : 'none';
+    addStepBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+  }
+  if (submitSongBtn) {
+    submitSongBtn.style.display = (isAdmin || isArtist) ? 'inline-flex' : 'none';
   }
 }
 
@@ -385,11 +392,9 @@ function openSessionModal() {
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left">
-      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
-        <div>
-          <h3 class="font-display font-bold text-lg text-ink">${isGuest ? 'Acessar o FrevAI' : 'Minha Conta FrevAI'}</h3>
-          <p class="text-[11px] text-muted">${isGuest ? 'Entre para comentar e favoritar artistas' : `Logado como: ${currentUserSession.name}`}</p>
-        </div>
+      <div class="pb-2 border-b border-gray-100 pr-10">
+        <h3 class="font-display font-bold text-lg text-ink">${isGuest ? 'Acessar o FrevAI' : 'Minha Conta FrevAI'}</h3>
+        <p class="text-[11px] text-muted">${isGuest ? 'Entre para comentar e favoritar artistas' : `Logado como: ${currentUserSession.name}`}</p>
       </div>
 
       ${isGuest ? `
@@ -425,12 +430,21 @@ function openSessionModal() {
           Entrar com a Google
         </button>
       ` : `
-        <div class="p-4 bg-surface-soft rounded-2xl flex items-center gap-3 border border-gray-100">
-          <img src="${currentUserSession.avatar}" alt="${currentUserSession.name}" class="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm" />
-          <div>
-            <h4 class="font-display font-bold text-sm text-ink">${currentUserSession.name}</h4>
-            <span class="text-xs text-muted block">${currentUserSession.handle}</span>
-            <span class="text-[11px] text-ink-soft">${currentUserSession.email || 'Conta Local'}</span>
+        <div class="p-4 bg-surface-soft rounded-2xl flex items-center gap-3.5 border border-gray-100">
+          <div class="relative flex-shrink-0">
+            <img id="session-avatar-preview" src="${currentUserSession.avatar}" alt="${currentUserSession.name}" class="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm" />
+            <label for="session-avatar-file-input" class="absolute -bottom-1 -right-1 w-6 h-6 bg-ink text-white rounded-full flex items-center justify-center cursor-pointer shadow-md hover:bg-frevo-orange transition-colors" title="Alterar foto">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                <circle cx="12" cy="13" r="4"></circle>
+              </svg>
+            </label>
+            <input type="file" id="session-avatar-file-input" accept="image/*" class="hidden" onchange="handleUserAvatarUpload(event)" />
+          </div>
+          <div class="min-w-0 flex-1">
+            <h4 class="font-display font-bold text-sm text-ink truncate">${currentUserSession.name}</h4>
+            <span class="text-xs text-muted block truncate">${currentUserSession.handle}</span>
+            <span class="text-[11px] text-ink-soft block truncate">${currentUserSession.email || 'Conta Local'}</span>
           </div>
         </div>
 
@@ -526,6 +540,74 @@ function logoutSession() {
   switchTestRole('guest');
 }
 
+// Upload de foto do usuário com compressão canvas e Supabase Storage
+async function handleUserAvatarUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // Compressão em canvas para máxima leveza mobile
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = async () => {
+      const canvas = document.createElement('canvas');
+      const maxDim = 400;
+      let width = img.width;
+      let height = img.height;
+
+      if (width > height) {
+        if (width > maxDim) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        }
+      } else {
+        if (height > maxDim) {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+
+      const base64Avatar = canvas.toDataURL('image/jpeg', 0.85);
+
+      // Atualiza preview imediatamente
+      const sessionPreview = document.getElementById('session-avatar-preview');
+      if (sessionPreview) sessionPreview.src = base64Avatar;
+
+      const editPreview = document.getElementById('edit-avatar-preview');
+      if (editPreview) editPreview.src = base64Avatar;
+
+      currentUserSession.avatar = base64Avatar;
+      currentUserProfile.avatar = base64Avatar;
+      saveCurrentSession();
+      updateProfileUI();
+
+      // Upload para o Supabase Storage se conectado
+      if (window.supabaseService && window.supabaseService.isConnected()) {
+        canvas.toBlob(async (blob) => {
+          if (blob) {
+            const uploadedUrl = await window.supabaseService.uploadAvatar(blob, currentUserSession.id);
+            if (uploadedUrl) {
+              currentUserSession.avatar = uploadedUrl;
+              currentUserProfile.avatar = uploadedUrl;
+              saveCurrentSession();
+              updateProfileUI();
+              if (sessionPreview) sessionPreview.src = uploadedUrl;
+              if (editPreview) editPreview.src = uploadedUrl;
+            }
+          }
+        }, 'image/jpeg', 0.85);
+      }
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 // Modal do Sino de Notificações
 function openNotificationsModal() {
   const modal = document.getElementById('global-modal');
@@ -533,16 +615,8 @@ function openNotificationsModal() {
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left">
-      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-xl bg-frevo-orange/15 text-frevo-orange flex items-center justify-center">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-            </svg>
-          </div>
-          <h3 class="font-display font-bold text-lg text-ink">Notificações</h3>
-        </div>
+      <div class="pb-2 border-b border-gray-100 pr-10">
+        <h3 class="font-display font-bold text-lg text-ink">Notificações Culturais</h3>
       </div>
 
       <div class="space-y-2.5 max-h-64 overflow-y-auto pr-1">
@@ -584,10 +658,67 @@ function openNotificationsModal() {
 }
 
 // ==============================================================================
+// GERENCIADOR DE INFINITE SCROLL DE ALTA PERFORMANCE (MOBILE-FIRST)
+// ==============================================================================
+const InfiniteScrollManager = {
+  observer: null,
+  state: {
+    feed: { page: 1, limit: 6 },
+    artists: { page: 1, limit: 8 },
+    songs: { page: 1, limit: 8 },
+    steps: { page: 1, limit: 6 },
+    history: { page: 1, limit: 6 },
+    map: { page: 1, limit: 6 }
+  },
+
+  init() {
+    if (this.observer) this.observer.disconnect();
+    this.observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const view = entry.target.dataset.view;
+          if (view) this.loadMore(view);
+        }
+      });
+    }, {
+      rootMargin: '250px' // Dispara 250px antes do final para scroll imperceptível
+    });
+  },
+
+  observe(element) {
+    if (this.observer && element) {
+      this.observer.observe(element);
+    }
+  },
+
+  loadMore(view) {
+    const s = this.state[view];
+    if (!s) return;
+    s.page++;
+    
+    if (view === 'feed') appendMoreFeed();
+    else if (view === 'artists') appendMoreArtists();
+    else if (view === 'songs') appendMoreSongs();
+    else if (view === 'steps') appendMoreSteps();
+    else if (view === 'history') appendMoreHistory();
+    else if (view === 'map') appendMoreMap();
+  },
+
+  reset(view) {
+    if (this.state[view]) this.state[view].page = 1;
+  }
+};
+
+// ==============================================================================
 // RENDERIZADORES DO APLICATIVO
 // ==============================================================================
 
 function switchView(viewName) {
+  if (viewName === 'admin-panel' && currentUserSession.role !== 'admin') {
+    alert('Acesso restrito: Apenas administradores autorizados podem acessar o painel de gestão.');
+    viewName = 'feed';
+  }
+
   document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
   
   const targetView = document.getElementById(`view-${viewName}`);
@@ -615,12 +746,22 @@ function renderStories() {
   `).join('');
 }
 
-function renderFeed() {
-  const container = document.getElementById('feed-list');
-  if (!container) return;
+// Render HTML de Post do Feed com Comentários Inline e Infinite Scroll
+function renderFeedPostHtml(post) {
+  const commentsList = (post.comments || []).map(c => `
+    <div class="flex items-start gap-2 text-xs">
+      <div class="w-6 h-6 rounded-full bg-frevo-orange/20 text-frevo-orange font-bold flex items-center justify-center text-[10px] flex-shrink-0">
+        ${(c.user || 'F').charAt(0).toUpperCase()}
+      </div>
+      <div class="comment-bubble flex-1">
+        <span class="font-bold text-ink text-[11px] block">${c.user || 'Folião'}</span>
+        <span class="text-ink-soft text-[11px]">${c.text}</span>
+      </div>
+    </div>
+  `).join('');
 
-  container.innerHTML = DB.posts.map(post => `
-    <article class="feed-card-immersive">
+  return `
+    <article class="feed-card-immersive infinite-scroll-item" id="post-card-${post.id}">
       <div class="feed-card-media">
         <img src="${post.image}" alt="${post.title}" loading="lazy" />
 
@@ -643,7 +784,7 @@ function renderFeed() {
         <!-- Bottom Floating Actions Bar -->
         <div class="floating-actions-bar">
           <div class="flex items-center gap-2">
-            <button onclick="openCommentsModal('${post.id}')" class="floating-circle-btn" aria-label="Comentários">
+            <button onclick="toggleCommentsDrawer('${post.id}')" class="floating-circle-btn" aria-label="Comentários" title="Ver e fazer comentários">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                 <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
               </svg>
@@ -657,7 +798,7 @@ function renderFeed() {
           </div>
 
           <button onclick="toggleLike('${post.id}')" class="floating-like-btn" aria-label="Curtir">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="${post.is_liked ? '#F0442E' : '#F0442E'}" stroke="#F0442E" stroke-width="${post.is_liked ? '0' : '2'}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="${post.is_liked ? '#F0442E' : 'none'}" stroke="#F0442E" stroke-width="2">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
             </svg>
             <span class="text-xs font-bold text-ink">${post.likes}</span>
@@ -675,8 +816,133 @@ function renderFeed() {
           ${post.tags.map(t => `<span class="badge bg-[#16C7D9]/15 text-[#127F8B] text-[10px] font-bold">#${t}</span>`).join('')}
         </div>
       </div>
+
+      <!-- Gaveta de Comentários Inline Abaixo do Post -->
+      <div id="comments-drawer-${post.id}" class="comments-drawer space-y-3">
+        <div class="flex items-center justify-between pb-1.5 border-b border-gray-100">
+          <span class="text-xs font-bold text-ink">Comentários (${(post.comments || []).length})</span>
+          <button onclick="toggleCommentsDrawer('${post.id}')" class="text-[11px] text-muted hover:text-ink font-semibold">Fechar ✕</button>
+        </div>
+
+        <div id="comments-list-${post.id}" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+          ${commentsList || `<p class="text-[11px] text-muted py-2 text-center">Seja o primeiro folião a comentar!</p>`}
+        </div>
+
+        <!-- Formulário de Comentário Inline -->
+        <form onsubmit="submitInlineComment(event, '${post.id}')" class="flex gap-1.5 items-center pt-1 border-t border-gray-100">
+          <input 
+            type="text" 
+            id="inline-comment-input-${post.id}" 
+            required 
+            placeholder="${currentUserSession.role === 'guest' ? 'Faça login para comentar...' : 'Escreva um comentário folião...'}" 
+            class="flex-1 px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange transition-all" 
+          />
+          <button type="submit" class="btn btn-primary text-xs px-3 py-2 rounded-xl font-bold shadow-sm flex-shrink-0">
+            Enviar
+          </button>
+        </form>
+      </div>
     </article>
-  `).join('');
+  `;
+}
+
+function renderFeed() {
+  const container = document.getElementById('feed-list');
+  if (!container) return;
+
+  InfiniteScrollManager.reset('feed');
+  const initialPosts = DB.posts.slice(0, InfiniteScrollManager.state.feed.limit);
+  
+  container.innerHTML = `
+    <div id="feed-items-stream" class="space-y-4">
+      ${initialPosts.map(post => renderFeedPostHtml(post)).join('')}
+    </div>
+    <div id="sentinel-feed" class="infinite-scroll-sentinel" data-view="feed">
+      ${DB.posts.length > initialPosts.length ? `
+        <div class="infinite-scroll-loader">
+          <div class="infinite-spinner"></div>
+          <span>Carregando mais histórias do frevo...</span>
+        </div>
+      ` : ''}
+    </div>
+  `;
+
+  const sentinel = document.getElementById('sentinel-feed');
+  if (sentinel && DB.posts.length > initialPosts.length) {
+    InfiniteScrollManager.observe(sentinel);
+  }
+}
+
+function appendMoreFeed() {
+  const stream = document.getElementById('feed-items-stream');
+  const sentinel = document.getElementById('sentinel-feed');
+  if (!stream) return;
+
+  const { page, limit } = InfiniteScrollManager.state.feed;
+  const start = (page - 1) * limit;
+  const nextPosts = DB.posts.slice(start, start + limit);
+
+  if (nextPosts.length > 0) {
+    const html = nextPosts.map(post => renderFeedPostHtml(post)).join('');
+    stream.insertAdjacentHTML('beforeend', html);
+  }
+
+  if (start + limit >= DB.posts.length && sentinel) {
+    sentinel.innerHTML = '';
+  }
+}
+
+// Abrir e fechar gaveta de comentários inline
+function toggleCommentsDrawer(postId) {
+  const drawer = document.getElementById(`comments-drawer-${postId}`);
+  if (!drawer) return;
+  const isOpen = drawer.classList.toggle('open');
+  if (isOpen) {
+    const input = document.getElementById(`inline-comment-input-${postId}`);
+    if (input) input.focus();
+  }
+}
+
+// Submeter comentário inline diretamente no Feed
+function submitInlineComment(event, postId) {
+  event.preventDefault();
+  if (currentUserSession.role === 'guest') {
+    alert('Crie uma conta ou faça login para comentar!');
+    openSessionModal();
+    return;
+  }
+
+  const input = document.getElementById(`inline-comment-input-${postId}`);
+  if (!input || !input.value.trim()) return;
+
+  const text = input.value.trim();
+  const post = DB.posts.find(p => p.id === postId);
+
+  if (post) {
+    if (!post.comments) post.comments = [];
+    post.comments.push({
+      user: currentUserSession.name || currentUserSession.handle.replace('@', ''),
+      text: text
+    });
+
+    input.value = '';
+
+    // Atualiza a gaveta inline de comentários
+    const list = document.getElementById(`comments-list-${postId}`);
+    if (list) {
+      list.innerHTML = post.comments.map(c => `
+        <div class="flex items-start gap-2 text-xs">
+          <div class="w-6 h-6 rounded-full bg-frevo-orange/20 text-frevo-orange font-bold flex items-center justify-center text-[10px] flex-shrink-0">
+            ${(c.user || 'F').charAt(0).toUpperCase()}
+          </div>
+          <div class="comment-bubble flex-1">
+            <span class="font-bold text-ink text-[11px] block">${c.user}</span>
+            <span class="text-ink-soft text-[11px]">${c.text}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
 }
 
 function toggleLike(postId) {
@@ -684,7 +950,18 @@ function toggleLike(postId) {
   if (post) {
     post.is_liked = !post.is_liked;
     post.likes += post.is_liked ? 1 : -1;
-    renderFeed();
+    const card = document.getElementById(`post-card-${postId}`);
+    if (card) {
+      const likeBtn = card.querySelector('.floating-like-btn');
+      if (likeBtn) {
+        likeBtn.innerHTML = `
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="${post.is_liked ? '#F0442E' : 'none'}" stroke="#F0442E" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+          <span class="text-xs font-bold text-ink">${post.likes}</span>
+        `;
+      }
+    }
   }
 }
 
@@ -692,12 +969,23 @@ function toggleSave(postId) {
   const post = DB.posts.find(p => p.id === postId);
   if (post) {
     post.is_saved = !post.is_saved;
-    renderFeed();
+    const card = document.getElementById(`post-card-${postId}`);
+    if (card) {
+      const saveBtn = card.querySelector('.floating-save-btn');
+      if (saveBtn) {
+        saveBtn.classList.toggle('is-saved', post.is_saved);
+        saveBtn.innerHTML = `
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="${post.is_saved ? '#FF8A00' : 'none'}" stroke="${post.is_saved ? '#FF8A00' : 'currentColor'}" stroke-width="2.2">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+          </svg>
+        `;
+      }
+    }
     renderProfileGallery();
   }
 }
 
-// Favoritar Artista (Apenas Usuários com Conta)
+// Favoritar Artista
 function toggleFavoriteArtist(artistId) {
   if (currentUserSession.role === 'guest') {
     alert('Crie uma conta ou faça login para favoritar seus artistas preferidos no FrevAI!');
@@ -716,82 +1004,29 @@ function toggleFavoriteArtist(artistId) {
   renderArtists();
 }
 
-// Busca Global Estilo Apple Music
-function handleGlobalSearch(event) {
-  const query = event.target.value.toLowerCase().trim();
-  const resultsContainer = document.getElementById('artists-search-results-container');
-  if (!resultsContainer) return;
+function renderArtistCardHtml(artist) {
+  const isFav = currentUserSession.favorites.includes(artist.id);
+  return `
+    <div class="bg-white border border-gray-200 rounded-2xl p-4 text-center flex flex-col items-center justify-between shadow-sm hover:shadow-md transition-shadow relative infinite-scroll-item">
+      <button onclick="toggleFavoriteArtist('${artist.id}')" class="btn-fav-artist absolute top-3 right-3 ${isFav ? 'favorited' : ''}" title="Favoritar Artista">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+        </svg>
+      </button>
 
-  if (!query) {
-    resultsContainer.innerHTML = `
-      <div class="space-y-4">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-ink">Artistas em Destaque</span>
-          <span class="text-[11px] text-muted">${DB.artists.length} Cadastrados</span>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="artists-grid"></div>
+      <div class="story-ring p-1 mb-2">
+        <img src="${artist.avatar_url}" alt="${artist.name}" class="w-16 h-16 rounded-full object-cover border-2 border-white" />
       </div>
-    `;
-    renderArtists();
-    return;
-  }
-
-  const filteredArtists = DB.artists.filter(a => 
-    a.name.toLowerCase().includes(query) || 
-    a.genre.toLowerCase().includes(query) ||
-    a.bio.toLowerCase().includes(query)
-  );
-
-  const filteredSongs = DB.songs.filter(s =>
-    s.title.toLowerCase().includes(query) ||
-    s.artist.toLowerCase().includes(query) ||
-    s.genre.toLowerCase().includes(query)
-  );
-
-  resultsContainer.innerHTML = `
-    <div class="space-y-4">
       <div>
-        <h4 class="text-xs font-bold text-ink mb-2">Artistas Encontrados (${filteredArtists.length})</h4>
-        ${filteredArtists.length > 0 ? `
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            ${filteredArtists.map(artist => `
-              <div class="bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-sm">
-                <div class="flex items-center gap-3">
-                  <img src="${artist.avatar_url}" alt="${artist.name}" class="w-12 h-12 rounded-full object-cover flex-shrink-0" />
-                  <div class="min-w-0">
-                    <h4 class="font-bold text-xs text-ink truncate">${artist.name}</h4>
-                    <span class="badge bg-frevo-pink/15 text-frevo-pink text-[10px] font-bold">${artist.genre}</span>
-                  </div>
-                </div>
-                <button onclick="toggleFavoriteArtist('${artist.id}')" class="btn-fav-artist ${currentUserSession.favorites.includes(artist.id) ? 'favorited' : ''}" title="Favoritar">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                  </svg>
-                </button>
-              </div>
-            `).join('')}
-          </div>
-        ` : `<p class="text-xs text-muted">Nenhum artista com este termo.</p>`}
+        <h3 class="font-display font-bold text-sm text-ink">${artist.name}</h3>
+        <span class="text-[11px] text-muted block mb-1">${artist.handle}</span>
+        <span class="badge bg-frevo-pink/15 text-frevo-pink font-bold text-[10px]">${artist.genre}</span>
       </div>
+      <p class="text-xs text-ink-soft line-clamp-2 my-2.5 leading-relaxed">${artist.bio}</p>
 
-      <div>
-        <h4 class="text-xs font-bold text-ink mb-2">Partituras & Músicas (${filteredSongs.length})</h4>
-        ${filteredSongs.length > 0 ? `
-          <div class="space-y-2">
-            ${filteredSongs.map(song => `
-              <div class="bg-white border border-gray-200 rounded-2xl p-3.5 flex items-center justify-between shadow-sm">
-                <div>
-                  <h5 class="font-bold text-xs text-ink">${song.title}</h5>
-                  <span class="text-[11px] text-muted">${song.genre} • ${song.artist}</span>
-                </div>
-                <button onclick="openScoreModal('${song.title}', '${song.artist}', '${song.id}')" class="btn btn-cyan text-xs py-1 px-3 h-7 rounded-xl font-bold">
-                  Ver Obra
-                </button>
-              </div>
-            `).join('')}
-          </div>
-        ` : `<p class="text-xs text-muted">Nenhuma partitura correspondente.</p>`}
-      </div>
+      <button onclick="switchView('artist-panel')" class="btn btn-primary w-full text-xs h-8 rounded-xl font-bold mt-1">
+        Acessar Perfil
+      </button>
     </div>
   `;
 }
@@ -800,32 +1035,76 @@ function renderArtists() {
   const container = document.getElementById('artists-grid');
   if (!container) return;
 
-  container.innerHTML = DB.artists.map(artist => {
-    const isFav = currentUserSession.favorites.includes(artist.id);
-    return `
-      <div class="bg-white border border-gray-200 rounded-2xl p-4 text-center flex flex-col items-center justify-between shadow-sm hover:shadow-md transition-shadow relative">
-        <button onclick="toggleFavoriteArtist('${artist.id}')" class="btn-fav-artist absolute top-3 right-3 ${isFav ? 'favorited' : ''}" title="Favoritar Artista">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-          </svg>
-        </button>
+  InfiniteScrollManager.reset('artists');
+  const initialArtists = DB.artists.slice(0, InfiniteScrollManager.state.artists.limit);
 
-        <div class="story-ring p-1 mb-2">
-          <img src="${artist.avatar_url}" alt="${artist.name}" class="w-16 h-16 rounded-full object-cover border-2 border-white" />
+  container.innerHTML = `
+    <div id="artists-stream" class="grid grid-cols-1 sm:grid-cols-2 gap-3 col-span-full">
+      ${initialArtists.map(artist => renderArtistCardHtml(artist)).join('')}
+    </div>
+    <div id="sentinel-artists" class="infinite-scroll-sentinel col-span-full" data-view="artists">
+      ${DB.artists.length > initialArtists.length ? `
+        <div class="infinite-scroll-loader">
+          <div class="infinite-spinner"></div>
+          <span>Carregando mais artistas...</span>
         </div>
-        <div>
-          <h3 class="font-display font-bold text-sm text-ink">${artist.name}</h3>
-          <span class="text-[11px] text-muted block mb-1">${artist.handle}</span>
-          <span class="badge bg-frevo-pink/15 text-frevo-pink font-bold text-[10px]">${artist.genre}</span>
-        </div>
-        <p class="text-xs text-ink-soft line-clamp-2 my-2.5 leading-relaxed">${artist.bio}</p>
+      ` : ''}
+    </div>
+  `;
 
-        <button onclick="switchView('artist-panel')" class="btn btn-primary w-full text-xs h-8 rounded-xl font-bold mt-1">
-          Acessar Perfil
-        </button>
+  const sentinel = document.getElementById('sentinel-artists');
+  if (sentinel && DB.artists.length > initialArtists.length) {
+    InfiniteScrollManager.observe(sentinel);
+  }
+}
+
+function appendMoreArtists() {
+  const stream = document.getElementById('artists-stream');
+  const sentinel = document.getElementById('sentinel-artists');
+  if (!stream) return;
+
+  const { page, limit } = InfiniteScrollManager.state.artists;
+  const start = (page - 1) * limit;
+  const nextArtists = DB.artists.slice(start, start + limit);
+
+  if (nextArtists.length > 0) {
+    const html = nextArtists.map(artist => renderArtistCardHtml(artist)).join('');
+    stream.insertAdjacentHTML('beforeend', html);
+  }
+
+  if (start + limit >= DB.artists.length && sentinel) {
+    sentinel.innerHTML = '';
+  }
+}
+
+// Render HTML de Partitura / Música
+function renderSongCardHtml(song) {
+  return `
+    <div class="bg-white border border-line-strong rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-sm infinite-scroll-item">
+      <div>
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="badge bg-frevo-cyan/20 text-ink text-xs font-bold">${song.genre}</span>
+          <span class="badge bg-gray-100 text-muted text-[10px] font-mono font-bold">${song.downloads_count || 120} downloads</span>
+        </div>
+        <h3 class="font-display font-bold text-xl text-ink">${song.title}</h3>
+        <p class="text-xs font-bold text-frevo-orange mb-2">${song.artist}</p>
+        <p class="text-xs text-ink-soft mb-3 leading-relaxed">${song.description}</p>
+        
+        <div class="p-3 rounded-xl bg-surface-soft border border-line text-xs font-mono text-ink-soft whitespace-pre-line max-h-24 overflow-y-auto mb-3">
+          ${song.lyrics}
+        </div>
       </div>
-    `;
-  }).join('');
+
+      <button onclick="openScoreModal('${song.title}', '${song.artist}', '${song.id}')" class="btn btn-cyan w-full text-xs font-bold py-2.5 rounded-xl shadow-sm flex items-center justify-center gap-2">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        Baixar Partitura em PDF
+      </button>
+    </div>
+  `;
 }
 
 function renderSongs(filterQuery = '') {
@@ -851,32 +1130,46 @@ function renderSongs(filterQuery = '') {
     return;
   }
 
-  container.innerHTML = filtered.map(song => `
-    <div class="bg-white border border-line-strong rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-sm">
-      <div>
-        <div class="flex items-center justify-between mb-1.5">
-          <span class="badge bg-frevo-cyan/20 text-ink text-xs font-bold">${song.genre}</span>
-          <span class="badge bg-gray-100 text-muted text-[10px] font-mono font-bold">${song.downloads_count || 120} downloads</span>
-        </div>
-        <h3 class="font-display font-bold text-xl text-ink">${song.title}</h3>
-        <p class="text-xs font-bold text-frevo-orange mb-2">${song.artist}</p>
-        <p class="text-xs text-ink-soft mb-3 leading-relaxed">${song.description}</p>
-        
-        <div class="p-3 rounded-xl bg-surface-soft border border-line text-xs font-mono text-ink-soft whitespace-pre-line max-h-24 overflow-y-auto mb-3">
-          ${song.lyrics}
-        </div>
-      </div>
+  InfiniteScrollManager.reset('songs');
+  const initialSongs = filtered.slice(0, InfiniteScrollManager.state.songs.limit);
 
-      <button onclick="openScoreModal('${song.title}', '${song.artist}', '${song.id}')" class="btn btn-cyan w-full text-xs font-bold py-2.5 rounded-xl shadow-sm">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M9 18V5L21 3V16"></path>
-          <circle cx="6" cy="18" r="3"></circle>
-          <circle cx="18" cy="16" r="3"></circle>
-        </svg>
-        Baixar / Visualizar Partitura Digital
-      </button>
+  container.innerHTML = `
+    <div id="songs-stream" class="space-y-4">
+      ${initialSongs.map(song => renderSongCardHtml(song)).join('')}
     </div>
-  `).join('');
+    <div id="sentinel-songs" class="infinite-scroll-sentinel" data-view="songs">
+      ${filtered.length > initialSongs.length ? `
+        <div class="infinite-scroll-loader">
+          <div class="infinite-spinner"></div>
+          <span>Carregando mais partituras...</span>
+        </div>
+      ` : ''}
+    </div>
+  `;
+
+  const sentinel = document.getElementById('sentinel-songs');
+  if (sentinel && filtered.length > initialSongs.length) {
+    InfiniteScrollManager.observe(sentinel);
+  }
+}
+
+function appendMoreSongs() {
+  const stream = document.getElementById('songs-stream');
+  const sentinel = document.getElementById('sentinel-songs');
+  if (!stream) return;
+
+  const { page, limit } = InfiniteScrollManager.state.songs;
+  const start = (page - 1) * limit;
+  const nextSongs = DB.songs.slice(start, start + limit);
+
+  if (nextSongs.length > 0) {
+    const html = nextSongs.map(song => renderSongCardHtml(song)).join('');
+    stream.insertAdjacentHTML('beforeend', html);
+  }
+
+  if (start + limit >= DB.songs.length && sentinel) {
+    sentinel.innerHTML = '';
+  }
 }
 
 function handleSongsSearch(event) {
@@ -884,14 +1177,11 @@ function handleSongsSearch(event) {
   renderSongs(query);
 }
 
-function renderSteps() {
-  const container = document.getElementById('steps-grid');
-  if (!container) return;
-
-  const canManage = currentUserSession.role === 'artist' || currentUserSession.role === 'admin';
-
-  container.innerHTML = DB.steps.map(step => `
-    <div class="bg-white border border-line-strong rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-sm relative">
+// Render HTML de Passo de Frevo
+function renderStepCardHtml(step) {
+  const canManage = currentUserSession.role === 'admin';
+  return `
+    <div class="bg-white border border-line-strong rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-sm relative infinite-scroll-item">
       <div>
         <div class="flex items-center justify-between mb-1.5">
           <span class="badge bg-frevo-green/20 text-ink text-xs font-bold">${step.difficulty}</span>
@@ -914,7 +1204,53 @@ function renderSteps() {
         </div>
       ` : ''}
     </div>
-  `).join('');
+  `;
+}
+
+function renderSteps() {
+  const container = document.getElementById('steps-grid');
+  if (!container) return;
+
+  InfiniteScrollManager.reset('steps');
+  const initialSteps = DB.steps.slice(0, InfiniteScrollManager.state.steps.limit);
+
+  container.innerHTML = `
+    <div id="steps-stream" class="space-y-4">
+      ${initialSteps.map(step => renderStepCardHtml(step)).join('')}
+    </div>
+    <div id="sentinel-steps" class="infinite-scroll-sentinel" data-view="steps">
+      ${DB.steps.length > initialSteps.length ? `
+        <div class="infinite-scroll-loader">
+          <div class="infinite-spinner"></div>
+          <span>Carregando mais passos...</span>
+        </div>
+      ` : ''}
+    </div>
+  `;
+
+  const sentinel = document.getElementById('sentinel-steps');
+  if (sentinel && DB.steps.length > initialSteps.length) {
+    InfiniteScrollManager.observe(sentinel);
+  }
+}
+
+function appendMoreSteps() {
+  const stream = document.getElementById('steps-stream');
+  const sentinel = document.getElementById('sentinel-steps');
+  if (!stream) return;
+
+  const { page, limit } = InfiniteScrollManager.state.steps;
+  const start = (page - 1) * limit;
+  const nextSteps = DB.steps.slice(start, start + limit);
+
+  if (nextSteps.length > 0) {
+    const html = nextSteps.map(step => renderStepCardHtml(step)).join('');
+    stream.insertAdjacentHTML('beforeend', html);
+  }
+
+  if (start + limit >= DB.steps.length && sentinel) {
+    sentinel.innerHTML = '';
+  }
 }
 
 function deleteStep(stepId) {
@@ -925,82 +1261,9 @@ function deleteStep(stepId) {
   }
 }
 
-function openNewStepModal() {
-  if (currentUserSession.role !== 'artist' && currentUserSession.role !== 'admin') {
-    alert('Apenas Artistas e Administradores podem cadastrar passos de frevo.');
-    return;
-  }
-
-  const modal = document.getElementById('global-modal');
-  const modalBody = document.getElementById('modal-body');
-
-  modalBody.innerHTML = `
-    <div class="space-y-4 text-left">
-      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
-        <h3 class="font-display font-bold text-lg text-ink">Cadastrar Novo Passo</h3>
-      </div>
-
-      <form onsubmit="submitNewStep(event)" class="space-y-3">
-        <div>
-          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Nome do Passo</label>
-          <input type="text" id="new-step-name" required placeholder="Ex: Parafuso Invertido" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
-        </div>
-        <div>
-          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Nível de Dificuldade</label>
-          <select id="new-step-difficulty" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none">
-            <option value="Iniciante">Iniciante</option>
-            <option value="Intermediário">Intermediário</option>
-            <option value="Avançado">Avançado</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Descrição</label>
-          <input type="text" id="new-step-desc" required placeholder="Breve resumo da movimentação..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
-        </div>
-        <div>
-          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Instruções Passo a Passo</label>
-          <textarea id="new-step-instructions" rows="3" required placeholder="1. Posição inicial...\n2. Salto e giro..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none"></textarea>
-        </div>
-        <div class="flex gap-2 pt-2">
-          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl">Cancelar</button>
-          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl">Salvar Passo</button>
-        </div>
-      </form>
-    </div>
-  `;
-
-  modal.classList.add('open');
-}
-
-function submitNewStep(e) {
-  e.preventDefault();
-  const name = document.getElementById('new-step-name').value;
-  const difficulty = document.getElementById('new-step-difficulty').value;
-  const description = document.getElementById('new-step-desc').value;
-  const instructions = document.getElementById('new-step-instructions').value;
-
-  DB.steps.push({
-    id: `st-${Date.now()}`,
-    name,
-    difficulty,
-    category: 'Tradicional',
-    description,
-    instructions,
-    author_role: currentUserSession.role
-  });
-
-  closeModal();
-  renderSteps();
-  renderAdminCMS();
-  alert('Novo passo cadastrado com sucesso!');
-}
-
-function renderHistory() {
-  const container = document.getElementById('history-timeline');
-  if (!container) return;
-
-  container.innerHTML = DB.history.map(item => `
-    <div class="relative pl-6 pb-6 border-l-2 border-frevo-yellow last:border-l-0">
+function renderHistoryItemHtml(item) {
+  return `
+    <div class="relative pl-6 pb-6 border-l-2 border-frevo-yellow last:border-l-0 infinite-scroll-item">
       <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-frevo-yellow border-2 border-paper shadow-sm"></div>
       <div class="bg-white border border-line-strong rounded-2xl p-4 space-y-2 shadow-sm">
         <span class="badge bg-frevo-yellow/40 text-ink text-[11px] font-bold">${item.period}</span>
@@ -1011,15 +1274,59 @@ function renderHistory() {
         </div>
       </div>
     </div>
-  `).join('');
+  `;
 }
 
-function renderMap() {
-  const container = document.getElementById('map-points-list');
+function renderHistory() {
+  const container = document.getElementById('history-timeline');
   if (!container) return;
 
-  container.innerHTML = DB.mapPoints.map(point => `
-    <div class="map-point-card space-y-3">
+  InfiniteScrollManager.reset('history');
+  const initialHistory = DB.history.slice(0, InfiniteScrollManager.state.history.limit);
+
+  container.innerHTML = `
+    <div id="history-stream">
+      ${initialHistory.map(item => renderHistoryItemHtml(item)).join('')}
+    </div>
+    <div id="sentinel-history" class="infinite-scroll-sentinel" data-view="history">
+      ${DB.history.length > initialHistory.length ? `
+        <div class="infinite-scroll-loader">
+          <div class="infinite-spinner"></div>
+          <span>Carregando mais fatos históricos...</span>
+        </div>
+      ` : ''}
+    </div>
+  `;
+
+  const sentinel = document.getElementById('sentinel-history');
+  if (sentinel && DB.history.length > initialHistory.length) {
+    InfiniteScrollManager.observe(sentinel);
+  }
+}
+
+function appendMoreHistory() {
+  const stream = document.getElementById('history-stream');
+  const sentinel = document.getElementById('sentinel-history');
+  if (!stream) return;
+
+  const { page, limit } = InfiniteScrollManager.state.history;
+  const start = (page - 1) * limit;
+  const nextHistory = DB.history.slice(start, start + limit);
+
+  if (nextHistory.length > 0) {
+    const html = nextHistory.map(item => renderHistoryItemHtml(item)).join('');
+    stream.insertAdjacentHTML('beforeend', html);
+  }
+
+  if (start + limit >= DB.history.length && sentinel) {
+    sentinel.innerHTML = '';
+  }
+}
+
+// Render HTML de Ponto do Mapa com Google Maps e Waze
+function renderMapPointCardHtml(point) {
+  return `
+    <div class="map-point-card space-y-3 infinite-scroll-item">
       <div>
         <div class="flex items-center justify-between mb-1">
           <span class="badge bg-frevo-orange/20 text-ink text-[11px] font-bold">${point.category}</span>
@@ -1030,13 +1337,31 @@ function renderMap() {
         <p class="text-xs text-ink-soft leading-relaxed">${point.description}</p>
       </div>
 
+      <!-- Ações de Rotas e Navegação (Google Maps & Waze) -->
+      <div class="flex gap-2 pt-1">
+        <a href="https://www.google.com/maps/search/?api=1&query=${point.coords[0]},${point.coords[1]}" target="_blank" rel="noopener noreferrer" class="btn btn-gmaps text-xs flex-1 rounded-xl flex items-center justify-center gap-1.5 py-2.5 font-bold shadow-sm" title="Abrir rota no Google Maps">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+          Google Maps
+        </a>
+
+        <a href="https://waze.com/ul?ll=${point.coords[0]},${point.coords[1]}&navigate=yes" target="_blank" rel="noopener noreferrer" class="btn btn-waze text-xs flex-1 rounded-xl flex items-center justify-center gap-1.5 py-2.5 font-bold shadow-sm" title="Navegar pelo Waze">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12c0 2.85 1.2 5.42 3.12 7.24L4 22l3.05-.98C8.56 21.64 10.23 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm-3.5 11c-.83 0-1.5-.67-1.5-1.5S7.67 10 8.5 10s1.5.67 1.5 1.5S9.33 13 8.5 13zm7 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+          </svg>
+          Waze
+        </a>
+      </div>
+
       <button onclick="toggleMapEmbed('${point.id}')" class="btn btn-outline text-xs w-full rounded-xl flex items-center justify-center gap-1.5 py-2">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
           <line x1="8" y1="2" x2="8" y2="18"></line>
           <line x1="16" y1="6" x2="16" y2="22"></line>
         </svg>
-        <span id="map-toggle-text-${point.id}">Ver Mapa no App ▼</span>
+        <span id="map-toggle-text-${point.id}">Ver Mapa Embutido no App ▼</span>
       </button>
 
       <div id="map-embed-${point.id}" class="map-embed-container">
@@ -1046,18 +1371,55 @@ function renderMap() {
           src="https://maps.google.com/maps?q=${point.coords[0]},${point.coords[1]}&hl=pt-BR&z=16&output=embed"
           allowfullscreen>
         </iframe>
-        
-        <a href="https://maps.google.com/?q=${point.coords[0]},${point.coords[1]}" target="_blank" rel="noopener noreferrer" class="btn btn-primary text-xs w-full rounded-xl mt-2 flex items-center justify-center gap-1.5 py-2.5 shadow-sm">
-          <span>Abrir Rota no Google Maps</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-            <polyline points="15 3 21 3 21 9"></polyline>
-            <line x1="10" y1="14" x2="21" y2="3"></line>
-          </svg>
-        </a>
       </div>
     </div>
-  `).join('');
+  `;
+}
+
+function renderMap() {
+  const container = document.getElementById('map-points-list');
+  if (!container) return;
+
+  InfiniteScrollManager.reset('map');
+  const initialPoints = DB.mapPoints.slice(0, InfiniteScrollManager.state.map.limit);
+
+  container.innerHTML = `
+    <div id="map-stream" class="space-y-4">
+      ${initialPoints.map(point => renderMapPointCardHtml(point)).join('')}
+    </div>
+    <div id="sentinel-map" class="infinite-scroll-sentinel" data-view="map">
+      ${DB.mapPoints.length > initialPoints.length ? `
+        <div class="infinite-scroll-loader">
+          <div class="infinite-spinner"></div>
+          <span>Carregando mais pontos do mapa...</span>
+        </div>
+      ` : ''}
+    </div>
+  `;
+
+  const sentinel = document.getElementById('sentinel-map');
+  if (sentinel && DB.mapPoints.length > initialPoints.length) {
+    InfiniteScrollManager.observe(sentinel);
+  }
+}
+
+function appendMoreMap() {
+  const stream = document.getElementById('map-stream');
+  const sentinel = document.getElementById('sentinel-map');
+  if (!stream) return;
+
+  const { page, limit } = InfiniteScrollManager.state.map;
+  const start = (page - 1) * limit;
+  const nextPoints = DB.mapPoints.slice(start, start + limit);
+
+  if (nextPoints.length > 0) {
+    const html = nextPoints.map(point => renderMapPointCardHtml(point)).join('');
+    stream.insertAdjacentHTML('beforeend', html);
+  }
+
+  if (start + limit >= DB.mapPoints.length && sentinel) {
+    sentinel.innerHTML = '';
+  }
 }
 
 function toggleMapEmbed(pointId) {
@@ -1938,32 +2300,170 @@ function addComment(postId) {
   }
 }
 
+// ==============================================================================
+// GERAÇÃO E DOWNLOAD DE PARTITURAS EM PDF REAL
+// ==============================================================================
+function generateAndDownloadScorePdf(song) {
+  try {
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+      alert('Biblioteca de PDF carregando... Por favor, tente novamente em alguns instantes.');
+      return false;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
+
+    const cyan = [22, 199, 217];
+    const orange = [255, 138, 0];
+    const red = [240, 68, 46];
+    const ink = [23, 23, 23];
+    const gray = [115, 115, 115];
+
+    // Cabeçalho Oficial
+    doc.setFillColor(244, 241, 234);
+    doc.rect(0, 0, 210, 30, 'F');
+
+    // Faixa colorida Frevo
+    doc.setFillColor(...cyan);
+    doc.rect(0, 30, 70, 2.5, 'F');
+    doc.setFillColor(...orange);
+    doc.rect(70, 30, 70, 2.5, 'F');
+    doc.setFillColor(...red);
+    doc.rect(140, 30, 70, 2.5, 'F');
+
+    // Títulos Institucionais
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(...orange);
+    doc.text('FREVIA — ACERVO DIGITAL DA SALVAGUARDA DO FREVO DE PERNAMBUCO', 105, 11, { align: 'center' });
+
+    doc.setFontSize(7.5);
+    doc.setTextColor(...gray);
+    doc.text('PATRIMÔNIO CULTURAL IMATERIAL DA HUMANIDADE (UNESCO / IPHAN)', 105, 17, { align: 'center' });
+    doc.text('DOCUMENTO OFICIAL DE PARTITURA E ARRANJO', 105, 22, { align: 'center' });
+
+    // Título da Obra
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(20);
+    doc.setTextColor(...ink);
+    doc.text((song.title || 'PARTITURA DO FREVO').toUpperCase(), 105, 45, { align: 'center' });
+
+    // Dados do Compositor / Gênero
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...red);
+    doc.text(`GÊNERO: ${(song.genre || 'Frevo de Rua').toUpperCase()}`, 20, 56);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(...ink);
+    doc.text(`Compositor / Arranjador: ${song.artist || 'Maestro do Frevo'}`, 20, 63);
+    doc.text(`Andamento: Allegro Vivace (140 - 152 BPM) • Tom: Do Maior / Re Menor`, 20, 70);
+    doc.text(`Instrumentação: Orquestra de Frevo (Sopros, Metais, Palhetas e Percussão Tradicional)`, 20, 77);
+
+    // Linha divisória
+    doc.setDrawColor(220, 220, 220);
+    doc.setLineWidth(0.5);
+    doc.line(20, 82, 190, 82);
+
+    // Pauta Musical Ilustrada (Pentagramas)
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9.5);
+    doc.setTextColor(...orange);
+    doc.text('PAUTA MUSICAL / GRADE INSTRUMENTAL', 20, 90);
+
+    let startY = 96;
+    for (let staff = 0; staff < 4; staff++) {
+      const currentStaffY = startY + (staff * 18);
+      doc.setDrawColor(180, 180, 180);
+      doc.setLineWidth(0.3);
+      for (let line = 0; line < 5; line++) {
+        doc.line(20, currentStaffY + (line * 2.2), 190, currentStaffY + (line * 2.2));
+      }
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.setTextColor(...ink);
+      doc.text('𝄞', 23, currentStaffY + 6.5);
+      doc.setFontSize(7.5);
+      doc.text('2', 29, currentStaffY + 3.5);
+      doc.text('4', 29, currentStaffY + 7.5);
+
+      // Compassos
+      doc.line(65, currentStaffY, 65, currentStaffY + 8.8);
+      doc.line(105, currentStaffY, 105, currentStaffY + 8.8);
+      doc.line(145, currentStaffY, 145, currentStaffY + 8.8);
+      doc.line(190, currentStaffY, 190, currentStaffY + 8.8);
+      doc.line(190.8, currentStaffY, 190.8, currentStaffY + 8.8);
+    }
+
+    // Letra / Diretrizes
+    const lyricsY = startY + 78;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9.5);
+    doc.setTextColor(...cyan);
+    doc.text('LETRA & DIRETRIZES DE EXECUÇÃO', 20, lyricsY);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(...ink);
+    
+    const lyricsContent = song.lyrics || 
+      `1ª Estrofe:\nNo passo ligeiro o clarim já tocou,\nO frevo ferveu, o Recife acordou!\nCom sombrinha no ar e tesoura no chão,\nÉ frevo no sangue de cada folião.\n\nRefrão:\nFreva, freva sem parar!\nDe Olinda até o cais,\nNa ponta do pé ninguém cansa jamais!\n\nObservação de Arranjo: Acelerar a dinâmica nos trombones e surdos na transição do refrão.`;
+
+    const splitLyrics = doc.splitTextToSize(lyricsContent, 170);
+    doc.text(splitLyrics, 20, lyricsY + 6);
+
+    // Rodapé de Autenticidade
+    doc.setDrawColor(220, 220, 220);
+    doc.line(20, 275, 190, 275);
+
+    doc.setFontSize(7);
+    doc.setTextColor(...gray);
+    doc.text(`Documento gerado digitalmente pela plataforma FrevIA em ${new Date().toLocaleDateString('pt-BR')} • Licença de Salvaguarda Aberta`, 105, 281, { align: 'center' });
+    doc.text(`ID do Registro: FREV-${(song.id || '00000000').substring(0, 8).toUpperCase()} • Autenticado para pesquisa e execução cultural`, 105, 285, { align: 'center' });
+
+    // Download do arquivo
+    const safeTitle = (song.title || 'Partitura').replace(/[^a-zA-Z0-9_-]/g, '_');
+    doc.save(`Partitura_${safeTitle}.pdf`);
+    return true;
+  } catch (err) {
+    console.error('[PDF] Erro ao gerar partitura em PDF:', err);
+    alert('Erro ao processar PDF da partitura: ' + err.message);
+    return false;
+  }
+}
+
 function openScoreModal(title, artist, songId) {
-  const song = DB.songs.find(s => s.id === songId) || { title, artist, downloads_count: 120 };
+  const song = DB.songs.find(s => s.id === songId) || { id: songId, title, artist, genre: 'Frevo de Rua', downloads_count: 120 };
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
 
   modalBody.innerHTML = `
-    <div class="text-center space-y-4">
-      <div class="w-14 h-14 rounded-2xl bg-frevo-cyan/20 flex items-center justify-center mx-auto text-frevo-cyan">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M9 18V5L21 3V16"></path>
-          <circle cx="6" cy="18" r="3"></circle>
-          <circle cx="18" cy="16" r="3"></circle>
+    <div class="space-y-4 text-left">
+      <div class="pb-2 border-b border-gray-100 pr-10">
+        <h3 class="font-display font-bold text-lg text-ink">Partitura & Arranjo</h3>
+        <p class="text-[11px] text-muted">Acervo Digital Oficial da Salvaguarda</p>
+      </div>
+
+      <div class="p-4 bg-surface-soft border border-gray-100 rounded-2xl space-y-2 text-left">
+        <div class="flex items-center justify-between">
+          <span class="badge bg-frevo-cyan/20 text-ink text-[11px] font-bold">${song.genre}</span>
+          <span class="badge bg-gray-100 text-muted text-[10px] font-mono font-bold">${song.downloads_count || 120} downloads</span>
+        </div>
+        <h3 class="font-display font-bold text-lg text-ink leading-tight">${song.title}</h3>
+        <p class="text-xs font-bold text-frevo-orange">${song.artist}</p>
+        <p class="text-xs text-muted leading-relaxed">${song.description || 'Partitura oficial formatada com pauta musical, grade de arranjo e letra completa.'}</p>
+      </div>
+
+      <button onclick="downloadScore('${song.id}')" class="btn btn-cyan w-full text-xs rounded-xl shadow-md py-3 font-bold flex items-center justify-center gap-2">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
         </svg>
-      </div>
-      <div>
-        <h3 class="font-display font-bold text-xl text-ink">${song.title}</h3>
-        <p class="text-xs font-bold text-frevo-orange mt-0.5">${song.artist}</p>
-        <span class="badge bg-gray-100 text-muted text-[10px] font-mono mt-1 font-bold">${song.downloads_count || 120} downloads registrados</span>
-      </div>
-      <div class="p-4 bg-surface-soft border border-gray-100 rounded-2xl text-xs text-muted space-y-1.5 text-left">
-        <p class="text-ink font-semibold">Acervo Oficial Aberto para Download</p>
-        <p>Partitura digitalizada em alta resolução com arranjo para orquestra e sopros.</p>
-        <p class="font-mono text-ink text-[11px] pt-1">Formato: PDF Digital</p>
-      </div>
-      <button onclick="downloadScore('${song.id}')" class="btn btn-cyan w-full text-xs rounded-xl shadow-md py-2.5 font-bold">
-        Baixar Partitura Oficial
+        Baixar Partitura em PDF (.pdf)
       </button>
     </div>
   `;
@@ -1972,14 +2472,15 @@ function openScoreModal(title, artist, songId) {
 }
 
 function downloadScore(songId) {
-  const song = DB.songs.find(s => s.id === songId);
-  if (song) {
+  const song = DB.songs.find(s => s.id === songId) || { id: songId, title: 'Frevo da Saudade', artist: 'Maestro do Frevo', genre: 'Frevo de Rua', downloads_count: 120 };
+  
+  const success = generateAndDownloadScorePdf(song);
+  if (success !== false) {
     song.downloads_count = (song.downloads_count || 120) + 1;
     renderSongs();
     renderProfileGallery();
+    closeModal();
   }
-  alert('Download da partitura iniciado com sucesso!');
-  closeModal();
 }
 
 function openStoryModal(name, avatar, subtitle) {
@@ -1991,14 +2492,14 @@ function openStoryModal(name, avatar, subtitle) {
       <div class="story-ring p-1.5 inline-block">
         <img src="${avatar}" alt="${name}" class="w-24 h-24 rounded-full object-cover border-2 border-white" />
       </div>
-      <div>
+      <div class="pr-10">
         <h3 class="font-display font-bold text-xl text-ink">${name}</h3>
         <span class="text-xs text-muted">${subtitle}</span>
       </div>
       <div class="p-4 bg-surface-soft rounded-2xl text-xs text-ink leading-relaxed border border-gray-100">
         "O frevo é a pulsação do nosso povo nas ladeiras e no asfalto."
       </div>
-      <button onclick="closeModal()" class="btn btn-primary w-full text-xs rounded-xl">Fechar Story</button>
+      <button onclick="closeModal()" class="btn btn-primary w-full text-xs rounded-xl py-2.5">Fechar Story</button>
     </div>
   `;
   modal.classList.add('open');
@@ -2057,11 +2558,9 @@ function openAccountDropdownModal() {
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left">
-      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
-        <div>
-          <h3 class="font-display font-bold text-lg text-ink">Gerenciar Conta</h3>
-          <p class="text-xs text-frevo-orange font-bold">${currentUserProfile.handle}</p>
-        </div>
+      <div class="pb-2 border-b border-gray-100 pr-10">
+        <h3 class="font-display font-bold text-lg text-ink">Gerenciar Conta</h3>
+        <p class="text-xs text-frevo-orange font-bold">${currentUserProfile.handle}</p>
       </div>
 
       <div class="space-y-2">
@@ -2166,7 +2665,7 @@ function openSettingsModal() {
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left">
-      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+      <div class="pb-2 border-b border-gray-100 pr-10">
         <h3 class="font-display font-bold text-lg text-ink">Configurações</h3>
       </div>
 
@@ -2234,7 +2733,7 @@ function openEditProfileModal() {
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left">
-      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+      <div class="pb-2 border-b border-gray-100 pr-10">
         <h3 class="font-display font-bold text-lg text-ink">Editar Perfil</h3>
       </div>
 
@@ -2248,7 +2747,7 @@ function openEditProfileModal() {
             </svg>
           </label>
         </div>
-        <input type="file" id="profile-avatar-file-input" accept="image/*" class="hidden" onchange="handleAvatarFileSelect(event)" />
+        <input type="file" id="profile-avatar-file-input" accept="image/*" class="hidden" onchange="handleUserAvatarUpload(event)" />
         <span class="text-[11px] text-muted">Toque no ícone para enviar uma foto do seu aparelho</span>
       </div>
 
@@ -2309,6 +2808,10 @@ function openEditProfileModal() {
   `;
 
   modal.classList.add('open');
+}
+
+function handleUserAvatarUpload(event) {
+  handleAvatarFileSelect(event);
 }
 
 function handleAvatarFileSelect(event) {
@@ -2387,7 +2890,7 @@ function openContactModal() {
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left">
-      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+      <div class="pb-2 border-b border-gray-100 pr-10">
         <h3 class="font-display font-bold text-lg text-ink">Contato com o Artista</h3>
       </div>
 
@@ -2433,13 +2936,7 @@ function openSubmitSongModal() {
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left">
-      <div class="flex items-center gap-2 pb-2 border-b border-gray-100">
-        <div class="w-8 h-8 rounded-xl bg-frevo-cyan/15 text-frevo-cyan flex items-center justify-center">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-        </div>
+      <div class="pb-2 border-b border-gray-100 pr-10">
         <h3 class="font-display font-bold text-lg text-ink">Cadastrar Nova Partitura</h3>
       </div>
 
@@ -2647,19 +3144,31 @@ document.addEventListener('DOMContentLoaded', () => {
   updateSessionUI();
   checkPwaPrompt();
 
+  // Inicializar o Infinite Scroll com IntersectionObserver para otimização mobile
+  if (typeof InfiniteScrollManager !== 'undefined' && InfiniteScrollManager.init) {
+    InfiniteScrollManager.init();
+  }
+
   if (window.FREVIA_CONFIG && window.FREVIA_CONFIG.isConfigured()) {
     syncAllWithSupabase();
   }
 
   // Ouvinte de mudança de autenticação no Supabase
   if (window.supabaseService) {
-    window.supabaseService.onAuthStateChange((event, session) => {
+    window.supabaseService.onAuthStateChange(async (event, session) => {
       if (session && session.user) {
+        // Tenta obter perfil do banco ou cria se não existir
+        let dbProfile = await window.supabaseService.getProfile(session.user.id);
+        if (!dbProfile) {
+          dbProfile = await window.supabaseService.upsertProfile(session.user);
+        }
+
         currentUserSession = {
-          role: session.user.user_metadata?.role || 'user',
-          name: session.user.user_metadata?.display_name || session.user.email.split('@')[0],
-          handle: '@' + session.user.email.split('@')[0],
-          avatar: session.user.user_metadata?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+          id: session.user.id,
+          role: dbProfile?.role || session.user.user_metadata?.role || 'user',
+          name: dbProfile?.display_name || session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email.split('@')[0],
+          handle: '@' + (session.user.email ? session.user.email.split('@')[0] : 'foliao'),
+          avatar: dbProfile?.avatar_url || session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
           email: session.user.email,
           artist_id: null,
           favorites: []

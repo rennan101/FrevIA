@@ -938,6 +938,86 @@ body {
   background: #FFF9F3;
 }
 
+/* ==========================================================================
+   INLINE COMMENTS DRAWER (ABAIXO DO POST)
+   ========================================================================== */
+.comments-drawer {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease, margin-top 0.25s ease;
+  background: #FFFFFF;
+  border: 1px solid #EAEAEA;
+  border-radius: 20px;
+  margin-top: 0;
+}
+
+.comments-drawer.open {
+  max-height: 520px;
+  opacity: 1;
+  margin-top: 10px;
+  padding: 14px;
+}
+
+.comment-bubble {
+  background: #F4F1EA;
+  border-radius: 14px;
+  padding: 8px 12px;
+}
+
+/* ==========================================================================
+   INFINITE SCROLL DE ALTA PERFORMANCE (SMARTPHONES)
+   ========================================================================== */
+.infinite-scroll-item {
+  content-visibility: auto;
+  contain-intrinsic-size: 100px 320px;
+}
+
+.infinite-scroll-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.infinite-scroll-loader.hidden {
+  display: none;
+}
+
+.infinite-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255, 138, 0, 0.2);
+  border-top-color: #FF8A00;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Botões de Rotas (Google Maps & Waze) */
+.btn-waze {
+  background-color: #33CCFF;
+  color: #003366;
+}
+.btn-waze:hover {
+  background-color: #29B8E6;
+}
+
+.btn-gmaps {
+  background-color: #4285F4;
+  color: #FFFFFF;
+}
+.btn-gmaps:hover {
+  background-color: #3367D6;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;
