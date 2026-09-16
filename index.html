@@ -68,8 +68,14 @@
         </span>
       </a>
 
-      <!-- Ações do Header (Sem bússola) -->
-      <div class="flex items-center gap-2">
+      <!-- Ações do Header -->
+      <div class="flex items-center gap-1.5">
+        <!-- Status de Conexão Supabase / Configuração -->
+        <button onclick="openSupabaseConfigModal()" id="supabase-status-badge" class="px-2.5 py-1 rounded-xl text-[11px] font-bold flex items-center gap-1.5 bg-gray-100 text-muted hover:bg-emerald-50 hover:text-emerald-600 transition-colors" title="Configurações do Supabase">
+          <span class="w-2 h-2 rounded-full bg-gray-400" id="supabase-status-dot"></span>
+          <span id="supabase-status-text">Supabase</span>
+        </button>
+
         <!-- Ícone Notificações / Like -->
         <button onclick="alert('Nenhuma notificação nova no momento.')" class="p-2 text-ink hover:text-frevo-red transition-colors" aria-label="Notificações">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -507,7 +513,10 @@
     </div>
   </aside>
 
-  <!-- Scripts -->
+  <!-- Supabase CDN & Camada de Integração -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/supabase.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

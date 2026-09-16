@@ -1232,7 +1232,14 @@ function submitNewSong(e) {
   const genre = document.getElementById('song-genre-input').value;
   const lyrics = document.getElementById('song-lyrics-input').value;
 
-  if (!title) return;
+  if (window.supabaseService && window.supabaseService.isConnected()) {
+    window.supabaseService.createSong({
+      title,
+      genre,
+      lyrics,
+      description: 'Nova obra submetida para acervo e revisão.'
+    });
+  }
 
   DB.songs.unshift({
     id: `s-${Date.now()}`,
@@ -1246,9 +1253,140 @@ function submitNewSong(e) {
   });
 
   closeModal();
-  alert('Música enviada com sucesso para moderação!');
+  alert('Música enviada com sucesso para moderação e sincronizada!');
   renderSongs();
   switchView('songs');
+}
+
+// ==============================================================================
+// MODAL DE CONFIGURAÇÃO DO SUPABASE
+// ==============================================================================
+function updateSupabaseStatusUI() {
+  const badge = document.getElementById('supabase-status-badge');
+  const dot = document.getElementById('supabase-status-dot');
+  const text = document.getElementById('supabase-status-text');
+
+  if (!badge || !dot || !text) return;
+
+  const isConfigured = window.FREVIA_CONFIG && window.FREVIA_CONFIG.isConfigured();
+  if (isConfigured) {
+    dot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
+    text.innerText = 'Supabase Conectado';
+    badge.className = 'px-2.5 py-1 rounded-xl text-[11px] font-bold flex items-center gap-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors';
+  } else {
+    dot.className = 'w-2 h-2 rounded-full bg-amber-400';
+    text.innerText = 'Conectar Supabase';
+    badge.className = 'px-2.5 py-1 rounded-xl text-[11px] font-bold flex items-center gap-1.5 bg-gray-100 text-muted hover:bg-amber-50 hover:text-amber-700 transition-colors';
+  }
+}
+
+function openSupabaseConfigModal() {
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+
+  const currentUrl = (window.FREVIA_CONFIG && window.FREVIA_CONFIG.SUPABASE_URL) || '';
+  const currentKey = (window.FREVIA_CONFIG && window.FREVIA_CONFIG.SUPABASE_ANON_KEY) || '';
+
+  modalBody.innerHTML = `
+    <div class="space-y-4 text-left">
+      <div class="flex items-center gap-2 pb-2 border-b border-gray-100">
+        <div class="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-display font-bold text-lg text-ink">Conexão Supabase</h3>
+          <p class="text-[11px] text-muted">Integração direta com o banco PostgreSQL e Storage</p>
+        </div>
+      </div>
+
+      <form onsubmit="saveSupabaseConfig(event)" class="space-y-3.5">
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Project URL</label>
+          <input type="url" id="cfg-supabase-url" value="${currentUrl}" required placeholder="https://xyzcompany.supabase.co" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          <span class="text-[10px] text-muted">Encontre em: Project Settings > API > Project URL</span>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Anon Public Key</label>
+          <textarea id="cfg-supabase-key" rows="2" required placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono text-[10px]">${currentKey}</textarea>
+          <span class="text-[10px] text-muted">Encontre em: Project Settings > API > Project API keys (anon / public)</span>
+        </div>
+
+        <div class="bg-surface-soft p-3 rounded-xl border border-gray-100 text-[11px] space-y-1">
+          <p class="font-bold text-ink">Banco de Dados e Schema:</p>
+          <p class="text-muted">O script completo com as tabelas (artistas, partituras, feed, mapa) está pronto no arquivo <code>supabase/migrations/001_initial_schema.sql</code>.</p>
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl">Cancelar</button>
+          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl shadow-md bg-emerald-600 hover:bg-emerald-700">Salvar e Sincronizar</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  modal.classList.add('open');
+}
+
+function saveSupabaseConfig(e) {
+  e.preventDefault();
+  const url = document.getElementById('cfg-supabase-url').value;
+  const key = document.getElementById('cfg-supabase-key').value;
+
+  if (window.FREVIA_CONFIG) {
+    window.FREVIA_CONFIG.saveCredentials(url, key);
+  }
+  if (window.supabaseService) {
+    window.supabaseService.initClient();
+  }
+
+  updateSupabaseStatusUI();
+  closeModal();
+  syncAllWithSupabase();
+  alert('Configurações do Supabase salvas com sucesso! Sincronizando dados...');
+}
+
+// Sincronização Assíncrona com Supabase
+async function syncAllWithSupabase() {
+  if (!window.supabaseService || !window.supabaseService.isConnected()) return;
+
+  try {
+    // 1. Posts
+    const livePosts = await window.supabaseService.getPosts();
+    if (livePosts && livePosts.length > 0) {
+      DB.posts = livePosts;
+      renderFeed();
+    }
+
+    // 2. Artistas
+    const liveArtists = await window.supabaseService.getArtists();
+    if (liveArtists && liveArtists.length > 0) {
+      DB.artists = liveArtists;
+      renderArtists();
+    }
+
+    // 3. Músicas
+    const liveSongs = await window.supabaseService.getSongs();
+    if (liveSongs && liveSongs.length > 0) {
+      DB.songs = liveSongs;
+      renderSongs();
+    }
+
+    // 4. Mapa
+    const liveMap = await window.supabaseService.getMapPoints();
+    if (liveMap && liveMap.length > 0) {
+      DB.map_points = liveMap;
+      renderMap();
+    }
+
+    console.log('[Supabase] Sincronização concluída!');
+  } catch (err) {
+    console.warn('[Supabase] Erro durante sincronização:', err);
+  }
 }
 
 // Inicialização Global
@@ -1263,6 +1401,12 @@ document.addEventListener('DOMContentLoaded', () => {
   renderMap();
   updateProfileUI();
   checkPwaPrompt();
+  updateSupabaseStatusUI();
+
+  // Tentar sincronizar dados caso o Supabase já esteja configurado
+  if (window.FREVIA_CONFIG && window.FREVIA_CONFIG.isConfigured()) {
+    syncAllWithSupabase();
+  }
 
   // Eventos de clique nas abas
   document.querySelectorAll('[data-view]').forEach(el => {
@@ -1281,3 +1425,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
