@@ -303,7 +303,7 @@ function updateSessionUI() {
     if (currentUserSession.role === 'guest') {
       userNameEl.innerText = 'Entrar';
     } else {
-      userNameEl.innerText = currentUserSession.name.split(' ')[0] + ` (${currentUserSession.role === 'admin' ? 'Admin' : currentUserSession.role === 'artist' ? 'Artista' : 'Usuário'})`;
+      userNameEl.innerText = currentUserSession.name.split(' ')[0];
     }
   }
 
@@ -316,7 +316,7 @@ function updateSessionUI() {
   }
 }
 
-function switchTestRole(role) {
+function switchTestRole(role, silent = false) {
   if (role === 'admin') {
     currentUserSession = {
       role: 'admin',
@@ -366,7 +366,12 @@ function switchTestRole(role) {
   renderProfileGallery();
   renderSteps();
   renderAdminCMS();
-  alert(`Papel alterado para: ${role.toUpperCase()} com sucesso!`);
+
+  if (!silent) {
+    if (role === 'guest') {
+      alert('Conta desconectada com sucesso.');
+    }
+  }
 }
 
 // ==============================================================================
@@ -385,9 +390,6 @@ function openSessionModal() {
           <h3 class="font-display font-bold text-lg text-ink">${isGuest ? 'Acessar o FrevAI' : 'Minha Conta FrevAI'}</h3>
           <p class="text-[11px] text-muted">${isGuest ? 'Entre para comentar e favoritar artistas' : `Logado como: ${currentUserSession.name}`}</p>
         </div>
-        <span class="badge ${currentUserSession.role === 'admin' ? 'bg-frevo-red/15 text-frevo-red' : currentUserSession.role === 'artist' ? 'bg-frevo-orange/15 text-frevo-orange' : 'bg-frevo-cyan/15 text-frevo-cyan'} text-[11px] font-bold">
-          ${currentUserSession.role.toUpperCase()}
-        </span>
       </div>
 
       ${isGuest ? `
@@ -513,7 +515,7 @@ async function handleEmailLogin(e) {
     };
     saveCurrentSession();
     closeModal();
-    alert(`Conectado com sucesso como: ${currentUserSession.role.toUpperCase()}`);
+    alert(`Conectado com sucesso!`);
   }
 }
 
@@ -541,7 +543,6 @@ function openNotificationsModal() {
           </div>
           <h3 class="font-display font-bold text-lg text-ink">Notificações</h3>
         </div>
-        <span class="badge bg-frevo-orange/15 text-frevo-orange text-[10px] font-bold">3 Novas</span>
       </div>
 
       <div class="space-y-2.5 max-h-64 overflow-y-auto pr-1">
@@ -827,11 +828,30 @@ function renderArtists() {
   }).join('');
 }
 
-function renderSongs() {
+function renderSongs(filterQuery = '') {
   const container = document.getElementById('songs-grid');
   if (!container) return;
 
-  container.innerHTML = DB.songs.map(song => `
+  const query = filterQuery.toLowerCase().trim();
+  const filtered = query ? DB.songs.filter(s => 
+    s.title.toLowerCase().includes(query) ||
+    s.artist.toLowerCase().includes(query) ||
+    s.genre.toLowerCase().includes(query) ||
+    (s.description && s.description.toLowerCase().includes(query)) ||
+    (s.lyrics && s.lyrics.toLowerCase().includes(query))
+  ) : DB.songs;
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div class="p-8 text-center bg-white rounded-2xl border border-gray-100 space-y-2">
+        <p class="text-xs text-ink font-bold">Nenhuma partitura encontrada</p>
+        <p class="text-[11px] text-muted">Tente buscar por outro termo, compositor ou gênero.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = filtered.map(song => `
     <div class="bg-white border border-line-strong rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-sm">
       <div>
         <div class="flex items-center justify-between mb-1.5">
@@ -857,6 +877,11 @@ function renderSongs() {
       </button>
     </div>
   `).join('');
+}
+
+function handleSongsSearch(event) {
+  const query = event.target.value;
+  renderSongs(query);
 }
 
 function renderSteps() {
@@ -2037,7 +2062,6 @@ function openAccountDropdownModal() {
           <h3 class="font-display font-bold text-lg text-ink">Gerenciar Conta</h3>
           <p class="text-xs text-frevo-orange font-bold">${currentUserProfile.handle}</p>
         </div>
-        <span class="badge bg-frevo-orange/15 text-frevo-orange text-[10px] font-bold">Opções</span>
       </div>
 
       <div class="space-y-2">
@@ -2212,7 +2236,6 @@ function openEditProfileModal() {
     <div class="space-y-4 text-left">
       <div class="flex items-center justify-between pb-2 border-b border-gray-100">
         <h3 class="font-display font-bold text-lg text-ink">Editar Perfil</h3>
-        <span class="badge bg-frevo-orange/15 text-frevo-orange text-[10px] font-bold">Artista</span>
       </div>
 
       <div class="flex flex-col items-center justify-center space-y-2 py-2">
@@ -2366,7 +2389,6 @@ function openContactModal() {
     <div class="space-y-4 text-left">
       <div class="flex items-center justify-between pb-2 border-b border-gray-100">
         <h3 class="font-display font-bold text-lg text-ink">Contato com o Artista</h3>
-        <span class="badge bg-frevo-orange/15 text-frevo-orange text-[10px] font-bold">Oficial</span>
       </div>
 
       <div class="space-y-3">
