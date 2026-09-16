@@ -1,0 +1,839 @@
+:root {
+  --frevo-cyan: #16C7D9;
+  --frevo-green: #39D98A;
+  --frevo-yellow: #FFD928;
+  --frevo-orange: #FF8A00;
+  --frevo-red: #F0442E;
+  --frevo-pink: #F04FA3;
+  --frevo-purple: #7447E8;
+
+  --ink: #171717;
+  --ink-soft: #4A4A4A;
+  --paper: #FAFAFA;
+  --surface: #FFFFFF;
+  --surface-soft: #F4F1EA;
+  --line: #EFEFEF;
+  --line-strong: #DBDBDB;
+  --muted: #737373;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
+  --shadow-floating: 0 12px 32px rgba(0, 0, 0, 0.1);
+  --shadow-sticker: 0 4px 14px rgba(0, 0, 0, 0.12);
+
+  --font-display: 'Bricolage Grotesque', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #F8F9FA;
+  color: var(--ink);
+  line-height: 1.4;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* Frevo Gradient */
+.gradient-frevo {
+  background: linear-gradient(135deg, #16C7D9 0%, #39D98A 30%, #FFD928 55%, #FF8A00 75%, #F0442E 100%);
+}
+
+.gradient-story {
+  background: linear-gradient(45deg, #FF8A00, #F04FA3, #7447E8, #16C7D9);
+}
+
+/* Stories Bar */
+.stories-container {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding: 12px 16px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.stories-container::-webkit-scrollbar {
+  display: none;
+}
+
+.story-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.story-ring {
+  padding: 2.5px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #FF8A00, #F04FA3, #16C7D9, #39D98A);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease;
+}
+
+.story-item:hover .story-ring {
+  transform: scale(1.05);
+}
+
+.story-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid #FFFFFF;
+  object-fit: cover;
+  background-color: var(--surface-soft);
+}
+
+.story-label {
+  font-size: 0.6875rem;
+  color: var(--ink);
+  font-weight: 600;
+  max-width: 68px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ==========================================================================
+   NOVO DESIGN DO FEED (REFERÊNCIA IMERSIVA)
+   ========================================================================== */
+.feed-card-immersive {
+  position: relative;
+  width: 100%;
+  border-radius: 28px;
+  overflow: hidden;
+  background-color: #121212;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  margin-bottom: 24px;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+}
+
+.feed-card-immersive:hover {
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12);
+}
+
+.feed-card-media {
+  width: 100%;
+  aspect-ratio: 4 / 4.3;
+  position: relative;
+  overflow: hidden;
+  display: block;
+}
+
+.feed-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.feed-card-immersive:hover .feed-card-media img {
+  transform: scale(1.02);
+}
+
+/* Pill de Autor Superior Flutuante */
+.floating-author-pill {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background: rgba(30, 30, 30, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  padding: 4px 14px 4px 5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #FFFFFF;
+  z-index: 10;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.floating-author-pill:hover {
+  background: rgba(20, 20, 20, 0.65);
+  transform: translateY(-1px);
+}
+
+.floating-author-pill img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.floating-author-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.floating-author-info .name {
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #FFFFFF;
+}
+
+.floating-author-info .sub {
+  font-size: 0.625rem;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.1;
+}
+
+/* Botão Flutuante Superior de Salvar */
+.floating-save-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #171717;
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transition: transform 0.15s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.floating-save-btn:hover {
+  background: #FFFFFF;
+  transform: scale(1.08);
+}
+
+.floating-save-btn:active {
+  transform: scale(0.92);
+}
+
+/* Barra de Ações Inferior Flutuante */
+.floating-actions-bar {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.floating-actions-bar > * {
+  pointer-events: auto;
+}
+
+.floating-circle-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #171717;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  transition: transform 0.15s ease, background-color 0.2s ease;
+}
+
+.floating-circle-btn:hover {
+  background: #FFFFFF;
+  transform: scale(1.08);
+}
+
+.floating-circle-btn:active {
+  transform: scale(0.92);
+}
+
+.floating-like-btn {
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  transition: transform 0.15s ease, background-color 0.2s ease;
+}
+
+.floating-like-btn:hover {
+  background: #FFFFFF;
+  transform: scale(1.05);
+}
+
+.floating-like-btn:active {
+  transform: scale(0.92);
+}
+
+/* Descrição e Legenda do Card */
+.feed-card-caption-container {
+  background: #FFFFFF;
+  padding: 14px 18px 16px;
+  border-bottom-left-radius: 28px;
+  border-bottom-right-radius: 28px;
+  border: 1px solid #EDEDED;
+  border-top: none;
+}
+
+/* ==========================================================================
+   NOVO DESIGN DO PERFIL (REFERÊNCIA COM AVATAR CENTRAL E MURAL ASSIMÉTRICO)
+   ========================================================================== */
+.profile-stats-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 10px 0 18px;
+}
+
+.profile-stat-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 70px;
+}
+
+.profile-stat-number {
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: #171717;
+  line-height: 1.2;
+}
+
+.profile-stat-label {
+  font-size: 0.6875rem;
+  color: #737373;
+  font-weight: 500;
+}
+
+.profile-avatar-center {
+  padding: 3.5px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FF8A00, #F04FA3, #7447E8, #16C7D9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+}
+
+.profile-avatar-center img {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #FFFFFF;
+}
+
+.profile-action-btn-gray {
+  background-color: #F1F3F5;
+  color: #171717;
+  font-weight: 700;
+  border-radius: 14px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8125rem;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.profile-action-btn-gray:hover {
+  background-color: #E9ECEF;
+}
+
+.profile-action-btn-gray:active {
+  transform: scale(0.98);
+}
+
+.profile-action-btn-black {
+  background-color: #141416;
+  color: #FFFFFF;
+  font-weight: 700;
+  border-radius: 14px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8125rem;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.profile-action-btn-black:hover {
+  background-color: #232328;
+}
+
+.profile-action-btn-black:active {
+  transform: scale(0.98);
+}
+
+/* Abas de Navegação do Perfil */
+.profile-tab-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 12px 0 16px;
+  border-top: 1px solid #F0F0F0;
+  margin-top: 16px;
+}
+
+.profile-tab-btn {
+  background: none;
+  border: none;
+  color: #A0A0A0;
+  cursor: pointer;
+  padding: 6px 12px;
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+.profile-tab-btn.active {
+  color: #171717;
+}
+
+.profile-tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 2.5px;
+  background-color: #171717;
+  border-radius: 999px;
+}
+
+/* Galeria Assimétrica (Mural / Masonry / Staggered) */
+.profile-asymmetric-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding-bottom: 24px;
+}
+
+.profile-grid-item {
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+  background-color: #EDEDED;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.profile-grid-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.profile-grid-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.profile-grid-item.tall {
+  grid-row: span 2;
+  height: 280px;
+}
+
+.profile-grid-item.regular {
+  height: 140px;
+}
+
+.profile-grid-item.square {
+  height: 160px;
+}
+
+/* ==========================================================================
+   CARDS ESTILO APPLE MUSIC / EXPLORAR O FREVO (VIBRANTES)
+   ========================================================================== */
+.music-category-card {
+  position: relative;
+  width: 100%;
+  border-radius: 24px;
+  padding: 24px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 140px;
+  color: #FFFFFF;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.music-category-card:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.18);
+}
+
+.music-category-card:active {
+  transform: scale(0.98);
+}
+
+.music-card-bg-map {
+  background: linear-gradient(135deg, #FF8A00 0%, #F0442E 60%, #7447E8 100%);
+}
+
+.music-card-bg-steps {
+  background: linear-gradient(135deg, #16C7D9 0%, #39D98A 50%, #0E8E72 100%);
+}
+
+.music-card-bg-history {
+  background: linear-gradient(135deg, #FFD928 0%, #FF8A00 50%, #D8315B 100%);
+}
+
+.music-card-icon-pill {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+/* Botão Voltar Padronizado */
+.btn-back-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.05);
+  border: none;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.btn-back-header:hover {
+  background: rgba(0, 0, 0, 0.1);
+  transform: translateX(-2px);
+}
+
+.btn-back-header:active {
+  transform: scale(0.95);
+}
+
+/* Botões do Design System */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  min-height: 38px;
+  padding: 8px 16px;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  font-size: 0.8125rem;
+  transition: all 0.15s ease;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background-color: var(--frevo-orange);
+  color: #FFFFFF;
+}
+
+.btn-primary:hover {
+  background-color: #e67c00;
+}
+
+.btn-cyan {
+  background-color: var(--frevo-cyan);
+  color: #FFFFFF;
+}
+
+.btn-green {
+  background-color: var(--frevo-green);
+  color: var(--ink);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  color: var(--ink);
+}
+
+.btn-outline:hover {
+  background: var(--surface-soft);
+}
+
+.btn-destructive {
+  background-color: var(--frevo-red);
+  color: #FFFFFF;
+}
+
+/* Chips & Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+/* Views Navigation */
+.view-section {
+  display: none;
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+.view-section.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Bottom Nav Mobile (Minimalista / Apple Style) */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  height: 58px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #8E8E93;
+  cursor: pointer;
+  background: none;
+  border: none;
+  min-height: 48px;
+  width: 100%;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.nav-item.active {
+  color: #171717;
+}
+
+.nav-item.active svg {
+  stroke-width: 2.2px;
+}
+
+.nav-item.active svg path[fill="none"] {
+  fill: currentColor;
+  fill-opacity: 0.15;
+}
+
+.nav-item.active svg.sombrinha-icon path:first-child {
+  fill: currentColor;
+  fill-opacity: 0.25;
+}
+
+.profile-tab-btn.active svg {
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+/* Modal Padronizado de Alto Padrão */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  padding: 16px;
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-content {
+  background: #FFFFFF;
+  border-radius: 28px;
+  max-width: 480px;
+  width: 100%;
+  max-height: 88vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  transform: scale(0.92) translateY(12px);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  scrollbar-width: thin;
+}
+
+.modal-overlay.open .modal-content {
+  transform: scale(1) translateY(0);
+}
+
+/* PWA Banner Flutuante de Instalação */
+.pwa-install-banner {
+  position: fixed;
+  bottom: 74px;
+  left: 16px;
+  right: 16px;
+  max-width: 420px;
+  margin: 0 auto;
+  background: rgba(23, 23, 23, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 22px;
+  padding: 14px 16px;
+  color: #FFFFFF;
+  z-index: 990;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transform: translateY(150%);
+  opacity: 0;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+  pointer-events: none;
+}
+
+.pwa-install-banner.show {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Container de Mapa Embutido Expansível */
+.map-point-card {
+  background: #FFFFFF;
+  border: 1px solid #EAEAEA;
+  border-radius: 24px;
+  padding: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.map-point-card:hover {
+  border-color: #D8D8D8;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.map-embed-container {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  border-radius: 18px;
+  transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, margin-top 0.3s ease;
+  margin-top: 0;
+}
+
+.map-embed-container.open {
+  max-height: 320px;
+  opacity: 1;
+  margin-top: 14px;
+}
+
+.map-embed-container iframe {
+  width: 100%;
+  height: 220px;
+  border: 0;
+  border-radius: 18px;
+  display: block;
+}
+
+/* Upload de Imagem Preview */
+.avatar-upload-dropzone {
+  border: 2px dashed #DBDBDB;
+  border-radius: 20px;
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  background: #FAFAFA;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.avatar-upload-dropzone:hover {
+  border-color: #FF8A00;
+  background: #FFF9F3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
