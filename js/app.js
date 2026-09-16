@@ -463,7 +463,14 @@ function openSessionModal() {
 
 async function loginWithGoogle() {
   if (window.supabaseService && window.supabaseService.isConnected()) {
-    await window.supabaseService.signInWithGoogle();
+    try {
+      const { data, error } = await window.supabaseService.signInWithGoogle();
+      if (error) {
+        alert('Erro ao conectar com o Google: ' + error.message + '\n\nCertifique-se de habilitar o provedor Google no painel do Supabase (Authentication -> Providers -> Google).');
+      }
+    } catch (err) {
+      alert('Falha na comunicação com o Google OAuth: ' + err.message);
+    }
   } else {
     // Simulação caso as chaves não estejam online
     switchTestRole('user');
@@ -2137,7 +2144,6 @@ function openSettingsModal() {
     <div class="space-y-4 text-left">
       <div class="flex items-center justify-between pb-2 border-b border-gray-100">
         <h3 class="font-display font-bold text-lg text-ink">Configurações</h3>
-        <span class="badge bg-gray-100 text-ink text-[10px] font-bold">Geral</span>
       </div>
 
       <div class="space-y-2.5">
