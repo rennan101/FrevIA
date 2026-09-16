@@ -13,7 +13,7 @@ class SupabaseService {
     if (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase) {
       try {
         this.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        console.log('[Supabase] Cliente conectado com sucesso ao projeto FrevIA!');
+        console.log('[Supabase] Cliente conectado com sucesso ao projeto FrevAI!');
       } catch (err) {
         console.error('[Supabase] Erro ao inicializar cliente:', err);
       }
@@ -165,7 +165,7 @@ class SupabaseService {
           title: s.title,
           artist: s.artist?.name || 'Maestro Anônimo',
           genre: s.genre || 'Frevo de Rua',
-          description: s.description || 'Partitura disponível no acervo oficial do FrevIA.',
+          description: s.description || 'Partitura disponível no acervo oficial do FrevAI.',
           lyrics: s.lyrics || '',
           score_file: s.score_path || 'partitura-oficial.pdf',
           status: s.status || 'published'
@@ -188,7 +188,7 @@ class SupabaseService {
           slug: (songData.title || 'song').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now(),
           genre: songData.genre || 'Frevo de Rua',
           lyrics: songData.lyrics,
-          description: songData.description || 'Submetida pelo acervo digital do FrevIA',
+          description: songData.description || 'Submetida pelo acervo digital do FrevAI',
           status: 'pending_review'
         }])
         .select();

@@ -106,7 +106,7 @@ const DB = {
       location: 'Bomba do Hemetério, Recife',
       type: 'music',
       title: 'Nova Partitura: "Passo da Fervura"',
-      content: 'Disponibilizamos a partitura completa com arranjo para saxofones e trompetes no acervo aberto do FrevIA! Músicos e orquestras de todo o Brasil já podem baixar gratuitamente.',
+      content: 'Disponibilizamos a partitura completa com arranjo para saxofones e trompetes no acervo aberto do FrevAI! Músicos e orquestras de todo o Brasil já podem baixar gratuitamente.',
       tags: ['FrevoDeRua', 'PartiturasAbertas', 'Arranjos'],
       likes: 589,
       is_liked: true,
@@ -1030,7 +1030,7 @@ function openPwaInstructionsModal() {
       </div>
 
       <div>
-        <h3 class="font-display font-bold text-xl text-ink">Adicionar FrevIA à Tela Inicial</h3>
+        <h3 class="font-display font-bold text-xl text-ink">Adicionar FrevAI à Tela Inicial</h3>
         <p class="text-xs text-muted mt-1">Tenha a melhor experiência com acesso instantâneo em tela cheia.</p>
       </div>
 
@@ -1051,7 +1051,7 @@ function openPwaInstructionsModal() {
           <ol class="list-decimal list-inside space-y-1 text-ink-soft">
             <li>Toque nos <strong>três pontos (⋮)</strong> no canto superior do navegador.</li>
             <li>Selecione <strong>"Instalar aplicativo"</strong> ou <strong>"Adicionar à tela inicial"</strong>.</li>
-            <li>Confirme para ter o ícone do FrevIA no seu dispositivo!</li>
+            <li>Confirme para ter o ícone do FrevAI no seu dispositivo!</li>
           </ol>
         </div>
       `}

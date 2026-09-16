@@ -1,8 +1,8 @@
 {
-  "name": "frevia",
+  "name": "frevai",
   "version": "1.0.0",
   "private": true,
-  "description": "FrevIA - Plataforma Cultural do Frevo de Pernambuco",
+  "description": "FrevAI - Plataforma Cultural do Frevo de Pernambuco",
   "scripts": {
     "dev": "npx -y serve . -l 3000",
     "start": "npx -y serve . -l 3000"
@@ -14,6 +14,6 @@
     "supabase",
     "pwa"
   ],
-  "author": "FrevIA Team",
+  "author": "FrevAI Team",
   "license": "MIT"
 }
