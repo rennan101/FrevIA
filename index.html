@@ -5,6 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>FrevAI — A Rede Social Cultural do Frevo</title>
   
+  <!-- Metadados de PWA e Mobile (iOS & Android) -->
+  <meta name="theme-color" content="#FF8A00" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="FrevAI" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="application-name" content="FrevAI" />
+
+  <!-- Manifest PWA -->
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Favicon para Navegadores Web (Abas) -->
+  <link rel="icon" type="image/svg+xml" href="assets/icons/icon.svg" />
+  <link rel="icon" type="image/png" sizes="48x48" href="assets/icons/favicon-48x48.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/icons/favicon-16x16.png" />
+
+  <!-- Ícones para Área de Trabalho / Tela de Início do iOS (Apple Touch Icon) -->
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png" />
+  <link rel="apple-touch-icon" sizes="192x192" href="assets/icons/icon-192x192.png" />
+  <link rel="apple-touch-icon" sizes="512x512" href="assets/icons/icon-512x512.png" />
+
   <!-- Fontes do Google: Bricolage Grotesque & Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -108,13 +131,6 @@
 
     <!-- 1. VIEW PRINCIPAL: FEED (HOME COM CARDS IMERSIVOS) -->
     <section id="view-feed" class="view-section active max-w-md mx-auto px-3">
-      <!-- Stories Bar -->
-      <div class="bg-white rounded-2xl mb-4 overflow-hidden border border-gray-100 shadow-sm">
-        <div id="stories-list" class="stories-container">
-          <!-- Renderizado via JS -->
-        </div>
-      </div>
-
       <!-- Feed Posts Stream (Cards Arredondados Imersivos) -->
       <div id="feed-list" class="space-y-4">
         <!-- Renderizado via JS -->
@@ -185,7 +201,7 @@
       </div>
     </section>
 
-    <!-- 3. VIEW: ARTISTAS & BUSCA (ESTILO APPLE MUSIC) -->
+    <!-- 3. VIEW: ARTISTAS (ESTILO APPLE MUSIC COM STORIES E BUSCA) -->
     <section id="view-artists" class="view-section max-w-md mx-auto px-4 py-3 space-y-4">
       <div class="pb-2 border-b border-gray-200 flex items-center justify-between">
         <div class="flex items-center gap-2">
@@ -195,7 +211,18 @@
             </svg>
             Voltar
           </button>
-          <h2 class="font-display font-extrabold text-xl text-ink">Artistas & Acervo</h2>
+          <h2 class="font-display font-extrabold text-xl text-ink">Artistas</h2>
+        </div>
+      </div>
+
+      <!-- Sessão de Artistas em Destaque (Stories Bar Acima da Busca) -->
+      <div class="bg-white rounded-2xl p-3 overflow-hidden border border-gray-100 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-display font-bold text-xs text-ink uppercase tracking-wider">Artistas em Destaque</h3>
+          <span class="text-[10px] font-bold text-frevo-orange">Em Alta</span>
+        </div>
+        <div id="stories-list" class="stories-container !p-0">
+          <!-- Renderizado via JS -->
         </div>
       </div>
 
@@ -219,7 +246,7 @@
       <!-- Grid de Resultados e Artistas -->
       <div class="space-y-4" id="artists-search-results-container">
         <div>
-          <h3 class="text-xs font-bold text-muted uppercase tracking-wider mb-2">Mestres & Agremiações em Destaque</h3>
+          <h3 class="text-xs font-bold text-muted uppercase tracking-wider mb-2">Mestres & Agremiações</h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="artists-grid"></div>
         </div>
       </div>
@@ -314,14 +341,9 @@
             </div>
           </div>
           
+          <!-- Top Right: Botão de Configurações (Engrenagem) -->
           <div class="flex items-center gap-1.5">
-            <button onclick="openEditProfileModal()" class="p-2 text-ink hover:text-frevo-orange transition-colors" title="Editar Perfil" aria-label="Editar Perfil">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-              </svg>
-            </button>
-            <button onclick="openRoleSettingsModal()" class="p-2 text-ink hover:text-frevo-cyan transition-colors" title="Alternar Papel de Acesso" aria-label="Acesso">
+            <button onclick="openSettingsModal()" class="p-2 text-ink hover:text-frevo-orange transition-colors rounded-xl bg-gray-100 hover:bg-gray-200" title="Configurações" aria-label="Configurações">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="3"></circle>
                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
@@ -332,7 +354,15 @@
 
         <div class="mt-3">
           <h2 id="profile-display-name" class="font-display font-extrabold text-xl text-ink leading-tight">Maestro & Fazedor de Cultura</h2>
-          <p id="profile-display-handle" class="text-xs font-bold text-frevo-orange mt-0.5">@maestro_cultural</p>
+          
+          <!-- Handle com Setinha Dropdown para Gerenciamento de Conta -->
+          <button onclick="openAccountDropdownModal()" class="inline-flex items-center gap-1.5 text-xs font-bold text-frevo-orange hover:text-frevo-red transition-colors mt-0.5 group">
+            <span id="profile-display-handle">@maestro_cultural</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="transition-transform group-hover:translate-y-0.5">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+
           <p id="profile-display-bio" class="text-xs text-ink-soft leading-relaxed mt-2">
             Pesquisador musical e arranjador de orquestra de Frevo de Pernambuco. Preservando a memória sonora das nossas ladeiras.
           </p>
@@ -340,13 +370,15 @@
 
         <div id="profile-display-socials" class="flex flex-wrap gap-1.5 mt-3"></div>
 
-        <button onclick="openContactModal()" class="btn btn-outline text-xs w-full rounded-2xl mt-4 font-bold flex items-center justify-center gap-2 py-2.5 shadow-sm">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-            <polyline points="22,6 12,13 2,6"></polyline>
-          </svg>
-          Contato Direto
-        </button>
+        <!-- Botões de Ação do Perfil Lado a Lado (Editar Perfil & Contato Direto sem ícone e msg) -->
+        <div class="grid grid-cols-2 gap-2 mt-4">
+          <button onclick="openEditProfileModal()" class="btn btn-primary text-xs rounded-2xl font-bold py-2.5 shadow-sm">
+            Editar Perfil
+          </button>
+          <button onclick="openContactModal()" class="btn btn-outline text-xs rounded-2xl font-bold py-2.5 shadow-sm">
+            Contato Direto
+          </button>
+        </div>
       </div>
 
       <!-- Profile Content Tab Bar (Apenas 2 Abas: Partituras & Salvos com Cores Distintas) -->

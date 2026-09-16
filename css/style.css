@@ -735,8 +735,8 @@ body {
 }
 
 .nav-item.active svg.sombrinha-icon path:first-child {
-  fill: currentColor;
-  fill-opacity: 0.25;
+  fill: none;
+  stroke: currentColor;
 }
 
 .profile-tab-btn.active svg {

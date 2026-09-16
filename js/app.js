@@ -2019,6 +2019,176 @@ function updateProfileUI() {
   }
 }
 
+function openAccountDropdownModal() {
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+
+  modalBody.innerHTML = `
+    <div class="space-y-4 text-left">
+      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+        <div>
+          <h3 class="font-display font-bold text-lg text-ink">Gerenciar Conta</h3>
+          <p class="text-xs text-frevo-orange font-bold">${currentUserProfile.handle}</p>
+        </div>
+        <span class="badge bg-frevo-orange/15 text-frevo-orange text-[10px] font-bold">Opções</span>
+      </div>
+
+      <div class="space-y-2">
+        <!-- 1. Trocar de Conta -->
+        <button onclick="closeModal(); openSessionModal();" class="w-full p-3 rounded-2xl bg-surface-soft hover:bg-gray-100 border border-gray-100 flex items-center justify-between transition-colors">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-frevo-cyan/15 text-frevo-cyan flex items-center justify-center">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+            </div>
+            <div class="text-left">
+              <h4 class="font-bold text-xs text-ink">Trocar de Conta</h4>
+              <p class="text-[11px] text-muted">Acessar com outro e-mail ou alternar usuário</p>
+            </div>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-gray-400">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+
+        <!-- 2. Sair da Conta -->
+        <button onclick="logoutSession(); closeModal();" class="w-full p-3 rounded-2xl bg-surface-soft hover:bg-gray-100 border border-gray-100 flex items-center justify-between transition-colors">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-gray-200 text-ink-soft flex items-center justify-center">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+            </div>
+            <div class="text-left">
+              <h4 class="font-bold text-xs text-ink">Sair da Conta</h4>
+              <p class="text-[11px] text-muted">Encerrar sessão com segurança</p>
+            </div>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-gray-400">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+
+        <!-- 3. Deletar Conta -->
+        <button onclick="confirmDeleteAccount()" class="w-full p-3 rounded-2xl bg-red-50 hover:bg-red-100 border border-red-100 flex items-center justify-between transition-colors">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-frevo-red/15 text-frevo-red flex items-center justify-center">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                <line x1="10" y1="11" x2="10" y2="17"></line>
+                <line x1="14" y1="11" x2="14" y2="17"></line>
+              </svg>
+            </div>
+            <div class="text-left">
+              <h4 class="font-bold text-xs text-frevo-red">Deletar Conta</h4>
+              <p class="text-[11px] text-frevo-red/80">Excluir permanentemente todos os dados</p>
+            </div>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-frevo-red">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </div>
+
+      <div class="pt-2">
+        <button type="button" onclick="closeModal()" class="btn btn-outline w-full text-xs rounded-xl py-2 font-bold">
+          Fechar
+        </button>
+      </div>
+    </div>
+  `;
+
+  modal.classList.add('open');
+}
+
+function confirmDeleteAccount() {
+  if (confirm('Tem certeza de que deseja deletar sua conta? Esta ação é irreversível e removerá seus dados salvos do FrevAI.')) {
+    if (window.supabaseService && window.supabaseService.isConnected()) {
+      window.supabaseService.signOut();
+    }
+    currentUserProfile = {
+      name: 'Visitante',
+      handle: '@visitante',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      bio: 'Perfil convidado da plataforma FrevAI.',
+      socialLinks: [],
+      email: '',
+      phone: ''
+    };
+    switchTestRole('guest');
+    updateProfileUI();
+    closeModal();
+    alert('Sua conta foi removida com sucesso!');
+  }
+}
+
+function openSettingsModal() {
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+
+  modalBody.innerHTML = `
+    <div class="space-y-4 text-left">
+      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+        <h3 class="font-display font-bold text-lg text-ink">Configurações</h3>
+        <span class="badge bg-gray-100 text-ink text-[10px] font-bold">Geral</span>
+      </div>
+
+      <div class="space-y-2.5">
+        <!-- Notificações -->
+        <div class="p-3 bg-surface-soft rounded-2xl flex items-center justify-between border border-gray-100">
+          <div>
+            <span class="font-bold text-xs text-ink block">Notificações Push</span>
+            <span class="text-[10px] text-muted">Avisos de novos passos e apresentações</span>
+          </div>
+          <input type="checkbox" checked class="w-4 h-4 accent-frevo-orange cursor-pointer" />
+        </div>
+
+        <!-- Reprodução de Áudio -->
+        <div class="p-3 bg-surface-soft rounded-2xl flex items-center justify-between border border-gray-100">
+          <div>
+            <span class="font-bold text-xs text-ink block">Prévia Automática de Áudio</span>
+            <span class="text-[10px] text-muted">Tocar amostras de partituras ao abrir</span>
+          </div>
+          <input type="checkbox" checked class="w-4 h-4 accent-frevo-orange cursor-pointer" />
+        </div>
+
+        <!-- Alternador de Papel de Teste -->
+        <button onclick="closeModal(); openSessionModal();" class="w-full p-3 bg-surface-soft hover:bg-gray-100 rounded-2xl flex items-center justify-between border border-gray-100 transition-colors">
+          <div>
+            <span class="font-bold text-xs text-ink block">Acessos & Permissões</span>
+            <span class="text-[10px] text-muted">Papel atual: ${currentUserSession.role.toUpperCase()}</span>
+          </div>
+          <span class="text-xs text-frevo-orange font-bold">Alternar</span>
+        </button>
+
+        <!-- Limpar Cache Local -->
+        <button onclick="localStorage.clear(); alert('Dados locais limpos!'); location.reload();" class="w-full p-3 bg-surface-soft hover:bg-red-50 rounded-2xl flex items-center justify-between border border-gray-100 transition-colors">
+          <div>
+            <span class="font-bold text-xs text-frevo-red block">Limpar Armazenamento Local</span>
+            <span class="text-[10px] text-muted">Restaurar padrões de fábrica do aplicativo</span>
+          </div>
+          <span class="text-xs text-frevo-red font-bold">Limpar</span>
+        </button>
+      </div>
+
+      <div class="pt-2">
+        <button type="button" onclick="closeModal()" class="btn btn-primary w-full text-xs rounded-xl py-2.5 font-bold shadow-md">
+          Concluído
+        </button>
+      </div>
+    </div>
+  `;
+
+  modal.classList.add('open');
+}
+
 let tempUploadedAvatar = null;
 
 function openEditProfileModal() {
@@ -2477,6 +2647,26 @@ document.addEventListener('DOMContentLoaded', () => {
       const view = el.dataset.view;
       if (view) switchView(view);
     });
+  });
+
+  // Registrar Service Worker para PWA e instalação na tela inicial
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').then((reg) => {
+        console.log('[FrevAI] Service Worker registrado com sucesso:', reg.scope);
+      }).catch((err) => {
+        console.warn('[FrevAI] Falha ao registrar Service Worker:', err);
+      });
+    });
+  }
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const banner = document.getElementById('pwa-install-banner');
+    if (banner) {
+      banner.classList.add('show');
+    }
   });
 
   const modal = document.getElementById('global-modal');

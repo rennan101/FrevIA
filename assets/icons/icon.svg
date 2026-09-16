@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#16C7D9" />
+      <stop offset="28%" stop-color="#39D98A" />
+      <stop offset="55%" stop-color="#FFD928" />
+      <stop offset="78%" stop-color="#FF8A00" />
+      <stop offset="100%" stop-color="#F0442E" />
+    </linearGradient>
+
+    <!-- Umbrella Gores Gradients -->
+    <linearGradient id="umbrella-yellow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF066"/>
+      <stop offset="100%" stop-color="#FFD928"/>
+    </linearGradient>
+    <linearGradient id="umbrella-red" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF6B57"/>
+      <stop offset="100%" stop-color="#F0442E"/>
+    </linearGradient>
+    <linearGradient id="umbrella-green" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5CF0A6"/>
+      <stop offset="100%" stop-color="#39D98A"/>
+    </linearGradient>
+    <linearGradient id="umbrella-cyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#46E0F0"/>
+      <stop offset="100%" stop-color="#16C7D9"/>
+    </linearGradient>
+    
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-opacity="0.35" flood-color="#000000" />
+    </filter>
+  </defs>
+
+  <!-- Squircle App Icon Base (iOS & Android Modern Design) -->
+  <rect width="512" height="512" rx="115" fill="url(#bg-gradient)"/>
+  
+  <!-- Subtle inner glow overlay -->
+  <rect width="512" height="512" rx="115" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="6"/>
+
+  <!-- Sombrinha de Frevo Icon Container -->
+  <g filter="url(#shadow)" transform="translate(4, -8)">
+    <!-- Umbrella Canopy (4 Traditional Colored Segments) -->
+    <!-- Segment 1: Cyan (Far Left) -->
+    <path d="M 256 120 C 180 120 100 170 80 270 C 110 250 145 260 170 280 C 190 220 225 150 256 120 Z" fill="url(#umbrella-cyan)"/>
+    
+    <!-- Segment 2: Green (Mid Left) -->
+    <path d="M 256 120 C 225 150 190 220 170 280 C 200 295 230 290 256 275 C 256 220 256 160 256 120 Z" fill="url(#umbrella-green)"/>
+    
+    <!-- Segment 3: Yellow (Mid Right) -->
+    <path d="M 256 120 C 256 160 256 220 256 275 C 282 290 312 295 342 280 C 322 220 287 150 256 120 Z" fill="url(#umbrella-yellow)"/>
+    
+    <!-- Segment 4: Red (Far Right) -->
+    <path d="M 256 120 C 287 150 322 220 342 280 C 367 260 402 250 432 270 C 412 170 332 120 256 120 Z" fill="url(#umbrella-red)"/>
+
+    <!-- Umbrella Canopy Outline / Ribs -->
+    <path d="M 80 270 C 100 170 180 120 256 120 C 332 120 412 170 432 270 C 402 250 367 260 342 280 C 312 295 282 290 256 275 C 230 290 200 295 170 280 C 145 260 110 250 80 270 Z" 
+          fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+
+    <!-- Inner Rib Lines -->
+    <path d="M 256 120 L 256 275" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/>
+    <path d="M 256 120 C 225 150 190 220 170 280" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/>
+    <path d="M 256 120 C 287 150 322 220 342 280" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/>
+
+    <!-- Top Cap / Ferrul -->
+    <circle cx="256" cy="115" r="10" fill="#FFFFFF"/>
+    <rect x="252" y="98" width="8" height="18" rx="4" fill="#FFFFFF"/>
+
+    <!-- Shaft / Haste -->
+    <path d="M 256 275 L 256 385" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round"/>
+
+    <!-- Curved J-Handle / Cabo -->
+    <path d="M 256 385 C 256 422 216 422 216 385 C 216 370 230 360 240 365" 
+          fill="none" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
