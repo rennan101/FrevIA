@@ -697,6 +697,15 @@ body {
   transform: scale(0.92);
 }
 
+/* Layout de Letras & Partituras Base */
+.songs-split-layout {
+  display: block;
+}
+
+.songs-viewer-col {
+  display: none;
+}
+
 /* Botões do Design System */
 .btn {
   display: inline-flex;
@@ -1429,14 +1438,15 @@ body {
     display: grid !important;
     grid-template-columns: repeat(3, 1fr) !important;
     gap: 24px !important;
-    align-items: start !important;
+    align-items: stretch !important;
   }
 
   #feed-items-stream > .feed-card-immersive {
     margin-bottom: 0 !important;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
     transition: transform 0.25s ease, box-shadow 0.25s ease;
   }
 
@@ -1445,8 +1455,11 @@ body {
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
   }
 
-  #feed-items-stream .feed-card-image-wrap {
+  #feed-items-stream .feed-card-media {
     height: 260px !important;
+    min-height: 260px !important;
+    max-height: 260px !important;
+    aspect-ratio: auto !important;
   }
 
   #feed-items-stream .feed-card-caption-container {
@@ -1463,14 +1476,14 @@ body {
   }
 
   #view-explore .music-category-card {
-    height: 200px !important;
-    min-height: 200px !important;
-    max-height: 200px !important;
+    height: 180px !important;
+    min-height: 180px !important;
+    max-height: 180px !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: space-between !important;
     align-items: flex-start !important;
-    padding: 24px !important;
+    padding: 22px !important;
     box-sizing: border-box !important;
   }
 

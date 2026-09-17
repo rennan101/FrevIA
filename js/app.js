@@ -1811,14 +1811,62 @@ function togglePostExpand(postId) {
   }
 }
 
-// Modal Completo de Perfil do Artista (Visualização Pública com Músicas Populares, Álbuns e Shows)
+// Curtir ou descurtir publicação do Feed
+function toggleLike(postId) {
+  const post = DB.posts.find(p => p.id === postId);
+  if (!post) return;
+
+  post.is_liked = !post.is_liked;
+  post.likes = (post.likes || 0) + (post.is_liked ? 1 : -1);
+  if (post.likes < 0) post.likes = 0;
+
+  renderFeed();
+}
+
+// Salvar ou remover dos salvos uma publicação do Feed
+function toggleSave(postId) {
+  const post = DB.posts.find(p => p.id === postId);
+  if (!post) return;
+
+  post.is_saved = !post.is_saved;
+  renderFeed();
+  renderProfileGallery();
+}
+
+// Favoritar / Desfavoritar Artista
+function toggleFavoriteArtist(artistId) {
+  if (!currentUserSession.favorites) {
+    currentUserSession.favorites = [];
+  }
+  const idx = currentUserSession.favorites.indexOf(artistId);
+  const isFav = idx !== -1;
+  if (isFav) {
+    currentUserSession.favorites.splice(idx, 1);
+  } else {
+    currentUserSession.favorites.push(artistId);
+  }
+  saveCurrentSession();
+  renderArtists();
+  renderProfileGallery();
+
+  // Se a tela pública do artista estiver aberta, atualizar sua visualização
+  const currentPublicContainer = document.getElementById('artist-public-content');
+  const targetView = document.getElementById('view-artist-public');
+  if (targetView && targetView.classList.contains('active') && currentPublicContainer) {
+    openArtistProfile(artistId);
+  }
+}
+
+// Visualização de Perfil Público do Artista (Página Completa, sem banner, estilo minimalista com músicas, álbuns e shows)
 function openArtistProfile(artistId) {
   const artist = DB.artists.find(a => a.id === artistId || a.handle === artistId || a.name === artistId);
   if (!artist) return;
 
-  const modal = document.getElementById('global-modal');
-  const modalBody = document.getElementById('modal-body');
-  if (!modal || !modalBody) return;
+  const titleEl = document.getElementById('artist-public-title');
+  if (titleEl) titleEl.innerText = artist.name;
+
+  const container = document.getElementById('artist-public-content');
+  if (!container) return;
 
   const artistSongs = DB.songs.filter(s => s.author_id === artist.id || (s.artist && s.artist.toLowerCase().includes(artist.name.toLowerCase())));
   const popularSongs = [...artistSongs].sort((a, b) => (b.plays_count || 0) - (a.plays_count || 0));
@@ -1826,70 +1874,66 @@ function openArtistProfile(artistId) {
   const artistShows = (DB.shows || []).filter(sh => sh.artist_id === artist.id);
   const isFav = (currentUserSession.favorites || []).includes(artist.id);
 
-  modalBody.innerHTML = `
-    <div class="text-left space-y-4 -m-2">
-      <!-- Banner de Capa -->
-      <div class="relative h-28 sm:h-32 rounded-2xl overflow-hidden bg-gradient-to-r from-frevo-orange to-frevo-red shadow-inner">
-        <img src="${artist.cover_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80'}" alt="${artist.name}" class="w-full h-full object-cover opacity-85" />
-        <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent"></div>
-      </div>
-
-      <!-- Avatar & Informações Principais -->
-      <div class="px-2 -mt-10 relative flex flex-col sm:flex-row items-center sm:items-end justify-between gap-3 text-center sm:text-left">
-        <div class="flex flex-col sm:flex-row items-center gap-3.5">
-          <div class="relative">
-            <img src="${artist.avatar_url}" alt="${artist.name}" class="w-20 h-20 rounded-full object-cover border-4 border-white shadow-md bg-white" />
-            <span class="absolute bottom-0 right-0 w-5 h-5 bg-frevo-green text-white rounded-full flex items-center justify-center text-[10px] border-2 border-white font-bold" title="Artista Verificado">✓</span>
-          </div>
-          <div>
-            <h3 class="font-display font-bold text-lg text-ink leading-tight">${artist.name}</h3>
-            <span class="text-xs text-muted font-medium">${artist.handle}</span>
-            <div class="mt-1 flex items-center justify-center sm:justify-start gap-1.5 flex-wrap">
-              <span class="badge bg-frevo-orange/15 text-frevo-orange font-bold text-[10px]">${artist.genre}</span>
-              <span class="badge bg-gray-100 text-muted font-mono font-bold text-[10px]">${artistSongs.length} música(s)</span>
-              ${artistAlbums.length > 0 ? `<span class="badge bg-frevo-purple/15 text-frevo-purple font-mono font-bold text-[10px]">${artistAlbums.length} álbum(ns)</span>` : ''}
+  container.innerHTML = `
+    <div class="space-y-4 text-left">
+      <!-- Cabeçalho do Artista (Sem Banner, Limpo e Moderno) -->
+      <div class="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm space-y-4">
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3.5">
+            <div class="relative flex-shrink-0">
+              <img src="${artist.avatar_url}" alt="${artist.name}" class="w-16 h-16 rounded-full object-cover border-2 border-frevo-orange/30 shadow-md bg-white" />
+              <span class="absolute bottom-0 right-0 w-5 h-5 bg-frevo-green text-white rounded-full flex items-center justify-center text-[10px] border-2 border-white font-bold" title="Artista Verificado">✓</span>
+            </div>
+            <div>
+              <h3 class="font-display font-extrabold text-lg text-ink leading-tight">${artist.name}</h3>
+              <span class="text-xs text-muted font-medium">${artist.handle}</span>
+              <div class="mt-1 flex items-center gap-1.5 flex-wrap">
+                <span class="badge bg-frevo-orange/15 text-frevo-orange font-bold text-[10px]">${artist.genre}</span>
+                <span class="badge bg-gray-100 text-muted font-mono font-bold text-[10px]">${artistSongs.length} faixa(s)</span>
+                ${artistAlbums.length > 0 ? `<span class="badge bg-frevo-purple/15 text-frevo-purple font-mono font-bold text-[10px]">${artistAlbums.length} álbum(ns)</span>` : ''}
+              </div>
             </div>
           </div>
+
+          <!-- Botão Favoritar Artista -->
+          <button onclick="toggleFavoriteArtist('${artist.id}')" class="btn ${isFav ? 'bg-frevo-orange text-white shadow-md' : 'btn-outline text-frevo-orange border-frevo-orange hover:bg-frevo-orange/10'} text-xs px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all flex-shrink-0">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+            <span class="hidden sm:inline">${isFav ? 'Favoritado ★' : 'Favoritar'}</span>
+          </button>
         </div>
 
-        <!-- Botão Favoritar Artista -->
-        <button onclick="toggleFavoriteArtist('${artist.id}'); openArtistProfile('${artist.id}');" class="btn ${isFav ? 'bg-frevo-orange text-white shadow-md' : 'btn-outline text-frevo-orange border-frevo-orange hover:bg-frevo-orange/10'} text-xs px-4 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-          </svg>
-          <span>${isFav ? 'Favoritado ★' : 'Favoritar'}</span>
-        </button>
-      </div>
-
-      <!-- Biografia e Trajetória -->
-      <div class="px-2 pt-1">
-        <h4 class="text-xs font-bold text-ink uppercase tracking-wider mb-1">Sobre o Artista</h4>
-        <p class="text-xs text-ink-soft leading-relaxed bg-surface-soft p-3.5 rounded-2xl border border-gray-100">
-          ${artist.bio}
-        </p>
-      </div>
-
-      <!-- Contato Oficial -->
-      ${(artist.email || artist.phone) ? `
-        <div class="px-2 flex items-center gap-2 flex-wrap">
-          ${artist.email ? `
-            <a href="mailto:${artist.email}" class="text-[11px] font-bold text-ink bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-              ${artist.email}
-            </a>
-          ` : ''}
-          ${artist.phone ? `
-            <a href="https://wa.me/${artist.phone.replace(/[^0-9]/g, '')}" target="_blank" rel="noopener noreferrer" class="text-[11px] font-bold text-frevo-green bg-frevo-green/10 hover:bg-frevo-green/20 px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2z"/></svg>
-              WhatsApp Oficial
-            </a>
-          ` : ''}
+        <!-- Biografia e Descrição -->
+        <div>
+          <h4 class="text-[11px] font-bold text-muted uppercase tracking-wider mb-1">Sobre o Artista</h4>
+          <p class="text-xs text-ink-soft leading-relaxed bg-surface-soft p-3.5 rounded-2xl border border-gray-100">
+            ${artist.bio}
+          </p>
         </div>
-      ` : ''}
+
+        <!-- Contato Oficial -->
+        ${(artist.email || artist.phone) ? `
+          <div class="flex items-center gap-2 flex-wrap pt-1">
+            ${artist.email ? `
+              <a href="mailto:${artist.email}" class="text-[11px] font-bold text-ink bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                ${artist.email}
+              </a>
+            ` : ''}
+            ${artist.phone ? `
+              <a href="https://wa.me/${artist.phone.replace(/[^0-9]/g, '')}" target="_blank" rel="noopener noreferrer" class="text-[11px] font-bold text-frevo-green bg-frevo-green/10 hover:bg-frevo-green/20 px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2z"/></svg>
+                WhatsApp Oficial
+              </a>
+            ` : ''}
+          </div>
+        ` : ''}
+      </div>
 
       <!-- 1. SEÇÃO DE MÚSICAS POPULARES (ESTILO APPLE MUSIC) -->
-      <div class="px-2 pt-2">
-        <div class="flex items-center justify-between mb-2">
+      <div class="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
           <h4 class="text-xs font-bold text-ink uppercase tracking-wider flex items-center gap-1.5">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF8A00" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
             Músicas Populares
@@ -1897,11 +1941,11 @@ function openArtistProfile(artistId) {
           <span class="text-[10px] text-muted font-bold font-mono">${popularSongs.length} faixas</span>
         </div>
 
-        <div class="space-y-1.5">
+        <div class="space-y-2">
           ${popularSongs.length > 0 ? popularSongs.map((song, index) => {
             const isThisPlaying = (currentPlayingSong && currentPlayingSong.id === song.id && isAudioPlaying);
             return `
-              <div onclick="playSong('${song.id}')" class="p-2.5 bg-white rounded-2xl border ${isThisPlaying ? 'border-frevo-orange ring-2 ring-frevo-orange/25 bg-orange-50/20' : 'border-gray-200'} shadow-sm flex items-center justify-between gap-3 hover:border-frevo-orange transition-all cursor-pointer group">
+              <div onclick="playSong('${song.id}')" class="p-2.5 bg-surface-soft rounded-2xl border ${isThisPlaying ? 'border-frevo-orange ring-2 ring-frevo-orange/25 bg-orange-50/20' : 'border-gray-100'} shadow-sm flex items-center justify-between gap-3 hover:border-frevo-orange transition-all cursor-pointer group">
                 <div class="flex items-center gap-3 min-w-0 flex-1">
                   <!-- Rank / Play Icon -->
                   <span class="w-5 text-center font-bold text-xs ${index === 0 ? 'text-frevo-orange' : 'text-muted'} font-mono">
@@ -1924,7 +1968,7 @@ function openArtistProfile(artistId) {
                 </div>
 
                 <div class="flex items-center gap-2 flex-shrink-0" onclick="event.stopPropagation()">
-                  <button onclick="playSong('${song.id}')" class="w-8 h-8 rounded-full ${isThisPlaying ? 'bg-frevo-orange text-white' : 'bg-surface-soft text-ink hover:bg-frevo-orange hover:text-white'} flex items-center justify-center transition-all shadow-sm" title="Reproduzir Música">
+                  <button onclick="playSong('${song.id}')" class="w-8 h-8 rounded-full ${isThisPlaying ? 'bg-frevo-orange text-white' : 'bg-white text-ink hover:bg-frevo-orange hover:text-white border border-gray-200'} flex items-center justify-center transition-all shadow-sm" title="Reproduzir Música">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                       ${isThisPlaying ? '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>' : '<polygon points="5 3 19 12 5 21 5 3"></polygon>'}
                     </svg>
@@ -1949,13 +1993,13 @@ function openArtistProfile(artistId) {
 
       <!-- 2. SEÇÃO DE ÁLBUNS (CARROSSEL HORIZONTAL GESTUAL SEM SCROLLBAR) -->
       ${artistAlbums.length > 0 ? `
-        <div class="px-2 pt-2">
-          <div class="flex items-center justify-between mb-2">
+        <div class="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
             <h4 class="text-xs font-bold text-ink uppercase tracking-wider flex items-center gap-1.5">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7447E8" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
               Álbuns & Discografia
             </h4>
-            <span class="text-[10px] text-muted">Arraste ou role horizontalmente ⇄</span>
+            <span class="text-[10px] text-muted">Arraste horizontalmente ⇄</span>
           </div>
 
           <div id="artist-albums-carousel" class="albums-carousel-track">
@@ -1973,8 +2017,8 @@ function openArtistProfile(artistId) {
       ` : ''}
 
       <!-- 3. SEÇÃO DE PRÓXIMOS SHOWS (ESTILO CALENDÁRIO VIP) -->
-      <div class="px-2 pt-2 pb-2">
-        <div class="flex items-center justify-between mb-2">
+      <div class="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm space-y-3 pb-4">
+        <div class="flex items-center justify-between">
           <h4 class="text-xs font-bold text-ink uppercase tracking-wider flex items-center gap-1.5">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F0442E" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
             Próximos Shows & Apresentações
@@ -2004,7 +2048,7 @@ function openArtistProfile(artistId) {
                     <span class="text-[10px] text-muted font-mono font-semibold">Horário: ${show.time} • ${day}/${month.toUpperCase()}/${year}</span>
                   </div>
                 </div>
-                <button onclick="alert('Redirecionando para informações e ingressos de ${show.title}!');" class="btn btn-primary text-[11px] px-3 py-1.5 rounded-xl font-bold whitespace-nowrap shadow-sm flex-shrink-0">
+                <button onclick="alert('Informações e ingressos para ${show.title}!');" class="btn btn-primary text-[11px] px-3 py-1.5 rounded-xl font-bold whitespace-nowrap shadow-sm flex-shrink-0">
                   Ingressos
                 </button>
               </div>
@@ -2019,9 +2063,10 @@ function openArtistProfile(artistId) {
     </div>
   `;
 
-  modal.classList.add('open');
+  // Mudar para a view dedicada de perfil público
+  switchView('artist-public');
 
-  // Inicializar suporte gestual do carrossel de álbuns (Touch, Drag & Drop e Shift+Scroll)
+  // Inicializar carrossel gestual
   setTimeout(() => {
     initAlbumsCarousel('artist-albums-carousel');
   }, 100);
@@ -2634,7 +2679,7 @@ function toggleSaveScore(songId) {
   renderProfileGallery();
 }
 
-// Selecionar Partitura para o Leitor no Desktop
+// Selecionar Partitura para o Leitor no Desktop ou abrir Modal no Mobile
 function selectSongForDesktopViewer(songId) {
   selectedSongId = songId;
   document.querySelectorAll('.song-card-item').forEach(el => {
@@ -2644,7 +2689,17 @@ function selectSongForDesktopViewer(songId) {
       el.classList.remove('selected');
     }
   });
-  renderSongsDesktopViewer(songId);
+
+  // Se estiver em tela desktop (com split viewer visível), renderiza no painel lateral
+  if (window.innerWidth >= 992) {
+    renderSongsDesktopViewer(songId);
+  } else {
+    // No mobile, abre a partitura completa no modal interativo
+    const song = DB.songs.find(s => s.id === songId);
+    if (song) {
+      openScoreModal(song.title, song.artist, song.id);
+    }
+  }
 }
 
 // Render HTML de Card de Partitura (com Botão de Salvar e Baixar Icon-Only)
@@ -3092,10 +3147,18 @@ function openAlbumDetails(albumId) {
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left -m-2">
-      <!-- Capa e Título do Álbum -->
+      <!-- Capa, Botão de Voltar e Título do Álbum -->
       <div class="relative h-44 rounded-2xl overflow-hidden shadow-inner">
         <img src="${album.cover_url}" alt="${album.title}" class="w-full h-full object-cover" />
         <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent"></div>
+        
+        <!-- Botão Voltar para Perfil do Artista -->
+        <button onclick="closeModal(); openArtistProfile('${artist.id}');" class="btn-back-header absolute top-3 left-3 bg-black/40 hover:bg-black/60 text-white border-white/20 z-10" aria-label="Voltar para Artista" title="Voltar para Artista">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+
         <div class="absolute bottom-3 left-3 right-3 text-white">
           <span class="badge bg-frevo-purple/40 backdrop-blur-md text-white border border-white/20 text-[10px] font-bold">Álbum • ${album.release_year}</span>
           <h3 class="font-display font-extrabold text-xl leading-tight mt-1 text-white">${album.title}</h3>

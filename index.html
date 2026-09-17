@@ -342,7 +342,20 @@
       <div class="space-y-3.5" id="map-points-list"></div>
     </section>
 
-    <!-- 8. VIEW: PERFIL DO ARTISTA -->
+    <!-- 8. VIEW: PERFIL PÚBLICO DO ARTISTA (FULL PAGE, SEM BANNER, COM VOLTAR) -->
+    <section id="view-artist-public" class="view-section max-w-md mx-auto px-4 py-3 space-y-4">
+      <div class="pb-2 border-b border-gray-200 relative flex items-center justify-center min-h-[44px]">
+        <button onclick="switchView('artists')" class="btn-back-header absolute left-0" aria-label="Voltar para Artistas" title="Voltar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <h2 class="font-display font-extrabold text-xl text-ink text-center" id="artist-public-title">Perfil do Artista</h2>
+      </div>
+      <div id="artist-public-content" class="space-y-4"></div>
+    </section>
+
+    <!-- 9. VIEW: MEU PERFIL (PAINEL DO USUÁRIO) -->
     <section id="view-artist-panel" class="view-section max-w-md mx-auto px-4 py-2 space-y-4">
       <!-- Cabeçalho do Perfil Minimalista -->
       <div class="profile-header-card">
