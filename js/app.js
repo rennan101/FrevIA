@@ -887,6 +887,10 @@ function updateSessionUI() {
   if (addStepBtn) {
     addStepBtn.style.display = isAdmin ? 'inline-flex' : 'none';
   }
+  const historyAddBtn = document.getElementById('history-admin-add-btn');
+  if (historyAddBtn) {
+    historyAddBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+  }
   if (submitSongBtn) {
     submitSongBtn.style.display = (isAdmin || isArtist) ? 'inline-flex' : 'none';
   }
@@ -4517,12 +4521,90 @@ function deleteStep(stepId) {
   }
 }
 
+// ==============================================================================
+// ORDENAÇÃO CRONOLÓGICA INTELIGENTE DA LINHA DO TEMPO DO FREVO
+// ==============================================================================
+function parseHistoryYear(periodStr) {
+  if (!periodStr) return 9999;
+  const str = String(periodStr).toLowerCase();
+
+  // 1. Extração de ano de 4 dígitos (ex: 1907, 1947, 2012)
+  const yearMatches = str.match(/\b(1[6789]\d\d|20\d\d)\b/g);
+  let baseYear = null;
+  if (yearMatches && yearMatches.length > 0) {
+    baseYear = parseInt(yearMatches[0], 10);
+  }
+
+  // 2. Notação de séculos romanos caso não haja ano explícito (ex: Século XIX -> ~1890 ou 1801)
+  if (baseYear === null) {
+    const centuryMatch = str.match(/s[eé]culo\s+([xvi]+)/i);
+    if (centuryMatch) {
+      const rom = centuryMatch[1].toUpperCase();
+      let num = 0;
+      if (rom === 'XVIII') num = 18;
+      else if (rom === 'XIX') num = 19;
+      else if (rom === 'XX') num = 20;
+      else if (rom === 'XXI') num = 21;
+      if (num > 0) {
+        baseYear = (num - 1) * 100 + (str.includes('final') ? 85 : (str.includes('meados') ? 50 : 1));
+      }
+    }
+  }
+
+  if (baseYear === null) return 9999;
+
+  // 3. Mês para desempate intra-anual
+  const months = ['janeiro', 'fevereiro', 'março', 'marco', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+  let monthIndex = 0;
+  for (let i = 0; i < months.length; i++) {
+    if (str.includes(months[i])) {
+      monthIndex = i + 1;
+      break;
+    }
+  }
+
+  // 4. Dia do mês para máxima precisão cronológica
+  let day = 1;
+  const dayMatch = str.match(/\b([0-2]?\d|3[01])\s+de\s+[a-zç]+/i);
+  if (dayMatch) {
+    day = parseInt(dayMatch[1], 10);
+  }
+
+  return baseYear + (monthIndex / 12) + (day / 365);
+}
+
+function sortHistoryTimeline() {
+  if (Array.isArray(DB.history)) {
+    DB.history.sort((a, b) => parseHistoryYear(a.period) - parseHistoryYear(b.period));
+  }
+}
+
 function renderHistoryItemHtml(item) {
+  const isAdmin = currentUserSession.role === 'admin';
+
   return `
     <div class="relative pl-6 pb-6 border-l-2 border-frevo-yellow last:border-l-0 infinite-scroll-item">
       <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-frevo-yellow border-2 border-paper shadow-sm"></div>
-      <div class="bg-white border border-line-strong rounded-2xl p-4 space-y-2 shadow-sm">
-        <span class="badge bg-frevo-yellow/40 text-ink text-[11px] font-bold">${item.period}</span>
+      <div class="bg-white border border-line-strong rounded-2xl p-4 space-y-2 shadow-sm transition hover:shadow-md">
+        <div class="flex items-center justify-between gap-2">
+          <span class="badge bg-frevo-yellow/40 text-ink text-[11px] font-bold">${item.period}</span>
+          ${isAdmin ? `
+            <div class="flex items-center gap-1">
+              <button onclick="openEditHistoryModal('${item.id}')" class="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Editar Marco">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+              </button>
+              <button onclick="deleteHistory('${item.id}')" class="p-1.5 text-gray-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Excluir Marco">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+              </button>
+            </div>
+          ` : ''}
+        </div>
         <h3 class="font-display font-bold text-lg text-ink">${item.title}</h3>
         <p class="text-xs text-ink-soft leading-relaxed">${item.content}</p>
         ${(item.media_url || item.image_url) ? `
@@ -4545,6 +4627,9 @@ function renderHistoryItemHtml(item) {
 function renderHistory() {
   const container = document.getElementById('history-timeline');
   if (!container) return;
+
+  // Garante a ordenação cronológica estrita antes de renderizar
+  sortHistoryTimeline();
 
   InfiniteScrollManager.reset('history');
   const initialHistory = DB.history.slice(0, InfiniteScrollManager.state.history.limit);
@@ -5285,9 +5370,14 @@ async function renderAdminCMS() {
                 <span class="badge bg-frevo-yellow/30 text-ink text-[10px] font-bold">${item.period}</span>
                 <strong class="text-ink text-xs block mt-1">${item.title}</strong>
               </div>
-              <button onclick="deleteHistory('${item.id}')" class="btn btn-destructive text-[11px] px-2 py-1 rounded-xl font-bold">
-                Excluir
-              </button>
+              <div class="flex items-center gap-1.5">
+                <button onclick="openEditHistoryModal('${item.id}')" class="btn btn-outline text-[11px] px-2.5 py-1 rounded-xl font-bold text-ink">
+                  Editar
+                </button>
+                <button onclick="deleteHistory('${item.id}')" class="btn btn-destructive text-[11px] px-2 py-1 rounded-xl font-bold">
+                  Excluir
+                </button>
+              </div>
             </div>
           `).join('')}
         </div>
@@ -5655,10 +5745,14 @@ function deleteMapPoint(id) {
 }
 
 function deleteHistory(id) {
-  if (confirm('Deseja excluir este marco histórico?')) {
+  if (confirm('Deseja realmente excluir este marco histórico da linha do tempo?')) {
     DB.history = DB.history.filter(h => h.id !== id);
+    if (window.supabaseService && window.supabaseService.isConnected()) {
+      window.supabaseService.deleteHistoryEntry?.(id);
+    }
     renderHistory();
     renderAdminCMS();
+    showAlertModal('Marco histórico removido com sucesso!', { title: 'Marco Excluído', type: 'success' });
   }
 }
 
@@ -6285,14 +6379,131 @@ function submitNewHistory(e) {
   };
 
   DB.history.push(newHist);
+  sortHistoryTimeline();
+
   if (window.supabaseService && window.supabaseService.isConnected()) {
-    window.supabaseService.createHistoryEntry(newHist);
+    window.supabaseService.createHistoryEntry?.(newHist);
   }
 
   closeModal();
   renderHistory();
   renderAdminCMS();
-  showAlertModal('Marco histórico adicionado com sucesso!', { title: 'Marco Salvo', type: 'success' });
+  showAlertModal('Marco histórico adicionado com sucesso e posicionado na ordem cronológica!', { title: 'Marco Salvo', type: 'success' });
+}
+
+// Modal de Edição de Marco Histórico
+function openEditHistoryModal(historyId) {
+  const item = DB.history.find(h => h.id === historyId);
+  if (!item) return;
+
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+
+  modalBody.innerHTML = `
+    <div class="space-y-4 text-left">
+      <div class="flex items-center justify-between pb-2 border-b border-gray-100 pr-8">
+        <div>
+          <h3 class="font-display font-bold text-lg text-ink">Editar Marco Histórico</h3>
+          <p class="text-xs text-muted">Atualize as informações cronológicas e documentais do registro</p>
+        </div>
+      </div>
+
+      <form onsubmit="submitEditHistory(event, '${item.id}')" class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Título do Marco *</label>
+          <input type="text" id="edit-hist-title" required value="${item.title ? item.title.replace(/"/g, '&quot;') : ''}" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Período / Data Histórica *</label>
+          <input type="text" id="edit-hist-period" required value="${item.period ? item.period.replace(/"/g, '&quot;') : ''}" placeholder="Ex: 9 de Fevereiro de 1907" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+          <p class="text-[10px] text-muted mt-0.5">Ao salvar, o card será realocado para a posição temporal exata na linha do tempo.</p>
+        </div>
+
+        <!-- Bloco de Mídia: Foto ou Vídeo Histórico -->
+        <div class="p-3 bg-surface-soft rounded-2xl border border-gray-200 space-y-2">
+          <label class="block text-[11px] font-bold text-ink uppercase">Documento / Mídia de Época (Foto ou Vídeo)</label>
+          <label class="btn btn-outline text-xs px-3 py-2 rounded-xl cursor-pointer flex items-center gap-1.5 font-bold justify-center bg-white hover:bg-gray-50">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            Substituir Arquivo
+            <input type="file" id="edit-hist-file-input" accept="image/*,video/mp4,video/webm" class="hidden" onchange="handleAdminMediaUpload(this, 'edit-hist-media-preview', 'edit-hist-media-url', 'edit-hist-media-type', 'history')" />
+          </label>
+
+          <div class="pt-1">
+            <label class="block text-[10px] font-bold text-muted uppercase mb-0.5">Ou cole o link do arquivo</label>
+            <input type="url" id="edit-hist-media-url" value="${item.media_url || item.image_url || ''}" placeholder="https://exemplo.com/registro-historico.jpg" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none font-mono" />
+            <input type="hidden" id="edit-hist-media-type" value="${item.media_type || 'image'}" />
+          </div>
+
+          <div id="edit-hist-media-preview">
+            ${(item.media_url || item.image_url) ? `
+              <div class="relative mt-2 rounded-xl overflow-hidden border border-gray-200 max-h-36">
+                ${(item.media_type === 'video' || (item.media_url && item.media_url.match(/\.(mp4|webm|mov)(\?.*)?$/i))) ? `
+                  <video src="${item.media_url}" controls playsinline class="w-full h-32 object-cover"></video>
+                ` : `
+                  <img src="${item.media_url || item.image_url}" alt="Preview" class="w-full h-32 object-cover" />
+                `}
+              </div>
+            ` : ''}
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Conteúdo Histórico Documentado *</label>
+          <textarea id="edit-hist-content" rows="3" required class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none">${item.content || ''}</textarea>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Fonte / Acervo Responsável *</label>
+          <input type="text" id="edit-hist-source" required value="${item.source ? item.source.replace(/"/g, '&quot;') : ''}" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+        </div>
+
+        <div class="flex gap-2 pt-2 border-t border-gray-100">
+          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl py-2.5 font-bold text-ink">Cancelar</button>
+          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl py-2.5 font-bold shadow-md">Salvar Alterações</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  modal.classList.add('open');
+}
+
+function submitEditHistory(e, historyId) {
+  e.preventDefault();
+  const item = DB.history.find(h => h.id === historyId);
+  if (!item) return;
+
+  const title = document.getElementById('edit-hist-title').value.trim();
+  const period = document.getElementById('edit-hist-period').value.trim();
+  const content = document.getElementById('edit-hist-content').value.trim();
+  const source = document.getElementById('edit-hist-source').value.trim();
+  const mediaUrl = document.getElementById('edit-hist-media-url')?.value?.trim() || null;
+  const mediaType = document.getElementById('edit-hist-media-type')?.value || 'image';
+
+  item.title = title;
+  item.period = period;
+  item.content = content;
+  item.source = source;
+  item.media_url = mediaUrl;
+  item.image_url = mediaUrl;
+  item.media_type = mediaType;
+
+  // Reordena a linha do tempo cronologicamente
+  sortHistoryTimeline();
+
+  if (window.supabaseService && window.supabaseService.isConnected()) {
+    window.supabaseService.updateHistoryEntry?.(historyId, item);
+  }
+
+  closeModal();
+  renderHistory();
+  renderAdminCMS();
+  showAlertModal('Marco histórico atualizado com sucesso e reposicionado na cronologia!', { title: 'Marco Atualizado', type: 'success' });
 }
 
 // Modal de Adicionar Novo Passo de Frevo (com Upload de Vídeo e Imagem)

@@ -383,6 +383,73 @@ class AwsService {
   }
 
   // ============================================================================
+  // HISTÓRIA DO FREVO (CRUD COM CRONOLOGIA AUTOMÁTICA)
+  // ============================================================================
+  async getHistoryEntries() {
+    if (!this.apiGatewayUrl) return null;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/history`);
+      if (res.ok) {
+        const data = await res.json();
+        return Array.isArray(data) ? data : null;
+      }
+      return null;
+    } catch (err) {
+      console.warn('[AWS History] Falha ao buscar história:', err);
+      return null;
+    }
+  }
+
+  async createHistoryEntry(item) {
+    if (!this.apiGatewayUrl || !item) return null;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/history`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(item)
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+      return null;
+    } catch (err) {
+      console.warn('[AWS History] Falha ao criar marco histórico:', err);
+      return null;
+    }
+  }
+
+  async updateHistoryEntry(id, item) {
+    if (!this.apiGatewayUrl || !id || !item) return null;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/history/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(item)
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+      return null;
+    } catch (err) {
+      console.warn('[AWS History] Falha ao atualizar marco histórico:', err);
+      return null;
+    }
+  }
+
+  async deleteHistoryEntry(id) {
+    if (!this.apiGatewayUrl || !id) return false;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/history/${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
+      return res.ok;
+    } catch (err) {
+      console.warn('[AWS History] Falha ao excluir marco histórico:', err);
+      return false;
+    }
+  }
+
+  // ============================================================================
   // UPLOAD DE MÍDIA UNIVERSAL (AMAZON S3 DIRETO)
   // ============================================================================
   async uploadMedia(file, folder = 'general') {
