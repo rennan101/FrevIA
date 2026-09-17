@@ -19,6 +19,7 @@ window.FREVIA_AWS_CONFIG = {
   // Autenticação (Amazon Cognito User Pools)
   COGNITO_USER_POOL_ID: 'sa-east-1_egnFYahtb',
   COGNITO_CLIENT_ID: '46t8rd0jlv6c3gmje9uj10s6c8',
+  COGNITO_DOMAIN: 'frevia.auth.sa-east-1.amazoncognito.com',
   
   // Backend Serverless & API REST em Produção
   API_GATEWAY_URL: 'https://q59vzihzm8.execute-api.sa-east-1.amazonaws.com/api',

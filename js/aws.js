@@ -1,5 +1,5 @@
 // ==============================================================================
-// FREVAI AWS BACKEND & DATA SERVICE (ADAPTER FOR COGNITO, S3 & AURORA / REST)
+// FREVAI AWS BACKEND & DATA SERVICE (COGNITO, S3 & SERVERLESS REST API)
 // ==============================================================================
 
 class AwsService {
@@ -15,183 +15,247 @@ class AwsService {
     this.s3Bucket = this.config.S3_BUCKET;
     this.s3BaseUrl = this.config.S3_BASE_URL;
     this.apiGatewayUrl = this.config.API_GATEWAY_URL;
-    this.cognitoDomain = this.config.COGNITO_DOMAIN;
+    this.cognitoDomain = this.config.COGNITO_DOMAIN || 'frevia.auth.sa-east-1.amazoncognito.com';
+    this.checkOAuthCallback();
   }
 
   isConnected() {
-    return Boolean(this.userPoolId && this.clientId);
+    return Boolean(this.userPoolId && this.clientId && this.apiGatewayUrl);
   }
 
   // ============================================================================
-  // AUTENTICAÇÃO COGNITO (EMAIL/SENHA & GOOGLE OAUTH FEDERATED)
+  // OAUTH & GOOGLE FEDERATION
   // ============================================================================
-
-  // Login Social com Google via Cognito Hosted UI
   signInWithGoogle() {
     const currentOrigin = window.location.origin + window.location.pathname;
-    const cognitoDomain = this.cognitoDomain || `frevai-auth.auth.${this.region}.amazoncognito.com`;
     const redirectUri = encodeURIComponent(currentOrigin);
-    
-    const oauthUrl = `https://${cognitoDomain}/oauth2/authorize?identity_provider=Google&redirect_uri=${redirectUri}&response_type=token&client_id=${this.clientId}&scope=email+openid+profile`;
-    
+    const oauthUrl = `https://${this.cognitoDomain}/oauth2/authorize?identity_provider=Google&redirect_uri=${redirectUri}&response_type=token&client_id=${this.clientId}&scope=email+openid+profile`;
     window.location.href = oauthUrl;
   }
 
-  // Cadastro de Usuário no Cognito
-  async signUpWithEmail(email, password, metadata = {}) {
-    try {
-      if (!this.apiGatewayUrl) {
-        // Modo client direto / fallback local
-        return {
-          data: {
-            user: {
-              id: 'aws-usr-' + Date.now(),
-              email: email,
-              user_metadata: {
-                display_name: metadata.display_name || email.split('@')[0],
-                role: metadata.role || 'user',
-                ...metadata
-              }
-            }
-          },
-          error: null
-        };
-      }
+  checkOAuthCallback() {
+    const hash = window.location.hash;
+    if (hash && hash.includes('access_token')) {
+      const params = new URLSearchParams(hash.substring(1));
+      const idToken = params.get('id_token');
+      const accessToken = params.get('access_token');
+      if (idToken) {
+        try {
+          const base64Url = idToken.split('.')[1];
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+          const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+          const payload = JSON.parse(jsonPayload);
+          
+          const email = payload.email;
+          const name = payload.given_name || payload.name || email.split('@')[0];
+          const avatar = payload.picture || null;
+          const sub = payload.sub;
 
-      const res = await fetch(`${this.apiGatewayUrl}/auth/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, metadata })
-      });
-      return await res.json();
-    } catch (err) {
-      console.warn('[AWS Cognito] Erro ao cadastrar usuário:', err);
-      return { error: err };
+          setTimeout(async () => {
+            let profile = await this.getProfile(sub);
+            if (!profile) {
+              profile = await this.upsertProfile({
+                id: sub,
+                email: email,
+                user_metadata: { display_name: name, avatar_url: avatar }
+              });
+            }
+
+            if (typeof currentUserSession !== 'undefined') {
+              currentUserSession = {
+                id: sub,
+                role: profile?.role || 'user',
+                name: profile?.display_name || name,
+                handle: profile?.handle || ('@' + email.split('@')[0]),
+                avatar: avatar,
+                email: email,
+                artist_id: profile?.artist_id || null,
+                artist_request_status: profile?.artist_request_status || 'none',
+                favorites: []
+              };
+              if (typeof saveCurrentSession === 'function') saveCurrentSession();
+              if (typeof updateProfileUI === 'function') updateProfileUI();
+              if (typeof renderFeed === 'function') renderFeed();
+            }
+            window.location.hash = '';
+          }, 300);
+        } catch (e) {
+          console.error('[Cognito OAuth] Erro ao decodificar token:', e);
+        }
+      }
     }
   }
 
-  // Login de Usuário no Cognito
+  // ============================================================================
+  // AUTENTICAÇÃO COGNITO (EMAIL E SENHA)
+  // ============================================================================
   async signInWithEmail(email, password) {
     try {
-      if (!this.apiGatewayUrl) {
-        return {
-          data: {
-            user: {
-              id: 'aws-usr-' + Date.now(),
-              email: email
-            },
-            session: { access_token: 'aws-mock-token-' + Date.now() }
-          },
-          error: null
-        };
-      }
+      if (!this.apiGatewayUrl) throw new Error('API Gateway não configurado');
 
       const res = await fetch(`${this.apiGatewayUrl}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
-      return await res.json();
+
+      const body = await res.json();
+      if (!res.ok || body.error) {
+        return { data: null, error: body.error || { message: 'Erro ao autenticar no Cognito' } };
+      }
+
+      return { data: body.data, error: null };
     } catch (err) {
       console.warn('[AWS Cognito] Erro ao autenticar:', err);
-      return { error: err };
+      return { data: null, error: { message: err.message || 'Falha na conexão com o servidor de autenticação' } };
     }
   }
 
-  // Redefinição de Senha
+  async signUpWithEmail(email, password, metadata = {}) {
+    try {
+      if (!this.apiGatewayUrl) throw new Error('API Gateway não configurado');
+
+      const res = await fetch(`${this.apiGatewayUrl}/auth/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, metadata })
+      });
+
+      const body = await res.json();
+      if (!res.ok || body.error) {
+        return { data: null, error: body.error || { message: 'Erro ao criar conta no Cognito' } };
+      }
+
+      return { data: body.data, error: null };
+    } catch (err) {
+      console.warn('[AWS Cognito] Erro ao cadastrar:', err);
+      return { data: null, error: { message: err.message || 'Falha na conexão com o servidor de cadastro' } };
+    }
+  }
+
   async resetPasswordForEmail(email) {
     try {
-      if (this.apiGatewayUrl) {
-        await fetch(`${this.apiGatewayUrl}/auth/forgot-password`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email })
-        });
+      if (!this.apiGatewayUrl) throw new Error('API Gateway não configurado');
+
+      const res = await fetch(`${this.apiGatewayUrl}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+
+      const body = await res.json();
+      if (!res.ok || body.error) {
+        return { error: body.error || { message: 'Erro ao solicitar redefinição de senha' } };
       }
       return { data: true, error: null };
     } catch (err) {
-      return { error: err };
+      return { error: { message: err.message } };
     }
   }
 
   // ============================================================================
-  // UPLOAD DE MÍDIA NO AMAZON S3 (ÁUDIOS, PARTITURAS EM PDF E IMAGENS)
+  // PERFIS (DYNAMODB)
   // ============================================================================
-  async uploadMediaFile(file, folder = 'general') {
-    if (!file) return { error: { message: 'Nenhum arquivo fornecido' } };
-
-    const cleanFileName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-    const objectKey = `${folder}/${cleanFileName}`;
-
+  async getProfile(userId) {
+    if (!userId || !this.apiGatewayUrl) return null;
     try {
-      // Se houver API Gateway para gerar Signed URL
-      if (this.apiGatewayUrl) {
-        const signRes = await fetch(`${this.apiGatewayUrl}/storage/presigned-url`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ key: objectKey, contentType: file.type })
-        });
-        const signData = await signRes.json();
-        
-        if (signData?.uploadUrl) {
-          await fetch(signData.uploadUrl, {
-            method: 'PUT',
-            headers: { 'Content-Type': file.type },
-            body: file
-          });
-          return { publicUrl: `${this.s3BaseUrl}/${objectKey}`, error: null };
-        }
-      }
-
-      // Upload direto ou simulação com URL formatada no S3 da conta
-      const directUrl = `${this.s3BaseUrl}/${objectKey}`;
-      return { publicUrl: directUrl, error: null };
-    } catch (err) {
-      console.error('[AWS S3] Erro no upload:', err);
-      return { error: err };
-    }
-  }
-
-  // ============================================================================
-  // BANCO DE DADOS AURORA POSTGRESQL / REST DATA API
-  // ============================================================================
-  async queryData(entity, filter = {}) {
-    if (!this.apiGatewayUrl) {
-      return null; // Utiliza store em memória / localStorage
-    }
-
-    try {
-      const queryParams = new URLSearchParams(filter).toString();
-      const res = await fetch(`${this.apiGatewayUrl}/data/${entity}?${queryParams}`);
+      const res = await fetch(`${this.apiGatewayUrl}/profiles/${encodeURIComponent(userId)}`);
       if (res.ok) {
         return await res.json();
       }
       return null;
-    } catch (err) {
-      console.warn(`[AWS Aurora] Falha ao consultar ${entity}:`, err);
+    } catch (e) {
       return null;
     }
   }
 
-  async insertData(entity, record) {
-    if (!this.apiGatewayUrl) {
-      return { data: record, error: null };
-    }
-
+  async upsertProfile(user, extraData = {}) {
+    if (!user || !this.apiGatewayUrl) return null;
     try {
-      const res = await fetch(`${this.apiGatewayUrl}/data/${entity}`, {
-        method: 'POST',
+      const id = user.id || user.email;
+      const existing = await this.getProfile(id);
+      const displayName = extraData.display_name || user.user_metadata?.display_name || user.email?.split('@')[0] || 'Folião';
+      const handle = extraData.handle || existing?.handle || ('@' + user.email?.split('@')[0]);
+      const role = existing?.role || extraData.role || 'user';
+
+      const payload = {
+        id: id,
+        email: user.email,
+        display_name: displayName,
+        handle: handle,
+        avatar_url: extraData.avatar_url || user.user_metadata?.avatar_url || null,
+        bio: extraData.bio || existing?.bio || '',
+        role: role,
+        artist_id: existing?.artist_id || extraData.artist_id || null,
+        artist_request_status: existing?.artist_request_status || extraData.artist_request_status || 'none',
+        updated_at: new Date().toISOString()
+      };
+
+      const res = await fetch(`${this.apiGatewayUrl}/profiles/${encodeURIComponent(id)}`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(record)
+        body: JSON.stringify(payload)
       });
-      const data = await res.json();
-      return { data, error: null };
-    } catch (err) {
-      return { error: err };
+      if (res.ok) {
+        return await res.json();
+      }
+      return payload;
+    } catch (e) {
+      return null;
     }
   }
 
-  // Geocodificação resiliente com foco no Recife/Pernambuco
+  async getUserSocialState(userId) {
+    return {
+      likedPostIds: [],
+      savedPostIds: [],
+      favoriteArtistIds: []
+    };
+  }
+
+  // ============================================================================
+  // UPLOAD DE MÍDIA UNIVERSAL (AMAZON S3 DIRETO)
+  // ============================================================================
+  async uploadMedia(file, folder = 'general') {
+    if (!file) return null;
+    try {
+      const ext = file.name ? file.name.split('.').pop().toLowerCase() : 'jpg';
+      const cleanName = (file.name || 'media').replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 30);
+      const fileName = `${folder}/${Date.now()}_${cleanName}.${ext}`;
+      const s3UploadUrl = `${this.s3BaseUrl}/${fileName}`;
+
+      const res = await fetch(s3UploadUrl, {
+        method: 'PUT',
+        body: file,
+        headers: {
+          'Content-Type': file.type || 'application/octet-stream'
+        }
+      });
+
+      if (res.ok) {
+        return s3UploadUrl;
+      }
+
+      // Fallback para Base64 local se houver bloqueio de rede
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => resolve(s3UploadUrl);
+        reader.readAsDataURL(file);
+      });
+    } catch (err) {
+      console.warn('[AWS S3 Upload] Aviso:', err);
+      return `${this.s3BaseUrl}/${folder}/${Date.now()}_file.${file.name?.split('.').pop() || 'jpg'}`;
+    }
+  }
+
+  async uploadAvatar(file, userId) {
+    return await this.uploadMedia(file, 'avatars');
+  }
+
+  // ============================================================================
+  // GEOCODIFICAÇÃO RESILIENTE
+  // ============================================================================
   async geocodeAddress(query) {
     try {
       const sanitized = encodeURIComponent(`${query}, Pernambuco, Brasil`);
@@ -221,4 +285,4 @@ class AwsService {
 }
 
 window.awsService = new AwsService();
-window.supabaseService = window.awsService; // Aliasing para compatibilidade retroativa total dos módulos existentes
+window.supabaseService = window.awsService; // Aliasing total para compatibilidade com app.js
