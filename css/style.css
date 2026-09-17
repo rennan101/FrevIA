@@ -1438,12 +1438,12 @@ body {
     display: grid !important;
     grid-template-columns: repeat(3, 1fr) !important;
     gap: 24px !important;
-    align-items: stretch !important;
+    align-items: start !important;
   }
 
   #feed-items-stream > .feed-card-immersive {
     margin-bottom: 0 !important;
-    height: 100% !important;
+    margin-top: 0 !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: flex-start !important;
@@ -1535,6 +1535,16 @@ body {
     display: grid !important;
     grid-template-columns: repeat(3, 1fr) !important;
     gap: 20px !important;
+    align-items: start !important;
+  }
+
+  /* Os filhos diretos do container de steps são o stream-inner e o sentinel */
+  .steps-stream-inner {
+    display: contents !important; /* Faz os filhos serem diretos do grid pai */
+  }
+
+  .steps-sentinel-col {
+    grid-column: 1 / -1 !important;
   }
 
   /* 9. Mapa Cultural: Grid em 2 Colunas */
@@ -1542,6 +1552,16 @@ body {
     display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 20px !important;
+    align-items: start !important;
+  }
+
+  /* Os filhos diretos do container de mapa são o stream-inner e o sentinel */
+  .map-stream-inner {
+    display: contents !important; /* Faz os filhos serem diretos do grid pai */
+  }
+
+  .map-sentinel-col {
+    grid-column: 1 / -1 !important;
   }
 
   /* 10. Perfil do Usuário / Artista */

@@ -1829,8 +1829,26 @@ function toggleSave(postId) {
   if (!post) return;
 
   post.is_saved = !post.is_saved;
-  renderFeed();
-  renderProfileGallery();
+
+  // Atualizar apenas o botão de salvar inline (sem re-render do feed inteiro)
+  document.querySelectorAll(`button[onclick="toggleSave('${postId}')"]`).forEach(btn => {
+    if (post.is_saved) {
+      btn.classList.add('is-saved');
+    } else {
+      btn.classList.remove('is-saved');
+    }
+    const svg = btn.querySelector('svg');
+    if (svg) {
+      svg.setAttribute('fill', post.is_saved ? '#FF8A00' : 'none');
+      svg.setAttribute('stroke', post.is_saved ? '#FF8A00' : 'currentColor');
+    }
+  });
+
+  // Atualizar aba Salvos do perfil sem piscar o feed
+  const profileTab = document.querySelector('.profile-tab-btn.tab-saved.active');
+  if (profileTab || document.getElementById('view-artist-panel')?.classList.contains('active')) {
+    renderProfileGallery();
+  }
 }
 
 // Favoritar / Desfavoritar Artista
@@ -2112,19 +2130,37 @@ function renderArtistCardHtml(artist) {
   `;
 }
 
-function renderArtists() {
+function renderArtists(filterQuery = '') {
   const container = document.getElementById('artists-grid');
   if (!container) return;
 
+  const query = filterQuery.toLowerCase().trim();
+  const filtered = query ? DB.artists.filter(a =>
+    a.name.toLowerCase().includes(query) ||
+    (a.handle && a.handle.toLowerCase().includes(query)) ||
+    (a.genre && a.genre.toLowerCase().includes(query)) ||
+    (a.bio && a.bio.toLowerCase().includes(query))
+  ) : DB.artists;
+
   InfiniteScrollManager.reset('artists');
-  const initialArtists = DB.artists.slice(0, InfiniteScrollManager.state.artists.limit);
+  const initialArtists = filtered.slice(0, InfiniteScrollManager.state.artists.limit);
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div class="col-span-full p-8 text-center bg-white rounded-2xl border border-gray-100 space-y-2">
+        <p class="text-xs text-ink font-bold">Nenhum artista encontrado</p>
+        <p class="text-[11px] text-muted">Tente buscar por outro nome, gênero ou arroba.</p>
+      </div>
+    `;
+    return;
+  }
 
   container.innerHTML = `
     <div id="artists-stream" class="grid grid-cols-1 sm:grid-cols-2 gap-3 col-span-full">
       ${initialArtists.map(artist => renderArtistCardHtml(artist)).join('')}
     </div>
     <div id="sentinel-artists" class="infinite-scroll-sentinel col-span-full" data-view="artists">
-      ${DB.artists.length > initialArtists.length ? `
+      ${filtered.length > initialArtists.length ? `
         <div class="infinite-scroll-loader">
           <div class="infinite-spinner"></div>
           <span>Carregando mais artistas...</span>
@@ -2134,9 +2170,14 @@ function renderArtists() {
   `;
 
   const sentinel = document.getElementById('sentinel-artists');
-  if (sentinel && DB.artists.length > initialArtists.length) {
+  if (sentinel && filtered.length > initialArtists.length) {
     InfiniteScrollManager.observe(sentinel);
   }
+}
+
+function handleArtistSearch(event) {
+  const query = event.target.value;
+  renderArtists(query);
 }
 
 function appendMoreArtists() {
@@ -3482,10 +3523,10 @@ function renderSteps() {
   const initialSteps = DB.steps.slice(0, InfiniteScrollManager.state.steps.limit);
 
   container.innerHTML = `
-    <div id="steps-stream" class="space-y-4">
+    <div id="steps-stream" class="steps-stream-inner">
       ${initialSteps.map(step => renderStepCardHtml(step)).join('')}
     </div>
-    <div id="sentinel-steps" class="infinite-scroll-sentinel" data-view="steps">
+    <div id="sentinel-steps" class="infinite-scroll-sentinel steps-sentinel-col" data-view="steps">
       ${DB.steps.length > initialSteps.length ? `
         <div class="infinite-scroll-loader">
           <div class="infinite-spinner"></div>
@@ -3512,7 +3553,8 @@ function appendMoreSteps() {
 
   if (nextSteps.length > 0) {
     const html = nextSteps.map(step => renderStepCardHtml(step)).join('');
-    stream.insertAdjacentHTML('beforeend', html);
+    // Inserir antes do sentinel, dentro do grid pai
+    sentinel.insertAdjacentHTML('beforebegin', html);
   }
 
   if (start + limit >= DB.steps.length && sentinel) {
@@ -3651,10 +3693,10 @@ function renderMap() {
   const initialPoints = DB.mapPoints.slice(0, InfiniteScrollManager.state.map.limit);
 
   container.innerHTML = `
-    <div id="map-stream" class="space-y-4">
+    <div id="map-stream" class="map-stream-inner">
       ${initialPoints.map(point => renderMapPointCardHtml(point)).join('')}
     </div>
-    <div id="sentinel-map" class="infinite-scroll-sentinel" data-view="map">
+    <div id="sentinel-map" class="infinite-scroll-sentinel map-sentinel-col" data-view="map">
       ${DB.mapPoints.length > initialPoints.length ? `
         <div class="infinite-scroll-loader">
           <div class="infinite-spinner"></div>
@@ -3681,7 +3723,8 @@ function appendMoreMap() {
 
   if (nextPoints.length > 0) {
     const html = nextPoints.map(point => renderMapPointCardHtml(point)).join('');
-    stream.insertAdjacentHTML('beforeend', html);
+    // Inserir antes do sentinel, dentro do grid pai
+    sentinel.insertAdjacentHTML('beforebegin', html);
   }
 
   if (start + limit >= DB.mapPoints.length && sentinel) {
@@ -5036,11 +5079,12 @@ function openScoreModal(title, artist, songId) {
   const modalBody = document.getElementById('modal-body');
 
   const profile = getSongMusicalProfile(song);
+  const isPlayingThis = (currentlyPlayingSongId === song.id);
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left">
       <div class="pb-2 border-b border-gray-100 pr-10">
-        <h3 class="font-display font-bold text-lg text-ink">Partitura & Arranjo Musical</h3>
+        <h3 class="font-display font-bold text-lg text-ink">Partitura &amp; Arranjo Musical</h3>
         <p class="text-[11px] text-muted">Acervo Digital Oficial da Salvaguarda • ${profile.key}</p>
       </div>
 
@@ -5054,27 +5098,54 @@ function openScoreModal(title, artist, songId) {
         <p class="text-xs text-muted leading-relaxed">${song.description || 'Partitura oficial formatada com pauta musical, grade de arranjo e letra completa.'}</p>
       </div>
 
-      <div class="flex items-center gap-2">
-        <button onclick="playFrevoAudioPreview('${song.id}')" class="btn btn-outline text-frevo-orange border-frevo-orange flex-1 text-xs py-3 rounded-xl font-bold flex items-center justify-center gap-1.5 shadow-sm">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-          </svg>
-          Ouvir Prévia Sonora
-        </button>
-        <button onclick="downloadScore('${song.id}')" class="btn btn-cyan flex-1 text-xs rounded-xl shadow-md py-3 font-bold flex items-center justify-center gap-2">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7 10 12 15 17 10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-          </svg>
-          Baixar PDF Real
+      <!-- Barra de andamento e prévia sonora -->
+      <div class="flex items-center justify-between px-4 py-2.5 bg-surface-soft rounded-xl text-xs font-medium text-ink-soft border border-gray-100 flex-wrap gap-2">
+        <div class="flex items-center gap-2 text-xs flex-wrap">
+          <span class="w-2.5 h-2.5 rounded-full ${isPlayingThis ? 'bg-frevo-red animate-ping' : 'bg-frevo-green animate-pulse'}"></span>
+          <span>Andamento: <strong>${profile.tempoLabel}</strong></span>
+          <span class="text-gray-300">•</span>
+          <span>Tom: <strong>${profile.key}</strong></span>
+        </div>
+        <button onclick="playFrevoAudioPreview('${song.id}')" class="btn ${isPlayingThis ? 'bg-frevo-red text-white' : 'bg-white border border-gray-200 hover:border-frevo-orange text-frevo-orange'} text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 shadow-sm transition-all">
+          ${isPlayingThis
+            ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg> Parar`
+            : `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Ouvir Prévia`}
         </button>
       </div>
+
+      <!-- Folha de Partitura Real com Pentagrama SVG -->
+      <div class="real-sheet-canvas p-4 space-y-3 shadow-inner overflow-y-auto" style="max-height: 320px;">
+        <div class="text-center pb-2 border-b border-stone-300">
+          <span class="text-[9px] tracking-widest uppercase text-stone-500 font-bold block mb-0.5">Sociedade dos Músicos do Frevo de Pernambuco</span>
+          <h4 class="text-xl font-serif font-black text-stone-900 tracking-wider uppercase">${song.title}</h4>
+          <span class="text-[11px] font-serif italic text-stone-700">Composição &amp; Arranjo: ${song.artist} • ${profile.lead}</span>
+        </div>
+        <div class="space-y-3">
+          ${renderStaveSvgHtml(profile.stave1, profile.keyAccidentals, profile.stave1Title)}
+          ${renderStaveSvgHtml(profile.stave2, profile.keyAccidentals, profile.stave2Title)}
+        </div>
+        <div class="pt-3 border-t border-stone-300">
+          <h4 class="font-serif font-bold text-xs uppercase tracking-wider text-stone-800 mb-1.5">Letra Oficial &amp; Diretrizes de Regência</h4>
+          <div class="bg-white/80 p-3 rounded-xl border border-stone-200 text-xs font-serif text-stone-800 whitespace-pre-line leading-relaxed">
+            ${song.lyrics || 'Instrumental — Frevo com arranjo para saxofones, trompetes, trombones de vara, tuba e percussão de surdo e tarol.'}
+          </div>
+        </div>
+      </div>
+
+      <button onclick="downloadScore('${song.id}')" class="btn btn-cyan w-full text-xs rounded-xl shadow-md py-3 font-bold flex items-center justify-center gap-2">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        Baixar Partitura em PDF
+      </button>
     </div>
   `;
 
   modal.classList.add('open');
 }
+
 
 function downloadScore(songId) {
   const song = DB.songs.find(s => s.id === songId) || { id: songId, title: 'Frevo da Saudade', artist: 'Maestro do Frevo', genre: 'Frevo de Rua', downloads_count: 120 };
