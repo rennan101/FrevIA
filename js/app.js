@@ -459,14 +459,18 @@ let currentUserSession = {
   avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
   email: '',
   artist_id: null,
-  favorites: ['a1'] // IDs dos artistas favoritados
+  favorites: ['a1'], // IDs dos artistas favoritados
+  saved_scores: ['s1000000-0000-0000-0000-000000000001', 's3000000-0000-0000-0000-000000000003'] // IDs das partituras salvas
 };
 
 // Carregar sessão salva do LocalStorage se houver
 const savedSession = localStorage.getItem('frevai_user_session');
 if (savedSession) {
   try {
-    currentUserSession = JSON.parse(savedSession);
+    currentUserSession = Object.assign(currentUserSession, JSON.parse(savedSession));
+    if (!currentUserSession.saved_scores) {
+      currentUserSession.saved_scores = ['s1000000-0000-0000-0000-000000000001', 's3000000-0000-0000-0000-000000000003'];
+    }
   } catch (e) {}
 }
 
@@ -1609,34 +1613,313 @@ function appendMoreArtists() {
   }
 }
 
-// Render HTML de Partitura / Música
+// Estado da Partitura Selecionada para o Visualizador Desktop
+let selectedSongId = 's1000000-0000-0000-0000-000000000001';
+
+// Salvar / Favoritar Partitura
+function toggleSaveScore(songId) {
+  if (!currentUserSession.saved_scores) {
+    currentUserSession.saved_scores = [];
+  }
+  const idx = currentUserSession.saved_scores.indexOf(songId);
+  const isSaved = idx !== -1;
+  if (isSaved) {
+    currentUserSession.saved_scores.splice(idx, 1);
+  } else {
+    currentUserSession.saved_scores.push(songId);
+  }
+  saveCurrentSession();
+  
+  // Atualizar visualização do Feed/Partituras e Perfil
+  renderSongs();
+  renderProfileGallery();
+}
+
+// Selecionar Partitura para o Leitor no Desktop
+function selectSongForDesktopViewer(songId) {
+  selectedSongId = songId;
+  document.querySelectorAll('.song-card-item').forEach(el => {
+    if (el.dataset.songId === songId) {
+      el.classList.add('selected');
+    } else {
+      el.classList.remove('selected');
+    }
+  });
+  renderSongsDesktopViewer(songId);
+}
+
+// Render HTML de Card de Partitura (com Botão de Salvar e Seleção no Desktop)
 function renderSongCardHtml(song) {
+  const isSelected = song.id === selectedSongId;
+  const isSaved = (currentUserSession.saved_scores || []).includes(song.id);
+
   return `
-    <div class="bg-white border border-line-strong rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-sm infinite-scroll-item">
+    <div onclick="selectSongForDesktopViewer('${song.id}')" data-song-id="${song.id}" class="song-card-item bg-white border ${isSelected ? 'border-frevo-orange ring-2 ring-frevo-orange/30 bg-orange-50/20' : 'border-gray-200'} rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-sm hover:shadow-md transition-all infinite-scroll-item cursor-pointer">
       <div>
         <div class="flex items-center justify-between mb-1.5">
-          <span class="badge bg-frevo-cyan/20 text-ink text-xs font-bold">${song.genre}</span>
-          <span class="badge bg-gray-100 text-muted text-[10px] font-mono font-bold">${song.downloads_count || 120} downloads</span>
+          <span class="badge bg-frevo-cyan/15 text-frevo-cyan text-xs font-bold">${song.genre}</span>
+          <div class="flex items-center gap-1.5">
+            <span class="badge bg-gray-100 text-muted text-[10px] font-mono font-bold">${song.downloads_count || 120} downloads</span>
+            <button onclick="event.stopPropagation(); toggleSaveScore('${song.id}')" class="p-1.5 rounded-lg text-frevo-orange hover:bg-orange-50 transition-colors" title="${isSaved ? 'Remover dos Salvos' : 'Salvar Partitura'}" aria-label="Salvar Partitura">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="${isSaved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+            </button>
+          </div>
         </div>
-        <h3 class="font-display font-bold text-xl text-ink">${song.title}</h3>
-        <p class="text-xs font-bold text-frevo-orange mb-2">${song.artist}</p>
-        <p class="text-xs text-ink-soft mb-3 leading-relaxed">${song.description}</p>
-        
-        <div class="p-3 rounded-xl bg-surface-soft border border-line text-xs font-mono text-ink-soft whitespace-pre-line max-h-24 overflow-y-auto mb-3">
-          ${song.lyrics}
+        <h3 class="font-display font-bold text-lg text-ink leading-snug">${song.title}</h3>
+        <p class="text-xs font-bold text-frevo-orange mb-1.5">${song.artist}</p>
+        <p class="text-xs text-ink-soft mb-2.5 leading-relaxed line-clamp-2">${song.description}</p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 pt-2 border-t border-gray-100">
+        <button onclick="event.stopPropagation(); openScoreModal('${song.title}', '${song.artist}', '${song.id}')" class="btn btn-outline text-xs py-2 rounded-xl font-bold flex items-center justify-center gap-1.5">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          Ver Detalhes
+        </button>
+        <button onclick="event.stopPropagation(); downloadScore('${song.id}')" class="btn btn-cyan text-xs font-bold py-2 rounded-xl shadow-sm flex items-center justify-center gap-1.5">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Baixar PDF
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+// Renderizar o Visualizador de Partitura Real no Desktop (Split Screen)
+function renderSongsDesktopViewer(songId) {
+  const viewer = document.getElementById('songs-desktop-viewer');
+  if (!viewer) return;
+
+  const song = DB.songs.find(s => s.id === songId) || DB.songs[0];
+  if (!song) {
+    viewer.innerHTML = `
+      <div class="p-12 text-center text-muted">
+        <p class="text-sm font-bold">Selecione uma partitura ao lado para visualizar.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const isSaved = (currentUserSession.saved_scores || []).includes(song.id);
+
+  viewer.innerHTML = `
+    <div class="p-6 space-y-4 text-left">
+      <!-- Cabeçalho da Partitura & Ações -->
+      <div class="flex items-start justify-between pb-3 border-b border-gray-100 gap-4">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="badge bg-frevo-cyan/15 text-frevo-cyan text-xs font-bold">${song.genre}</span>
+            <span class="badge bg-gray-100 text-muted text-[11px] font-mono font-bold">${song.downloads_count || 120} downloads</span>
+            <span class="badge bg-frevo-orange/15 text-frevo-orange text-[10px] font-bold">Autêntica • 2/4</span>
+          </div>
+          <h2 class="font-display font-black text-2xl text-ink leading-tight">${song.title}</h2>
+          <p class="text-xs font-bold text-frevo-orange mt-0.5">${song.artist}</p>
+        </div>
+
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <button onclick="toggleSaveScore('${song.id}')" class="btn ${isSaved ? 'bg-orange-500 text-white shadow-md' : 'btn-outline text-frevo-orange border-frevo-orange'} text-xs px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="${isSaved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+            ${isSaved ? 'Salva' : 'Salvar'}
+          </button>
+          <button onclick="downloadScore('${song.id}')" class="btn btn-cyan text-xs px-4 py-2 rounded-xl font-bold shadow-sm flex items-center gap-1.5">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Baixar PDF Real
+          </button>
         </div>
       </div>
 
-      <button onclick="openScoreModal('${song.title}', '${song.artist}', '${song.id}')" class="btn btn-cyan w-full text-xs font-bold py-2.5 rounded-xl shadow-sm flex items-center justify-center gap-2">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-          <polyline points="7 10 12 15 17 10"></polyline>
-          <line x1="12" y1="15" x2="12" y2="3"></line>
-        </svg>
-        Baixar Partitura em PDF
-      </button>
+      <!-- Barra de Ferramentas / Prévia Sonora -->
+      <div class="flex items-center justify-between px-4 py-2.5 bg-surface-soft rounded-xl text-xs font-medium text-ink-soft border border-gray-100">
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-2.5 h-2.5 rounded-full bg-frevo-green animate-pulse"></span>
+          <span>Andamento: <strong>Allegro Vivace (152 BPM)</strong></span>
+          <span class="text-gray-300">•</span>
+          <span>Tom: <strong>Ré Maior / Sol Menor</strong></span>
+        </div>
+        <button onclick="playFrevoAudioPreview('${song.title.replace(/'/g, "\\'")}')" class="btn bg-white border border-gray-200 hover:border-frevo-orange text-frevo-orange text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 shadow-sm transition-all">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          Ouvir Arranjo Musical
+        </button>
+      </div>
+
+      <!-- Folha de Partitura Real Estilizada (Página Musical Autêntica) -->
+      <div class="real-sheet-canvas p-6 space-y-5 shadow-inner max-h-[520px] overflow-y-auto">
+        <div class="text-center pb-2 border-b border-stone-300">
+          <span class="text-[10px] tracking-widest uppercase text-stone-500 font-bold block mb-1">Sociedade dos Músicos do Frevo de Pernambuco</span>
+          <h3 class="text-2xl font-serif font-black text-stone-900 tracking-wider uppercase">${song.title}</h3>
+          <span class="text-xs font-serif italic text-stone-700">Composição & Arranjo: ${song.artist}</span>
+        </div>
+
+        <!-- Pentagramas e Pautas Musicais em SVG Real -->
+        <div class="space-y-4">
+          <!-- Pauta 1 -->
+          <div class="relative bg-white/70 p-2.5 rounded-lg border border-stone-200 shadow-sm">
+            <svg class="w-full h-16" viewBox="0 0 500 50">
+              <!-- 5 Linhas da Pauta -->
+              <line x1="0" y1="10" x2="500" y2="10" class="real-sheet-stave"/>
+              <line x1="0" y1="18" x2="500" y2="18" class="real-sheet-stave"/>
+              <line x1="0" y1="26" x2="500" y2="26" class="real-sheet-stave"/>
+              <line x1="0" y1="34" x2="500" y2="34" class="real-sheet-stave"/>
+              <line x1="0" y1="42" x2="500" y2="42" class="real-sheet-stave"/>
+              
+              <!-- Clave de Sol 𝄞 -->
+              <text x="5" y="38" font-size="34" font-family="serif" font-weight="bold" fill="#171717">𝄞</text>
+              <!-- Compasso 2/4 -->
+              <text x="32" y="24" font-size="14" font-family="serif" font-weight="bold" fill="#171717">2</text>
+              <text x="32" y="38" font-size="14" font-family="serif" font-weight="bold" fill="#171717">4</text>
+              
+              <!-- Barras de Compasso -->
+              <line x1="140" y1="10" x2="140" y2="42" class="real-sheet-barline"/>
+              <line x1="260" y1="10" x2="260" y2="42" class="real-sheet-barline"/>
+              <line x1="380" y1="10" x2="380" y2="42" class="real-sheet-barline"/>
+              <line x1="496" y1="10" x2="496" y2="42" class="real-sheet-barline" stroke-width="2.5"/>
+
+              <!-- Notas Compasso 1 (Colcheias & Sincopado) -->
+              <circle cx="56" cy="26" r="4" class="real-sheet-note"/>
+              <line x1="60" y1="26" x2="60" y2="8" stroke="#171717" stroke-width="1.8"/>
+              <circle cx="78" cy="18" r="4" class="real-sheet-note"/>
+              <line x1="82" y1="18" x2="82" y2="2" stroke="#171717" stroke-width="1.8"/>
+              <line x1="60" y1="6" x2="82" y2="6" stroke="#171717" stroke-width="3"/>
+
+              <circle cx="102" cy="18" r="4" class="real-sheet-note"/>
+              <line x1="106" y1="18" x2="106" y2="4" stroke="#171717" stroke-width="1.8"/>
+              <circle cx="122" cy="10" r="4" class="real-sheet-note"/>
+              <line x1="126" y1="10" x2="126" y2="0" stroke="#171717" stroke-width="1.8"/>
+              <line x1="106" y1="3" x2="126" y2="3" stroke="#171717" stroke-width="3"/>
+
+              <!-- Notas Compasso 2 -->
+              <circle cx="165" cy="10" r="4" class="real-sheet-note"/>
+              <line x1="169" y1="10" x2="169" y2="-4" stroke="#171717" stroke-width="1.8"/>
+              <circle cx="195" cy="18" r="4" class="real-sheet-note"/>
+              <line x1="199" y1="18" x2="199" y2="4" stroke="#171717" stroke-width="1.8"/>
+              <circle cx="225" cy="26" r="4" class="real-sheet-note"/>
+              <line x1="229" y1="26" x2="229" y2="10" stroke="#171717" stroke-width="1.8"/>
+
+              <!-- Notas Compasso 3 (Frase de Trombone) -->
+              <circle cx="285" cy="34" r="4" class="real-sheet-note"/>
+              <line x1="289" y1="34" x2="289" y2="18" stroke="#171717" stroke-width="1.8"/>
+              <circle cx="315" cy="26" r="4" class="real-sheet-note"/>
+              <line x1="319" y1="26" x2="319" y2="10" stroke="#171717" stroke-width="1.8"/>
+              <circle cx="345" cy="18" r="4" class="real-sheet-note"/>
+              <line x1="349" y1="18" x2="349" y2="4" stroke="#171717" stroke-width="1.8"/>
+
+              <!-- Notas Compasso 4 (Cadência Final com Dinâmica ff) -->
+              <circle cx="410" cy="10" r="4.5" class="real-sheet-note"/>
+              <line x1="414" y1="10" x2="414" y2="-4" stroke="#171717" stroke-width="2"/>
+              <circle cx="450" cy="18" r="5" class="real-sheet-note" fill="none" stroke="#171717" stroke-width="2"/>
+              <line x1="455" y1="18" x2="455" y2="2" stroke="#171717" stroke-width="2"/>
+              <text x="470" y="46" font-size="11" font-family="serif" font-style="italic" font-weight="bold" fill="#C53030">ff</text>
+            </svg>
+          </div>
+
+          <!-- Pauta 2 -->
+          <div class="relative bg-white/70 p-2.5 rounded-lg border border-stone-200 shadow-sm">
+            <svg class="w-full h-16" viewBox="0 0 500 50">
+              <line x1="0" y1="10" x2="500" y2="10" class="real-sheet-stave"/>
+              <line x1="0" y1="18" x2="500" y2="18" class="real-sheet-stave"/>
+              <line x1="0" y1="26" x2="500" y2="26" class="real-sheet-stave"/>
+              <line x1="0" y1="34" x2="500" y2="34" class="real-sheet-stave"/>
+              <line x1="0" y1="42" x2="500" y2="42" class="real-sheet-stave"/>
+              
+              <text x="5" y="38" font-size="34" font-family="serif" font-weight="bold" fill="#171717">𝄞</text>
+              
+              <line x1="140" y1="10" x2="140" y2="42" class="real-sheet-barline"/>
+              <line x1="260" y1="10" x2="260" y2="42" class="real-sheet-barline"/>
+              <line x1="380" y1="10" x2="380" y2="42" class="real-sheet-barline"/>
+              <line x1="496" y1="10" x2="496" y2="42" class="real-sheet-barline" stroke-width="2.5"/>
+
+              <circle cx="50" cy="18" r="4" class="real-sheet-note"/>
+              <line x1="54" y1="18" x2="54" y2="2" stroke="#171717" stroke-width="1.8"/>
+              <circle cx="70" cy="10" r="4" class="real-sheet-note"/>
+              <line x1="74" y1="10" x2="74" y2="-4" stroke="#171717" stroke-width="1.8"/>
+              <circle cx="90" cy="18" r="4" class="real-sheet-note"/>
+              <line x1="94" y1="18" x2="94" y2="2" stroke="#171717" stroke-width="1.8"/>
+              <circle cx="110" cy="26" r="4" class="real-sheet-note"/>
+              <line x1="114" y1="26" x2="114" y2="10" stroke="#171717" stroke-width="1.8"/>
+
+              <circle cx="165" cy="18" r="4" class="real-sheet-note"/>
+              <line x1="169" y1="18" x2="169" y2="2" stroke="#171717" stroke-width="1.8"/>
+              <circle cx="205" cy="10" r="4" class="real-sheet-note"/>
+              <line x1="209" y1="10" x2="209" y2="-4" stroke="#171717" stroke-width="1.8"/>
+
+              <circle cx="285" cy="10" r="4" class="real-sheet-note"/>
+              <line x1="289" y1="10" x2="289" y2="-4" stroke="#171717" stroke-width="1.8"/>
+              <circle cx="325" cy="18" r="4" class="real-sheet-note"/>
+              <line x1="329" y1="18" x2="329" y2="2" stroke="#171717" stroke-width="1.8"/>
+
+              <circle cx="410" cy="18" r="5" class="real-sheet-note" fill="none" stroke="#171717" stroke-width="2"/>
+              <line x1="415" y1="18" x2="415" y2="2" stroke="#171717" stroke-width="2"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Letra da Música / Diretrizes de Interpretação -->
+        <div class="pt-3 border-t border-stone-300">
+          <h4 class="font-serif font-bold text-xs uppercase tracking-wider text-stone-800 mb-1.5">Letra Oficial & Diretrizes de Regência</h4>
+          <div class="bg-white/80 p-3.5 rounded-xl border border-stone-200 text-xs font-serif text-stone-800 whitespace-pre-line leading-relaxed">
+            ${song.lyrics || 'Instrumental — Frevo de Rua com arranjo para saxofones, trompetes, trombones de vara, tuba e percussão de surdo e tarol.'}
+          </div>
+        </div>
+      </div>
     </div>
   `;
+}
+
+// Sintetizador Web Audio API: Tocar Prévia Sonora do Frevo Instantaneamente
+function playFrevoAudioPreview(songTitle) {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+
+    // Notas da fanfarra de Frevo (Trompetes e Metais em Ré Maior)
+    const notes = [
+      { freq: 293.66, dur: 0.12, type: 'sawtooth' }, // D4
+      { freq: 369.99, dur: 0.12, type: 'sawtooth' }, // F#4
+      { freq: 440.00, dur: 0.16, type: 'sawtooth' }, // A4
+      { freq: 587.33, dur: 0.28, type: 'sawtooth' }, // D5
+      { freq: 554.37, dur: 0.14, type: 'sawtooth' }, // C#5
+      { freq: 587.33, dur: 0.35, type: 'sawtooth' }  // D5 sustenta
+    ];
+
+    let now = ctx.currentTime;
+
+    notes.forEach(n => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = n.type;
+      osc.frequency.setValueAtTime(n.freq, now);
+
+      gain.gain.setValueAtTime(0.18, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + n.dur);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + n.dur);
+      now += n.dur + 0.04;
+    });
+
+  } catch (err) {
+    console.log('[WebAudio] Prévia não suportada:', err);
+  }
 }
 
 function renderSongs(filterQuery = '') {
@@ -1659,14 +1942,21 @@ function renderSongs(filterQuery = '') {
         <p class="text-[11px] text-muted">Tente buscar por outro termo, compositor ou gênero.</p>
       </div>
     `;
+    const viewer = document.getElementById('songs-desktop-viewer');
+    if (viewer) viewer.innerHTML = '';
     return;
+  }
+
+  // Garantir que a primeira partitura esteja sempre selecionada no Desktop
+  if (!selectedSongId || !filtered.some(s => s.id === selectedSongId)) {
+    selectedSongId = filtered[0].id;
   }
 
   InfiniteScrollManager.reset('songs');
   const initialSongs = filtered.slice(0, InfiniteScrollManager.state.songs.limit);
 
   container.innerHTML = `
-    <div id="songs-stream" class="space-y-4">
+    <div id="songs-stream" class="space-y-3.5">
       ${initialSongs.map(song => renderSongCardHtml(song)).join('')}
     </div>
     <div id="sentinel-songs" class="infinite-scroll-sentinel" data-view="songs">
@@ -1678,6 +1968,9 @@ function renderSongs(filterQuery = '') {
       ` : ''}
     </div>
   `;
+
+  // Renderizar a partitura ativa no leitor desktop
+  renderSongsDesktopViewer(selectedSongId);
 
   const sentinel = document.getElementById('sentinel-songs');
   if (sentinel && filtered.length > initialSongs.length) {
@@ -2041,49 +2334,105 @@ function renderProfileGallery() {
     return;
   }
 
-  // 2. ABA DE PUBLICAÇÕES SALVAS DO FEED
+  // 2. ABA DE ITENS SALVOS (PARTITURAS E PUBLICAÇÕES DO FEED)
   if (currentProfileTab === 'saved') {
     const savedPosts = DB.posts.filter(p => p.is_saved);
+    const savedScores = DB.songs.filter(s => (currentUserSession.saved_scores || []).includes(s.id));
+    const totalSaved = savedPosts.length + savedScores.length;
 
     container.innerHTML = `
-      <div class="space-y-3 pb-6">
-        <div class="flex items-center justify-between px-1">
-          <span class="text-xs font-bold text-ink">Publicações Salvas (${savedPosts.length})</span>
-          <button onclick="switchView('feed')" class="text-xs font-bold text-frevo-cyan hover:underline">Ver Feed</button>
-        </div>
+      <div class="space-y-5 pb-6">
+        <!-- Partituras & Músicas Salvas -->
+        <div>
+          <div class="flex items-center justify-between px-1 mb-2">
+            <span class="text-xs font-bold text-ink flex items-center gap-1.5">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16C7D9" stroke-width="2.5">
+                <rect x="3" y="3" width="18" height="18" rx="6"></rect>
+                <line x1="12" y1="8" x2="12" y2="16"></line>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+              </svg>
+              Partituras Salvas (${savedScores.length})
+            </span>
+            <button onclick="switchView('songs')" class="text-xs font-bold text-frevo-orange hover:underline">+ Explorar Partituras</button>
+          </div>
 
-        ${savedPosts.length > 0 ? `
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            ${savedPosts.map(post => `
-              <div class="bg-white border border-gray-200 rounded-2xl p-3 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
-                <div onclick="handleNotificationClick(null, 'post', '${post.id}')" class="flex items-center gap-3 min-w-0 cursor-pointer flex-1 mr-2">
-                  <img src="${post.image}" alt="${post.title}" class="w-12 h-12 rounded-xl object-cover flex-shrink-0" />
-                  <div class="min-w-0 flex-1">
-                    <h4 class="font-bold text-xs text-ink truncate">${post.title}</h4>
-                    <span class="text-[11px] text-muted truncate block">${post.author}</span>
+          ${savedScores.length > 0 ? `
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              ${savedScores.map(song => `
+                <div class="bg-white border border-gray-200 rounded-2xl p-3.5 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow">
+                  <div class="space-y-1 mb-2.5">
+                    <div class="flex items-center justify-between">
+                      <span class="badge bg-frevo-cyan/15 text-frevo-cyan text-[10px] font-bold">${song.genre}</span>
+                      <button onclick="toggleSaveScore('${song.id}')" class="p-1 text-frevo-orange hover:text-gray-400" title="Remover dos Salvos">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1">
+                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                      </button>
+                    </div>
+                    <h4 class="font-bold text-xs text-ink truncate">${song.title}</h4>
+                    <p class="text-[11px] text-frevo-orange font-semibold truncate">${song.artist}</p>
+                    <p class="text-[10px] text-muted line-clamp-1">${song.description}</p>
+                  </div>
+                  <div class="grid grid-cols-2 gap-1.5 pt-2 border-t border-gray-100">
+                    <button onclick="switchView('songs'); selectSongForDesktopViewer('${song.id}');" class="btn btn-outline text-[11px] py-1.5 rounded-xl font-bold">
+                      Visualizar
+                    </button>
+                    <button onclick="downloadScore('${song.id}')" class="btn btn-cyan text-[11px] py-1.5 rounded-xl font-bold flex items-center justify-center gap-1">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                      </svg>
+                      PDF
+                    </button>
                   </div>
                 </div>
-                <div class="flex items-center gap-1.5 flex-shrink-0">
-                  <button onclick="toggleSave('${post.id}')" class="btn btn-outline text-xs px-2.5 py-1 rounded-xl text-frevo-red hover:bg-red-50 font-bold whitespace-nowrap">
-                    Remover
-                  </button>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        ` : `
-          <div class="p-8 text-center bg-white rounded-2xl border border-gray-200 shadow-sm">
-            <div class="w-12 h-12 rounded-full bg-frevo-cyan/15 text-frevo-cyan mx-auto flex items-center justify-center mb-3">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              `).join('')}
+            </div>
+          ` : `
+            <div class="p-4 text-center bg-white rounded-2xl border border-dashed border-gray-200">
+              <p class="text-xs text-muted">Nenhuma partitura salva ainda. Toque no ícone de salvar em qualquer partitura!</p>
+            </div>
+          `}
+        </div>
+
+        <!-- Publicações Salvas do Feed -->
+        <div class="pt-2 border-t border-gray-100">
+          <div class="flex items-center justify-between px-1 mb-2">
+            <span class="text-xs font-bold text-ink flex items-center gap-1.5">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7447E8" stroke-width="2.5">
                 <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
               </svg>
-            </div>
-            <p class="text-xs text-muted mb-3 font-medium">Você ainda não salvou nenhuma publicação do feed.</p>
-            <button onclick="switchView('feed')" class="btn btn-cyan text-xs px-4 py-2 rounded-xl font-bold">
-              Ir para o Feed Cultural
-            </button>
+              Publicações Salvas (${savedPosts.length})
+            </span>
+            <button onclick="switchView('feed')" class="text-xs font-bold text-frevo-cyan hover:underline">Ver Feed</button>
           </div>
-        `}
+
+          ${savedPosts.length > 0 ? `
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              ${savedPosts.map(post => `
+                <div class="bg-white border border-gray-200 rounded-2xl p-3 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
+                  <div onclick="handleNotificationClick(null, 'post', '${post.id}')" class="flex items-center gap-3 min-w-0 cursor-pointer flex-1 mr-2">
+                    <img src="${post.image}" alt="${post.title}" class="w-12 h-12 rounded-xl object-cover flex-shrink-0" />
+                    <div class="min-w-0 flex-1">
+                      <h4 class="font-bold text-xs text-ink truncate">${post.title}</h4>
+                      <span class="text-[11px] text-muted truncate block">${post.author}</span>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-1.5 flex-shrink-0">
+                    <button onclick="toggleSave('${post.id}')" class="btn btn-outline text-xs px-2.5 py-1 rounded-xl text-frevo-red hover:bg-red-50 font-bold whitespace-nowrap">
+                      Remover
+                    </button>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          ` : `
+            <div class="p-4 text-center bg-white rounded-2xl border border-dashed border-gray-200">
+              <p class="text-xs text-muted">Você ainda não salvou publicações do feed.</p>
+            </div>
+          `}
+        </div>
       </div>
     `;
     return;
@@ -3233,9 +3582,18 @@ function updateProfileUI() {
     if (scoresTabBtn) {
       scoresTabBtn.style.display = isArtistOrAdmin ? 'inline-flex' : 'none';
     }
-    const savedTabBtn = profileTabs.querySelector('.tab-saved');
-    if (savedTabBtn && !isArtistOrAdmin) {
-      savedTabBtn.classList.add('active');
+    
+    // Garantir que APENAS uma aba esteja ativa no carregamento do perfil
+    profileTabs.querySelectorAll('.profile-tab-btn').forEach(btn => btn.classList.remove('active'));
+    if (!isArtistOrAdmin && currentProfileTab === 'scores') {
+      currentProfileTab = 'favorites';
+    }
+    const currentTabBtn = profileTabs.querySelector(`.profile-tab-btn.tab-${currentProfileTab}`);
+    if (currentTabBtn) {
+      currentTabBtn.classList.add('active');
+    } else {
+      const favBtn = profileTabs.querySelector('.profile-tab-btn.tab-favorites');
+      if (favBtn) favBtn.classList.add('active');
     }
   }
 }

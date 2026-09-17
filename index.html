@@ -246,7 +246,7 @@
       </div>
     </section>
 
-    <!-- 4. VIEW: MÚSICAS & PARTITURAS -->
+    <!-- 4. VIEW: MÚSICAS & PARTITURAS (SPLIT SCREEN NO DESKTOP WEB COM LEITOR PDF) -->
     <section id="view-songs" class="view-section max-w-md mx-auto px-4 py-3 space-y-4">
       <div class="pb-2 border-b border-gray-200 relative flex items-center justify-center min-h-[44px]">
         <button onclick="switchView('feed')" class="btn-back-header absolute left-0" aria-label="Voltar para Home" title="Voltar">
@@ -277,7 +277,15 @@
         />
       </div>
 
-      <div class="space-y-4" id="songs-grid"></div>
+      <!-- Split Layout no Desktop: Lista à Esquerda e Visualizador PDF/Partitura Real à Direita -->
+      <div class="songs-split-layout">
+        <div class="songs-list-col">
+          <div class="space-y-3.5" id="songs-grid"></div>
+        </div>
+        <div class="songs-viewer-col" id="songs-desktop-viewer">
+          <!-- Renderizado via JS no Desktop -->
+        </div>
+      </div>
     </section>
 
     <!-- 5. VIEW: PASSOS DE FREVO -->
@@ -504,17 +512,6 @@
       </svg>
       <span class="nav-label hidden">Meu Perfil</span>
     </button>
-
-    <!-- Rodapé da Sidebar no Desktop -->
-    <div class="sidebar-footer mt-auto pt-4 border-t border-gray-100 hidden">
-      <div class="p-3 rounded-2xl bg-orange-50 border border-orange-100/80">
-        <div class="flex items-center gap-2 mb-1">
-          <span class="w-2 h-2 rounded-full bg-frevo-orange animate-pulse"></span>
-          <span class="text-[11px] font-bold text-frevo-orange uppercase tracking-wider">FrevAI Web</span>
-        </div>
-        <p class="text-[11px] text-ink-soft leading-tight">O universo do Frevo no seu navegador.</p>
-      </div>
-    </div>
   </nav>
 
   <!-- =========================================================================
