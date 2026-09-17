@@ -9,7 +9,7 @@ const DB = {
       name: 'Maestro Forró',
       handle: '@maestroforro',
       genre: 'Frevo Livre',
-      bio: 'Regente e arranjador à frente da OPBH. Transformando o Frevo com fusões globais e energia visceral.',
+      bio: 'Regente, compositor e arranjador à frente da OPBH (Orquestra Popular da Bomba do Hemetério). Revolucionando o Frevo através de fusões rítmicas globais com jazz, maracatu e música sinfônica contemporânea.',
       avatar_url: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80',
       cover_url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80',
       email: 'forro@cultura.pe.gov.br',
@@ -19,10 +19,10 @@ const DB = {
     },
     {
       id: 'a2',
-      name: 'SpokFrevo',
+      name: 'SpokFrevo Orquestra',
       handle: '@spokfrevo',
       genre: 'Frevo de Rua',
-      bio: 'Liderada pelo saxofonista Spok, elevando o Frevo instrumental ao circuito mundial do jazz.',
+      bio: 'Comandada pelo virtuoso saxofonista e maestro Spok, a big band de 18 músicos eleva o Frevo de Rua instrumental ao circuito dos maiores festivais internacionais de jazz com técnica e improvisações viscerais.',
       avatar_url: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=400&q=80',
       cover_url: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=1200&q=80',
       email: 'spok@cultura.pe.gov.br',
@@ -35,7 +35,7 @@ const DB = {
       name: 'Bloco da Saudade',
       handle: '@blocodasaudade',
       genre: 'Frevo de Bloco',
-      bio: 'Tradição dos blocos líricos de pau e corda do Recife desde 1974 com coro feminino e poesia.',
+      bio: 'Fundado em 1974 para reviver os tradicionais blocos líricos de pau e corda do Recife. Composto por coro feminino impecável, violões, banjos, cavaquinhos, flautas e clarinetes inspirados na poesia carnavalesca.',
       avatar_url: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=400&q=80',
       cover_url: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=1200&q=80',
       email: 'saudade@cultura.pe.gov.br',
@@ -48,7 +48,7 @@ const DB = {
       name: 'Claudionor Germano',
       handle: '@claudionorgermano',
       genre: 'Frevo Canção',
-      bio: 'Patrimônio Vivo de Pernambuco, a mais marcante voz dos frevos de Capiba e Nelson Ferreira.',
+      bio: 'Patrimônio Vivo de Pernambuco. A voz definitiva dos frevos de Capiba e Nelson Ferreira. Ao longo de 70 anos de carreira gravou dezenas de discos icônicos celebrando a memória e a alma do carnaval do Recife.',
       avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
       cover_url: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=1200&q=80',
       email: 'claudionor@cultura.pe.gov.br',
@@ -61,13 +61,26 @@ const DB = {
       name: 'Orquestra Popular da Bomba',
       handle: '@opbh_recife',
       genre: 'Frevo Contemporâneo',
-      bio: 'Nova geração de metais e percussão unindo frevo de rua e ritmos afro-brasileiros.',
+      bio: 'Coletivo de jovens instrumentistas e percussionistas da Bomba do Hemetério no Recife. Exploram novas harmonias, metais velozes e a pulsação contagiante do frevo de rua para as novas gerações.',
       avatar_url: 'https://images.unsplash.com/photo-1520523839898-507127053c37?auto=format&fit=crop&w=400&q=80',
       cover_url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80',
       email: 'contato@opbh.com.br',
       phone: '+55 (81) 99876-5555',
-      is_approved: false, // Pendente de moderação CMS
-      has_story: false,
+      is_approved: true,
+      has_story: true,
+    },
+    {
+      id: 'a6',
+      name: 'Giselle Andrade',
+      handle: '@gisellepassista',
+      genre: 'Dança & Passos de Frevo',
+      bio: 'Passista premiada, coreógrafa e pesquisadora corporal do Frevo. Diretora de oficinas no Paço do Frevo, dedicando sua trajetória à formação de passistas e inovação dos passos acrobáticos pernambucanos.',
+      avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      cover_url: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=1200&q=80',
+      email: 'giselle@passistaspe.org',
+      phone: '+55 (81) 99876-6666',
+      is_approved: true,
+      has_story: true,
     }
   ],
 
@@ -115,7 +128,7 @@ const DB = {
     },
     {
       id: 'p3',
-      author: 'SpokFrevo',
+      author: 'SpokFrevo Orquestra',
       handle: 'spokfrevo',
       avatar: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=400&q=80',
       image: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=1000&q=80',
@@ -136,51 +149,183 @@ const DB = {
   songs: [
     {
       id: 's1',
-      title: 'Vassourinhas',
-      artist: 'Matias da Rocha & Joana Batista',
-      genre: 'Frevo de Rua',
-      description: 'O mais emblemático e executado frevo instrumental de todos os tempos.',
-      lyrics: '(Instrumental - Execução enérgica de sopros e percussão sincopada)',
-      score_file: 'vassourinhas-orquestra.pdf',
+      title: 'Passo da Fervura',
+      artist: 'Maestro Forró',
+      genre: 'Frevo Livre',
+      description: 'Arranjo completo para saxofones, trompetes e base rítmica sincopada.',
+      lyrics: '(Instrumental - Diálogo dinâmico entre naipes de metais e percussão de rua)',
+      score_file: 'passo-da-fervura-metais.pdf',
       status: 'published',
       downloads_count: 1420,
       author_id: 'a1'
     },
     {
       id: 's2',
-      title: 'Madeira Que Cupim Não Rói',
-      artist: 'Capiba',
-      genre: 'Frevo de Bloco',
-      description: 'Hino lírico da resistência e orgulho carnavalesco pernambucano.',
-      lyrics: 'Madeira do Rosário vem a ver contar / Como é que se faz pra vencer / Pernambuco é terra de cabra da peste...',
-      score_file: 'madeira-cupim-coro.pdf',
+      title: 'Fervura no Recife Antigo',
+      artist: 'Maestro Forró',
+      genre: 'Frevo de Rua',
+      description: 'Partitura orquestral com cadência acelerada executada nas ladeiras e pontes do Recife.',
+      lyrics: '(Instrumental - Clássico contemporâneo da OPBH)',
+      score_file: 'fervura-recife-antigo.pdf',
       status: 'published',
-      downloads_count: 980,
-      author_id: 'a3'
+      downloads_count: 890,
+      author_id: 'a1'
     },
     {
       id: 's3',
-      title: 'Valores do Passado',
-      artist: 'Edgar Moraes',
-      genre: 'Frevo de Bloco',
-      description: 'Poesia nostálgica sobre os antigos carnavais de pau e corda do Recife.',
-      lyrics: 'Bloco das Flores, Batutas de São José / Pavão Dourado, Flor da Lira...',
-      score_file: 'valores-do-passado.pdf',
+      title: 'Vassourinhas (Arranjo OPBH)',
+      artist: 'Maestro Forró',
+      genre: 'Frevo de Rua',
+      description: 'Releitura sinfônica vigorosa da marcha mais célebre do carnaval pernambucano.',
+      lyrics: '(Instrumental - Arranjo oficial para orquestras de frevo)',
+      score_file: 'vassourinhas-opbh.pdf',
       status: 'published',
-      downloads_count: 650,
-      author_id: 'a3'
+      downloads_count: 2150,
+      author_id: 'a1'
     },
     {
       id: 's4',
-      title: 'Frevo Mulher',
-      artist: 'Zé Ramalho',
-      genre: 'Frevo Canção',
-      description: 'Fusão antológica do frevo com a poesia telúrica nordestina.',
-      lyrics: 'Quantos aqui ouvem a voz do povo / Que vem de dentro do coração...',
-      score_file: 'frevo-mulher-metais.pdf',
+      title: 'Moraes é Frevo',
+      artist: 'SpokFrevo Orquestra',
+      genre: 'Frevo de Rua',
+      description: 'Partitura completa para Big Band com solos expressivos de sax alto.',
+      lyrics: '(Instrumental - Homenagem instrumental a Edgar Moraes com solos virtuosísticos)',
+      score_file: 'moraes-e-frevo-bigband.pdf',
       status: 'published',
-      downloads_count: 830,
-      author_id: 'a1'
+      downloads_count: 1780,
+      author_id: 'a2'
+    },
+    {
+      id: 's5',
+      title: 'Frevo Sanfonado',
+      artist: 'SpokFrevo Orquestra',
+      genre: 'Frevo Instrumental',
+      description: 'Fusão primorosa de saxofone com sanfona e naipes de trombones.',
+      lyrics: '(Instrumental - Fusão entre a tradição dos bailes e a pulsação de rua)',
+      score_file: 'frevo-sanfonado-spok.pdf',
+      status: 'published',
+      downloads_count: 1340,
+      author_id: 'a2'
+    },
+    {
+      id: 's6',
+      title: 'Passo de Anjo',
+      artist: 'SpokFrevo Orquestra',
+      genre: 'Frevo de Rua',
+      description: 'Pauta e partes orquestrais para concerto e cortejos carnavalescos.',
+      lyrics: '(Instrumental - Arranjo instrumental premiado internacionalmente)',
+      score_file: 'passo-de-anjo.pdf',
+      status: 'published',
+      downloads_count: 960,
+      author_id: 'a2'
+    },
+    {
+      id: 's7',
+      title: 'Madeira Que Cupim Não Rói',
+      artist: 'Bloco da Saudade',
+      genre: 'Frevo de Bloco',
+      description: 'Hino lírico da resistência e orgulho carnavalesco com arranjo para coro e cordas.',
+      lyrics: 'Madeira do Rosário vem a ver contar / Como é que se faz pra vencer / Pernambuco é terra de cabra da peste / Não há quem conteste o nosso valor...',
+      score_file: 'madeira-cupim-coro.pdf',
+      status: 'published',
+      downloads_count: 1980,
+      author_id: 'a3'
+    },
+    {
+      id: 's8',
+      title: 'Valores do Passado',
+      artist: 'Bloco da Saudade',
+      genre: 'Frevo de Bloco',
+      description: 'Poesia nostálgica de Edgar Moraes para flautas, clarinetes e coro feminino.',
+      lyrics: 'Bloco das Flores, Batutas de São José / Pavão Dourado, Flor da Lira / Um bloco em cada esquina a desfilar / Fazendo o coração palpitar...',
+      score_file: 'valores-do-passado.pdf',
+      status: 'published',
+      downloads_count: 1250,
+      author_id: 'a3'
+    },
+    {
+      id: 's9',
+      title: 'Minha Saudade Lírica',
+      artist: 'Bloco da Saudade',
+      genre: 'Frevo de Bloco',
+      description: 'Marcha de bloco com violões de 7 cordas, banjos e coro a quatro vozes.',
+      lyrics: 'Quanta saudade eu tenho dos carnavais de outrora / Das noites enluaradas sob os clarins da aurora...',
+      score_file: 'minha-saudade-lirica.pdf',
+      status: 'published',
+      downloads_count: 740,
+      author_id: 'a3'
+    },
+    {
+      id: 's10',
+      title: 'Voltei Recife',
+      artist: 'Claudionor Germano',
+      genre: 'Frevo Canção',
+      description: 'Melodia imortalizada com cifras e arranjo vocal para orquestra de frevo.',
+      lyrics: 'Voltei, Recife! Foi a saudade que me trouxe pelo braço / Quero rever a Rua da Aurora / O Passo da Pátria e o meu pedaço...',
+      score_file: 'voltei-recife-cifras.pdf',
+      status: 'published',
+      downloads_count: 2430,
+      author_id: 'a4'
+    },
+    {
+      id: 's11',
+      title: 'Hino de Capiba (É de Fazer Chorar)',
+      artist: 'Claudionor Germano',
+      genre: 'Frevo Canção',
+      description: 'Pauta vocal com arranjo de sopros e introdução de trompetes.',
+      lyrics: 'Quero ver quem não chora quando o frevo começa a tocar / No meio da multidão a gente não pode parar...',
+      score_file: 'hino-capiba-metais.pdf',
+      status: 'published',
+      downloads_count: 1620,
+      author_id: 'a4'
+    },
+    {
+      id: 's12',
+      title: 'Frevo Nº 1 de Nelson Ferreira',
+      artist: 'Claudionor Germano',
+      genre: 'Frevo Canção',
+      description: 'Arranjo histórico com naipe de clarinetes e percussão tradicional.',
+      lyrics: 'O frevo não é para quem quer, é para quem pode / Quando a orquestra ataca ninguém fica parado...',
+      score_file: 'frevo-num1-nelson.pdf',
+      status: 'published',
+      downloads_count: 1110,
+      author_id: 'a4'
+    },
+    {
+      id: 's13',
+      title: 'Fervura da Bomba',
+      artist: 'Orquestra Popular da Bomba',
+      genre: 'Frevo Contemporâneo',
+      description: 'Partitura enérgica com trombones em destaque e percussão de maracatu.',
+      lyrics: '(Instrumental - Ritmo afro-pernambucano com pegada urbana)',
+      score_file: 'fervura-bomba.pdf',
+      status: 'published',
+      downloads_count: 530,
+      author_id: 'a5'
+    },
+    {
+      id: 's14',
+      title: 'Clarins da Aurora',
+      artist: 'Orquestra Popular da Bomba',
+      genre: 'Frevo de Rua',
+      description: 'Abertura festiva para grupos juvenis e bandas escolares de frevo.',
+      lyrics: '(Instrumental - Ideal para ensaios de iniciação musical)',
+      score_file: 'clarins-da-aurora.pdf',
+      status: 'published',
+      downloads_count: 480,
+      author_id: 'a5'
+    },
+    {
+      id: 's15',
+      title: 'Marcha Rítmica dos Passistas',
+      artist: 'Giselle Andrade',
+      genre: 'Dança & Passos',
+      description: 'Partitura com marcação rítmica precisa para sincronização de passos acrobáticos.',
+      lyrics: '(Guia rítmico instrumental para treino do Ferrolho e Tesoura)',
+      score_file: 'marcha-passistas.pdf',
+      status: 'published',
+      downloads_count: 820,
+      author_id: 'a6'
     }
   ],
 
@@ -982,7 +1127,7 @@ function renderFeedPostHtml(post) {
         <img src="${post.image}" alt="${post.title}" loading="lazy" />
 
         <!-- Top-Left Floating Author Pill -->
-        <div class="floating-author-pill" onclick="openStoryModal('${post.author}', '${post.avatar}', '${post.location}')">
+        <div class="floating-author-pill" onclick="openArtistProfileByAuthor('${post.author}')" title="Ver perfil de ${post.author}">
           <img src="${post.avatar}" alt="${post.author}" />
           <div class="floating-author-info">
             <span class="name">${post.author}</span>
@@ -1045,16 +1190,18 @@ function renderFeedPostHtml(post) {
         </div>
 
         <!-- Formulário de Comentário Inline -->
-        <form onsubmit="submitInlineComment(event, '${post.id}')" class="flex gap-1.5 items-center pt-1 border-t border-gray-100">
+        <form onsubmit="submitInlineComment(event, '${post.id}')" class="flex gap-2 items-center pt-1 border-t border-gray-200/80">
           <input 
             type="text" 
             id="inline-comment-input-${post.id}" 
             required 
             placeholder="${currentUserSession.role === 'guest' ? 'Faça login para comentar...' : 'Escreva um comentário folião...'}" 
-            class="flex-1 px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange transition-all" 
+            class="flex-1 px-3.5 py-2 text-xs border border-gray-200 rounded-xl bg-white text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange transition-all shadow-inner" 
           />
-          <button type="submit" class="btn btn-primary text-xs px-3 py-2 rounded-xl font-bold shadow-sm flex-shrink-0">
-            Enviar
+          <button type="submit" class="btn btn-primary text-white p-2.5 rounded-xl font-bold shadow-sm flex-shrink-0 flex items-center justify-center hover:opacity-95 active:scale-95 transition-all" aria-label="Enviar comentário" title="Enviar comentário">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+            </svg>
           </button>
         </form>
       </div>
@@ -1251,118 +1398,143 @@ function appendMoreFeed() {
   }
 }
 
-// Abrir e fechar gaveta de comentários inline
+// Abrir e fechar gaveta de comentários inline com scroll elástico até o campo de texto
 function toggleCommentsDrawer(postId) {
   const drawer = document.getElementById(`comments-drawer-${postId}`);
   if (!drawer) return;
   const isOpen = drawer.classList.toggle('open');
   if (isOpen) {
-    const input = document.getElementById(`inline-comment-input-${postId}`);
-    if (input) input.focus();
+    setTimeout(() => {
+      const input = document.getElementById(`inline-comment-input-${postId}`);
+      if (input) {
+        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        input.focus();
+      }
+    }, 280);
   }
 }
 
-// Submeter comentário inline diretamente no Feed
-function submitInlineComment(event, postId) {
-  event.preventDefault();
-  if (currentUserSession.role === 'guest') {
-    alert('Crie uma conta ou faça login para comentar!');
-    openSessionModal();
-    return;
-  }
+// Modal Completo de Perfil do Artista (Visualização Pública com Obras e Partituras)
+function openArtistProfile(artistId) {
+  const artist = DB.artists.find(a => a.id === artistId || a.handle === artistId || a.name === artistId);
+  if (!artist) return;
 
-  const input = document.getElementById(`inline-comment-input-${postId}`);
-  if (!input || !input.value.trim()) return;
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+  if (!modal || !modalBody) return;
 
-  const text = input.value.trim();
-  const post = DB.posts.find(p => p.id === postId);
+  const artistSongs = DB.songs.filter(s => s.author_id === artist.id || (s.artist && s.artist.toLowerCase().includes(artist.name.toLowerCase())));
+  const isFav = (currentUserSession.favorites || []).includes(artist.id);
 
-  if (post) {
-    if (!post.comments) post.comments = [];
-    post.comments.push({
-      user: currentUserSession.name || currentUserSession.handle.replace('@', ''),
-      text: text
-    });
+  modalBody.innerHTML = `
+    <div class="text-left space-y-4 -m-2">
+      <!-- Banner de Capa com Botão Fechar -->
+      <div class="relative h-28 sm:h-32 rounded-2xl overflow-hidden bg-gradient-to-r from-frevo-orange to-frevo-red shadow-inner">
+        <img src="${artist.cover_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80'}" alt="${artist.name}" class="w-full h-full object-cover opacity-85" />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent"></div>
+        <button onclick="closeModal()" class="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-black/45 text-white flex items-center justify-center hover:bg-black/70 transition-colors z-10" aria-label="Fechar">
+          ✕
+        </button>
+      </div>
 
-    input.value = '';
-
-    // Atualiza a gaveta inline de comentários
-    const list = document.getElementById(`comments-list-${postId}`);
-    if (list) {
-      list.innerHTML = post.comments.map(c => `
-        <div class="flex items-start gap-2 text-xs">
-          <div class="w-6 h-6 rounded-full bg-frevo-orange/20 text-frevo-orange font-bold flex items-center justify-center text-[10px] flex-shrink-0">
-            ${(c.user || 'F').charAt(0).toUpperCase()}
+      <!-- Avatar & Informações Principais -->
+      <div class="px-2 -mt-10 relative flex flex-col sm:flex-row items-center sm:items-end justify-between gap-3 text-center sm:text-left">
+        <div class="flex flex-col sm:flex-row items-center gap-3.5">
+          <div class="relative">
+            <img src="${artist.avatar_url}" alt="${artist.name}" class="w-20 h-20 rounded-full object-cover border-4 border-white shadow-md bg-white" />
+            <span class="absolute bottom-0 right-0 w-5 h-5 bg-frevo-green text-white rounded-full flex items-center justify-center text-[10px] border-2 border-white font-bold" title="Artista Verificado">✓</span>
           </div>
-          <div class="comment-bubble flex-1">
-            <span class="font-bold text-ink text-[11px] block">${c.user}</span>
-            <span class="text-ink-soft text-[11px]">${c.text}</span>
+          <div>
+            <h3 class="font-display font-bold text-lg text-ink leading-tight">${artist.name}</h3>
+            <span class="text-xs text-muted font-medium">${artist.handle}</span>
+            <div class="mt-1 flex items-center justify-center sm:justify-start gap-1.5 flex-wrap">
+              <span class="badge bg-frevo-orange/15 text-frevo-orange font-bold text-[10px]">${artist.genre}</span>
+              <span class="badge bg-gray-100 text-muted font-mono font-bold text-[10px]">${artistSongs.length} partitura(s)</span>
+            </div>
           </div>
         </div>
-      `).join('');
-    }
-  }
-}
 
-function toggleLike(postId) {
-  const post = DB.posts.find(p => p.id === postId);
-  if (post) {
-    post.is_liked = !post.is_liked;
-    post.likes += post.is_liked ? 1 : -1;
-    const card = document.getElementById(`post-card-${postId}`);
-    if (card) {
-      const likeBtn = card.querySelector('.floating-like-btn');
-      if (likeBtn) {
-        likeBtn.innerHTML = `
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="${post.is_liked ? '#F0442E' : 'none'}" stroke="#F0442E" stroke-width="2">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        <!-- Botão Favoritar Artista -->
+        <button onclick="toggleFavoriteArtist('${artist.id}'); openArtistProfile('${artist.id}');" class="btn ${isFav ? 'bg-frevo-orange text-white shadow-md' : 'btn-outline text-frevo-orange border-frevo-orange hover:bg-frevo-orange/10'} text-xs px-4 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
           </svg>
-          <span class="text-xs font-bold text-ink">${post.likes}</span>
-        `;
-      }
-    }
-  }
+          <span>${isFav ? 'Favoritado ★' : 'Favoritar'}</span>
+        </button>
+      </div>
+
+      <!-- Biografia e Trajetória -->
+      <div class="px-2 pt-2">
+        <h4 class="text-xs font-bold text-ink uppercase tracking-wider mb-1">Sobre o Artista</h4>
+        <p class="text-xs text-ink-soft leading-relaxed bg-surface-soft p-3.5 rounded-2xl border border-gray-100">
+          ${artist.bio}
+        </p>
+      </div>
+
+      <!-- Contato Oficial -->
+      ${(artist.email || artist.phone) ? `
+        <div class="px-2 flex items-center gap-2 flex-wrap">
+          ${artist.email ? `
+            <a href="mailto:${artist.email}" class="text-[11px] font-bold text-ink bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+              ${artist.email}
+            </a>
+          ` : ''}
+          ${artist.phone ? `
+            <a href="https://wa.me/${artist.phone.replace(/[^0-9]/g, '')}" target="_blank" rel="noopener noreferrer" class="text-[11px] font-bold text-frevo-green bg-frevo-green/10 hover:bg-frevo-green/20 px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2z"/></svg>
+              WhatsApp Oficial
+            </a>
+          ` : ''}
+        </div>
+      ` : ''}
+
+      <!-- Obras e Partituras Publicadas do Artista -->
+      <div class="px-2 pt-1 pb-2">
+        <div class="flex items-center justify-between mb-2">
+          <h4 class="text-xs font-bold text-ink uppercase tracking-wider">Obras & Partituras (${artistSongs.length})</h4>
+        </div>
+
+        <div class="space-y-2 max-h-52 overflow-y-auto pr-1">
+          ${artistSongs.length > 0 ? artistSongs.map(song => `
+            <div class="p-3 bg-white rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between gap-3 hover:border-frevo-orange transition-colors">
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-1.5 mb-0.5">
+                  <span class="badge bg-frevo-cyan/15 text-frevo-cyan text-[9px] font-bold">${song.genre}</span>
+                  <span class="text-[10px] text-muted font-mono font-semibold">${song.downloads_count || 120} downloads</span>
+                </div>
+                <h5 class="font-bold text-xs text-ink truncate">${song.title}</h5>
+                <p class="text-[10px] text-muted truncate">${song.description}</p>
+              </div>
+              <button onclick="openScoreModal('${song.title}', '${song.artist}', '${song.id}')" class="btn btn-cyan text-xs py-1.5 px-3 rounded-xl font-bold flex-shrink-0">
+                Baixar PDF
+              </button>
+            </div>
+          `).join('') : `
+            <div class="p-4 text-center bg-surface-soft rounded-2xl border border-gray-100">
+              <p class="text-xs text-muted">Este artista ainda não publicou partituras no acervo.</p>
+            </div>
+          `}
+        </div>
+      </div>
+    </div>
+  `;
+
+  modal.classList.add('open');
 }
 
-function toggleSave(postId) {
-  const post = DB.posts.find(p => p.id === postId);
-  if (post) {
-    post.is_saved = !post.is_saved;
-    const card = document.getElementById(`post-card-${postId}`);
-    if (card) {
-      const saveBtn = card.querySelector('.floating-save-btn');
-      if (saveBtn) {
-        saveBtn.classList.toggle('is-saved', post.is_saved);
-        saveBtn.innerHTML = `
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="${post.is_saved ? '#FF8A00' : 'none'}" stroke="${post.is_saved ? '#FF8A00' : 'currentColor'}" stroke-width="2.2">
-            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-          </svg>
-        `;
-      }
-    }
-    renderProfileGallery();
-  }
-}
-
-// Favoritar Artista
-function toggleFavoriteArtist(artistId) {
-  if (currentUserSession.role === 'guest') {
-    alert('Crie uma conta ou faça login para favoritar seus artistas preferidos no FrevAI!');
-    openSessionModal();
-    return;
-  }
-
-  const idx = currentUserSession.favorites.indexOf(artistId);
-  if (idx > -1) {
-    currentUserSession.favorites.splice(idx, 1);
+function openArtistProfileByAuthor(authorName) {
+  const artist = DB.artists.find(a => a.name.toLowerCase() === (authorName || '').toLowerCase() || a.handle.toLowerCase() === (authorName || '').toLowerCase());
+  if (artist) {
+    openArtistProfile(artist.id);
   } else {
-    currentUserSession.favorites.push(artistId);
+    openStoryModal(authorName, 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80', 'Recife, PE');
   }
-
-  saveCurrentSession();
-  renderArtists();
-  renderProfileGallery();
 }
+
+window.openArtistModal = function(name, avatar, cover, genre, bio, email, phone, id) {
+  openArtistProfile(id || name);
+};
 
 function renderArtistCardHtml(artist) {
   const isFav = currentUserSession.favorites.includes(artist.id);
@@ -1384,8 +1556,8 @@ function renderArtistCardHtml(artist) {
       </div>
       <p class="text-xs text-ink-soft line-clamp-2 my-2.5 leading-relaxed">${artist.bio}</p>
 
-      <button onclick="switchView('artist-panel')" class="btn btn-primary w-full text-xs h-8 rounded-xl font-bold mt-1">
-        Acessar Perfil
+      <button onclick="openArtistProfile('${artist.id}')" class="btn btn-primary w-full text-xs h-8 rounded-xl font-bold mt-1 shadow-sm flex items-center justify-center gap-1.5">
+        Ver Perfil & Partituras
       </button>
     </div>
   `;
@@ -3475,9 +3647,8 @@ function openOnboardingModal() {
             <div class="bg-gradient-to-br from-[#FF8A00] to-[#F0442E] p-5 rounded-2xl text-white min-h-[260px] flex flex-col justify-between shadow-lg">
               <div>
                 <div class="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center mb-3">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <path d="M12 8v4l3 3"></path>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12c0 .55.45 1 1 1h7v6c0 1.1.9 2 2 2s2-.9 2-2c0-.55-.45-1-1-1s-1 .45-1 1v-6h9c.55 0 1-.45 1-1 0-5.52-4.48-10-10-10zm-1.5 9.5C6.36 11.5 3.96 8.54 3.58 4.67 5.6 3.6 7.91 3 10.5 3v8.5zm3 0V3c2.59 0 4.9.6 6.92 1.67-.38 3.87-2.78 6.83-6.92 6.83z"/>
                   </svg>
                 </div>
                 <span class="text-[10px] font-bold uppercase tracking-widest text-white/80">Bem-vindo(a) ao FrevAI</span>
@@ -3498,8 +3669,8 @@ function openOnboardingModal() {
             <div class="bg-gradient-to-br from-[#7447E8] to-[#F04FA3] p-5 rounded-2xl text-white min-h-[260px] flex flex-col justify-between shadow-lg">
               <div>
                 <div class="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center mb-3">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/>
                   </svg>
                 </div>
                 <span class="text-[10px] font-bold uppercase tracking-widest text-white/80">Feed & Interações</span>
@@ -3520,10 +3691,8 @@ function openOnboardingModal() {
             <div class="bg-gradient-to-br from-[#00A86B] to-[#16C7D9] p-5 rounded-2xl text-white min-h-[260px] flex flex-col justify-between shadow-lg">
               <div>
                 <div class="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center mb-3">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <path d="M9 18V5l12-2v13"></path>
-                    <circle cx="6" cy="18" r="3"></circle>
-                    <circle cx="18" cy="16" r="3"></circle>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
                   </svg>
                 </div>
                 <span class="text-[10px] font-bold uppercase tracking-widest text-white/80">Acervo Musical</span>
@@ -3544,9 +3713,8 @@ function openOnboardingModal() {
             <div class="bg-gradient-to-br from-[#FFD928] to-[#FF8A00] p-5 rounded-2xl text-ink min-h-[260px] flex flex-col justify-between shadow-lg">
               <div>
                 <div class="w-11 h-11 rounded-2xl bg-ink/10 backdrop-blur-md flex items-center justify-center mb-3 text-ink">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                    <circle cx="12" cy="10" r="3"></circle>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                   </svg>
                 </div>
                 <span class="text-[10px] font-bold uppercase tracking-widest text-ink/70">Passos & Mapa Cultural</span>
@@ -3567,8 +3735,8 @@ function openOnboardingModal() {
             <div class="bg-gradient-to-br from-[#1E293B] to-[#0F172A] p-5 rounded-2xl text-white min-h-[260px] flex flex-col justify-between shadow-lg">
               <div>
                 <div class="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center mb-3 text-frevo-orange">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
                   </svg>
                 </div>
                 <span class="text-[10px] font-bold uppercase tracking-widest text-white/70">Tudo Pronto!</span>
@@ -3602,7 +3770,7 @@ function openOnboardingModal() {
           Anterior
         </button>
         <button id="onb-btn-next" onclick="onboardingNext()" class="btn btn-primary flex-1 text-xs rounded-xl py-2.5 font-bold shadow-md">
-          Próximo →
+          Próximo
         </button>
       </div>
     </div>
@@ -3665,9 +3833,9 @@ function updateOnboardingView() {
 
   if (btnNext) {
     if (currentOnboardingIndex === totalOnboardingSlides - 1) {
-      btnNext.innerText = 'Começar a Explorar 🎉';
+      btnNext.innerText = 'Começar a Explorar';
     } else {
-      btnNext.innerText = 'Próximo →';
+      btnNext.innerText = 'Próximo';
     }
   }
 }
