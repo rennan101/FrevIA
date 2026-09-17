@@ -1230,8 +1230,11 @@ function renderFeedPostHtml(post) {
           <h4 class="font-bold text-xs text-ink">${post.title}</h4>
           <span class="text-[10px] text-muted">${post.time_ago}</span>
         </div>
-        <p class="text-xs text-ink-soft leading-relaxed mb-2">${post.content}</p>
-        <div class="flex flex-wrap gap-1.5">
+        <p id="post-text-${post.id}" class="feed-card-text text-xs text-ink-soft leading-relaxed mb-1 ${post.content && post.content.length > 90 ? 'clamped' : ''}">${post.content}</p>
+        ${post.content && post.content.length > 90 ? `
+          <button type="button" id="post-readmore-${post.id}" onclick="togglePostExpand('${post.id}')" class="feed-read-more-btn">ler mais...</button>
+        ` : ''}
+        <div class="flex flex-wrap gap-1.5 mt-1">
           ${post.tags.map(t => `<span class="badge bg-[#16C7D9]/15 text-[#127F8B] text-[10px] font-bold">#${t}</span>`).join('')}
         </div>
       </div>
@@ -1537,6 +1540,24 @@ function toggleCommentsDrawer(postId) {
         input.focus();
       }
     }, 280);
+  }
+}
+
+// Expandir ou recolher texto longo de descrição do card do feed
+function togglePostExpand(postId) {
+  const textEl = document.getElementById(`post-text-${postId}`);
+  const btnEl = document.getElementById(`post-readmore-${postId}`);
+  if (!textEl) return;
+
+  const isClamped = textEl.classList.contains('clamped');
+  if (isClamped) {
+    textEl.classList.remove('clamped');
+    textEl.classList.add('expanded');
+    if (btnEl) btnEl.innerText = 'ler menos';
+  } else {
+    textEl.classList.add('clamped');
+    textEl.classList.remove('expanded');
+    if (btnEl) btnEl.innerText = 'ler mais...';
   }
 }
 
