@@ -99,6 +99,9 @@ const DB = {
       likes: 342,
       is_liked: false,
       is_saved: false,
+      is_admin_post: true,
+      author_id: 'admin_paco',
+      artist_id: null,
       time_ago: 'HÁ 2 HORAS',
       created_at: '2026-09-16T12:00:00Z',
       comments: [
@@ -114,12 +117,15 @@ const DB = {
       image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=80',
       location: 'Bomba do Hemetério, Recife',
       type: 'music',
-      title: 'Nova Partitura: "Passo da Fervura"',
+      title: 'Nova Partitura: "Bomba em Brasa"',
       content: 'Disponibilizamos a partitura completa com arranjo para saxofones e trompetes no acervo aberto do FrevAI! Músicos e orquestras de todo o Brasil já podem baixar gratuitamente.',
       tags: ['FrevoDeRua', 'PartiturasAbertas', 'Arranjos'],
       likes: 589,
       is_liked: true,
       is_saved: true,
+      is_admin_post: false,
+      author_id: 'a1',
+      artist_id: 'a1',
       time_ago: 'HÁ 6 HORAS',
       created_at: '2026-09-16T08:30:00Z',
       comments: [
@@ -140,8 +146,53 @@ const DB = {
       likes: 820,
       is_liked: false,
       is_saved: false,
+      is_admin_post: false,
+      author_id: 'a2',
+      artist_id: 'a2',
       time_ago: 'ONTEM',
       created_at: '2026-09-15T20:00:00Z',
+      comments: []
+    },
+    {
+      id: 'p4',
+      author: 'Bloco da Saudade',
+      handle: 'blocodasaudade',
+      avatar: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=400&q=80',
+      image: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=1000&q=80',
+      location: 'Sede do Bloco, Recife',
+      type: 'culture',
+      title: 'Ensaio Aberto dos Clarins e Coral Feminino',
+      content: 'Neste sábado abriremos as portas para o ensaio geral dos nossos clássicos líricos. Convidamos todos os amantes do Frevo de Bloco para cantar conosco!',
+      tags: ['FrevoDeBloco', 'BlocoDaSaudade', 'CoralLirico'],
+      likes: 412,
+      is_liked: false,
+      is_saved: false,
+      is_admin_post: false,
+      author_id: 'a3',
+      artist_id: 'a3',
+      time_ago: 'HÁ 1 DIA',
+      created_at: '2026-09-15T15:00:00Z',
+      comments: []
+    },
+    {
+      id: 'p5',
+      author: 'Giselle Andrade',
+      handle: 'giselleandrade',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      image: 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1000&q=80',
+      location: 'Quatro Cantos, Olinda',
+      type: 'culture',
+      title: 'Oficina Aberta: Passo da Tesoura e Parafuso',
+      content: 'Aprenda os segredos da agilidade e do equilíbrio na dança do frevo com passistas premiados de Olinda e Recife.',
+      tags: ['PassosDoFrevo', 'Danca', 'Olinda'],
+      likes: 678,
+      is_liked: true,
+      is_saved: false,
+      is_admin_post: false,
+      author_id: 'a6',
+      artist_id: 'a6',
+      time_ago: 'HÁ 2 DIAS',
+      created_at: '2026-09-14T18:00:00Z',
       comments: []
     }
   ],
@@ -1134,7 +1185,10 @@ function renderFeedPostHtml(post) {
         <div class="floating-author-pill" onclick="openArtistProfileByAuthor('${post.author}')" title="Ver perfil de ${post.author}">
           <img src="${post.avatar}" alt="${post.author}" />
           <div class="floating-author-info">
-            <span class="name">${post.author}</span>
+            <div class="flex items-center gap-1.5">
+              <span class="name">${post.author}</span>
+              ${post.is_admin_post ? `<span class="badge bg-frevo-red text-white text-[9px] px-1.5 py-0.5 rounded-md font-extrabold uppercase tracking-wider shadow-sm">Oficial</span>` : ''}
+            </div>
             <span class="sub">${post.location.split(',')[0]}</span>
           </div>
         </div>
@@ -1356,19 +1410,86 @@ async function deleteComment(postId, commentId) {
   }
 }
 
+// Controle de Abas do Feed (Notícias & Para Você)
+let currentFeedTab = 'news';
+
+function switchFeedTab(tabName, btnElement) {
+  currentFeedTab = tabName;
+  document.querySelectorAll('.feed-tab-pill').forEach(btn => btn.classList.remove('active'));
+  if (btnElement) {
+    btnElement.classList.add('active');
+  } else {
+    const target = document.getElementById(`feed-tab-${tabName}`);
+    if (target) target.classList.add('active');
+  }
+  renderFeed();
+}
+
+function getActiveFeedPosts() {
+  if (currentFeedTab === 'foryou') {
+    const userFavs = currentUserSession.favorites || [];
+    return DB.posts.filter(p => 
+      userFavs.includes(p.author_id) || 
+      userFavs.includes(p.artist_id) || 
+      userFavs.some(favId => {
+        const artist = DB.artists.find(a => a.id === favId);
+        return artist && (artist.name === p.author || artist.handle === p.handle);
+      })
+    );
+  }
+
+  // Aba Notícias: Todos os posts, priorizando os publicados por Administradores no topo
+  return [...DB.posts].sort((a, b) => {
+    const aIsAdmin = a.is_admin_post || (a.author && (a.author.toLowerCase().includes('paço') || a.author.toLowerCase().includes('fundação') || a.author.toLowerCase().includes('salvaguarda')));
+    const bIsAdmin = b.is_admin_post || (b.author && (b.author.toLowerCase().includes('paço') || b.author.toLowerCase().includes('fundação') || b.author.toLowerCase().includes('salvaguarda')));
+    if (aIsAdmin && !bIsAdmin) return -1;
+    if (!aIsAdmin && bIsAdmin) return 1;
+    return 0; // mantém a ordem cronológica
+  });
+}
+
 function renderFeed() {
   const container = document.getElementById('feed-list');
   if (!container) return;
 
+  const activePosts = getActiveFeedPosts();
+
+  if (activePosts.length === 0) {
+    container.innerHTML = `
+      <div class="p-8 text-center bg-white rounded-3xl border border-gray-100 shadow-sm space-y-3">
+        <div class="w-12 h-12 rounded-2xl bg-frevo-orange/15 text-frevo-orange mx-auto flex items-center justify-center">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <h3 class="font-display font-bold text-base text-ink">Nenhuma publicação por aqui ainda</h3>
+        <p class="text-xs text-muted max-w-xs mx-auto">
+          ${currentFeedTab === 'foryou' 
+            ? 'Você ainda não segue artistas ou seus artistas favoritados ainda não postaram novidades.' 
+            : 'Nenhuma notícia publicada no momento.'}
+        </p>
+        ${currentFeedTab === 'foryou' ? `
+          <button onclick="switchView('artists')" class="btn btn-primary text-xs px-4 py-2.5 rounded-xl font-bold shadow-md">
+            Descobrir e Seguir Artistas
+          </button>
+        ` : ''}
+      </div>
+    `;
+    return;
+  }
+
   InfiniteScrollManager.reset('feed');
-  const initialPosts = DB.posts.slice(0, InfiniteScrollManager.state.feed.limit);
+  const initialPosts = activePosts.slice(0, InfiniteScrollManager.state.feed.limit);
   
   container.innerHTML = `
     <div id="feed-items-stream" class="space-y-4">
       ${initialPosts.map(post => renderFeedPostHtml(post)).join('')}
     </div>
     <div id="sentinel-feed" class="infinite-scroll-sentinel" data-view="feed">
-      ${DB.posts.length > initialPosts.length ? `
+      ${activePosts.length > initialPosts.length ? `
         <div class="infinite-scroll-loader">
           <div class="infinite-spinner"></div>
           <span>Carregando mais histórias do frevo...</span>
@@ -1378,7 +1499,7 @@ function renderFeed() {
   `;
 
   const sentinel = document.getElementById('sentinel-feed');
-  if (sentinel && DB.posts.length > initialPosts.length) {
+  if (sentinel && activePosts.length > initialPosts.length) {
     InfiniteScrollManager.observe(sentinel);
   }
 }
@@ -1388,16 +1509,17 @@ function appendMoreFeed() {
   const sentinel = document.getElementById('sentinel-feed');
   if (!stream) return;
 
+  const activePosts = getActiveFeedPosts();
   const { page, limit } = InfiniteScrollManager.state.feed;
   const start = (page - 1) * limit;
-  const nextPosts = DB.posts.slice(start, start + limit);
+  const nextPosts = activePosts.slice(start, start + limit);
 
   if (nextPosts.length > 0) {
     const html = nextPosts.map(post => renderFeedPostHtml(post)).join('');
     stream.insertAdjacentHTML('beforeend', html);
   }
 
-  if (start + limit >= DB.posts.length && sentinel) {
+  if (start + limit >= activePosts.length && sentinel) {
     sentinel.innerHTML = '';
   }
 }

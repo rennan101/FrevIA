@@ -129,8 +129,20 @@
        ========================================================================= -->
   <main class="flex-1 w-full pb-24 pt-2">
 
-    <!-- 1. VIEW PRINCIPAL: FEED (HOME COM CARDS IMERSIVOS) -->
+    <!-- 1. VIEW PRINCIPAL: FEED (HOME COM ABAS NOTÍCIAS & PARA VOCÊ) -->
     <section id="view-feed" class="view-section active max-w-md mx-auto px-3">
+      <!-- Abas de Navegação do Feed (Notícias & Para você) -->
+      <div class="feed-tabs-container flex items-center justify-center mb-4 pt-1">
+        <div class="feed-tabs-pills flex items-center p-1 bg-gray-100/95 border border-gray-200/80 rounded-2xl shadow-inner max-w-xs w-full">
+          <button onclick="switchFeedTab('news', this)" id="feed-tab-news" class="feed-tab-pill active flex-1 py-1.5 px-3 rounded-xl text-xs font-bold text-center transition-all">
+            Notícias
+          </button>
+          <button onclick="switchFeedTab('foryou', this)" id="feed-tab-foryou" class="feed-tab-pill flex-1 py-1.5 px-3 rounded-xl text-xs font-bold text-center transition-all">
+            Para você
+          </button>
+        </div>
+      </div>
+
       <!-- Feed Posts Stream (Cards Arredondados Imersivos) -->
       <div id="feed-list" class="space-y-4">
         <!-- Renderizado via JS -->
@@ -460,7 +472,7 @@
           <path d="M12 3V19C12 20.1 11.1 21 10 21C8.9 21 8 20.1 8 19"/>
         </svg>
       </div>
-      <div class="flex flex-col text-left">
+      <div class="sidebar-brand-text flex flex-col text-left">
         <span class="font-display font-extrabold text-xl tracking-tight text-ink leading-none">FrevAI</span>
         <span class="text-[10px] font-bold text-frevo-orange uppercase tracking-wider mt-0.5">Rede do Frevo</span>
       </div>
