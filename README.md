@@ -19,6 +19,7 @@ FrevIA é uma Progressive Web App (PWA) e Single Page Application (SPA) standalo
 - **Mapa do Frevo Expansível:** Visualização do mapa interativo embutido direto no app + redirecionamento para o Google Maps.
 - **Suporte PWA Completo:** Banner automático de instalação para iOS (Safari) e Android (Chrome).
 - **Sem Emojis / Design Profissional:** 100% estruturado com ícones vetoriais SVG e tipografia moderna (*Bricolage Grotesque* & *Plus Jakarta Sans*).
+- **Diretrizes e Regras de Desenvolvimento:** Consulte o [`GEMINI.md`](GEMINI.md) e o [`design.md`](design.md) para regras de modais, arquitetura e padrão Zero Emojis.
 
 ---
 

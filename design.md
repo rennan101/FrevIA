@@ -642,7 +642,24 @@ Nunca deixar tela vazia sem explicação.
 
 ---
 
-# 23. Diretriz final
+# 24. Padrões de Modais e Zero Emojis (Diretrizes Oficiais)
+
+### Regra Zero Emojis
+- **Proibição Estrita:** Nunca utilizar emojis em botões, modais, textos de notificação ou elementos visuais da plataforma.
+- **Padrão SVG:** Utilizar exclusivamente ícones SVG profissionais e consistentes (estilo Feather/Heroicons/Lucide) integrados com Tailwind (`w-4 h-4`, `w-5 h-5`, etc.).
+
+### Modais e Diálogos da Plataforma
+- **Superfície e Bordas:** Container com `bg-white` ou `bg-surface-soft`, bordas sutis `border border-gray-200`, cantos `rounded-2xl` e elevação `shadow-2xl`.
+- **Cabeçalho:** Ícone SVG de contexto em badge com fundo temático (`w-10 h-10 rounded-2xl flex items-center justify-center`), título sem serifa com `font-display font-bold text-ink` e subtítulo informativo em `text-xs text-muted`.
+- **Ações:**
+  - Botão Primário/Aprovação: `btn-primary` ou `btn-green`.
+  - Botão Destrutivo/Recusa: `btn bg-rose-600 hover:bg-rose-700 text-white rounded-xl`.
+  - Botão Cancelar: `btn btn-outline rounded-xl`.
+- **Notificação e Transparência:** Todas as ações de moderação (como a recusa de solicitações) devem fornecer feedback claro ao usuário, tanto via notificação na plataforma (`DB.notifications`) quanto por e-mail formal de orientação.
+
+---
+
+# 25. Diretriz final
 
 A estética deve transmitir:
 

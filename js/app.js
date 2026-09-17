@@ -1937,6 +1937,20 @@ function handleNotificationClick(notifId, type, targetId) {
       b.classList.toggle('active', b.innerText.toLowerCase().includes('solicitaç') || b.innerText.toLowerCase().includes('artista'));
     });
     renderAdminCMS();
+  } else if (type === 'artist_rejected') {
+    loadNotificationsLocal();
+    const notif = (DB.notifications || []).find(n => n.id === notifId);
+    const feedback = notif ? notif.message : 'Sua solicitação artística não pôde ser aprovada no momento.';
+    showAlertModal(
+      `${feedback}\n\nVocê pode atualizar seus dados biográficos e links artísticos na aba de perfil e enviar uma nova solicitação a qualquer momento.`,
+      { title: 'Parecer da Curadoria', type: 'info' }
+    );
+  } else if (type === 'artist_approved') {
+    switchView('profile');
+    showAlertModal(
+      'Parabéns! Seu perfil de Artista Oficial já está ativo. Você já pode cadastrar partituras e gerenciar suas obras.',
+      { title: 'Artista Verificado', type: 'success' }
+    );
   }
 }
 
@@ -1946,7 +1960,12 @@ function openNotificationsModal() {
   const modalBody = document.getElementById('modal-body');
   loadNotificationsLocal();
   const isAdm = currentUserSession.role === 'admin';
-  const notifications = (DB.notifications || []).filter(n => isAdm || n.forRole !== 'admin');
+  const notifications = (DB.notifications || []).filter(n => {
+    if (isAdm) return true;
+    if (n.forRole === 'admin') return false;
+    if (n.forUserId) return n.forUserId === currentUserSession.id;
+    return true;
+  });
   const unreadCount = notifications.filter(n => !n.read).length;
 
   modalBody.innerHTML = `
@@ -1968,12 +1987,16 @@ function openNotificationsModal() {
           <div onclick="handleNotificationClick('${notif.id}', '${notif.type}', '${notif.targetId}')" class="notification-item p-3.5 ${notif.read ? 'bg-white border border-gray-100 opacity-80' : 'bg-surface-soft border border-frevo-orange/30 shadow-sm'} rounded-2xl flex items-start gap-3 cursor-pointer hover:border-frevo-orange transition-all">
             <div class="relative flex-shrink-0">
               <img src="${notif.author_avatar || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80'}" alt="${notif.author || 'FrevAI'}" class="w-10 h-10 rounded-full object-cover border border-gray-200" />
-              <div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-white ${notif.type === 'score' ? 'bg-frevo-cyan' : notif.type === 'artist_request' ? 'bg-frevo-green' : 'bg-frevo-orange'}">
+              <div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-white ${notif.type === 'score' ? 'bg-frevo-cyan' : notif.type === 'artist_request' ? 'bg-frevo-green' : notif.type === 'artist_rejected' ? 'bg-rose-500' : notif.type === 'artist_approved' ? 'bg-emerald-500' : 'bg-frevo-orange'}">
                 ${notif.type === 'score' 
                   ? '<svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>' 
                   : notif.type === 'artist_request'
                     ? '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>'
-                    : '<svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>'}
+                    : notif.type === 'artist_rejected'
+                      ? '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>'
+                      : notif.type === 'artist_approved'
+                        ? '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>'
+                        : '<svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>'}
               </div>
             </div>
             <div class="flex-1 min-w-0">
@@ -1985,7 +2008,7 @@ function openNotificationsModal() {
               <div class="flex items-center justify-between mt-1.5 pt-1 border-t border-gray-100/60">
                 <span class="text-[10px] text-muted font-medium">${notif.time_ago || 'Recentemente'}</span>
                 <span class="text-[10px] font-bold text-frevo-orange flex items-center gap-0.5">
-                  ${notif.type === 'score' ? 'Ver Partitura' : notif.type === 'artist_request' ? 'Revisar no CMS' : 'Ver no Feed'} →
+                  ${notif.type === 'score' ? 'Ver Partitura' : notif.type === 'artist_request' ? 'Revisar no CMS' : notif.type === 'artist_rejected' ? 'Ver Justificativa' : notif.type === 'artist_approved' ? 'Acessar Perfil' : 'Ver no Feed'} →
                 </span>
               </div>
             </div>
@@ -5059,7 +5082,7 @@ async function renderAdminCMS() {
                     <button onclick="confirmApproveArtistRequest('${req.id}')" class="btn btn-green text-[11px] px-2.5 py-1 rounded-xl font-bold shadow-sm">
                       Aprovar
                     </button>
-                    <button onclick="confirmRejectArtistRequest('${req.id}')" class="btn btn-destructive text-[11px] px-2.5 py-1 rounded-xl font-bold shadow-sm">
+                    <button onclick="openRejectArtistModal('${req.id}')" class="btn btn-destructive text-[11px] px-2.5 py-1 rounded-xl font-bold shadow-sm">
                       Recusar
                     </button>
                   </div>
@@ -5295,22 +5318,209 @@ async function confirmApproveArtistRequest(requestId) {
   renderArtists();
 }
 
-async function confirmRejectArtistRequest(requestId) {
-  const reason = prompt('Informe o motivo da recusa (opcional):', 'Dados incompletos ou fora das diretrizes');
-  if (reason === null) return;
+// Modal de Recusa de Solicitação de Artista (Design System FrevAI - Zero Emojis)
+function openRejectArtistModal(requestId) {
+  loadArtistRequestsLocal();
+  const req = (DB.artistRequests || []).find(r => r.id === requestId) || {
+    id: requestId,
+    requested_name: 'Artista',
+    genre: 'Frevo de Rua',
+    user: { display_name: 'Folião Solicitante', handle: '@foliao', email: '' }
+  };
+
+  const applicantName = req.user?.display_name || req.requested_name || 'Solicitante';
+  const applicantHandle = req.user?.handle || '@foliao';
+  const applicantEmail = req.user?.email || req.email || '';
+
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+
+  modalBody.innerHTML = `
+    <div class="space-y-4 text-left">
+      <!-- Cabeçalho do Modal -->
+      <div class="flex items-start gap-3 pb-3 border-b border-gray-100 pr-8">
+        <div class="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 border border-rose-100 flex items-center justify-center flex-shrink-0">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="15" y1="9" x2="9" y2="15"></line>
+            <line x1="9" y1="9" x2="15" y2="15"></line>
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-display font-bold text-lg text-ink">Recusar Solicitação Artística</h3>
+          <p class="text-xs text-muted">Apresente a justificativa ao artista solicitante</p>
+        </div>
+      </div>
+
+      <!-- Resumo do Solicitante -->
+      <div class="p-3 bg-surface-soft border border-gray-200 rounded-2xl flex items-center justify-between gap-3 text-xs">
+        <div class="min-w-0">
+          <strong class="text-ink font-bold block truncate">${req.requested_name}</strong>
+          <span class="text-muted block text-[11px]">${applicantName} • ${applicantHandle}</span>
+          ${applicantEmail ? `<span class="text-[11px] text-gray-500 font-mono block truncate">${applicantEmail}</span>` : ''}
+        </div>
+        <span class="badge bg-rose-100 text-rose-700 text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0">
+          MODERAÇÃO
+        </span>
+      </div>
+
+      <!-- Motivos Rápidos Selecionáveis -->
+      <div class="space-y-1.5">
+        <label class="block text-[11px] font-bold text-ink uppercase tracking-wider">Motivos frequentes (clique para preencher)</label>
+        <div class="flex flex-wrap gap-1.5">
+          <button type="button" onclick="setRejectReasonPreset('Dados biográficos e referências musicais incompletos.')" class="px-2.5 py-1 text-[11px] bg-white hover:bg-gray-100 border border-gray-200 rounded-xl text-ink-soft transition">
+            Dados incompletos
+          </button>
+          <button type="button" onclick="setRejectReasonPreset('Material artístico não condiz com as diretrizes e salvaguarda do Frevo.')" class="px-2.5 py-1 text-[11px] bg-white hover:bg-gray-100 border border-gray-200 rounded-xl text-ink-soft transition">
+            Fora das diretrizes
+          </button>
+          <button type="button" onclick="setRejectReasonPreset('Não foi possível verificar a autenticidade ou titularidade da obra.')" class="px-2.5 py-1 text-[11px] bg-white hover:bg-gray-100 border border-gray-200 rounded-xl text-ink-soft transition">
+            Titularidade duvidosa
+          </button>
+          <button type="button" onclick="setRejectReasonPreset('Solicitação duplicada ou perfil já existente no acervo.')" class="px-2.5 py-1 text-[11px] bg-white hover:bg-gray-100 border border-gray-200 rounded-xl text-ink-soft transition">
+            Duplicidade
+          </button>
+        </div>
+      </div>
+
+      <!-- Campo de Justificativa / Parecer -->
+      <div class="space-y-1">
+        <label for="reject-reason-textarea" class="block text-[11px] font-bold text-ink uppercase tracking-wider">Justificativa da Recusa <span class="text-rose-500">*</span></label>
+        <textarea id="reject-reason-textarea" rows="4" placeholder="Descreva de forma respeitosa o motivo pelo qual a solicitação não foi aprovada..." class="w-full px-3 py-2 text-xs border border-gray-300 focus:border-rose-500 focus:ring-2 focus:ring-rose-100 rounded-xl bg-white text-ink focus:outline-none transition leading-relaxed"></textarea>
+      </div>
+
+      <!-- Disparo de E-mail de Notificação -->
+      <div class="p-3 bg-amber-50/60 border border-amber-200/80 rounded-2xl space-y-2">
+        <label class="flex items-center gap-2 cursor-pointer select-none">
+          <input type="checkbox" id="reject-send-email-checkbox" checked class="w-4 h-4 text-rose-600 rounded border-gray-300 focus:ring-rose-500">
+          <span class="text-xs font-bold text-ink">Enviar e-mail formal de notificação de recusa</span>
+        </label>
+        <div id="reject-email-preview-container" class="space-y-1.5 pl-6 pt-1">
+          <div>
+            <label class="block text-[10px] font-bold text-muted uppercase">E-mail do Solicitante</label>
+            <input type="email" id="reject-recipient-email" value="${applicantEmail}" placeholder="artista@exemplo.com" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none font-mono" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Ações do Modal -->
+      <div class="flex gap-2 pt-2 border-t border-gray-100">
+        <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl py-2.5 font-bold text-ink">
+          Cancelar
+        </button>
+        <button type="button" onclick="submitRejectArtistRequest('${req.id}')" class="btn bg-rose-600 hover:bg-rose-700 text-white flex-1 text-xs rounded-xl py-2.5 font-bold shadow-md transition flex items-center justify-center gap-1.5">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          Confirmar Recusa
+        </button>
+      </div>
+    </div>
+  `;
+
+  modal.classList.add('open');
+}
+
+function setRejectReasonPreset(reasonText) {
+  const textarea = document.getElementById('reject-reason-textarea');
+  if (textarea) {
+    textarea.value = reasonText;
+    textarea.focus();
+  }
+}
+
+async function submitRejectArtistRequest(requestId) {
+  const reasonInput = document.getElementById('reject-reason-textarea');
+  const reason = (reasonInput ? reasonInput.value : '').trim();
+  const sendEmail = document.getElementById('reject-send-email-checkbox')?.checked ?? true;
+  const recipientEmail = document.getElementById('reject-recipient-email')?.value?.trim() || '';
+
+  if (!reason) {
+    showAlertModal('Por favor, informe a justificativa da recusa para orientar o solicitante.', { title: 'Atenção', type: 'warning' });
+    return;
+  }
 
   loadArtistRequestsLocal();
   const req = (DB.artistRequests || []).find(r => r.id === requestId);
+  const targetUserId = req ? req.user_id : null;
+  const artistName = req ? req.requested_name : 'Artista';
+
   if (req) {
     req.status = 'rejected';
+    req.review_notes = reason;
+    req.reviewed_at = new Date().toISOString();
     saveArtistRequestsLocal();
   }
 
-  if (window.supabaseService && window.supabaseService.isConnected()) {
-    await window.supabaseService.rejectArtistRequest(requestId, currentUserSession.id, reason);
+  // Atualiza sessão do usuário atual caso seja o próprio autor da solicitação
+  if (targetUserId && currentUserSession.id === targetUserId) {
+    currentUserSession.artist_request_status = 'rejected';
+    saveCurrentSession();
   }
-  alert('Solicitação de artista recusada.');
+
+  // Integração com Supabase
+  if (window.supabaseService && window.supabaseService.isConnected()) {
+    try {
+      await window.supabaseService.rejectArtistRequest(requestId, currentUserSession.id, reason);
+    } catch (err) {
+      console.warn('[Supabase] Erro ao sincronizar recusa:', err.message);
+    }
+  }
+
+  // 1. Enviar Notificação na Plataforma para o Usuário Solicitante
+  loadNotificationsLocal();
+  DB.notifications.unshift({
+    id: 'notif-reject-' + Date.now(),
+    type: 'artist_rejected',
+    targetId: requestId,
+    forUserId: targetUserId,
+    author: 'Comitê FrevAI',
+    author_avatar: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80',
+    title: 'Solicitação Artística Não Aprovada',
+    message: `Sua solicitação de perfil artístico para "${artistName}" foi analisada pelo comitê. Motivo: ${reason}`,
+    time_ago: 'Agora mesmo',
+    read: false
+  });
+  saveNotificationsLocal();
+  updateNotificationBadge();
+
+  // 2. Disparar E-mail Formal de Notificação
+  if (sendEmail) {
+    const subject = encodeURIComponent(`FrevAI: Atualização sobre sua solicitação de perfil artístico (${artistName})`);
+    const emailBody = encodeURIComponent(
+      `Olá,\n\nAgradecemos seu interesse em fazer parte do acervo oficial do FrevAI.\n\n` +
+      `Informamos que sua solicitação de perfil de artista para "${artistName}" foi revisada pela equipe curatorial e não pôde ser aprovada no momento.\n\n` +
+      `Parecer do Comitê:\n"${reason}"\n\n` +
+      `Você pode adequar as informações e enviar uma nova solicitação a qualquer momento pelo aplicativo FrevAI.\n\n` +
+      `Atenciosamente,\nComitê Gestor & Curadoria FrevAI`
+    );
+
+    // Se houver e-mail válido, prepara o link mailto
+    if (recipientEmail && recipientEmail.includes('@')) {
+      const mailtoLink = `mailto:${recipientEmail}?subject=${subject}&body=${emailBody}`;
+      // Cria trigger não obstrutivo
+      const link = document.createElement('a');
+      link.href = mailtoLink;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }
+
+  closeModal();
   renderAdminCMS();
+
+  showAlertModal(
+    `A solicitação foi recusada com sucesso.\n\nO solicitante foi notificado na plataforma FrevAI${recipientEmail ? ' e a mensagem de e-mail foi gerada' : ''}.`,
+    { title: 'Recusa Registrada', type: 'info' }
+  );
+}
+
+// Retrocompatibilidade
+async function confirmRejectArtistRequest(requestId) {
+  openRejectArtistModal(requestId);
 }
 
 // Modal de Decisão de Aprovação/Recusa de Artista com Disparo de E-mail
