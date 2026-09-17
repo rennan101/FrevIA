@@ -5,11 +5,30 @@
 -- 1. EXTENSIONS
 create extension if not exists "uuid-ossp";
 
--- 2. ENUMS & TYPES
-create type user_role as enum ('user', 'artist', 'admin');
-create type post_type as enum ('event', 'news', 'music', 'score', 'culture', 'artist');
-create type content_status as enum ('draft', 'pending_review', 'published', 'archived');
-create type comment_status as enum ('visible', 'hidden', 'pending');
+-- 2. ENUMS & TYPES (IDEMPOTENTE - NÃO FALHA SE JÁ EXISTIR)
+do $$ begin
+  create type user_role as enum ('user', 'artist', 'admin');
+exception
+  when duplicate_object then null;
+end $$;
+
+do $$ begin
+  create type post_type as enum ('event', 'news', 'music', 'score', 'culture', 'artist');
+exception
+  when duplicate_object then null;
+end $$;
+
+do $$ begin
+  create type content_status as enum ('draft', 'pending_review', 'published', 'archived');
+exception
+  when duplicate_object then null;
+end $$;
+
+do $$ begin
+  create type comment_status as enum ('visible', 'hidden', 'pending');
+exception
+  when duplicate_object then null;
+end $$;
 
 -- 3. PROFILES TABLE (Linked with auth.users)
 create table if not exists public.profiles (
@@ -238,101 +257,130 @@ end;
 $$ language plpgsql security definer;
 
 -- PROFILES RLS
+drop policy if exists "Public profiles are readable by everyone" on public.profiles;
 create policy "Public profiles are readable by everyone"
   on public.profiles for select using (true);
 
+drop policy if exists "Users can update own profile" on public.profiles;
 create policy "Users can update own profile"
   on public.profiles for update using (auth.uid() = id);
 
 -- ARTISTS RLS
+drop policy if exists "Published artists are readable by everyone" on public.artists;
 create policy "Published artists are readable by everyone"
   on public.artists for select using (is_published = true or is_artist_owner(id) or is_admin());
 
+drop policy if exists "Admins can manage artists" on public.artists;
 create policy "Admins can manage artists"
   on public.artists for all using (is_admin());
 
+drop policy if exists "Artists can update own details" on public.artists;
 create policy "Artists can update own details"
   on public.artists for update using (is_artist_owner(id));
 
 -- ARTIST PERMISSIONS RLS
+drop policy if exists "Artist permissions readable by owner and admin" on public.artist_permissions;
 create policy "Artist permissions readable by owner and admin"
   on public.artist_permissions for select using (is_artist_owner(artist_id) or is_admin());
 
+drop policy if exists "Admins can manage artist permissions" on public.artist_permissions;
 create policy "Admins can manage artist permissions"
   on public.artist_permissions for all using (is_admin());
 
 -- SONGS RLS
+drop policy if exists "Published songs are readable by everyone" on public.songs;
 create policy "Published songs are readable by everyone"
   on public.songs for select using (status = 'published' or is_artist_owner(artist_id) or is_admin());
 
+drop policy if exists "Artists can submit songs for own profile" on public.songs;
 create policy "Artists can submit songs for own profile"
   on public.songs for insert with check (
     is_artist_owner(artist_id) or is_admin()
   );
 
+drop policy if exists "Artists can update own drafts and pending songs" on public.songs;
 create policy "Artists can update own drafts and pending songs"
   on public.songs for update using (
     (is_artist_owner(artist_id) and status in ('draft', 'pending_review')) or is_admin()
   );
 
 -- POSTS RLS
+drop policy if exists "Published posts are readable by everyone" on public.posts;
 create policy "Published posts are readable by everyone"
   on public.posts for select using (status = 'published' or auth.uid() = author_id or is_admin());
 
+drop policy if exists "Admins and Authors can create posts" on public.posts;
 create policy "Admins and Authors can create posts"
   on public.posts for insert with check (auth.uid() = author_id or is_admin());
 
+drop policy if exists "Authors can edit own unpublished posts and Admins can edit all" on public.posts;
 create policy "Authors can edit own unpublished posts and Admins can edit all"
   on public.posts for update using (auth.uid() = author_id or is_admin());
 
 -- POST LIKES RLS
+drop policy if exists "Likes are readable by everyone" on public.post_likes;
 create policy "Likes are readable by everyone"
   on public.post_likes for select using (true);
 
+drop policy if exists "Authenticated users can toggle their likes" on public.post_likes;
 create policy "Authenticated users can toggle their likes"
   on public.post_likes for insert with check (auth.uid() = user_id);
 
+drop policy if exists "Users can delete their own likes" on public.post_likes;
 create policy "Users can delete their own likes"
   on public.post_likes for delete using (auth.uid() = user_id);
 
 -- COMMENTS RLS
+drop policy if exists "Visible comments are readable by everyone" on public.comments;
 create policy "Visible comments are readable by everyone"
   on public.comments for select using (status = 'visible' or auth.uid() = user_id or is_admin());
 
+drop policy if exists "Authenticated users can insert comments" on public.comments;
 create policy "Authenticated users can insert comments"
   on public.comments for insert with check (auth.uid() = user_id);
 
+drop policy if exists "Users can update or delete their own comments" on public.comments;
 create policy "Users can update or delete their own comments"
   on public.comments for update using (auth.uid() = user_id);
 
+drop policy if exists "Users can delete own comments, admin can delete any" on public.comments;
 create policy "Users can delete own comments, admin can delete any"
   on public.comments for delete using (auth.uid() = user_id or is_admin());
 
 -- FOLLOWS RLS
+drop policy if exists "Follows are readable by everyone" on public.follows;
 create policy "Follows are readable by everyone"
   on public.follows for select using (true);
 
+drop policy if exists "Users can follow artists" on public.follows;
 create policy "Users can follow artists"
   on public.follows for insert with check (auth.uid() = follower_id);
 
+drop policy if exists "Users can unfollow artists" on public.follows;
 create policy "Users can unfollow artists"
   on public.follows for delete using (auth.uid() = follower_id);
 
 -- FREVO STEPS, HISTORY & MAP POINTS RLS
+drop policy if exists "Published steps are readable by everyone" on public.frevo_steps;
 create policy "Published steps are readable by everyone"
   on public.frevo_steps for select using (is_published = true or is_admin());
 
+drop policy if exists "Admins can manage steps" on public.frevo_steps;
 create policy "Admins can manage steps"
   on public.frevo_steps for all using (is_admin());
 
+drop policy if exists "Published history is readable by everyone" on public.history_entries;
 create policy "Published history is readable by everyone"
   on public.history_entries for select using (is_published = true or is_admin());
 
+drop policy if exists "Admins can manage history" on public.history_entries;
 create policy "Admins can manage history"
   on public.history_entries for all using (is_admin());
 
+drop policy if exists "Published map points are readable by everyone" on public.map_points;
 create policy "Published map points are readable by everyone"
   on public.map_points for select using (is_published = true or is_admin());
 
+drop policy if exists "Admins can manage map points" on public.map_points;
 create policy "Admins can manage map points"
   on public.map_points for all using (is_admin());

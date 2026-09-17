@@ -42,14 +42,18 @@ alter table public.songs add column if not exists score_pdf_url text;
 alter table public.albums enable row level security;
 alter table public.artist_events enable row level security;
 
+drop policy if exists "Public albums are readable by everyone" on public.albums;
 create policy "Public albums are readable by everyone"
   on public.albums for select using (true);
 
+drop policy if exists "Artists can manage own albums" on public.albums;
 create policy "Artists can manage own albums"
   on public.albums for all using (is_artist_owner(artist_id) or is_admin());
 
+drop policy if exists "Public events are readable by everyone" on public.artist_events;
 create policy "Public events are readable by everyone"
   on public.artist_events for select using (is_published = true or is_artist_owner(artist_id) or is_admin());
 
+drop policy if exists "Artists can manage own events" on public.artist_events;
 create policy "Artists can manage own events"
   on public.artist_events for all using (is_artist_owner(artist_id) or is_admin());
