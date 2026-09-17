@@ -3,13 +3,14 @@
 // ==============================================================================
 // Infraestrutura em Nuvem na AWS (Amazon Web Services)
 // Região Oficial: sa-east-1 (São Paulo) | Projeto / Conta: 196156785860
-// Hosting: AWS Amplify Hosting (d4g55spy61el0.amplifyapp.com)
+// Hosting: AWS Amplify Hosting (https://main.d4g55spy61el0.amplifyapp.com)
 
 window.FREVIA_AWS_CONFIG = {
   REGION: 'sa-east-1',
   ACCOUNT_ID: '196156785860',
   AMPLIFY_APP_ID: 'd4g55spy61el0',
   AMPLIFY_DOMAIN: 'd4g55spy61el0.amplifyapp.com',
+  CUSTOM_DOMAIN: 'frevai.is-a.dev',
   
   // Storage de Mídia (S3) para Áudios, Partituras PDF, Imagens e Vídeos
   S3_BUCKET: 'frevia-media-196156785860',
@@ -18,11 +19,10 @@ window.FREVIA_AWS_CONFIG = {
   // Autenticação (Amazon Cognito User Pools)
   COGNITO_USER_POOL_ID: 'sa-east-1_egnFYahtb',
   COGNITO_CLIENT_ID: '46t8rd0jlv6c3gmje9uj10s6c8',
-  COGNITO_DOMAIN: 'frevia-auth.auth.sa-east-1.amazoncognito.com',
   
-  // Banco de Dados Relacional: Aurora PostgreSQL Serverless v2
-  AURORA_ENDPOINT: localStorage.getItem('frevai_aurora_endpoint') || '',
-  API_GATEWAY_URL: localStorage.getItem('frevai_api_gateway_url') || '',
+  // Backend Serverless & API REST em Produção
+  API_GATEWAY_URL: 'https://q59vzihzm8.execute-api.sa-east-1.amazonaws.com/api',
+  AURORA_ENDPOINT: 'frevai-aurora-cluster.cluster-c30usu6u25gn.sa-east-1.rds.amazonaws.com',
   
   TABLES: {
     PROFILES: 'frevai_profiles',
@@ -42,18 +42,13 @@ window.FREVIA_AWS_CONFIG = {
 window.FREVIA_CONFIG = {
   AWS: window.FREVIA_AWS_CONFIG,
 
-  saveAwsEndpoints(apiGatewayUrl, auroraEndpoint) {
-    if (apiGatewayUrl) {
-      localStorage.setItem('frevai_api_gateway_url', apiGatewayUrl.trim());
-      this.AWS.API_GATEWAY_URL = apiGatewayUrl.trim();
-    }
-    if (auroraEndpoint) {
-      localStorage.setItem('frevai_aurora_endpoint', auroraEndpoint.trim());
-      this.AWS.AURORA_ENDPOINT = auroraEndpoint.trim();
-    }
+  // Adapter para serviços REST da AWS
+  getApiUrl(table) {
+    const base = this.AWS.API_GATEWAY_URL.replace(/\/+$/, '');
+    return table ? `${base}/${table}` : base;
   },
 
   isConfigured() {
-    return Boolean(this.AWS && this.AWS.S3_BUCKET && this.AWS.COGNITO_USER_POOL_ID);
+    return Boolean(this.AWS && this.AWS.API_GATEWAY_URL);
   }
 };
