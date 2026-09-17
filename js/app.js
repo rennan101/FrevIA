@@ -811,6 +811,31 @@ function switchTestRole(role, silent = false) {
 // ==============================================================================
 // MODAL UNIFICADO DE SESSÃO / LOGIN / CADASTRO (SUPABASE & GOOGLE)
 // ==============================================================================
+let currentAuthTab = 'login';
+let currentSignupRole = 'fan'; // 'fan' ou 'artist'
+
+function switchAuthTab(tab) {
+  currentAuthTab = tab;
+  openSessionModal();
+}
+
+function setSignupRole(role) {
+  currentSignupRole = role;
+  const fanBtn = document.getElementById('signup-role-fan-btn');
+  const artistBtn = document.getElementById('signup-role-artist-btn');
+  const artistFields = document.getElementById('signup-artist-fields');
+
+  if (role === 'artist') {
+    if (artistBtn) artistBtn.className = 'flex-1 p-2.5 rounded-xl border-2 border-frevo-orange bg-frevo-orange/10 text-left transition-all';
+    if (fanBtn) fanBtn.className = 'flex-1 p-2.5 rounded-xl border border-gray-200 bg-surface-soft text-left transition-all opacity-60';
+    if (artistFields) artistFields.classList.remove('hidden');
+  } else {
+    if (fanBtn) fanBtn.className = 'flex-1 p-2.5 rounded-xl border-2 border-frevo-cyan bg-frevo-cyan/10 text-left transition-all';
+    if (artistBtn) artistBtn.className = 'flex-1 p-2.5 rounded-xl border border-gray-200 bg-surface-soft text-left transition-all opacity-60';
+    if (artistFields) artistFields.classList.add('hidden');
+  }
+}
+
 function openSessionModal() {
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
@@ -821,24 +846,96 @@ function openSessionModal() {
     <div class="space-y-4 text-left">
       <div class="pb-2 border-b border-gray-100 pr-10">
         <h3 class="font-display font-bold text-lg text-ink">${isGuest ? 'Acessar o FrevAI' : 'Minha Conta FrevAI'}</h3>
-        <p class="text-[11px] text-muted">${isGuest ? 'Entre para comentar e favoritar artistas' : `Logado como: ${currentUserSession.name}`}</p>
+        <p class="text-[11px] text-muted">${isGuest ? 'Entre ou cadastre-se para vivenciar o universo do Frevo' : `Logado como: ${currentUserSession.name}`}</p>
       </div>
 
       ${isGuest ? `
-        <!-- Formulário E-mail e Senha (Primeiro) -->
-        <form onsubmit="handleEmailLogin(event)" class="space-y-3">
-          <div>
-            <label class="block text-[11px] font-bold text-ink uppercase mb-1">E-mail</label>
-            <input type="email" id="auth-email" required placeholder="seuemail@exemplo.com" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
-          </div>
-          <div>
-            <label class="block text-[11px] font-bold text-ink uppercase mb-1">Senha</label>
-            <input type="password" id="auth-password" required placeholder="••••••••" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
-          </div>
-          <button type="submit" class="btn btn-primary w-full text-xs rounded-xl py-2.5 font-bold shadow-md">
-            Entrar com E-mail e Senha
+        <!-- Abas de Navegação: Entrar vs Criar Conta -->
+        <div class="flex items-center p-1 bg-gray-100 rounded-xl">
+          <button type="button" onclick="switchAuthTab('login')" class="flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${currentAuthTab === 'login' ? 'bg-white text-ink shadow-sm' : 'text-muted hover:text-ink'}">
+            Entrar
           </button>
-        </form>
+          <button type="button" onclick="switchAuthTab('signup')" class="flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${currentAuthTab === 'signup' ? 'bg-white text-ink shadow-sm' : 'text-muted hover:text-ink'}">
+            Criar Conta
+          </button>
+        </div>
+
+        ${currentAuthTab === 'login' ? `
+          <!-- Formulário de Login (E-mail e Senha) -->
+          <form onsubmit="handleEmailLogin(event)" class="space-y-3">
+            <div>
+              <label class="block text-[11px] font-bold text-ink uppercase mb-1">E-mail</label>
+              <input type="email" id="auth-email" required placeholder="seuemail@exemplo.com" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-ink uppercase mb-1">Senha</label>
+              <input type="password" id="auth-password" required placeholder="••••••••" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+            </div>
+            <button type="submit" class="btn btn-primary w-full text-xs rounded-xl py-2.5 font-bold shadow-md">
+              Entrar
+            </button>
+          </form>
+        ` : `
+          <!-- Formulário de Cadastro (Fã vs Artista) -->
+          <form onsubmit="handleEmailSignUp(event)" class="space-y-3">
+            <div>
+              <label class="block text-[11px] font-bold text-ink uppercase mb-1">Nome Completo *</label>
+              <input type="text" id="signup-name" required placeholder="Seu nome ou como quer ser chamado" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-ink uppercase mb-1">E-mail *</label>
+              <input type="email" id="signup-email" required placeholder="seuemail@exemplo.com" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-ink uppercase mb-1">Criar Senha *</label>
+              <input type="password" id="signup-password" required minlength="6" placeholder="Mínimo 6 caracteres" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+            </div>
+
+            <!-- Seletor: Fã vs Artista -->
+            <div>
+              <label class="block text-[11px] font-bold text-ink uppercase mb-1.5">Como deseja participar?</label>
+              <div class="flex gap-2">
+                <button type="button" id="signup-role-fan-btn" onclick="setSignupRole('fan')" class="flex-1 p-2.5 rounded-xl border-2 border-frevo-cyan bg-frevo-cyan/10 text-left transition-all">
+                  <span class="block text-xs font-bold text-ink">🎉 Folião / Fã</span>
+                  <span class="block text-[10px] text-muted">Curtir, salvar e ouvir</span>
+                </button>
+                <button type="button" id="signup-role-artist-btn" onclick="setSignupRole('artist')" class="flex-1 p-2.5 rounded-xl border border-gray-200 bg-surface-soft text-left transition-all opacity-60">
+                  <span class="block text-xs font-bold text-ink">🎺 Artista / Músico</span>
+                  <span class="block text-[10px] text-muted">Publicar partituras e acervo</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Campos Condicionais para Artista -->
+            <div id="signup-artist-fields" class="space-y-2.5 p-3 rounded-xl bg-frevo-orange/5 border border-frevo-orange/20 hidden">
+              <div class="text-[11px] text-amber-800 leading-snug">
+                <strong>🎺 Aprovação de Curadoria:</strong> Sua conta entrará inicialmente como fã comum. O comitê gestor aprovará seu projeto para liberação das ferramentas de publicação.
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-ink uppercase mb-0.5">Nome Artístico / Grupo *</label>
+                <input type="text" id="signup-artist-name" placeholder="Ex: Orquestra Som da Terra" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-ink uppercase mb-0.5">Gênero Tradicional</label>
+                <select id="signup-artist-genre" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange">
+                  <option value="Frevo de Rua">Frevo de Rua</option>
+                  <option value="Frevo Canção">Frevo Canção</option>
+                  <option value="Frevo de Bloco">Frevo de Bloco</option>
+                  <option value="Frevo Livre Instrumental">Frevo Livre Instrumental</option>
+                  <option value="Frevo Contemporâneo">Frevo Contemporâneo</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-ink uppercase mb-0.5">WhatsApp / Contato</label>
+                <input type="text" id="signup-artist-whatsapp" placeholder="(81) 99999-9999" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-full text-xs rounded-xl py-2.5 font-bold shadow-md">
+              Cadastrar Conta
+            </button>
+          </form>
+        `}
 
         <div class="flex items-center my-3 text-center">
           <div class="flex-1 border-t border-gray-200"></div>
@@ -846,7 +943,7 @@ function openSessionModal() {
           <div class="flex-1 border-t border-gray-200"></div>
         </div>
 
-        <!-- Botão Google OAuth Oficial (Segundo) -->
+        <!-- Botão Google OAuth Oficial -->
         <button onclick="loginWithGoogle()" class="btn btn-outline w-full py-2.5 rounded-2xl flex items-center justify-center gap-2.5 text-xs font-bold shadow-sm hover:bg-gray-50 transition-all">
           <svg width="18" height="18" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -857,6 +954,7 @@ function openSessionModal() {
           Entrar com a Google
         </button>
       ` : `
+        <!-- Usuário Logado -->
         <div class="p-4 bg-surface-soft rounded-2xl flex items-center gap-3.5 border border-gray-100">
           <div class="relative flex-shrink-0">
             <img id="session-avatar-preview" src="${currentUserSession.avatar}" alt="${currentUserSession.name}" class="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm" />
@@ -872,8 +970,29 @@ function openSessionModal() {
             <h4 class="font-display font-bold text-sm text-ink truncate">${currentUserSession.name}</h4>
             <span class="text-xs text-muted block truncate">${currentUserSession.handle}</span>
             <span class="text-[11px] text-ink-soft block truncate">${currentUserSession.email || 'Conta Local'}</span>
+            <span class="badge ${currentUserSession.role === 'admin' ? 'bg-frevo-red/15 text-frevo-red' : currentUserSession.role === 'artist' ? 'bg-frevo-orange/15 text-frevo-orange' : 'bg-gray-200 text-ink'} text-[10px] font-bold mt-1">
+              ${currentUserSession.role === 'admin' ? '👑 Administrador' : currentUserSession.role === 'artist' ? '🎺 Artista Oficial' : '🎉 Folião'}
+            </span>
           </div>
         </div>
+
+        <!-- Banner de Status de Artista se Houver Solicitação Pendente -->
+        ${currentUserSession.artist_request_status === 'pending' ? `
+          <div class="p-3 bg-amber-50 border border-amber-200 rounded-2xl flex items-center gap-2.5 text-xs text-amber-800">
+            <span class="text-base">🎺</span>
+            <div>
+              <strong class="block">Solicitação Artística em Análise</strong>
+              <span class="text-[11px] text-amber-700">Aguardando aprovação do administrador para liberação do perfil de artista.</span>
+            </div>
+          </div>
+        ` : ''}
+
+        ${currentUserSession.role === 'user' && currentUserSession.artist_request_status !== 'pending' ? `
+          <button onclick="closeModal(); openArtistRequestModal();" class="w-full py-2.5 px-3 rounded-2xl bg-frevo-orange/10 hover:bg-frevo-orange/20 border border-frevo-orange/30 text-frevo-orange text-xs font-bold flex items-center justify-center gap-2 transition-colors">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3C6.5 3 2 7.5 2 13C2 13 4.5 11.5 7 13C9.5 14.5 12 13 12 13C12 13 14.5 14.5 17 13C19.5 11.5 22 13 22 13C22 7.5 17.5 3 12 3Z" fill="currentColor" fill-opacity="0.2"/><path d="M12 3V19C12 20.1 11.1 21 10 21C8.9 21 8 20.1 8 19"/></svg>
+            <span>Quero solicitar perfil de Artista</span>
+          </button>
+        ` : ''}
 
         <button onclick="logoutSession()" class="btn btn-outline text-xs w-full rounded-xl py-2 font-bold text-frevo-red hover:bg-red-50">
           Encerrar Sessão (Sair)
@@ -888,10 +1007,10 @@ function openSessionModal() {
             Visitante (Sem Login)
           </button>
           <button onclick="switchTestRole('user')" class="p-2 rounded-xl text-[11px] font-bold bg-frevo-cyan/15 hover:bg-frevo-cyan/25 text-ink text-left">
-            Usuário Comum
+            Folião Comum
           </button>
           <button onclick="switchTestRole('artist')" class="p-2 rounded-xl text-[11px] font-bold bg-frevo-orange/15 hover:bg-frevo-orange/25 text-ink text-left">
-            Artista (Maestro Forró)
+            Artista (SpokFrevo)
           </button>
           <button onclick="switchTestRole('admin')" class="p-2 rounded-xl text-[11px] font-bold bg-frevo-red/15 hover:bg-frevo-red/25 text-ink text-left">
             Administrador (CMS)
@@ -915,7 +1034,6 @@ async function loginWithGoogle() {
       alert('Falha na comunicação com o Google OAuth: ' + err.message);
     }
   } else {
-    // Simulação caso as chaves não estejam online
     switchTestRole('user');
   }
 }
@@ -931,45 +1049,214 @@ async function handleEmailLogin(e) {
       alert('Erro no login Supabase: ' + error.message);
       return;
     }
-    const isNewProfile = !currentUserProfile.name;
+
+    // Carregar perfil real no Supabase
+    let dbProfile = await window.supabaseService.getProfile(data.user.id);
+    if (!dbProfile) {
+      dbProfile = await window.supabaseService.upsertProfile(data.user);
+    }
+
+    // Regra de Ouro: artist_id só é vinculado se role === 'artist' E aprovado pelo admin
+    const isApprovedArtist = dbProfile?.role === 'artist' && dbProfile?.artist_id;
+    const userRole = dbProfile?.role === 'admin' ? 'admin' : isApprovedArtist ? 'artist' : 'user';
+    const artistId = isApprovedArtist ? dbProfile.artist_id : null;
+
     currentUserSession = {
-      role: data.user.user_metadata?.role || 'user',
-      name: data.user.user_metadata?.display_name || '',
-      handle: '',
-      avatar: data.user.user_metadata?.avatar_url || data.user.user_metadata?.picture || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      id: data.user.id,
+      role: userRole,
+      name: dbProfile?.display_name || data.user.user_metadata?.display_name || email.split('@')[0],
+      handle: dbProfile?.handle || ('@' + email.split('@')[0]),
+      avatar: dbProfile?.avatar_url || data.user.user_metadata?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
       email: email,
-      artist_id: null,
+      artist_id: artistId,
+      artist_request_status: dbProfile?.artist_request_status || 'none',
       favorites: []
     };
+
+    // Sincronizar estado social (likes, salvos, favoritos)
+    const social = await window.supabaseService.getUserSocialState(data.user.id);
+    if (social) {
+      currentUserSession.favorites = social.favoriteArtistIds || [];
+      DB.posts.forEach(p => {
+        p.is_liked = social.likedPostIds.includes(p.id);
+        p.is_saved = social.savedPostIds.includes(p.id);
+      });
+    }
+
     saveCurrentSession();
     updateProfileUI();
+    renderFeed();
+    renderArtists();
     closeModal();
-    setTimeout(() => {
-      openEditProfileModal(true);
-    }, 300);
   } else {
     // Fallback local
     currentUserSession = {
       role: email.includes('admin') ? 'admin' : email.includes('artista') ? 'artist' : 'user',
-      name: '',
-      handle: '',
+      name: email.split('@')[0],
+      handle: '@' + email.split('@')[0],
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
       email: email,
       artist_id: null,
+      artist_request_status: email.includes('artista') ? 'pending' : 'none',
       favorites: []
     };
-    currentUserProfile.name = '';
-    currentUserProfile.handle = '';
-    currentUserProfile.bio = '';
+    currentUserProfile.name = currentUserSession.name;
+    currentUserProfile.handle = currentUserSession.handle;
     currentUserProfile.email = email;
-    currentUserProfile.socialLinks = [];
     saveCurrentSession();
     updateProfileUI();
     closeModal();
-    setTimeout(() => {
-      openEditProfileModal(true);
-    }, 300);
   }
+}
+
+async function handleEmailSignUp(e) {
+  e.preventDefault();
+  const name = document.getElementById('signup-name')?.value;
+  const email = document.getElementById('signup-email')?.value;
+  const password = document.getElementById('signup-password')?.value;
+
+  if (!name || !email || !password) return;
+
+  const isArtistChoice = currentSignupRole === 'artist';
+  const artistName = document.getElementById('signup-artist-name')?.value || name;
+  const genre = document.getElementById('signup-artist-genre')?.value || 'Frevo de Rua';
+  const whatsapp = document.getElementById('signup-artist-whatsapp')?.value || '';
+
+  if (window.supabaseService && window.supabaseService.isConnected()) {
+    // Cadastra sempre com role inicial 'user'
+    const { data, error } = await window.supabaseService.signUpWithEmail(email, password, {
+      display_name: name,
+      role: 'user'
+    });
+
+    if (error) {
+      alert('Erro no cadastro Supabase: ' + error.message);
+      return;
+    }
+
+    // Se escolheu ser artista, registra a solicitação para o admin aprovar
+    if (isArtistChoice && data?.user) {
+      await window.supabaseService.requestArtistRole(data.user.id, {
+        requested_name: artistName,
+        genre: genre,
+        whatsapp: whatsapp
+      });
+      alert('🎺 Conta criada com sucesso!\n\nSua solicitação para se tornar Artista foi enviada para aprovação da moderação.\n\nEnquanto o administrador analisa seu projeto, você já pode navegar e aproveitar o FrevAI como fã!');
+    } else {
+      alert('🎉 Conta criada com sucesso! Seja bem-vindo ao FrevAI!');
+    }
+
+    closeModal();
+    // Alterna para tela de login com o email pré-preenchido
+    switchAuthTab('login');
+  } else {
+    alert('Cadastro simulado com sucesso!');
+    closeModal();
+  }
+}
+
+// Modal para Usuário Logado solicitar perfil de Artista
+function openArtistRequestModal() {
+  if (currentUserSession.role === 'guest') {
+    openSessionModal();
+    return;
+  }
+  if (currentUserSession.role === 'artist') {
+    alert('Você já possui um perfil de artista verificado no FrevAI!');
+    return;
+  }
+
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+
+  modalBody.innerHTML = `
+    <div class="space-y-4 text-left">
+      <div class="pb-2 border-b border-gray-100 pr-10">
+        <h3 class="font-display font-bold text-lg text-ink">Solicitar Perfil de Artista</h3>
+        <p class="text-xs text-muted">Junte-se à galeria de mestres e fazedores de cultura do Frevo</p>
+      </div>
+
+      <div class="p-3 bg-frevo-orange/10 border border-frevo-orange/30 rounded-2xl text-xs text-ink space-y-1">
+        <div class="font-bold flex items-center gap-1.5 text-frevo-orange">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          Como funciona a aprovação?
+        </div>
+        <p class="text-[11px] text-muted">Você continuará navegando como folião normalmente. O comitê de gestão analisará suas informações e, após a aprovação, as abas de partituras, álbuns e shows serão liberadas no seu perfil.</p>
+      </div>
+
+      <form onsubmit="handleArtistRequestSubmit(event)" class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Nome Artístico / Grupo / Orquestra *</label>
+          <input type="text" id="req-artist-name" required placeholder="Ex: Orquestra Frevo Tropical" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Gênero Tradicional</label>
+          <select id="req-artist-genre" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange">
+            <option value="Frevo de Rua">Frevo de Rua</option>
+            <option value="Frevo Canção">Frevo Canção</option>
+            <option value="Frevo de Bloco">Frevo de Bloco</option>
+            <option value="Frevo Livre Instrumental">Frevo Livre Instrumental</option>
+            <option value="Frevo Contemporâneo">Frevo Contemporâneo</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Breve Biografia / Histórico</label>
+          <textarea id="req-artist-bio" rows="3" placeholder="Conte um pouco sobre sua trajetória no Frevo, participações em carnavais ou festivais..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange"></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] font-bold text-ink uppercase mb-1">Instagram (@usuario)</label>
+            <input type="text" id="req-artist-instagram" placeholder="@seuinstagram" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-ink uppercase mb-1">WhatsApp de Contato</label>
+            <input type="text" id="req-artist-whatsapp" placeholder="(81) 99999-9999" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+          </div>
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl">Cancelar</button>
+          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl shadow-md font-bold">Enviar para Curadoria</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  modal.classList.add('open');
+}
+
+async function handleArtistRequestSubmit(e) {
+  e.preventDefault();
+  const name = document.getElementById('req-artist-name')?.value;
+  const genre = document.getElementById('req-artist-genre')?.value;
+  const bio = document.getElementById('req-artist-bio')?.value;
+  const instagram = document.getElementById('req-artist-instagram')?.value;
+  const whatsapp = document.getElementById('req-artist-whatsapp')?.value;
+
+  if (!name) return;
+
+  if (window.supabaseService && window.supabaseService.isConnected()) {
+    const { error } = await window.supabaseService.requestArtistRole(currentUserSession.id, {
+      requested_name: name,
+      genre: genre,
+      bio: bio,
+      instagram_url: instagram,
+      whatsapp: whatsapp
+    });
+    if (error) {
+      alert('Erro ao enviar solicitação: ' + error.message);
+      return;
+    }
+  }
+
+  currentUserSession.artist_request_status = 'pending';
+  saveCurrentSession();
+  closeModal();
+  updateProfileUI();
+  alert('🎺 Sua solicitação de perfil artístico foi enviada com sucesso!\n\nNossa curadoria analisará as informações. Você continua com acesso normal de folião.');
 }
 
 function logoutSession() {
@@ -1753,6 +2040,10 @@ function togglePostExpand(postId) {
 
 // Curtir ou descurtir publicação do Feed
 function toggleLike(postId) {
+  if (currentUserSession.role === 'guest') {
+    openSessionModal();
+    return;
+  }
   const post = DB.posts.find(p => p.id === postId);
   if (!post) return;
 
@@ -1760,15 +2051,27 @@ function toggleLike(postId) {
   post.likes = (post.likes || 0) + (post.is_liked ? 1 : -1);
   if (post.likes < 0) post.likes = 0;
 
+  if (window.supabaseService && currentUserSession.id) {
+    window.supabaseService.togglePostLike(postId, currentUserSession.id);
+  }
+
   renderFeed();
 }
 
 // Salvar ou remover dos salvos uma publicação do Feed
 function toggleSave(postId) {
+  if (currentUserSession.role === 'guest') {
+    openSessionModal();
+    return;
+  }
   const post = DB.posts.find(p => p.id === postId);
   if (!post) return;
 
   post.is_saved = !post.is_saved;
+
+  if (window.supabaseService && currentUserSession.id) {
+    window.supabaseService.toggleSavedPost(postId, currentUserSession.id);
+  }
 
   // Atualizar apenas o botão de salvar inline (sem re-render do feed inteiro)
   document.querySelectorAll(`button[onclick="toggleSave('${postId}')"]`).forEach(btn => {
@@ -1793,6 +2096,10 @@ function toggleSave(postId) {
 
 // Favoritar / Desfavoritar Artista
 function toggleFavoriteArtist(artistId) {
+  if (currentUserSession.role === 'guest') {
+    openSessionModal();
+    return;
+  }
   if (!currentUserSession.favorites) {
     currentUserSession.favorites = [];
   }
@@ -1804,6 +2111,11 @@ function toggleFavoriteArtist(artistId) {
     currentUserSession.favorites.push(artistId);
   }
   saveCurrentSession();
+
+  if (window.supabaseService && currentUserSession.id) {
+    window.supabaseService.toggleFavoriteArtist(artistId, currentUserSession.id);
+  }
+
   renderArtists();
   renderProfileGallery();
 
@@ -4051,52 +4363,96 @@ function switchAdminTab(tab, btnElement) {
   renderAdminCMS();
 }
 
-function renderAdminCMS() {
+async function renderAdminCMS() {
   const container = document.getElementById('admin-cms-content');
   if (!container) return;
 
   if (currentAdminTab === 'artists') {
-    // 1. Gestão e Aprovação de Artistas
-    container.innerHTML = `
-      <div class="bg-white border border-gray-200 rounded-2xl p-4 space-y-3 shadow-sm">
-        <div class="flex items-center justify-between pb-2 border-b border-gray-100">
-          <div>
-            <h3 class="font-display font-bold text-sm text-ink">Fila de Aprovação de Artistas</h3>
-            <p class="text-[11px] text-muted">Aprove ou recuse novos cadastros com notificação por e-mail</p>
-          </div>
-          <button onclick="openNewArtistModal()" class="btn btn-primary text-xs px-2.5 py-1 rounded-xl font-bold">+ Artista</button>
-        </div>
+    // Buscar solicitações pendentes do Supabase
+    let pendingRequests = [];
+    if (window.supabaseService && window.supabaseService.isConnected()) {
+      pendingRequests = await window.supabaseService.getPendingArtistRequests();
+    }
 
-        <div class="space-y-2.5">
-          ${DB.artists.map(artist => `
-            <div class="p-3 bg-surface-soft rounded-2xl border border-gray-100 flex items-center justify-between gap-3">
-              <div class="flex items-center gap-2.5 min-w-0">
-                <img src="${artist.avatar_url}" alt="${artist.name}" class="w-10 h-10 rounded-full object-cover flex-shrink-0" />
-                <div class="min-w-0">
-                  <strong class="text-ink text-xs block truncate">${artist.name}</strong>
-                  <span class="text-[11px] text-muted block">${artist.email || 'sem email'}</span>
-                  <span class="badge ${artist.is_approved ? 'bg-frevo-green/20 text-ink' : 'bg-frevo-orange/20 text-frevo-orange'} text-[10px] font-bold">
-                    ${artist.is_approved ? 'Aprovado' : 'Aguardando Moderação'}
-                  </span>
+    container.innerHTML = `
+      <div class="space-y-4">
+        <!-- 1. Fila de Solicitações Pendentes de Artista (Curadoria / Moderação) -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-4 space-y-3 shadow-sm">
+          <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+            <div>
+              <h3 class="font-display font-bold text-sm text-ink flex items-center gap-2">
+                <span>🎺 Solicitações de Artistas</span>
+                <span class="badge ${pendingRequests.length > 0 ? 'bg-frevo-orange text-white' : 'bg-gray-100 text-muted'} text-[10px] font-bold px-2 py-0.5 rounded-full">
+                  ${pendingRequests.length} pendente${pendingRequests.length === 1 ? '' : 's'}
+                </span>
+              </h3>
+              <p class="text-[11px] text-muted">Aprove os projetos artísticos para liberar as ferramentas de publicação</p>
+            </div>
+          </div>
+
+          <div class="space-y-2.5">
+            ${pendingRequests.length > 0 ? pendingRequests.map(req => `
+              <div class="p-3 bg-amber-50/70 rounded-2xl border border-amber-200/80 space-y-2">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="flex items-center gap-2.5 min-w-0">
+                    <img src="${req.user?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}" alt="${req.requested_name}" class="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-amber-300" />
+                    <div class="min-w-0">
+                      <strong class="text-ink text-xs block font-bold truncate">${req.requested_name}</strong>
+                      <span class="text-[11px] text-muted block">Fã: ${req.user?.display_name || 'Usuário'}</span>
+                      <span class="badge bg-frevo-orange/20 text-frevo-orange text-[10px] font-bold mt-0.5">${req.genre || 'Frevo de Rua'}</span>
+                    </div>
+                  </div>
+                  <div class="flex gap-1.5 flex-shrink-0">
+                    <button onclick="confirmApproveArtistRequest('${req.id}')" class="btn btn-green text-[11px] px-2.5 py-1 rounded-xl font-bold shadow-sm">
+                      ✓ Aprovar
+                    </button>
+                    <button onclick="confirmRejectArtistRequest('${req.id}')" class="btn btn-destructive text-[11px] px-2.5 py-1 rounded-xl font-bold shadow-sm">
+                      ✕ Recusar
+                    </button>
+                  </div>
+                </div>
+                ${req.bio ? `<p class="text-[11px] text-ink-soft bg-white/70 p-2 rounded-xl border border-amber-100 italic">${req.bio}</p>` : ''}
+                <div class="flex flex-wrap gap-2 text-[10px] text-muted pt-1">
+                  ${req.whatsapp ? `<span class="bg-white px-2 py-0.5 rounded-lg border border-gray-200 font-mono">WhatsApp: ${req.whatsapp}</span>` : ''}
+                  ${req.instagram_url ? `<span class="bg-white px-2 py-0.5 rounded-lg border border-gray-200 font-mono">Instagram: ${req.instagram_url}</span>` : ''}
                 </div>
               </div>
-
-              <div class="flex gap-1.5 flex-shrink-0">
-                ${!artist.is_approved ? `
-                  <button onclick="openDecisionEmailModal('${artist.id}', true)" class="btn btn-green text-[11px] px-2.5 py-1 rounded-xl font-bold">
-                    Aprovar
-                  </button>
-                  <button onclick="openDecisionEmailModal('${artist.id}', false)" class="btn btn-destructive text-[11px] px-2.5 py-1 rounded-xl font-bold">
-                    Recusar
-                  </button>
-                ` : `
-                  <button onclick="openDecisionEmailModal('${artist.id}', false)" class="btn btn-outline text-[11px] px-2 py-1 rounded-xl font-bold text-frevo-red">
-                    Suspender
-                  </button>
-                `}
+            `).join('') : `
+              <div class="p-4 text-center text-xs text-muted bg-surface-soft rounded-xl border border-gray-100">
+                Nenhuma solicitação de artista aguardando moderação no momento.
               </div>
+            `}
+          </div>
+        </div>
+
+        <!-- 2. Artistas Cadastrados no Catálogo Oficial -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-4 space-y-3 shadow-sm">
+          <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+            <div>
+              <h3 class="font-display font-bold text-sm text-ink">Artistas no Acervo Oficial (${DB.artists.length})</h3>
+              <p class="text-[11px] text-muted">Artistas aprovados e publicados na rede</p>
             </div>
-          `).join('')}
+            <button onclick="openNewArtistModal()" class="btn btn-primary text-xs px-2.5 py-1 rounded-xl font-bold">+ Artista</button>
+          </div>
+
+          <div class="space-y-2">
+            ${DB.artists.map(artist => `
+              <div class="p-2.5 bg-surface-soft rounded-2xl border border-gray-100 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <img src="${artist.avatar_url}" alt="${artist.name}" class="w-9 h-9 rounded-full object-cover flex-shrink-0" />
+                  <div class="min-w-0">
+                    <strong class="text-ink text-xs block truncate">${artist.name}</strong>
+                    <span class="text-[10px] text-muted block">${artist.genre || 'Frevo de Rua'}</span>
+                  </div>
+                </div>
+                <div class="flex gap-1.5 flex-shrink-0">
+                  <button onclick="openArtistProfile('${artist.id}')" class="btn btn-outline text-[10px] px-2 py-1 rounded-xl font-bold">
+                    Ver Perfil
+                  </button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
         </div>
       </div>
     `;
@@ -4221,6 +4577,34 @@ function renderAdminCMS() {
       </div>
     `;
   }
+}
+
+// Ações de Aprovação e Recusa de Solicitações de Artistas no CMS
+async function confirmApproveArtistRequest(requestId) {
+  if (!confirm('Deseja realmente aprovar esta solicitação e promover o usuário a Artista Oficial do FrevAI?')) return;
+  if (window.supabaseService && window.supabaseService.isConnected()) {
+    const res = await window.supabaseService.approveArtistRequest(requestId, currentUserSession.id);
+    if (res && res.error) {
+      alert('Erro ao aprovar artista: ' + res.error.message);
+      return;
+    }
+    // Sincronizar artistas com os dados novos do Supabase
+    const freshArtists = await window.supabaseService.getArtists();
+    if (freshArtists && freshArtists.length > 0) DB.artists = freshArtists;
+  }
+  alert('🎺 Artista aprovado com sucesso! O perfil do usuário agora é "Artista" e suas ferramentas de publicação foram liberadas.');
+  renderAdminCMS();
+  renderArtists();
+}
+
+async function confirmRejectArtistRequest(requestId) {
+  const reason = prompt('Informe o motivo da recusa (opcional):', 'Dados incompletos ou fora das diretrizes');
+  if (reason === null) return;
+  if (window.supabaseService && window.supabaseService.isConnected()) {
+    await window.supabaseService.rejectArtistRequest(requestId, currentUserSession.id, reason);
+  }
+  alert('Solicitação de artista recusada.');
+  renderAdminCMS();
 }
 
 // Modal de Decisão de Aprovação/Recusa de Artista com Disparo de E-mail
@@ -5205,6 +5589,46 @@ function updateProfileUI() {
       if (favBtn) favBtn.classList.add('active');
     }
   }
+
+  // Renderizar banner de status de artista no perfil
+  const artistBannerEl = document.getElementById('profile-artist-status-banner');
+  if (artistBannerEl) {
+    if (currentUserSession.role === 'artist') {
+      artistBannerEl.innerHTML = `
+        <div class="p-2.5 bg-frevo-green/10 border border-frevo-green/30 rounded-2xl flex items-center justify-between text-xs text-ink">
+          <div class="flex items-center gap-2">
+            <span class="text-base">🎺</span>
+            <div>
+              <strong class="block text-ink text-xs font-bold">Artista Oficial Verificado</strong>
+              <span class="text-[10px] text-muted">Acesso completo para gerenciar músicas, álbuns e shows.</span>
+            </div>
+          </div>
+          <button onclick="openSubmitSongModal()" class="btn btn-primary text-[10px] px-2.5 py-1 rounded-xl font-bold flex-shrink-0">
+            + Música
+          </button>
+        </div>
+      `;
+    } else if (currentUserSession.artist_request_status === 'pending') {
+      artistBannerEl.innerHTML = `
+        <div class="p-2.5 bg-amber-50 border border-amber-200 rounded-2xl flex items-center gap-2 text-xs text-amber-800">
+          <span class="text-base">⏳</span>
+          <div>
+            <strong class="block text-xs font-bold">Solicitação de Artista em Análise</strong>
+            <span class="text-[10px] text-amber-700">Aguardando aprovação do administrador para liberar a publicação do seu acervo.</span>
+          </div>
+        </div>
+      `;
+    } else if (currentUserSession.role === 'user') {
+      artistBannerEl.innerHTML = `
+        <button onclick="openArtistRequestModal()" class="w-full py-2 px-3 rounded-2xl bg-frevo-orange/10 hover:bg-frevo-orange/20 border border-frevo-orange/30 text-frevo-orange text-xs font-bold flex items-center justify-center gap-2 transition-colors">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3C6.5 3 2 7.5 2 13C2 13 4.5 11.5 7 13C9.5 14.5 12 13 12 13C12 13 14.5 14.5 17 13C19.5 11.5 22 13 22 13C22 7.5 17.5 3 12 3Z" fill="currentColor" fill-opacity="0.2"/><path d="M12 3V19C12 20.1 11.1 21 10 21C8.9 21 8 20.1 8 19"/></svg>
+          <span>Quero me tornar um Artista no FrevAI</span>
+        </button>
+      `;
+    } else {
+      artistBannerEl.innerHTML = '';
+    }
+  }
 }
 
 function openAccountDropdownModal() {
@@ -5963,7 +6387,7 @@ function openContactModal() {
 
 function openSubmitSongModal() {
   if (currentUserSession.role !== 'artist' && currentUserSession.role !== 'admin') {
-    alert('Apenas Artistas e Administradores podem cadastrar músicas e partituras.');
+    alert('Apenas Artistas Aprovados e Administradores podem cadastrar músicas e partituras.');
     return;
   }
 
@@ -5976,7 +6400,7 @@ function openSubmitSongModal() {
     <div class="space-y-4 text-left">
       <div class="pb-2 border-b border-gray-100 pr-10">
         <h3 class="font-display font-bold text-lg text-ink">Cadastrar Nova Música / Áudio</h3>
-        <p class="text-xs text-muted">Adicione a faixa com áudio real, letra e arranjo de partitura</p>
+        <p class="text-xs text-muted">Envie áudio real (MP3), partitura em PDF e capa da obra</p>
       </div>
 
       <form id="new-song-form" onsubmit="submitNewSong(event)" class="space-y-3">
@@ -6005,15 +6429,32 @@ function openSubmitSongModal() {
           </div>
         </div>
 
+        <!-- Upload de Arquivo MP3 Real -->
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Link do Áudio MP3 / Streaming (URL)</label>
-          <input type="url" id="song-audio-input" placeholder="https://assets.mixkit.co/music/preview/...mp3" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
-          <span class="text-[10px] text-muted block mt-0.5">Deixe em branco para usar a sintetização sonora de metais automática do FrevAI.</span>
+          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Arquivo de Áudio (MP3 / WAV)</label>
+          <div class="p-2.5 bg-surface-soft border border-gray-200 rounded-xl space-y-1.5">
+            <input type="file" id="song-audio-file" accept="audio/*" class="text-xs text-muted file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-frevo-orange/15 file:text-frevo-orange hover:file:bg-frevo-orange/25 cursor-pointer w-full" />
+            <div class="text-[10px] text-muted">Ou informe uma URL externa de áudio:</div>
+            <input type="url" id="song-audio-input" placeholder="https://exemplo.com/musica.mp3" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none" />
+          </div>
         </div>
 
+        <!-- Upload de Partitura em PDF Real -->
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Capa da Faixa / Álbum (URL)</label>
-          <input type="url" id="song-cover-input" placeholder="https://images.unsplash.com/..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Partitura Oficial (PDF)</label>
+          <div class="p-2.5 bg-surface-soft border border-gray-200 rounded-xl space-y-1.5">
+            <input type="file" id="song-score-file" accept="application/pdf" class="text-xs text-muted file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-frevo-cyan/15 file:text-frevo-cyan hover:file:bg-frevo-cyan/25 cursor-pointer w-full" />
+            <div class="text-[10px] text-muted">O arquivo PDF ficará disponível para download dos músicos e foliões.</div>
+          </div>
+        </div>
+
+        <!-- Upload de Imagem de Capa -->
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Imagem de Capa da Faixa</label>
+          <div class="p-2.5 bg-surface-soft border border-gray-200 rounded-xl space-y-1.5">
+            <input type="file" id="song-cover-file" accept="image/*" class="text-xs text-muted file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-gray-200 file:text-ink hover:file:bg-gray-300 cursor-pointer w-full" />
+            <input type="url" id="song-cover-input" placeholder="Ou URL da imagem (https://images.unsplash.com/...)" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none" />
+          </div>
         </div>
 
         <div>
@@ -6024,9 +6465,13 @@ function openSubmitSongModal() {
           <textarea id="song-lyrics-input" rows="3" placeholder="Insira os versos ou o arranjo orquestral da canção..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange"></textarea>
         </div>
 
+        <div id="submit-song-status" class="hidden text-xs text-center font-bold text-frevo-orange py-1">
+          Enviando mídia e registrando partitura...
+        </div>
+
         <div class="flex gap-2 pt-2">
           <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl">Cancelar</button>
-          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl shadow-md font-bold">Publicar Música</button>
+          <button type="submit" id="btn-submit-song-action" class="btn btn-primary flex-1 text-xs rounded-xl shadow-md font-bold">Publicar Música</button>
         </div>
       </form>
     </div>
@@ -6044,69 +6489,118 @@ function autoGenerateLyricsPrompt() {
   }
 }
 
-function submitNewSong(e) {
+async function submitNewSong(e) {
   e.preventDefault();
-  const title = document.getElementById('song-title-input').value;
-  const genre = document.getElementById('song-genre-input').value;
-  const albumId = document.getElementById('song-album-input').value || null;
-  const audioUrl = document.getElementById('song-audio-input').value || 'https://assets.mixkit.co/music/preview/mixkit-brazilian-carnival-brass-band-1120.mp3';
-  const coverUrl = document.getElementById('song-cover-input').value || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&q=80';
-  const lyrics = document.getElementById('song-lyrics-input').value;
+  const title = document.getElementById('song-title-input')?.value;
+  const genre = document.getElementById('song-genre-input')?.value || 'Frevo de Rua';
+  const albumId = document.getElementById('song-album-input')?.value || null;
+  const lyrics = document.getElementById('song-lyrics-input')?.value || '';
+
+  const audioFileInput = document.getElementById('song-audio-file');
+  const scoreFileInput = document.getElementById('song-score-file');
+  const coverFileInput = document.getElementById('song-cover-file');
+
+  let audioUrl = document.getElementById('song-audio-input')?.value || '';
+  let coverUrl = document.getElementById('song-cover-input')?.value || '';
+  let scoreFileUrl = 'partitura-oficial.pdf';
 
   if (!title) return;
 
-  const newSong = {
-    id: `s-${Date.now()}`,
-    title,
-    artist: currentUserSession.name || currentUserProfile.name || 'Artista do Frevo',
-    genre,
-    description: 'Obra autêntica cadastrada no acervo oficial com áudio e partitura.',
-    lyrics: lyrics || `Lá vem ${title} no compasso do ${genre}!\nO passo é ligeiro e faz a terra tremer!`,
-    score_file: 'partitura-oficial.pdf',
-    audio_url: audioUrl,
-    cover_url: coverUrl,
-    duration_seconds: 180,
-    plays_count: 1,
-    is_popular: true,
-    album_id: albumId,
-    status: 'published',
-    downloads_count: 1,
-    author_id: currentUserSession.artist_id || 'a1'
-  };
-
-  DB.songs.unshift(newSong);
-  if (window.supabaseService && window.supabaseService.isConnected()) {
-    window.supabaseService.createSong(newSong);
+  const statusEl = document.getElementById('submit-song-status');
+  const btnAction = document.getElementById('btn-submit-song-action');
+  if (statusEl) statusEl.classList.remove('hidden');
+  if (btnAction) {
+    btnAction.disabled = true;
+    btnAction.innerText = 'Enviando...';
   }
 
-  // Notificação Cultural In-App & Push (Nova Partitura de Artista)
-  const newNotif = {
-    id: `notif-${Date.now()}`,
-    type: 'score',
-    targetId: newSong.id,
-    title: 'Nova Música & Partitura!',
-    message: `${newSong.artist} lançou a faixa "${newSong.title}". Ouça agora no player!`,
-    author: newSong.artist,
-    author_avatar: currentUserSession.avatar,
-    time_ago: 'Agora',
-    read: false
-  };
-  DB.notifications = DB.notifications || [];
-  DB.notifications.unshift(newNotif);
-  updateNotificationBadge();
-  sendCulturalPushNotification({
-    title: newNotif.title,
-    message: newNotif.message,
-    url: `/#songs?score=${newSong.id}`,
-    type: 'score',
-    targetId: newSong.id
-  });
+  try {
+    const artistId = currentUserSession.artist_id || 'general';
 
-  closeModal();
-  renderSongs();
-  renderProfileGallery();
-  renderAdminCMS();
-  alert('Música publicada com sucesso! Você já pode reproduzi-la no player.');
+    // 1. Upload de Áudio Real se arquivo foi selecionado
+    if (audioFileInput && audioFileInput.files && audioFileInput.files[0] && window.supabaseService) {
+      if (statusEl) statusEl.innerText = 'Fazendo upload do áudio MP3...';
+      const uploadedAudio = await window.supabaseService.uploadAudio(audioFileInput.files[0], artistId);
+      if (uploadedAudio) audioUrl = uploadedAudio;
+    }
+    if (!audioUrl) {
+      audioUrl = 'https://assets.mixkit.co/music/preview/mixkit-brazilian-carnival-brass-band-1120.mp3';
+    }
+
+    // 2. Upload de Partitura PDF se arquivo foi selecionado
+    if (scoreFileInput && scoreFileInput.files && scoreFileInput.files[0] && window.supabaseService) {
+      if (statusEl) statusEl.innerText = 'Fazendo upload da partitura PDF...';
+      const uploadedScore = await window.supabaseService.uploadScore(scoreFileInput.files[0], artistId);
+      if (uploadedScore) scoreFileUrl = uploadedScore;
+    }
+
+    // 3. Upload de Capa se arquivo foi selecionado
+    if (coverFileInput && coverFileInput.files && coverFileInput.files[0] && window.supabaseService) {
+      if (statusEl) statusEl.innerText = 'Fazendo upload da imagem de capa...';
+      const uploadedCover = await window.supabaseService.uploadSongCover(coverFileInput.files[0]);
+      if (uploadedCover) coverUrl = uploadedCover;
+    }
+    if (!coverUrl) {
+      coverUrl = 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&q=80';
+    }
+
+    const newSong = {
+      id: `s-${Date.now()}`,
+      title,
+      artist: currentUserSession.name || currentUserProfile.name || 'Artista do Frevo',
+      genre,
+      description: 'Obra autêntica cadastrada no acervo oficial com áudio e partitura.',
+      lyrics: lyrics || `Lá vem ${title} no compasso do ${genre}!\nO passo é ligeiro e faz a terra tremer!`,
+      score_file: scoreFileUrl,
+      score_path: scoreFileUrl,
+      audio_url: audioUrl,
+      cover_url: coverUrl,
+      duration_seconds: 180,
+      plays_count: 1,
+      is_popular: true,
+      album_id: albumId,
+      status: 'published',
+      downloads_count: 1,
+      author_id: currentUserSession.artist_id || 'a1',
+      artist_id: currentUserSession.artist_id || null,
+      submitted_by: currentUserSession.id || null
+    };
+
+    DB.songs.unshift(newSong);
+
+    // Persistir no Supabase
+    if (window.supabaseService && window.supabaseService.isConnected()) {
+      await window.supabaseService.createSong(newSong);
+    }
+
+    // Notificação Cultural In-App & Push
+    const newNotif = {
+      id: `notif-${Date.now()}`,
+      type: 'score',
+      targetId: newSong.id,
+      title: 'Nova Música & Partitura!',
+      message: `${newSong.artist} lançou a faixa "${newSong.title}". Ouça agora no player!`,
+      author: newSong.artist,
+      author_avatar: currentUserSession.avatar,
+      time_ago: 'Agora',
+      read: false
+    };
+    DB.notifications = DB.notifications || [];
+    DB.notifications.unshift(newNotif);
+    updateNotificationBadge();
+
+    closeModal();
+    renderSongs();
+    renderProfileGallery();
+    alert(`🎺 Música "${newSong.title}" publicada com sucesso com áudio e partitura!`);
+  } catch (err) {
+    console.error('Erro ao publicar música:', err);
+    alert('Erro ao enviar música: ' + err.message);
+    if (btnAction) {
+      btnAction.disabled = false;
+      btnAction.innerText = 'Publicar Música';
+    }
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -6156,7 +6650,7 @@ function openSubmitAlbumModal() {
   modal.classList.add('open');
 }
 
-function submitNewAlbum(e) {
+async function submitNewAlbum(e) {
   e.preventDefault();
   const title = document.getElementById('album-title-input').value;
   const release_year = parseInt(document.getElementById('album-year-input').value) || new Date().getFullYear();
@@ -6177,14 +6671,22 @@ function submitNewAlbum(e) {
   DB.albums = DB.albums || [];
   DB.albums.unshift(newAlbum);
 
+  if (window.supabaseService && window.supabaseService.isConnected()) {
+    const saved = await window.supabaseService.createAlbum(newAlbum);
+    if (saved && saved.id) newAlbum.id = saved.id;
+  }
+
   closeModal();
   renderProfileGallery();
   alert('Álbum criado com sucesso! Agora você pode vincular faixas a ele.');
 }
 
-function deleteAlbum(albumId) {
+async function deleteAlbum(albumId) {
   if (confirm('Deseja realmente excluir este álbum?')) {
     DB.albums = (DB.albums || []).filter(a => a.id !== albumId);
+    if (window.supabaseService && window.supabaseService.isConnected()) {
+      await window.supabaseService.deleteAlbum(albumId);
+    }
     renderProfileGallery();
   }
 }
@@ -6241,38 +6743,50 @@ function openSubmitShowModal() {
   modal.classList.add('open');
 }
 
-function submitNewShow(e) {
+async function submitNewShow(e) {
   e.preventDefault();
-  const title = document.getElementById('show-title-input').value;
-  const date = document.getElementById('show-date-input').value;
-  const time = document.getElementById('show-time-input').value;
-  const venue = document.getElementById('show-venue-input').value;
-  const city = document.getElementById('show-city-input').value || 'Recife - PE';
+  const event_name = document.getElementById('show-title-input').value;
+  const event_date = document.getElementById('show-date-input').value;
+  const event_time = document.getElementById('show-time-input').value;
+  const venue_name = document.getElementById('show-venue-input').value;
+  const city = document.getElementById('show-city-input').value;
 
-  if (!title || !date) return;
+  if (!event_name || !event_date) return;
 
   const newShow = {
     id: `sh-${Date.now()}`,
     artist_id: currentUserSession.artist_id || 'a1',
-    title,
-    venue,
+    event_name,
+    title: event_name,
+    event_date,
+    date: event_date,
+    event_time,
+    time: event_time,
+    venue_name,
+    venue: venue_name,
     city,
-    date,
-    time,
     ticket_url: '#'
   };
 
   DB.shows = DB.shows || [];
   DB.shows.unshift(newShow);
 
+  if (window.supabaseService && window.supabaseService.isConnected()) {
+    const saved = await window.supabaseService.createArtistEvent(newShow);
+    if (saved && saved.id) newShow.id = saved.id;
+  }
+
   closeModal();
   renderProfileGallery();
-  alert('Show adicionado com sucesso à sua agenda!');
+  alert('Show agendado e publicado com sucesso!');
 }
 
-function deleteShow(showId) {
-  if (confirm('Deseja realmente excluir este show da agenda?')) {
+async function deleteShow(showId) {
+  if (confirm('Deseja realmente excluir este show da sua agenda?')) {
     DB.shows = (DB.shows || []).filter(s => s.id !== showId);
+    if (window.supabaseService && window.supabaseService.isConnected()) {
+      await window.supabaseService.deleteArtistEvent(showId);
+    }
     renderProfileGallery();
   }
 }
@@ -6461,14 +6975,20 @@ document.addEventListener('DOMContentLoaded', () => {
           const googleAvatar = session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture;
           const currentAvatar = dbProfile?.avatar_url || googleAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
 
+          // Regra de Ouro: artist_id só é vinculado se role === 'artist' E aprovado pelo admin
+          const isApprovedArtist = dbProfile?.role === 'artist' && dbProfile?.artist_id;
+          const userRole = dbProfile?.role === 'admin' ? 'admin' : isApprovedArtist ? 'artist' : 'user';
+          const artistId = isApprovedArtist ? dbProfile.artist_id : null;
+
           currentUserSession = {
             id: session.user.id,
-            role: dbProfile?.role || session.user.user_metadata?.role || 'user',
+            role: userRole,
             name: dbProfile?.display_name || session.user.user_metadata?.full_name || session.user.user_metadata?.name || '',
             handle: dbProfile?.handle || (session.user.email ? '@' + session.user.email.split('@')[0] : ''),
             avatar: currentAvatar,
             email: session.user.email,
-            artist_id: null,
+            artist_id: artistId,
+            artist_request_status: dbProfile?.artist_request_status || 'none',
             favorites: []
           };
 
@@ -6477,6 +6997,18 @@ document.addEventListener('DOMContentLoaded', () => {
           currentUserProfile.avatar = currentAvatar;
           currentUserProfile.email = session.user.email;
           if (dbProfile?.bio) currentUserProfile.bio = dbProfile.bio;
+
+          // Sincronizar estado social do usuário autenticado (likes, salvos, favoritos)
+          const social = await window.supabaseService.getUserSocialState(session.user.id);
+          if (social) {
+            currentUserSession.favorites = social.favoriteArtistIds || [];
+            DB.posts.forEach(p => {
+              p.is_liked = social.likedPostIds.includes(p.id);
+              p.is_saved = social.savedPostIds.includes(p.id);
+            });
+            renderFeed();
+            renderArtists();
+          }
 
           saveCurrentSession();
           updateProfileUI();

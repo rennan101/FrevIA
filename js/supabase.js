@@ -107,13 +107,16 @@ class SupabaseService {
     }
   }
 
-  // Inserir ou atualizar perfil do usuário logado
+  // Inserir ou atualizar perfil do usuário logado preservando papel e vínculo de artista
   async upsertProfile(user, extraData = {}) {
     if (!this.client || !user) return null;
     try {
+      const existing = await this.getProfile(user.id);
       const displayName = extraData.display_name || user.user_metadata?.full_name || user.user_metadata?.name || user.user_metadata?.display_name || user.email?.split('@')[0] || 'Folião';
       const avatarUrl = extraData.avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
-      const role = extraData.role || user.user_metadata?.role || 'user';
+      const role = existing?.role || extraData.role || 'user';
+      const artistId = existing?.artist_id || extraData.artist_id || null;
+      const artistRequestStatus = existing?.artist_request_status || extraData.artist_request_status || 'none';
 
       const { data, error } = await this.client
         .from('profiles')
@@ -122,6 +125,8 @@ class SupabaseService {
           display_name: displayName,
           avatar_url: avatarUrl,
           role: role,
+          artist_id: artistId,
+          artist_request_status: artistRequestStatus,
           updated_at: new Date().toISOString()
         })
         .select()
@@ -521,22 +526,37 @@ class SupabaseService {
   async createSong(songData) {
     if (!this.client) return null;
     try {
+      const slug = (songData.title || 'song').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
+      const insertPayload = {
+        title: songData.title,
+        slug: slug,
+        genre: songData.genre || 'Frevo de Rua',
+        lyrics: songData.lyrics || '',
+        description: songData.description || 'Submetida pelo acervo digital do FrevAI',
+        score_path: songData.score_path || null,
+        audio_url: songData.audio_url || null,
+        cover_url: songData.cover_url || null,
+        artist_id: songData.artist_id || null,
+        duration_seconds: songData.duration_seconds || 180,
+        status: 'published'
+      };
+
+      if (songData.submitted_by) {
+        insertPayload.submitted_by = songData.submitted_by;
+      }
+      if (songData.album_id) {
+        insertPayload.album_id = songData.album_id;
+      }
+
       const { data, error } = await this.client
         .from('songs')
-        .insert([{
-          title: songData.title,
-          slug: (songData.title || 'song').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now(),
-          genre: songData.genre || 'Frevo de Rua',
-          lyrics: songData.lyrics,
-          description: songData.description || 'Submetida pelo acervo digital do FrevAI',
-          status: 'published'
-        }])
+        .insert([insertPayload])
         .select();
 
       if (error) throw error;
       return data;
     } catch (err) {
-      console.error('[Supabase] Erro ao cadastrar partitura:', err.message);
+      console.error('[Supabase] Erro ao cadastrar partitura/música:', err.message);
       return null;
     }
   }
@@ -549,6 +569,422 @@ class SupabaseService {
       return true;
     } catch {
       return false;
+    }
+  }
+
+  // ============================================================================
+  // ÁLBUNS & SHOWS (CRUD)
+  // ============================================================================
+  async createAlbum(albumData) {
+    if (!this.client) return null;
+    try {
+      const { data, error } = await this.client
+        .from('albums')
+        .insert([{
+          title: albumData.title,
+          slug: (albumData.title || 'album').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now(),
+          artist_id: albumData.artist_id,
+          cover_url: albumData.cover_url || null,
+          release_year: parseInt(albumData.release_year, 10) || new Date().getFullYear(),
+          tracks_count: parseInt(albumData.tracks_count, 10) || 1
+        }])
+        .select();
+
+      if (error) throw error;
+      return data && data[0];
+    } catch (err) {
+      console.error('[Supabase] Erro ao criar álbum:', err.message);
+      return null;
+    }
+  }
+
+  async deleteAlbum(albumId) {
+    if (!this.client) return false;
+    try {
+      const { error } = await this.client.from('albums').delete().eq('id', albumId);
+      if (error) throw error;
+      return true;
+    } catch (err) {
+      console.error('[Supabase] Erro ao excluir álbum:', err.message);
+      return false;
+    }
+  }
+
+  async createArtistEvent(eventData) {
+    if (!this.client) return null;
+    try {
+      const { data, error } = await this.client
+        .from('artist_events')
+        .insert([{
+          artist_id: eventData.artist_id,
+          event_name: eventData.event_name,
+          venue_name: eventData.venue_name || 'Recife Antigo',
+          city: eventData.city || 'Recife - PE',
+          event_date: eventData.event_date,
+          event_time: eventData.event_time || '20:00',
+          ticket_url: eventData.ticket_url || null
+        }])
+        .select();
+
+      if (error) throw error;
+      return data && data[0];
+    } catch (err) {
+      console.error('[Supabase] Erro ao criar evento de artista:', err.message);
+      return null;
+    }
+  }
+
+  async deleteArtistEvent(eventId) {
+    if (!this.client) return false;
+    try {
+      const { error } = await this.client.from('artist_events').delete().eq('id', eventId);
+      if (error) throw error;
+      return true;
+    } catch (err) {
+      console.error('[Supabase] Erro ao excluir evento:', err.message);
+      return false;
+    }
+  }
+
+  // ============================================================================
+  // FLUXO DE ARTISTA: SOLICITAÇÃO & APROVAÇÃO ADMIN
+  // ============================================================================
+  async requestArtistRole(userId, reqData) {
+    if (!this.client || !userId) return { error: { message: 'Supabase não conectado ou usuário inválido' } };
+    try {
+      // 1. Inserir ou atualizar na tabela artist_requests
+      const { data: request, error: reqError } = await this.client
+        .from('artist_requests')
+        .insert([{
+          user_id: userId,
+          requested_name: reqData.requested_name,
+          genre: reqData.genre || 'Frevo de Rua',
+          bio: reqData.bio || '',
+          instagram_url: reqData.instagram_url || '',
+          whatsapp: reqData.whatsapp || '',
+          status: 'pending'
+        }])
+        .select()
+        .single();
+
+      if (reqError) throw reqError;
+
+      // 2. Atualizar perfil com status pendente (role continua 'user')
+      await this.client
+        .from('profiles')
+        .update({
+          artist_request_status: 'pending',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', userId);
+
+      return { data: request, error: null };
+    } catch (err) {
+      console.error('[Supabase] Erro ao solicitar papel de artista:', err.message);
+      return { error: err };
+    }
+  }
+
+  async getPendingArtistRequests() {
+    if (!this.client) return [];
+    try {
+      const { data, error } = await this.client
+        .from('artist_requests')
+        .select(`
+          id,
+          user_id,
+          requested_name,
+          genre,
+          bio,
+          instagram_url,
+          whatsapp,
+          status,
+          created_at,
+          user:user_id(display_name, avatar_url)
+        `)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    } catch (err) {
+      console.warn('[Supabase] Falha ao carregar pedidos de artista:', err.message);
+      return [];
+    }
+  }
+
+  async approveArtistRequest(requestId, adminId) {
+    if (!this.client) return { error: { message: 'Supabase não conectado' } };
+    try {
+      // 1. Buscar a solicitação
+      const { data: req, error: fetchErr } = await this.client
+        .from('artist_requests')
+        .select('*')
+        .eq('id', requestId)
+        .single();
+
+      if (fetchErr || !req) throw new Error('Solicitação não encontrada');
+
+      const slug = req.requested_name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.floor(Math.random() * 1000);
+
+      // 2. Criar registro na tabela artists vinculado ao profile_id
+      const { data: artist, error: artistErr } = await this.client
+        .from('artists')
+        .insert([{
+          profile_id: req.user_id,
+          name: req.requested_name,
+          slug: slug,
+          genre: req.genre || 'Frevo de Rua',
+          bio: req.bio || '',
+          instagram_url: req.instagram_url || null,
+          is_authorized_editor: true,
+          is_published: true
+        }])
+        .select()
+        .single();
+
+      if (artistErr) throw artistErr;
+
+      // 3. Atualizar o profile do usuário promovendo para 'artist' e vinculando o artist_id
+      const { error: profErr } = await this.client
+        .from('profiles')
+        .update({
+          role: 'artist',
+          artist_id: artist.id,
+          artist_request_status: 'approved',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', req.user_id);
+
+      if (profErr) throw profErr;
+
+      // 4. Marcar a solicitação como aprovada
+      await this.client
+        .from('artist_requests')
+        .update({
+          status: 'approved',
+          reviewed_by: adminId,
+          reviewed_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', requestId);
+
+      return { data: artist, error: null };
+    } catch (err) {
+      console.error('[Supabase] Erro ao aprovar artista:', err.message);
+      return { error: err };
+    }
+  }
+
+  async rejectArtistRequest(requestId, adminId, reason = '') {
+    if (!this.client) return { error: { message: 'Supabase não conectado' } };
+    try {
+      const { data: req } = await this.client
+        .from('artist_requests')
+        .select('user_id')
+        .eq('id', requestId)
+        .single();
+
+      const { error } = await this.client
+        .from('artist_requests')
+        .update({
+          status: 'rejected',
+          review_notes: reason,
+          reviewed_by: adminId,
+          reviewed_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', requestId);
+
+      if (error) throw error;
+
+      if (req && req.user_id) {
+        await this.client
+          .from('profiles')
+          .update({
+            artist_request_status: 'rejected',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', req.user_id);
+      }
+
+      return { error: null };
+    } catch (err) {
+      console.error('[Supabase] Erro ao recusar artista:', err.message);
+      return { error: err };
+    }
+  }
+
+  // ============================================================================
+  // INTERAÇÕES SOCIAIS: LIKES, SALVOS & FAVORITOS NO SUPABASE
+  // ============================================================================
+  async togglePostLike(postId, userId) {
+    if (!this.client || !userId || !postId) return null;
+    try {
+      const { data: existing } = await this.client
+        .from('post_likes')
+        .select('id')
+        .eq('post_id', postId)
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (existing) {
+        await this.client.from('post_likes').delete().eq('id', existing.id);
+        return { liked: false };
+      } else {
+        await this.client.from('post_likes').insert([{ post_id: postId, user_id: userId }]);
+        return { liked: true };
+      }
+    } catch (err) {
+      console.warn('[Supabase] Falha ao alternar like:', err.message);
+      return null;
+    }
+  }
+
+  async toggleSavedPost(postId, userId) {
+    if (!this.client || !userId || !postId) return null;
+    try {
+      const { data: existing } = await this.client
+        .from('saved_posts')
+        .select('id')
+        .eq('post_id', postId)
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (existing) {
+        await this.client.from('saved_posts').delete().eq('id', existing.id);
+        return { saved: false };
+      } else {
+        await this.client.from('saved_posts').insert([{ post_id: postId, user_id: userId }]);
+        return { saved: true };
+      }
+    } catch (err) {
+      console.warn('[Supabase] Falha ao alternar post salvo:', err.message);
+      return null;
+    }
+  }
+
+  async toggleFavoriteArtist(artistId, userId) {
+    if (!this.client || !userId || !artistId) return null;
+    try {
+      const { data: existing } = await this.client
+        .from('artist_favorites')
+        .select('id')
+        .eq('artist_id', artistId)
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (existing) {
+        await this.client.from('artist_favorites').delete().eq('id', existing.id);
+        return { favorited: false };
+      } else {
+        await this.client.from('artist_favorites').insert([{ artist_id: artistId, user_id: userId }]);
+        return { favorited: true };
+      }
+    } catch (err) {
+      console.warn('[Supabase] Falha ao alternar favorito:', err.message);
+      return null;
+    }
+  }
+
+  async getUserSocialState(userId) {
+    if (!this.client || !userId) return { likedPostIds: [], savedPostIds: [], favoriteArtistIds: [] };
+    try {
+      const [likesRes, savesRes, favsRes] = await Promise.all([
+        this.client.from('post_likes').select('post_id').eq('user_id', userId),
+        this.client.from('saved_posts').select('post_id').eq('user_id', userId),
+        this.client.from('artist_favorites').select('artist_id').eq('user_id', userId)
+      ]);
+
+      return {
+        likedPostIds: (likesRes.data || []).map(r => r.post_id),
+        savedPostIds: (savesRes.data || []).map(r => r.post_id),
+        favoriteArtistIds: (favsRes.data || []).map(r => r.artist_id)
+      };
+    } catch (err) {
+      console.warn('[Supabase] Falha ao carregar estado social do usuário:', err.message);
+      return { likedPostIds: [], savedPostIds: [], favoriteArtistIds: [] };
+    }
+  }
+
+  // ============================================================================
+  // STORAGE: ÁUDIOS (MP3), PARTITURAS (PDF) & CAPAS NO BUCKET SCORES
+  // ============================================================================
+  async uploadAudio(file, artistId = 'general') {
+    if (!this.client || !file) return null;
+    try {
+      const cleanName = file.name ? file.name.replace(/[^a-zA-Z0-9._-]/g, '_') : 'audio.mp3';
+      const filePath = `audio/${artistId}/${Date.now()}_${cleanName}`;
+
+      const { data, error } = await this.client.storage
+        .from('scores')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = this.client.storage
+        .from('scores')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (err) {
+      console.error('[Supabase] Falha no upload do áudio MP3:', err.message);
+      return null;
+    }
+  }
+
+  async uploadScore(file, artistId = 'general') {
+    if (!this.client || !file) return null;
+    try {
+      const cleanName = file.name ? file.name.replace(/[^a-zA-Z0-9._-]/g, '_') : 'partitura.pdf';
+      const filePath = `scores/${artistId}/${Date.now()}_${cleanName}`;
+
+      const { data, error } = await this.client.storage
+        .from('scores')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = this.client.storage
+        .from('scores')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (err) {
+      console.error('[Supabase] Falha no upload da partitura PDF:', err.message);
+      return null;
+    }
+  }
+
+  async uploadSongCover(file) {
+    if (!this.client || !file) return null;
+    try {
+      const cleanName = file.name ? file.name.replace(/[^a-zA-Z0-9._-]/g, '_') : 'cover.jpg';
+      const filePath = `covers/${Date.now()}_${cleanName}`;
+
+      const { data, error } = await this.client.storage
+        .from('scores')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = this.client.storage
+        .from('scores')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (err) {
+      console.error('[Supabase] Falha no upload da capa:', err.message);
+      return null;
     }
   }
 
@@ -627,3 +1063,4 @@ class SupabaseService {
 }
 
 window.supabaseService = new SupabaseService();
+

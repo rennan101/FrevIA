@@ -1466,7 +1466,8 @@ body {
     flex: 1;
   }
 
-  /* 5. Explorar: 3 Cards em Linha Horizontal */
+  /* 5. Explorar: 3 Cards em Linha Horizontal Perfeitamente Alinhados */
+  #view-explore .explore-cards-grid,
   #view-explore > .space-y-3\.5 {
     display: grid !important;
     grid-template-columns: repeat(3, 1fr) !important;
@@ -1475,7 +1476,12 @@ body {
     align-items: stretch !important;
   }
 
+  /* Resetar explicitamente qualquer margem herdada do Tailwind (.space-y-3.5) */
+  #view-explore .explore-cards-grid > *,
+  #view-explore > .space-y-3\.5 > *,
   #view-explore .music-category-card {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
     height: 180px !important;
     min-height: 180px !important;
     max-height: 180px !important;
