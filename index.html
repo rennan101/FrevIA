@@ -397,7 +397,7 @@
         </div>
       </div>
 
-      <!-- Profile Content Tab Bar (3 Abas: Artistas Favoritos, Salvos & Partituras com Cores Distintas) -->
+      <!-- Profile Content Tab Bar (Abas: Artistas Favoritos, Salvos, Partituras, Álbuns & Shows) -->
       <div class="profile-tab-bar" id="profile-tabs">
         <button class="profile-tab-btn tab-favorites active" onclick="switchProfileTab('favorites', this)" aria-label="Artistas Favoritados" title="Artistas Favoritados">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -409,11 +409,25 @@
             <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
           </svg>
         </button>
-        <button class="profile-tab-btn tab-scores" onclick="switchProfileTab('scores', this)" aria-label="Partituras & Músicas" title="Minhas Partituras">
+        <button class="profile-tab-btn tab-scores" onclick="switchProfileTab('scores', this)" aria-label="Partituras & Músicas" title="Minhas Músicas & Partituras">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M9 18V5L21 3V16"></path>
             <circle cx="6" cy="18" r="3"></circle>
             <circle cx="18" cy="16" r="3"></circle>
+          </svg>
+        </button>
+        <button class="profile-tab-btn tab-albums" onclick="switchProfileTab('albums', this)" aria-label="Meus Álbuns" title="Meus Álbuns">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </button>
+        <button class="profile-tab-btn tab-shows" onclick="switchProfileTab('shows', this)" aria-label="Meus Shows" title="Agenda de Shows">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
           </svg>
         </button>
       </div>
@@ -527,6 +541,94 @@
   </nav>
 
   <!-- =========================================================================
+       APPLE MUSIC STYLE GLOBAL AUDIO PLAYER & LYRICS EXPANDED SHEET
+       ========================================================================= -->
+  <div id="apple-audio-player" class="apple-player-bar hidden" role="region" aria-label="Player de Áudio">
+    <div class="apple-player-inner">
+      <!-- Capa e Título da Faixa -->
+      <div class="apple-player-track-info" onclick="openExpandedPlayer()">
+        <img id="player-track-cover" src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&q=80" alt="Capa" class="apple-player-cover" />
+        <div class="apple-player-meta">
+          <h4 id="player-track-title" class="apple-player-title truncate">Passo da Fervura</h4>
+          <p id="player-track-artist" class="apple-player-artist truncate">Maestro Forró</p>
+        </div>
+      </div>
+
+      <!-- Scrubber & Controles de Reprodução -->
+      <div class="apple-player-controls-container">
+        <div class="apple-player-scrubber-wrap">
+          <span id="player-time-current" class="apple-player-time">0:00</span>
+          <div class="apple-player-progress-bg" id="player-progress-bar" onclick="seekAudio(event)">
+            <div id="player-progress-fill" class="apple-player-progress-fill" style="width: 0%;"></div>
+          </div>
+          <span id="player-time-total" class="apple-player-time">3:00</span>
+        </div>
+
+        <div class="apple-player-buttons">
+          <button onclick="prevTrack()" class="apple-player-btn" aria-label="Faixa Anterior" title="Anterior">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2.5"></line></svg>
+          </button>
+          <button id="player-play-btn" onclick="togglePlayAudio()" class="apple-player-btn-main" aria-label="Play/Pause" title="Tocar ou Pausar">
+            <svg id="player-play-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <svg id="player-pause-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="hidden"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+          </button>
+          <button onclick="nextTrack()" class="apple-player-btn" aria-label="Próxima Faixa" title="Próxima">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2.5"></line></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Ações Extras: Volume & Botão de Letras -->
+      <div class="apple-player-extra-actions">
+        <!-- Controle de Volume -->
+        <div class="apple-player-volume-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-white/70 flex-shrink-0"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+          <input type="range" id="player-volume-slider" min="0" max="1" step="0.05" value="0.85" oninput="setAudioVolume(this.value)" class="apple-volume-range" aria-label="Volume" />
+        </div>
+
+        <!-- Botão de Letras (Lyrics) -->
+        <button id="player-lyrics-toggle-btn" onclick="toggleLyricsModal()" class="apple-player-lyrics-btn" aria-label="Ver Letra da Música" title="Letra da Música">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><line x1="9" y1="9" x2="15" y2="9"></line><line x1="9" y1="13" x2="13" y2="13"></line></svg>
+          <span class="hidden sm:inline text-xs font-bold">Letra</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Player de Áudio Expandido & Letras (Overlay Imersivo Estilo Apple Music) -->
+  <div id="apple-lyrics-modal" class="lyrics-modal-overlay hidden">
+    <div class="lyrics-modal-content">
+      <div class="flex items-center justify-between pb-3 border-b border-white/15">
+        <div class="flex items-center gap-3">
+          <img id="lyrics-track-cover" src="" alt="Capa" class="w-10 h-10 rounded-xl object-cover shadow-sm border border-white/20" />
+          <div>
+            <h3 id="lyrics-track-title" class="font-bold text-sm text-white leading-tight">Título da Música</h3>
+            <p id="lyrics-track-artist" class="text-xs text-white/70">Nome do Artista</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <!-- Botão Baixar Partitura em PDF -->
+          <button id="lyrics-download-score-btn" onclick="downloadCurrentSongScorePDF()" class="btn bg-white/15 hover:bg-white/25 text-white text-xs px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all border border-white/20">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <span>Partitura PDF</span>
+          </button>
+          <button onclick="toggleLyricsModal()" class="w-8 h-8 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center font-bold transition-all" aria-label="Fechar Letra">✕</button>
+        </div>
+      </div>
+
+      <!-- Letra da Música com Tipografia Estilo Apple Music -->
+      <div class="lyrics-scroll-body mt-4 pr-1">
+        <div id="lyrics-text-content" class="lyrics-container space-y-4 text-left">
+          <!-- Renderizado via JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Audio Element Oculto -->
+  <audio id="frevia-audio-element" preload="metadata"></audio>
+
+  <!-- =========================================================================
        MODAL REATIVO GLOBAL (PADRÃO REFINADO COM FECHAMENTO MODERNO)
        ========================================================================= -->
   <div id="global-modal" class="modal-overlay">
@@ -540,6 +642,7 @@
       <div id="modal-body"></div>
     </div>
   </div>
+
 
   <!-- =========================================================================
        BANNER FLUTUANTE DE INSTALAÇÃO PWA (ANDROID & IOS AUTOMÁTICO)

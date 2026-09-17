@@ -204,8 +204,24 @@ const DB = {
       artist: 'Maestro Forró',
       genre: 'Frevo Livre',
       description: 'Arranjo completo para saxofones, trompetes e base rítmica sincopada.',
-      lyrics: '(Instrumental - Diálogo dinâmico entre naipes de metais e percussão de rua)',
+      lyrics: `(Metais atacam com vigor)
+Lá vem o frevo fervendo nas ladeiras
+Pula passista, gira a sombrinha no ar
+Recife acorda ao toque dos clarins
+Que a festa popular não tem mais fim!
+
+(Solo enérgico de trompete)
+Na Bomba do Hemetério a massa vibra
+O passo é ligeiro e faz a terra tremer
+Vem na cadência desse frevo livre
+Pernambuco ensina como é viver!`,
       score_file: 'passo-da-fervura-metais.pdf',
+      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-brazilian-carnival-brass-band-1120.mp3',
+      cover_url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&q=80',
+      duration_seconds: 184,
+      plays_count: 14200,
+      is_popular: true,
+      album_id: 'alb1',
       status: 'published',
       downloads_count: 1420,
       author_id: 'a1'
@@ -216,8 +232,17 @@ const DB = {
       artist: 'Maestro Forró',
       genre: 'Frevo de Rua',
       description: 'Partitura orquestral com cadência acelerada executada nas ladeiras e pontes do Recife.',
-      lyrics: '(Instrumental - Clássico contemporâneo da OPBH)',
+      lyrics: `Clarins anunciam no Marco Zero
+A orquestra rasga a madrugada inteira
+Vem no compasso desse frevo quente
+Arrastando a multidão pelas ladeiras!`,
       score_file: 'fervura-recife-antigo.pdf',
+      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-latin-carnival-party-1122.mp3',
+      cover_url: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80',
+      duration_seconds: 165,
+      plays_count: 9800,
+      is_popular: true,
+      album_id: 'alb1',
       status: 'published',
       downloads_count: 890,
       author_id: 'a1'
@@ -228,8 +253,16 @@ const DB = {
       artist: 'Maestro Forró',
       genre: 'Frevo de Rua',
       description: 'Releitura sinfônica vigorosa da marcha mais célebre do carnaval pernambucano.',
-      lyrics: '(Instrumental - Arranjo oficial para orquestras de frevo)',
+      lyrics: `(Solo acrobático e acelerado de metais)
+Vassoura, vassourinha que varre a tristeza
+No passo do frevo que é nossa riqueza!`,
       score_file: 'vassourinhas-opbh.pdf',
+      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-samba-brazil-fiesta-1124.mp3',
+      cover_url: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=400&q=80',
+      duration_seconds: 210,
+      plays_count: 28400,
+      is_popular: true,
+      album_id: 'alb2',
       status: 'published',
       downloads_count: 2150,
       author_id: 'a1'
@@ -240,8 +273,15 @@ const DB = {
       artist: 'SpokFrevo Orquestra',
       genre: 'Frevo de Rua',
       description: 'Partitura completa para Big Band com solos expressivos de sax alto.',
-      lyrics: '(Instrumental - Homenagem instrumental a Edgar Moraes com solos virtuosísticos)',
+      lyrics: `(Instrumental Jazz-Frevo de vanguarda)
+Harmonias arrojadas e improvisações livres no pulsar pernambucano.`,
       score_file: 'moraes-e-frevo-bigband.pdf',
+      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-carnival-brass-groove-1121.mp3',
+      cover_url: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=400&q=80',
+      duration_seconds: 242,
+      plays_count: 18900,
+      is_popular: true,
+      album_id: 'alb3',
       status: 'published',
       downloads_count: 1780,
       author_id: 'a2'
@@ -252,8 +292,14 @@ const DB = {
       artist: 'SpokFrevo Orquestra',
       genre: 'Frevo Instrumental',
       description: 'Fusão primorosa de saxofone com sanfona e naipes de trombones.',
-      lyrics: '(Instrumental - Fusão entre a tradição dos bailes e a pulsação de rua)',
+      lyrics: `(Diálogo rítmico entre fole de oito baixos e naipes de sopro)`,
       score_file: 'frevo-sanfonado-spok.pdf',
+      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-latin-carnival-party-1122.mp3',
+      cover_url: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=400&q=80',
+      duration_seconds: 198,
+      plays_count: 12400,
+      is_popular: true,
+      album_id: 'alb3',
       status: 'published',
       downloads_count: 1340,
       author_id: 'a2'
@@ -264,8 +310,14 @@ const DB = {
       artist: 'SpokFrevo Orquestra',
       genre: 'Frevo de Rua',
       description: 'Pauta e partes orquestrais para concerto e cortejos carnavalescos.',
-      lyrics: '(Instrumental - Arranjo instrumental premiado internacionalmente)',
+      lyrics: `(Marcha instrumental premiada internacionalmente com arranjo para big band)`,
       score_file: 'passo-de-anjo.pdf',
+      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-brazilian-carnival-brass-band-1120.mp3',
+      cover_url: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=400&q=80',
+      duration_seconds: 220,
+      plays_count: 8700,
+      is_popular: false,
+      album_id: 'alb3',
       status: 'published',
       downloads_count: 960,
       author_id: 'a2'
@@ -276,8 +328,22 @@ const DB = {
       artist: 'Bloco da Saudade',
       genre: 'Frevo de Bloco',
       description: 'Hino lírico da resistência e orgulho carnavalesco com arranjo para coro e cordas.',
-      lyrics: 'Madeira do Rosário vem a ver contar / Como é que se faz pra vencer / Pernambuco é terra de cabra da peste / Não há quem conteste o nosso valor...',
+      lyrics: `Madeira do Rosário vem a ver contar
+Como é que se faz pra vencer
+Pernambuco é terra de cabra da peste
+Não há quem conteste o nosso valor!
+
+Se a gente desce a ladeira cantando
+Não tem quem segure o coral de pau e corda
+Nossa saudade é a chama viva
+Do carnaval que nunca se acaba!`,
       score_file: 'madeira-cupim-coro.pdf',
+      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-samba-brazil-fiesta-1124.mp3',
+      cover_url: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=400&q=80',
+      duration_seconds: 235,
+      plays_count: 31200,
+      is_popular: true,
+      album_id: 'alb4',
       status: 'published',
       downloads_count: 1980,
       author_id: 'a3'
@@ -288,8 +354,21 @@ const DB = {
       artist: 'Bloco da Saudade',
       genre: 'Frevo de Bloco',
       description: 'Poesia nostálgica de Edgar Moraes para flautas, clarinetes e coro feminino.',
-      lyrics: 'Bloco das Flores, Batutas de São José / Pavão Dourado, Flor da Lira / Um bloco em cada esquina a desfilar / Fazendo o coração palpitar...',
+      lyrics: `Bloco das Flores, Batutas de São José
+Pavão Dourado, Flor da Lira
+Um bloco em cada esquina a desfilar
+Fazendo o coração palpitar...
+
+Relembro os velhos carnavais com emoção
+Clarins de prata sob o luar do Recife
+Guardo no peito a poesia e a canção!`,
       score_file: 'valores-do-passado.pdf',
+      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-carnival-brass-groove-1121.mp3',
+      cover_url: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=400&q=80',
+      duration_seconds: 195,
+      plays_count: 15600,
+      is_popular: true,
+      album_id: 'alb4',
       status: 'published',
       downloads_count: 1250,
       author_id: 'a3'
@@ -300,8 +379,17 @@ const DB = {
       artist: 'Bloco da Saudade',
       genre: 'Frevo de Bloco',
       description: 'Marcha de bloco com violões de 7 cordas, banjos e coro a quatro vozes.',
-      lyrics: 'Quanta saudade eu tenho dos carnavais de outrora / Das noites enluaradas sob os clarins da aurora...',
+      lyrics: `Quanta saudade eu tenho dos carnavais de outrora
+Das noites enluaradas sob os clarins da aurora...
+Vem meu amor dançar comigo
+Ao som das cordas e do violão amigo!`,
       score_file: 'minha-saudade-lirica.pdf',
+      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-latin-carnival-party-1122.mp3',
+      cover_url: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=400&q=80',
+      duration_seconds: 210,
+      plays_count: 8300,
+      is_popular: false,
+      album_id: 'alb4',
       status: 'published',
       downloads_count: 740,
       author_id: 'a3'
@@ -312,8 +400,21 @@ const DB = {
       artist: 'Claudionor Germano',
       genre: 'Frevo Canção',
       description: 'Melodia imortalizada com cifras e arranjo vocal para orquestra de frevo.',
-      lyrics: 'Voltei, Recife! Foi a saudade que me trouxe pelo braço / Quero rever a Rua da Aurora / O Passo da Pátria e o meu pedaço...',
+      lyrics: `Voltei, Recife!
+Foi a saudade que me trouxe pelo braço
+Quero rever a Rua da Aurora
+O Passo da Pátria e o meu pedaço!
+
+Recife, linda cidade formosa
+Das pontes cortando o Capibaribe
+Vim pra cantar o meu Frevo com você!`,
       score_file: 'voltei-recife-cifras.pdf',
+      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-brazilian-carnival-brass-band-1120.mp3',
+      cover_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
+      duration_seconds: 190,
+      plays_count: 42000,
+      is_popular: true,
+      album_id: 'alb5',
       status: 'published',
       downloads_count: 2430,
       author_id: 'a4'
@@ -324,8 +425,16 @@ const DB = {
       artist: 'Claudionor Germano',
       genre: 'Frevo Canção',
       description: 'Pauta vocal com arranjo de sopros e introdução de trompetes.',
-      lyrics: 'Quero ver quem não chora quando o frevo começa a tocar / No meio da multidão a gente não pode parar...',
+      lyrics: `Quero ver quem não chora quando o frevo começa a tocar
+No meio da multidão a gente não pode parar...
+É de fazer chorar de tanta alegria!`,
       score_file: 'hino-capiba-metais.pdf',
+      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-samba-brazil-fiesta-1124.mp3',
+      cover_url: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=400&q=80',
+      duration_seconds: 175,
+      plays_count: 26500,
+      is_popular: true,
+      album_id: 'alb5',
       status: 'published',
       downloads_count: 1620,
       author_id: 'a4'
@@ -336,8 +445,15 @@ const DB = {
       artist: 'Claudionor Germano',
       genre: 'Frevo Canção',
       description: 'Arranjo histórico com naipe de clarinetes e percussão tradicional.',
-      lyrics: 'O frevo não é para quem quer, é para quem pode / Quando a orquestra ataca ninguém fica parado...',
+      lyrics: `O frevo não é para quem quer, é para quem pode
+Quando a orquestra ataca ninguém fica parado!`,
       score_file: 'frevo-num1-nelson.pdf',
+      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-carnival-brass-groove-1121.mp3',
+      cover_url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&q=80',
+      duration_seconds: 188,
+      plays_count: 14700,
+      is_popular: false,
+      album_id: 'alb5',
       status: 'published',
       downloads_count: 1110,
       author_id: 'a4'
@@ -348,8 +464,15 @@ const DB = {
       artist: 'Orquestra Popular da Bomba',
       genre: 'Frevo Contemporâneo',
       description: 'Partitura enérgica com trombones em destaque e percussão de maracatu.',
-      lyrics: '(Instrumental - Ritmo afro-pernambucano com pegada urbana)',
+      lyrics: `Metais incandescentes da Bomba do Hemetério
+Fazendo a periferia ferver de orgulho e arte!`,
       score_file: 'fervura-bomba.pdf',
+      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-latin-carnival-party-1122.mp3',
+      cover_url: 'https://images.unsplash.com/photo-1520523839898-507127053c37?auto=format&fit=crop&w=400&q=80',
+      duration_seconds: 170,
+      plays_count: 6400,
+      is_popular: true,
+      album_id: 'alb6',
       status: 'published',
       downloads_count: 530,
       author_id: 'a5'
@@ -360,8 +483,15 @@ const DB = {
       artist: 'Orquestra Popular da Bomba',
       genre: 'Frevo de Rua',
       description: 'Abertura festiva para grupos juvenis e bandas escolares de frevo.',
-      lyrics: '(Instrumental - Ideal para ensaios de iniciação musical)',
+      lyrics: `O dia amanhece com clarins em marcha
+Juventude recifense que toca e dança!`,
       score_file: 'clarins-da-aurora.pdf',
+      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-brazilian-carnival-brass-band-1120.mp3',
+      cover_url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&q=80',
+      duration_seconds: 160,
+      plays_count: 4200,
+      is_popular: false,
+      album_id: 'alb6',
       status: 'published',
       downloads_count: 480,
       author_id: 'a5'
@@ -372,13 +502,133 @@ const DB = {
       artist: 'Giselle Andrade',
       genre: 'Dança & Passos',
       description: 'Partitura com marcação rítmica precisa para sincronização de passos acrobáticos.',
-      lyrics: '(Guia rítmico instrumental para treino do Ferrolho e Tesoura)',
+      lyrics: `Ferrolho, Tesoura, Parafuso e Ponta
+O corpo responde ao sopro dos metais!`,
       score_file: 'marcha-passistas.pdf',
+      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-samba-brazil-fiesta-1124.mp3',
+      cover_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      duration_seconds: 178,
+      plays_count: 9100,
+      is_popular: true,
+      album_id: 'alb7',
       status: 'published',
       downloads_count: 820,
       author_id: 'a6'
     }
   ],
+
+  albums: [
+    {
+      id: 'alb1',
+      artist_id: 'a1',
+      title: 'Fervura Global',
+      cover_url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=500&q=80',
+      release_year: 2025,
+      tracks_count: 12
+    },
+    {
+      id: 'alb2',
+      artist_id: 'a1',
+      title: 'Sinfonia da Bomba',
+      cover_url: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=500&q=80',
+      release_year: 2023,
+      tracks_count: 10
+    },
+    {
+      id: 'alb3',
+      artist_id: 'a2',
+      title: 'Frevo de Big Band ao Vivo',
+      cover_url: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=500&q=80',
+      release_year: 2024,
+      tracks_count: 14
+    },
+    {
+      id: 'alb4',
+      artist_id: 'a3',
+      title: '50 Anos de Poesia Lírica',
+      cover_url: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=500&q=80',
+      release_year: 2024,
+      tracks_count: 16
+    },
+    {
+      id: 'alb5',
+      artist_id: 'a4',
+      title: 'Vozes da Memória de Capiba',
+      cover_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=500&q=80',
+      release_year: 2022,
+      tracks_count: 18
+    },
+    {
+      id: 'alb6',
+      artist_id: 'a5',
+      title: 'Nova Geração dos Metais',
+      cover_url: 'https://images.unsplash.com/photo-1520523839898-507127053c37?auto=format&fit=crop&w=500&q=80',
+      release_year: 2025,
+      tracks_count: 8
+    },
+    {
+      id: 'alb7',
+      artist_id: 'a6',
+      title: 'Trilhas do Passo',
+      cover_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=500&q=80',
+      release_year: 2024,
+      tracks_count: 6
+    }
+  ],
+
+  shows: [
+    {
+      id: 'sh1',
+      artist_id: 'a1',
+      title: 'Concerto da Fervura ao Ar Livre',
+      venue: 'Praça do Arsenal, Recife Antigo',
+      city: 'Recife - PE',
+      date: '2026-09-27',
+      time: '19:30',
+      ticket_url: '#'
+    },
+    {
+      id: 'sh2',
+      artist_id: 'a1',
+      title: 'Encontro dos Clarins da Noite',
+      venue: 'Pátio de São Pedro',
+      city: 'Recife - PE',
+      date: '2026-10-12',
+      time: '21:00',
+      ticket_url: '#'
+    },
+    {
+      id: 'sh3',
+      artist_id: 'a2',
+      title: 'Noite de Gala do Frevo Jazz',
+      venue: 'Teatro Santa Isabel',
+      city: 'Recife - PE',
+      date: '2026-09-30',
+      time: '20:00',
+      ticket_url: '#'
+    },
+    {
+      id: 'sh4',
+      artist_id: 'a3',
+      title: 'Acerto de Marcha Lírico',
+      venue: 'Largo do Amparo',
+      city: 'Olinda - PE',
+      date: '2026-10-04',
+      time: '17:00',
+      ticket_url: '#'
+    },
+    {
+      id: 'sh5',
+      artist_id: 'a4',
+      title: 'Tributo aos 70 Anos de Frevo',
+      venue: 'Paço do Frevo',
+      city: 'Recife - PE',
+      date: '2026-10-18',
+      time: '18:30',
+      ticket_url: '#'
+    }
+  ],
+
 
   steps: [
     {
@@ -1561,7 +1811,7 @@ function togglePostExpand(postId) {
   }
 }
 
-// Modal Completo de Perfil do Artista (Visualização Pública com Obras e Partituras)
+// Modal Completo de Perfil do Artista (Visualização Pública com Músicas Populares, Álbuns e Shows)
 function openArtistProfile(artistId) {
   const artist = DB.artists.find(a => a.id === artistId || a.handle === artistId || a.name === artistId);
   if (!artist) return;
@@ -1571,6 +1821,9 @@ function openArtistProfile(artistId) {
   if (!modal || !modalBody) return;
 
   const artistSongs = DB.songs.filter(s => s.author_id === artist.id || (s.artist && s.artist.toLowerCase().includes(artist.name.toLowerCase())));
+  const popularSongs = [...artistSongs].sort((a, b) => (b.plays_count || 0) - (a.plays_count || 0));
+  const artistAlbums = (DB.albums || []).filter(alb => alb.artist_id === artist.id);
+  const artistShows = (DB.shows || []).filter(sh => sh.artist_id === artist.id);
   const isFav = (currentUserSession.favorites || []).includes(artist.id);
 
   modalBody.innerHTML = `
@@ -1596,7 +1849,8 @@ function openArtistProfile(artistId) {
             <span class="text-xs text-muted font-medium">${artist.handle}</span>
             <div class="mt-1 flex items-center justify-center sm:justify-start gap-1.5 flex-wrap">
               <span class="badge bg-frevo-orange/15 text-frevo-orange font-bold text-[10px]">${artist.genre}</span>
-              <span class="badge bg-gray-100 text-muted font-mono font-bold text-[10px]">${artistSongs.length} partitura(s)</span>
+              <span class="badge bg-gray-100 text-muted font-mono font-bold text-[10px]">${artistSongs.length} música(s)</span>
+              ${artistAlbums.length > 0 ? `<span class="badge bg-frevo-purple/15 text-frevo-purple font-mono font-bold text-[10px]">${artistAlbums.length} álbum(ns)</span>` : ''}
             </div>
           </div>
         </div>
@@ -1611,7 +1865,7 @@ function openArtistProfile(artistId) {
       </div>
 
       <!-- Biografia e Trajetória -->
-      <div class="px-2 pt-2">
+      <div class="px-2 pt-1">
         <h4 class="text-xs font-bold text-ink uppercase tracking-wider mb-1">Sobre o Artista</h4>
         <p class="text-xs text-ink-soft leading-relaxed bg-surface-soft p-3.5 rounded-2xl border border-gray-100">
           ${artist.bio}
@@ -1636,34 +1890,131 @@ function openArtistProfile(artistId) {
         </div>
       ` : ''}
 
-      <!-- Obras e Partituras Publicadas do Artista -->
-      <div class="px-2 pt-1 pb-2">
+      <!-- 1. SEÇÃO DE MÚSICAS POPULARES (ESTILO APPLE MUSIC) -->
+      <div class="px-2 pt-2">
         <div class="flex items-center justify-between mb-2">
-          <h4 class="text-xs font-bold text-ink uppercase tracking-wider">Obras & Partituras (${artistSongs.length})</h4>
+          <h4 class="text-xs font-bold text-ink uppercase tracking-wider flex items-center gap-1.5">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF8A00" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            Músicas Populares
+          </h4>
+          <span class="text-[10px] text-muted font-bold font-mono">${popularSongs.length} faixas</span>
         </div>
 
-        <div class="space-y-2 max-h-52 overflow-y-auto pr-1">
-          ${artistSongs.length > 0 ? artistSongs.map(song => `
-            <div class="p-3 bg-white rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between gap-3 hover:border-frevo-orange transition-colors">
-              <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-1.5 mb-0.5">
-                  <span class="badge bg-frevo-cyan/15 text-frevo-cyan text-[9px] font-bold">${song.genre}</span>
-                  <span class="text-[10px] text-muted font-mono font-semibold">${song.downloads_count || 120} downloads</span>
+        <div class="space-y-1.5">
+          ${popularSongs.length > 0 ? popularSongs.map((song, index) => {
+            const isThisPlaying = (currentPlayingSong && currentPlayingSong.id === song.id && isAudioPlaying);
+            return `
+              <div onclick="playSong('${song.id}')" class="p-2.5 bg-white rounded-2xl border ${isThisPlaying ? 'border-frevo-orange ring-2 ring-frevo-orange/25 bg-orange-50/20' : 'border-gray-200'} shadow-sm flex items-center justify-between gap-3 hover:border-frevo-orange transition-all cursor-pointer group">
+                <div class="flex items-center gap-3 min-w-0 flex-1">
+                  <!-- Rank / Play Icon -->
+                  <span class="w-5 text-center font-bold text-xs ${index === 0 ? 'text-frevo-orange' : 'text-muted'} font-mono">
+                    ${isThisPlaying ? `
+                      <span class="inline-block w-2.5 h-2.5 rounded-full bg-frevo-orange animate-ping"></span>
+                    ` : `${index + 1}`}
+                  </span>
+                  
+                  <!-- Capa da Música -->
+                  <img src="${song.cover_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=200&q=80'}" alt="${song.title}" class="w-10 h-10 rounded-xl object-cover flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform" />
+                  
+                  <div class="min-w-0 flex-1">
+                    <h5 class="font-bold text-xs text-ink truncate group-hover:text-frevo-orange transition-colors">${song.title}</h5>
+                    <div class="flex items-center gap-2 text-[10px] text-muted">
+                      <span>${song.genre}</span>
+                      <span>•</span>
+                      <span class="font-mono">${(song.plays_count || 1200).toLocaleString('pt-BR')} plays</span>
+                    </div>
+                  </div>
                 </div>
-                <h5 class="font-bold text-xs text-ink truncate">${song.title}</h5>
-                <p class="text-[10px] text-muted truncate">${song.description}</p>
+
+                <div class="flex items-center gap-2 flex-shrink-0" onclick="event.stopPropagation()">
+                  <button onclick="playSong('${song.id}')" class="w-8 h-8 rounded-full ${isThisPlaying ? 'bg-frevo-orange text-white' : 'bg-surface-soft text-ink hover:bg-frevo-orange hover:text-white'} flex items-center justify-center transition-all shadow-sm" title="Reproduzir Música">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                      ${isThisPlaying ? '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>' : '<polygon points="5 3 19 12 5 21 5 3"></polygon>'}
+                    </svg>
+                  </button>
+                  <button onclick="openScoreModal('${song.title}', '${song.artist}', '${song.id}')" class="btn btn-cyan p-2 rounded-xl font-bold flex-shrink-0" title="Ver Partitura / Baixar PDF" aria-label="Partitura">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="7 10 12 15 17 10"></polyline>
+                      <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                  </button>
+                </div>
               </div>
-              <button onclick="openScoreModal('${song.title}', '${song.artist}', '${song.id}')" class="btn btn-cyan p-2 rounded-xl font-bold flex-shrink-0" title="Baixar Partitura em PDF" aria-label="Baixar Partitura em PDF">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                  <polyline points="7 10 12 15 17 10"></polyline>
-                  <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-              </button>
-            </div>
-          `).join('') : `
+            `;
+          }).join('') : `
             <div class="p-4 text-center bg-surface-soft rounded-2xl border border-gray-100">
-              <p class="text-xs text-muted">Este artista ainda não publicou partituras no acervo.</p>
+              <p class="text-xs text-muted">Nenhuma música cadastrada por este artista ainda.</p>
+            </div>
+          `}
+        </div>
+      </div>
+
+      <!-- 2. SEÇÃO DE ÁLBUNS (CARROSSEL HORIZONTAL GESTUAL SEM SCROLLBAR) -->
+      ${artistAlbums.length > 0 ? `
+        <div class="px-2 pt-2">
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="text-xs font-bold text-ink uppercase tracking-wider flex items-center gap-1.5">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7447E8" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
+              Álbuns & Discografia
+            </h4>
+            <span class="text-[10px] text-muted">Arraste ou role horizontalmente ⇄</span>
+          </div>
+
+          <div id="artist-albums-carousel" class="albums-carousel-track">
+            ${artistAlbums.map(album => `
+              <div class="album-card-item" onclick="openAlbumDetails('${album.id}')">
+                <img src="${album.cover_url}" alt="${album.title}" class="album-card-cover" />
+                <div class="mt-2 text-left">
+                  <h5 class="font-bold text-xs text-ink truncate">${album.title}</h5>
+                  <p class="text-[10px] text-muted font-mono">${album.release_year} • ${album.tracks_count} faixas</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- 3. SEÇÃO DE PRÓXIMOS SHOWS (ESTILO CALENDÁRIO VIP) -->
+      <div class="px-2 pt-2 pb-2">
+        <div class="flex items-center justify-between mb-2">
+          <h4 class="text-xs font-bold text-ink uppercase tracking-wider flex items-center gap-1.5">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F0442E" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            Próximos Shows & Apresentações
+          </h4>
+          <span class="text-[10px] text-muted font-mono font-bold">${artistShows.length} confirmados</span>
+        </div>
+
+        <div class="shows-timeline">
+          ${artistShows.length > 0 ? artistShows.map(show => {
+            const dateObj = new Date(`${show.date}T12:00:00`);
+            const day = dateObj.getDate().toString().padStart(2, '0');
+            const month = dateObj.toLocaleString('pt-BR', { month: 'short' }).replace('.', '');
+            const year = dateObj.getFullYear();
+            return `
+              <div class="show-item-card">
+                <div class="flex items-center gap-3 min-w-0">
+                  <div class="show-date-badge">
+                    <span class="show-date-day">${day}</span>
+                    <span class="show-date-month">${month}</span>
+                  </div>
+                  <div class="min-w-0">
+                    <h5 class="font-bold text-xs text-ink truncate">${show.title}</h5>
+                    <p class="text-[11px] text-ink-soft flex items-center gap-1 truncate">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                      ${show.venue} (${show.city || 'Recife - PE'})
+                    </p>
+                    <span class="text-[10px] text-muted font-mono font-semibold">Horário: ${show.time} • ${day}/${month.toUpperCase()}/${year}</span>
+                  </div>
+                </div>
+                <button onclick="alert('Redirecionando para informações e ingressos de ${show.title}!');" class="btn btn-primary text-[11px] px-3 py-1.5 rounded-xl font-bold whitespace-nowrap shadow-sm flex-shrink-0">
+                  Ingressos
+                </button>
+              </div>
+            `;
+          }).join('') : `
+            <div class="p-4 text-center bg-surface-soft rounded-2xl border border-gray-100">
+              <p class="text-xs text-muted">Nenhum show agendado no momento. Fique atento às novidades!</p>
             </div>
           `}
         </div>
@@ -1672,6 +2023,11 @@ function openArtistProfile(artistId) {
   `;
 
   modal.classList.add('open');
+
+  // Inicializar suporte gestual do carrossel de álbuns (Touch, Drag & Drop e Shift+Scroll)
+  setTimeout(() => {
+    initAlbumsCarousel('artist-albums-carousel');
+  }, 100);
 }
 
 function openArtistProfileByAuthor(authorName) {
@@ -2439,36 +2795,407 @@ function renderSongsDesktopViewer(songId) {
 }
 
 // ==============================================================================
-// SINTETIZADOR WEB AUDIO API COMPLETO (ÁUDIO MULTIVOZ DO FREVO COM TIMBRE REAL)
+// GERENCIADOR DE ÁUDIO GLOBAL & PLAYER ESTILO APPLE MUSIC
 // ==============================================================================
-let globalAudioCtx = null;
-let currentlyPlayingSongId = null;
-let activeAudioTimeouts = [];
-let activeOscillatorsList = [];
+let currentPlayingSong = null;
+let currentPlaylist = [];
+let currentPlaylistIndex = 0;
+let isAudioPlaying = false;
+let audioSeekInterval = null;
 
-function stopFrevoAudioPlayback() {
-  activeAudioTimeouts.forEach(t => clearTimeout(t));
-  activeAudioTimeouts = [];
-  activeOscillatorsList.forEach(osc => {
-    try { osc.stop(); osc.disconnect(); } catch {}
+// Inicialização dos Listeners do Elemento <audio> Nativo
+function initFrevoAudioEngine() {
+  const audioEl = document.getElementById('frevia-audio-element');
+  if (!audioEl) return;
+
+  audioEl.addEventListener('play', () => {
+    isAudioPlaying = true;
+    updateAudioPlayerUI();
   });
-  activeOscillatorsList = [];
-  
-  const previousSongId = currentlyPlayingSongId;
-  currentlyPlayingSongId = null;
 
-  if (previousSongId) {
-    const btn = document.getElementById(`btn-audio-preview-${previousSongId}`);
-    if (btn) {
-      btn.className = 'btn bg-white border border-gray-200 hover:border-frevo-orange text-frevo-orange text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 shadow-sm transition-all';
-      btn.innerHTML = `
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-          <polygon points="5 3 19 12 5 21 5 3"></polygon>
-        </svg>
-        Ouvir Arranjo Musical
-      `;
+  audioEl.addEventListener('pause', () => {
+    isAudioPlaying = false;
+    updateAudioPlayerUI();
+  });
+
+  audioEl.addEventListener('ended', () => {
+    nextTrack();
+  });
+
+  audioEl.addEventListener('timeupdate', () => {
+    const curTime = audioEl.currentTime || 0;
+    const durTime = audioEl.duration || (currentPlayingSong ? currentPlayingSong.duration_seconds : 180) || 180;
+    
+    const progressFill = document.getElementById('player-progress-fill');
+    const timeCurEl = document.getElementById('player-time-current');
+    const timeTotEl = document.getElementById('player-time-total');
+
+    if (progressFill) {
+      const pct = (curTime / durTime) * 100;
+      progressFill.style.width = `${Math.min(pct, 100)}%`;
+    }
+
+    if (timeCurEl) timeCurEl.innerText = formatAudioTime(curTime);
+    if (timeTotEl) timeTotEl.innerText = formatAudioTime(durTime);
+  });
+
+  audioEl.addEventListener('error', (err) => {
+    console.warn('[FrevoAudio] Falha ao carregar arquivo de áudio remoto, usando sintetização:', err);
+    // Se o arquivo remoto falhar ou expirar, podemos reproduzir via sintetizador
+  });
+}
+
+function formatAudioTime(sec) {
+  if (isNaN(sec) || sec < 0) return '0:00';
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+// Tocar Música Especificada
+function playSong(songId, playlist = null) {
+  const song = DB.songs.find(s => s.id === songId);
+  if (!song) return;
+
+  // Interromper qualquer sintetizador WebAudio antigo se estiver ativo
+  if (typeof stopFrevoAudioPlayback === 'function') {
+    stopFrevoAudioPlayback();
+  }
+
+  // Definir Playlist
+  if (playlist && Array.isArray(playlist)) {
+    currentPlaylist = playlist;
+  } else if (!currentPlaylist || currentPlaylist.length === 0 || !currentPlaylist.some(s => s.id === song.id)) {
+    currentPlaylist = DB.songs;
+  }
+
+  currentPlaylistIndex = currentPlaylist.findIndex(s => s.id === song.id);
+  if (currentPlaylistIndex === -1) currentPlaylistIndex = 0;
+
+  currentPlayingSong = song;
+
+  // Incrementar contador de plays
+  song.plays_count = (song.plays_count || 1200) + 1;
+
+  const playerBar = document.getElementById('apple-audio-player');
+  if (playerBar) {
+    playerBar.classList.remove('hidden');
+  }
+
+  const audioEl = document.getElementById('frevia-audio-element');
+  if (audioEl) {
+    if (song.audio_url) {
+      audioEl.src = song.audio_url;
+      audioEl.play().catch(e => {
+        console.log('[FrevoAudio] Autoplay restrito pelo navegador ou áudio em preview:', e);
+        // Fallback tocando sintetizador se o arquivo MP3 não for acessível
+        if (typeof playFrevoAudioPreview === 'function') {
+          playFrevoAudioPreview(song.id);
+        }
+      });
+    } else {
+      if (typeof playFrevoAudioPreview === 'function') {
+        playFrevoAudioPreview(song.id);
+      }
     }
   }
+
+  updateAudioPlayerUI();
+  updateLyricsModalContent();
+
+  // Re-renderizar listas ativas para destacar faixa tocando
+  if (document.getElementById('artist-albums-carousel')) {
+    // Se estiver no perfil do artista, re-renderizar modal do artista
+    const artist = DB.artists.find(a => a.id === song.author_id);
+    if (artist && document.getElementById('global-modal')?.classList.contains('open')) {
+      // Pequeno timeout para não recarregar abruptamente a modal
+    }
+  }
+}
+
+function togglePlayAudio() {
+  const audioEl = document.getElementById('frevia-audio-element');
+  if (!currentPlayingSong && DB.songs.length > 0) {
+    playSong(DB.songs[0].id);
+    return;
+  }
+
+  if (audioEl) {
+    if (audioEl.paused) {
+      audioEl.play().catch(e => console.warn(e));
+      isAudioPlaying = true;
+    } else {
+      audioEl.pause();
+      isAudioPlaying = false;
+    }
+  } else {
+    isAudioPlaying = !isAudioPlaying;
+  }
+
+  updateAudioPlayerUI();
+}
+
+function nextTrack() {
+  if (!currentPlaylist || currentPlaylist.length === 0) {
+    currentPlaylist = DB.songs;
+  }
+  currentPlaylistIndex = (currentPlaylistIndex + 1) % currentPlaylist.length;
+  const nextSong = currentPlaylist[currentPlaylistIndex];
+  if (nextSong) {
+    playSong(nextSong.id, currentPlaylist);
+  }
+}
+
+function prevTrack() {
+  if (!currentPlaylist || currentPlaylist.length === 0) {
+    currentPlaylist = DB.songs;
+  }
+  currentPlaylistIndex = (currentPlaylistIndex - 1 + currentPlaylist.length) % currentPlaylist.length;
+  const prevSong = currentPlaylist[currentPlaylistIndex];
+  if (prevSong) {
+    playSong(prevSong.id, currentPlaylist);
+  }
+}
+
+function seekAudio(e) {
+  const progressBar = document.getElementById('player-progress-bar');
+  const audioEl = document.getElementById('frevia-audio-element');
+  if (!progressBar || !audioEl) return;
+
+  const rect = progressBar.getBoundingClientRect();
+  const clickX = e.clientX - rect.left;
+  const width = rect.width;
+  const pct = Math.max(0, Math.min(1, clickX / width));
+
+  const targetTime = pct * (audioEl.duration || (currentPlayingSong ? currentPlayingSong.duration_seconds : 180) || 180);
+  audioEl.currentTime = targetTime;
+
+  const progressFill = document.getElementById('player-progress-fill');
+  if (progressFill) progressFill.style.width = `${pct * 100}%`;
+}
+
+function setAudioVolume(val) {
+  const audioEl = document.getElementById('frevia-audio-element');
+  if (audioEl) {
+    audioEl.volume = Math.max(0, Math.min(1, parseFloat(val)));
+  }
+}
+
+function updateAudioPlayerUI() {
+  if (!currentPlayingSong) return;
+
+  const coverEl = document.getElementById('player-track-cover');
+  const titleEl = document.getElementById('player-track-title');
+  const artistEl = document.getElementById('player-track-artist');
+  const playIcon = document.getElementById('player-play-icon');
+  const pauseIcon = document.getElementById('player-pause-icon');
+
+  if (coverEl) coverEl.src = currentPlayingSong.cover_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&q=80';
+  if (titleEl) titleEl.innerText = currentPlayingSong.title || 'Música do Frevo';
+  if (artistEl) artistEl.innerText = currentPlayingSong.artist || 'Artista Pernambucano';
+
+  if (playIcon && pauseIcon) {
+    if (isAudioPlaying) {
+      playIcon.classList.add('hidden');
+      pauseIcon.classList.remove('hidden');
+    } else {
+      playIcon.classList.remove('hidden');
+      pauseIcon.classList.add('hidden');
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// MODAL DE LETRAS IMERSIVO (ESTILO APPLE MUSIC)
+// -----------------------------------------------------------------------------
+function toggleLyricsModal() {
+  const modal = document.getElementById('apple-lyrics-modal');
+  if (!modal) return;
+
+  if (modal.classList.contains('hidden')) {
+    updateLyricsModalContent();
+    modal.classList.remove('hidden');
+  } else {
+    modal.classList.add('hidden');
+  }
+}
+
+function updateLyricsModalContent() {
+  const song = currentPlayingSong || DB.songs[0];
+  if (!song) return;
+
+  const titleEl = document.getElementById('lyrics-track-title');
+  const artistEl = document.getElementById('lyrics-track-artist');
+  const coverEl = document.getElementById('lyrics-track-cover');
+  const contentEl = document.getElementById('lyrics-text-content');
+
+  if (titleEl) titleEl.innerText = song.title;
+  if (artistEl) artistEl.innerText = `${song.artist} • ${song.genre}`;
+  if (coverEl) coverEl.src = song.cover_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=200&q=80';
+
+  if (contentEl) {
+    const rawLyrics = song.lyrics || `(Instrumental — Arranjo de Metais e Clarins)\nLá vem o frevo descendo a ladeira\nCom sombrinha colorida e alegria brasileira!`;
+    const lines = rawLyrics.split('\n');
+
+    contentEl.innerHTML = `
+      <div class="mb-4 p-3 bg-white/10 rounded-2xl border border-white/15 flex items-center justify-between">
+        <div>
+          <span class="text-[10px] uppercase tracking-wider text-frevo-orange font-bold">Revisão do Artista</span>
+          <p class="text-xs text-white/80">Letra transcrita e validada oficialmente pela Salvaguarda</p>
+        </div>
+        <button onclick="openEditLyricsModal('${song.id}')" class="btn bg-white/15 hover:bg-white/25 text-white text-[11px] px-3 py-1 rounded-xl font-bold border border-white/20">
+          Revisar Letra
+        </button>
+      </div>
+      <div class="space-y-3">
+        ${lines.map((line, idx) => {
+          if (!line.trim()) return '<div class="h-3"></div>';
+          const isNote = line.trim().startsWith('(') && line.trim().endsWith(')');
+          return `
+            <div class="lyrics-line ${isNote ? 'text-frevo-orange/80 italic text-sm' : ''}" onclick="this.classList.toggle('text-white')">
+              ${line}
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+}
+
+function openEditLyricsModal(songId) {
+  const song = DB.songs.find(s => s.id === songId) || currentPlayingSong;
+  if (!song) return;
+
+  const newLyrics = prompt('Edite a letra oficial desta obra:', song.lyrics || '');
+  if (newLyrics !== null && newLyrics.trim() !== '') {
+    song.lyrics = newLyrics;
+    updateLyricsModalContent();
+    alert('Letra atualizada e salva com sucesso!');
+  }
+}
+
+function downloadCurrentSongScorePDF(songId) {
+  const targetId = songId || (currentPlayingSong ? currentPlayingSong.id : DB.songs[0].id);
+  downloadScore(targetId);
+}
+
+// -----------------------------------------------------------------------------
+// DETALHES DE ÁLBUM & REPRODUÇÃO EM CARROSSEL
+// -----------------------------------------------------------------------------
+function openAlbumDetails(albumId) {
+  const album = (DB.albums || []).find(a => a.id === albumId);
+  if (!album) return;
+
+  const artist = DB.artists.find(a => a.id === album.artist_id) || { name: 'Artista do Frevo', genre: 'Frevo de Rua' };
+  const albumSongs = DB.songs.filter(s => s.album_id === album.id || (s.author_id === album.artist_id && !s.album_id));
+
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+  if (!modal || !modalBody) return;
+
+  modalBody.innerHTML = `
+    <div class="space-y-4 text-left -m-2">
+      <!-- Capa e Título do Álbum -->
+      <div class="relative h-44 rounded-2xl overflow-hidden shadow-inner">
+        <img src="${album.cover_url}" alt="${album.title}" class="w-full h-full object-cover" />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent"></div>
+        <button onclick="closeModal()" class="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-black/45 text-white flex items-center justify-center hover:bg-black/70 transition-colors z-10" aria-label="Fechar">
+          ✕
+        </button>
+        <div class="absolute bottom-3 left-3 right-3 text-white">
+          <span class="badge bg-frevo-purple/40 backdrop-blur-md text-white border border-white/20 text-[10px] font-bold">Álbum • ${album.release_year}</span>
+          <h3 class="font-display font-extrabold text-xl leading-tight mt-1 text-white">${album.title}</h3>
+          <p class="text-xs text-white/80">${artist.name} • ${albumSongs.length} faixas</p>
+        </div>
+      </div>
+
+      <!-- Botão Tocar Álbum Inteiro -->
+      <div class="px-2 flex items-center gap-2">
+        <button onclick="playAlbumTracks('${album.id}')" class="btn btn-primary flex-1 text-xs py-2.5 rounded-xl font-bold shadow-md flex items-center justify-center gap-2">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          Reproduzir Álbum Completo
+        </button>
+      </div>
+
+      <!-- Lista de Faixas do Álbum -->
+      <div class="px-2 space-y-2 max-h-60 overflow-y-auto">
+        ${albumSongs.length > 0 ? albumSongs.map((song, idx) => `
+          <div onclick="playSong('${song.id}', DB.songs.filter(s => s.album_id === '${album.id}'))" class="p-2.5 bg-surface-soft hover:bg-orange-50/40 rounded-xl border border-gray-100 flex items-center justify-between gap-3 cursor-pointer group transition-colors">
+            <div class="flex items-center gap-2.5 min-w-0 flex-1">
+              <span class="w-5 text-center font-bold text-xs text-muted font-mono">${idx + 1}</span>
+              <div class="min-w-0 flex-1">
+                <h5 class="font-bold text-xs text-ink truncate group-hover:text-frevo-orange">${song.title}</h5>
+                <span class="text-[10px] text-muted font-mono">${song.genre}</span>
+              </div>
+            </div>
+            <button onclick="event.stopPropagation(); openScoreModal('${song.title}', '${song.artist}', '${song.id}')" class="btn btn-cyan p-1.5 rounded-lg font-bold flex-shrink-0" title="Ver Partitura">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            </button>
+          </div>
+        `).join('') : `
+          <div class="p-4 text-center bg-surface-soft rounded-xl text-xs text-muted">
+            Nenhuma faixa vinculada a este álbum ainda.
+          </div>
+        `}
+      </div>
+    </div>
+  `;
+
+  modal.classList.add('open');
+}
+
+function playAlbumTracks(albumId) {
+  const albumSongs = DB.songs.filter(s => s.album_id === albumId);
+  if (albumSongs.length > 0) {
+    playSong(albumSongs[0].id, albumSongs);
+    closeModal();
+  }
+}
+
+// -----------------------------------------------------------------------------
+// INICIALIZADOR DO CARROSSEL HORIZONTAL GESTUAL (TOUCH, DRAG & DROP E SHIFT+SCROLL)
+// -----------------------------------------------------------------------------
+function initAlbumsCarousel(containerId = 'artist-albums-carousel') {
+  const slider = document.getElementById(containerId);
+  if (!slider) return;
+
+  let isDown = false;
+  let startX = 0;
+  let scrollLeft = 0;
+
+  // Mouse Drag & Drop
+  slider.addEventListener('mousedown', (e) => {
+    isDown = true;
+    slider.classList.add('is-dragging');
+    startX = e.pageX - slider.offsetLeft;
+    scrollLeft = slider.scrollLeft;
+  });
+
+  slider.addEventListener('mouseleave', () => {
+    isDown = false;
+    slider.classList.remove('is-dragging');
+  });
+
+  slider.addEventListener('mouseup', () => {
+    isDown = false;
+    slider.classList.remove('is-dragging');
+  });
+
+  slider.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - slider.offsetLeft;
+    const walk = (x - startX) * 1.8; // Sensibilidade do arrasto
+    slider.scrollLeft = scrollLeft - walk;
+  });
+
+  // Shift + Scroll ou Roda do Mouse Horizontal
+  slider.addEventListener('wheel', (e) => {
+    if (e.deltaY !== 0) {
+      e.preventDefault();
+      slider.scrollLeft += e.deltaY;
+    }
+  }, { passive: false });
 }
 
 async function playFrevoAudioPreview(songIdOrTitle) {
@@ -3099,7 +3826,7 @@ function renderProfileGallery() {
     return;
   }
 
-  // 3. ABA DE PARTITURAS (Apenas Artistas e Administradores)
+  // 3. ABA DE PARTITURAS & MÚSICAS (Apenas Artistas e Administradores)
   if (currentProfileTab === 'scores') {
     if (!isArtistOrAdmin) {
       switchProfileTab('favorites');
@@ -3113,8 +3840,8 @@ function renderProfileGallery() {
     container.innerHTML = `
       <div class="space-y-3 pb-6">
         <div class="flex items-center justify-between px-1">
-          <span class="text-xs font-bold text-ink">Minhas Obras & Partituras (${artistSongs.length})</span>
-          <button onclick="openSubmitSongModal()" class="text-xs font-bold text-frevo-orange hover:underline">+ Nova Obra</button>
+          <span class="text-xs font-bold text-ink">Minhas Obras & Músicas (${artistSongs.length})</span>
+          <button onclick="openSubmitSongModal()" class="text-xs font-bold text-frevo-orange hover:underline">+ Nova Música</button>
         </div>
         ${artistSongs.length > 0 ? `
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -3123,12 +3850,17 @@ function renderProfileGallery() {
                 <div class="space-y-0.5 min-w-0 pr-2">
                   <div class="flex items-center gap-1.5 flex-wrap">
                     <span class="badge bg-frevo-cyan/15 text-frevo-cyan text-[10px] font-bold">${song.genre}</span>
-                    <span class="badge bg-gray-100 text-muted text-[10px] font-mono font-bold">${song.downloads_count || 120} downloads</span>
+                    <span class="badge bg-gray-100 text-muted text-[10px] font-mono font-bold">${(song.plays_count || 1200).toLocaleString('pt-BR')} plays</span>
                   </div>
                   <h4 class="font-bold text-xs text-ink leading-tight truncate">${song.title}</h4>
                   <p class="text-[11px] text-muted line-clamp-1">${song.description}</p>
                 </div>
                 <div class="flex items-center gap-1.5 flex-shrink-0">
+                  <button onclick="playSong('${song.id}')" class="w-8 h-8 rounded-full bg-surface-soft hover:bg-frevo-orange hover:text-white flex items-center justify-center font-bold text-ink transition-all shadow-sm" title="Ouvir Áudio">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                      <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                  </button>
                   <button onclick="openScoreModal('${song.title}', '${song.artist}', '${song.id}')" class="btn btn-cyan p-2 rounded-xl font-bold flex-shrink-0" title="Baixar Partitura" aria-label="Baixar Partitura">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -3148,26 +3880,122 @@ function renderProfileGallery() {
           </div>
         ` : `
           <div class="p-8 text-center bg-white rounded-2xl border border-gray-200">
-            <p class="text-xs text-muted mb-2">Nenhuma partitura cadastrada ainda.</p>
+            <p class="text-xs text-muted mb-2">Nenhuma música cadastrada ainda.</p>
             <button onclick="openSubmitSongModal()" class="btn btn-primary text-xs px-3 py-1.5 rounded-xl font-bold">
-              Cadastrar Minha Primeira Partitura
+              Cadastrar Minha Primeira Música
             </button>
           </div>
         `}
       </div>
     `;
+    return;
   }
-}
 
-function deleteSong(songId) {
-  if (confirm('Deseja realmente excluir esta partitura?')) {
-    DB.songs = DB.songs.filter(s => s.id !== songId);
-    if (window.supabaseService && window.supabaseService.isConnected()) {
-      window.supabaseService.deleteSong(songId);
+  // 4. ABA DE ÁLBUNS (Apenas Artistas e Administradores)
+  if (currentProfileTab === 'albums') {
+    if (!isArtistOrAdmin) {
+      switchProfileTab('favorites');
+      return;
     }
-    renderProfileGallery();
-    renderSongs();
-    renderAdminCMS();
+
+    const artistAlbums = currentUserSession.artist_id
+      ? (DB.albums || []).filter(alb => alb.artist_id === currentUserSession.artist_id)
+      : (DB.albums || []);
+
+    container.innerHTML = `
+      <div class="space-y-3 pb-6">
+        <div class="flex items-center justify-between px-1">
+          <span class="text-xs font-bold text-ink">Meus Álbuns & EPs (${artistAlbums.length})</span>
+          <button onclick="openSubmitAlbumModal()" class="text-xs font-bold text-frevo-purple hover:underline">+ Novo Álbum</button>
+        </div>
+        ${artistAlbums.length > 0 ? `
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            ${artistAlbums.map(album => `
+              <div class="bg-white border border-gray-200 rounded-2xl p-3 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow">
+                <img src="${album.cover_url}" alt="${album.title}" class="w-full aspect-square rounded-xl object-cover shadow-sm mb-2" />
+                <div>
+                  <h4 class="font-bold text-xs text-ink truncate">${album.title}</h4>
+                  <p class="text-[11px] text-muted font-mono">${album.release_year} • ${album.tracks_count} faixas</p>
+                </div>
+                <div class="flex items-center justify-between pt-2 mt-2 border-t border-gray-100">
+                  <button onclick="openAlbumDetails('${album.id}')" class="btn btn-outline text-[10px] px-2 py-1 rounded-lg font-bold">
+                    Ver Faixas
+                  </button>
+                  <button onclick="deleteAlbum('${album.id}')" class="p-1 text-gray-400 hover:text-frevo-red" title="Excluir Álbum">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  </button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        ` : `
+          <div class="p-8 text-center bg-white rounded-2xl border border-gray-200">
+            <p class="text-xs text-muted mb-2">Nenhum álbum cadastrado ainda.</p>
+            <button onclick="openSubmitAlbumModal()" class="btn bg-frevo-purple text-white text-xs px-3 py-1.5 rounded-xl font-bold">
+              Cadastrar Meu Primeiro Álbum
+            </button>
+          </div>
+        `}
+      </div>
+    `;
+    return;
+  }
+
+  // 5. ABA DE SHOWS (Apenas Artistas e Administradores)
+  if (currentProfileTab === 'shows') {
+    if (!isArtistOrAdmin) {
+      switchProfileTab('favorites');
+      return;
+    }
+
+    const artistShows = currentUserSession.artist_id
+      ? (DB.shows || []).filter(sh => sh.artist_id === currentUserSession.artist_id)
+      : (DB.shows || []);
+
+    container.innerHTML = `
+      <div class="space-y-3 pb-6">
+        <div class="flex items-center justify-between px-1">
+          <span class="text-xs font-bold text-ink">Agenda de Shows (${artistShows.length})</span>
+          <button onclick="openSubmitShowModal()" class="text-xs font-bold text-frevo-red hover:underline">+ Novo Show</button>
+        </div>
+        ${artistShows.length > 0 ? `
+          <div class="space-y-2">
+            ${artistShows.map(show => {
+              const dateObj = new Date(`${show.date}T12:00:00`);
+              const day = dateObj.getDate().toString().padStart(2, '0');
+              const month = dateObj.toLocaleString('pt-BR', { month: 'short' }).replace('.', '');
+              const year = dateObj.getFullYear();
+              return `
+                <div class="show-item-card">
+                  <div class="flex items-center gap-3 min-w-0">
+                    <div class="show-date-badge">
+                      <span class="show-date-day">${day}</span>
+                      <span class="show-date-month">${month}</span>
+                    </div>
+                    <div class="min-w-0">
+                      <h5 class="font-bold text-xs text-ink truncate">${show.title}</h5>
+                      <p class="text-[11px] text-ink-soft truncate">${show.venue} (${show.city || 'Recife - PE'})</p>
+                      <span class="text-[10px] text-muted font-mono font-semibold">${show.time} • ${day}/${month.toUpperCase()}/${year}</span>
+                    </div>
+                  </div>
+                  <button onclick="deleteShow('${show.id}')" class="p-2 text-gray-400 hover:text-frevo-red rounded-xl hover:bg-red-50 flex-shrink-0" title="Excluir Show">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  </button>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        ` : `
+          <div class="p-8 text-center bg-surface-soft rounded-2xl border border-gray-100">
+            <p class="text-xs text-muted mb-2">Nenhum show cadastrado na sua agenda.</p>
+            <button onclick="openSubmitShowModal()" class="btn btn-primary text-xs px-3 py-1.5 rounded-xl font-bold">
+              Cadastrar Próximo Show
+            </button>
+          </div>
+        `}
+      </div>
+    `;
+    return;
   }
 }
 
@@ -4284,17 +5112,21 @@ function updateProfileUI() {
     }
   }
 
-  // Se for usuário comum ou visitante, ocultar a aba de partituras criadas (ele não cria partituras)
+  // Se for usuário comum ou visitante, ocultar abas de artista (músicas, álbuns e shows)
   const isArtistOrAdmin = currentUserSession.role === 'artist' || currentUserSession.role === 'admin';
   if (profileTabs) {
     const scoresTabBtn = profileTabs.querySelector('.tab-scores');
-    if (scoresTabBtn) {
-      scoresTabBtn.style.display = isArtistOrAdmin ? 'inline-flex' : 'none';
-    }
+    if (scoresTabBtn) scoresTabBtn.style.display = isArtistOrAdmin ? 'inline-flex' : 'none';
+    
+    const albumsTabBtn = profileTabs.querySelector('.tab-albums');
+    if (albumsTabBtn) albumsTabBtn.style.display = isArtistOrAdmin ? 'inline-flex' : 'none';
+
+    const showsTabBtn = profileTabs.querySelector('.tab-shows');
+    if (showsTabBtn) showsTabBtn.style.display = isArtistOrAdmin ? 'inline-flex' : 'none';
     
     // Garantir que APENAS uma aba esteja ativa no carregamento do perfil
     profileTabs.querySelectorAll('.profile-tab-btn').forEach(btn => btn.classList.remove('active'));
-    if (!isArtistOrAdmin && currentProfileTab === 'scores') {
+    if (!isArtistOrAdmin && (currentProfileTab === 'scores' || currentProfileTab === 'albums' || currentProfileTab === 'shows')) {
       currentProfileTab = 'favorites';
     }
     const currentTabBtn = profileTabs.querySelector(`.profile-tab-btn.tab-${currentProfileTab}`);
@@ -5063,40 +5895,70 @@ function openContactModal() {
 
 function openSubmitSongModal() {
   if (currentUserSession.role !== 'artist' && currentUserSession.role !== 'admin') {
-    alert('Apenas Artistas e Administradores podem cadastrar partituras.');
+    alert('Apenas Artistas e Administradores podem cadastrar músicas e partituras.');
     return;
   }
 
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
 
+  const artistAlbums = (DB.albums || []).filter(alb => alb.artist_id === (currentUserSession.artist_id || 'a1'));
+
   modalBody.innerHTML = `
     <div class="space-y-4 text-left">
       <div class="pb-2 border-b border-gray-100 pr-10">
-        <h3 class="font-display font-bold text-lg text-ink">Cadastrar Nova Partitura</h3>
+        <h3 class="font-display font-bold text-lg text-ink">Cadastrar Nova Música / Áudio</h3>
+        <p class="text-xs text-muted">Adicione a faixa com áudio real, letra e arranjo de partitura</p>
       </div>
 
-      <form id="new-song-form" onsubmit="submitNewSong(event)" class="space-y-3.5">
+      <form id="new-song-form" onsubmit="submitNewSong(event)" class="space-y-3">
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Título da Música</label>
-          <input type="text" id="song-title-input" required placeholder="Ex: Frevo da Saudade" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Título da Música *</label>
+          <input type="text" id="song-title-input" required placeholder="Ex: Passo da Fervura" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
         </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Gênero Tradicional</label>
+            <select id="song-genre-input" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange">
+              <option value="Frevo de Rua">Frevo de Rua</option>
+              <option value="Frevo Canção">Frevo Canção</option>
+              <option value="Frevo de Bloco">Frevo de Bloco</option>
+              <option value="Frevo Livre">Frevo Livre</option>
+              <option value="Frevo Contemporâneo">Frevo Contemporâneo</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Vincular a Álbum</label>
+            <select id="song-album-input" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange">
+              <option value="">(Single / Sem Álbum)</option>
+              ${artistAlbums.map(alb => `<option value="${alb.id}">${alb.title}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Gênero Tradicional</label>
-          <select id="song-genre-input" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange">
-            <option value="Frevo de Rua">Frevo de Rua</option>
-            <option value="Frevo Canção">Frevo Canção</option>
-            <option value="Frevo de Bloco">Frevo de Bloco</option>
-            <option value="Frevo Livre">Frevo Livre</option>
-          </select>
+          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Link do Áudio MP3 / Streaming (URL)</label>
+          <input type="url" id="song-audio-input" placeholder="https://assets.mixkit.co/music/preview/...mp3" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+          <span class="text-[10px] text-muted block mt-0.5">Deixe em branco para usar a sintetização sonora de metais automática do FrevAI.</span>
         </div>
+
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Letra / Detalhes do Arranjo</label>
-          <textarea id="song-lyrics-input" rows="3" placeholder="Insira a letra ou notas do arranjo instrumental..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange"></textarea>
+          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Capa da Faixa / Álbum (URL)</label>
+          <input type="url" id="song-cover-input" placeholder="https://images.unsplash.com/..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
         </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-[11px] font-bold text-ink uppercase tracking-wider">Letra Oficial / Estrofes</label>
+            <button type="button" onclick="autoGenerateLyricsPrompt()" class="text-[10px] text-frevo-orange font-bold hover:underline">✨ Gerar Letra Auto</button>
+          </div>
+          <textarea id="song-lyrics-input" rows="3" placeholder="Insira os versos ou o arranjo orquestral da canção..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange"></textarea>
+        </div>
+
         <div class="flex gap-2 pt-2">
           <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl">Cancelar</button>
-          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl shadow-md font-bold">Submeter Obra</button>
+          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl shadow-md font-bold">Publicar Música</button>
         </div>
       </form>
     </div>
@@ -5105,10 +5967,22 @@ function openSubmitSongModal() {
   modal.classList.add('open');
 }
 
+function autoGenerateLyricsPrompt() {
+  const title = document.getElementById('song-title-input')?.value || 'Frevo Novo';
+  const genre = document.getElementById('song-genre-input')?.value || 'Frevo de Rua';
+  const lyricsInput = document.getElementById('song-lyrics-input');
+  if (lyricsInput) {
+    lyricsInput.value = `(Metais atacam com vigor e alegria)\nLá vem ${title} nas ladeiras do carnaval!\nO passo é ligeiro, a poeira sobe no ar,\nAo som contagiante do ${genre} que faz o povo vibrar!\n\n(Solo enérgico de saxofone e clarins)\nPernambuco é paixão, tradição e folia sem fim!`;
+  }
+}
+
 function submitNewSong(e) {
   e.preventDefault();
   const title = document.getElementById('song-title-input').value;
   const genre = document.getElementById('song-genre-input').value;
+  const albumId = document.getElementById('song-album-input').value || null;
+  const audioUrl = document.getElementById('song-audio-input').value || 'https://assets.mixkit.co/music/preview/mixkit-brazilian-carnival-brass-band-1120.mp3';
+  const coverUrl = document.getElementById('song-cover-input').value || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&q=80';
   const lyrics = document.getElementById('song-lyrics-input').value;
 
   if (!title) return;
@@ -5116,11 +5990,17 @@ function submitNewSong(e) {
   const newSong = {
     id: `s-${Date.now()}`,
     title,
-    artist: currentUserSession.name || currentUserProfile.name,
+    artist: currentUserSession.name || currentUserProfile.name || 'Artista do Frevo',
     genre,
-    description: 'Nova obra submetida para acervo e revisão.',
-    lyrics: lyrics || '(Sem letra informada)',
-    score_file: 'nova-partitura.pdf',
+    description: 'Obra autêntica cadastrada no acervo oficial com áudio e partitura.',
+    lyrics: lyrics || `Lá vem ${title} no compasso do ${genre}!\nO passo é ligeiro e faz a terra tremer!`,
+    score_file: 'partitura-oficial.pdf',
+    audio_url: audioUrl,
+    cover_url: coverUrl,
+    duration_seconds: 180,
+    plays_count: 1,
+    is_popular: true,
+    album_id: albumId,
     status: 'published',
     downloads_count: 1,
     author_id: currentUserSession.artist_id || 'a1'
@@ -5136,8 +6016,8 @@ function submitNewSong(e) {
     id: `notif-${Date.now()}`,
     type: 'score',
     targetId: newSong.id,
-    title: 'Nova Partitura Lançada!',
-    message: `${newSong.artist} disponibilizou a partitura de "${newSong.title}".`,
+    title: 'Nova Música & Partitura!',
+    message: `${newSong.artist} lançou a faixa "${newSong.title}". Ouça agora no player!`,
     author: newSong.artist,
     author_avatar: currentUserSession.avatar,
     time_ago: 'Agora',
@@ -5158,7 +6038,175 @@ function submitNewSong(e) {
   renderSongs();
   renderProfileGallery();
   renderAdminCMS();
-  alert('Música cadastrada no acervo oficial com sucesso!');
+  alert('Música publicada com sucesso! Você já pode reproduzi-la no player.');
+}
+
+// -----------------------------------------------------------------------------
+// GESTÃO DE ÁLBUNS DO ARTISTA
+// -----------------------------------------------------------------------------
+function openSubmitAlbumModal() {
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+
+  modalBody.innerHTML = `
+    <div class="space-y-4 text-left">
+      <div class="pb-2 border-b border-gray-100 pr-10">
+        <h3 class="font-display font-bold text-lg text-ink">Novo Álbum / EP</h3>
+        <p class="text-xs text-muted">Cadastre um novo disco para organizar suas faixas</p>
+      </div>
+
+      <form onsubmit="submitNewAlbum(event)" class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Título do Álbum *</label>
+          <input type="text" id="album-title-input" required placeholder="Ex: Fervura Global Vol. 2" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-purple" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Ano de Lançamento</label>
+            <input type="number" id="album-year-input" value="${new Date().getFullYear()}" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-purple" />
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Qtd. Prevista de Faixas</label>
+            <input type="number" id="album-tracks-input" value="10" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-purple" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">URL da Imagem de Capa</label>
+          <input type="url" id="album-cover-input" placeholder="https://images.unsplash.com/..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-purple" />
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl">Cancelar</button>
+          <button type="submit" class="btn bg-frevo-purple text-white flex-1 text-xs rounded-xl shadow-md font-bold">Criar Álbum</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  modal.classList.add('open');
+}
+
+function submitNewAlbum(e) {
+  e.preventDefault();
+  const title = document.getElementById('album-title-input').value;
+  const release_year = parseInt(document.getElementById('album-year-input').value) || new Date().getFullYear();
+  const tracks_count = parseInt(document.getElementById('album-tracks-input').value) || 10;
+  const cover_url = document.getElementById('album-cover-input').value || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=500&q=80';
+
+  if (!title) return;
+
+  const newAlbum = {
+    id: `alb-${Date.now()}`,
+    artist_id: currentUserSession.artist_id || 'a1',
+    title,
+    cover_url,
+    release_year,
+    tracks_count
+  };
+
+  DB.albums = DB.albums || [];
+  DB.albums.unshift(newAlbum);
+
+  closeModal();
+  renderProfileGallery();
+  alert('Álbum criado com sucesso! Agora você pode vincular faixas a ele.');
+}
+
+function deleteAlbum(albumId) {
+  if (confirm('Deseja realmente excluir este álbum?')) {
+    DB.albums = (DB.albums || []).filter(a => a.id !== albumId);
+    renderProfileGallery();
+  }
+}
+
+// -----------------------------------------------------------------------------
+// GESTÃO DE SHOWS & APRESENTAÇÕES DO ARTISTA
+// -----------------------------------------------------------------------------
+function openSubmitShowModal() {
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+
+  modalBody.innerHTML = `
+    <div class="space-y-4 text-left">
+      <div class="pb-2 border-b border-gray-100 pr-10">
+        <h3 class="font-display font-bold text-lg text-ink">Agendar Próximo Show</h3>
+        <p class="text-xs text-muted">Divulgue seus concertos e apresentações de Frevo</p>
+      </div>
+
+      <form onsubmit="submitNewShow(event)" class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Título do Evento / Show *</label>
+          <input type="text" id="show-title-input" required placeholder="Ex: Noite de Frevo e Clarins" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-red" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Data *</label>
+            <input type="date" id="show-date-input" required class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-red" />
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Horário *</label>
+            <input type="time" id="show-time-input" required value="20:00" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-red" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Local / Espaço Cultural *</label>
+          <input type="text" id="show-venue-input" required placeholder="Ex: Praça do Arsenal, Teatro Santa Isabel" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-red" />
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Cidade / Estado</label>
+          <input type="text" id="show-city-input" value="Recife - PE" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-red" />
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl">Cancelar</button>
+          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl shadow-md font-bold">Publicar Show</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  modal.classList.add('open');
+}
+
+function submitNewShow(e) {
+  e.preventDefault();
+  const title = document.getElementById('show-title-input').value;
+  const date = document.getElementById('show-date-input').value;
+  const time = document.getElementById('show-time-input').value;
+  const venue = document.getElementById('show-venue-input').value;
+  const city = document.getElementById('show-city-input').value || 'Recife - PE';
+
+  if (!title || !date) return;
+
+  const newShow = {
+    id: `sh-${Date.now()}`,
+    artist_id: currentUserSession.artist_id || 'a1',
+    title,
+    venue,
+    city,
+    date,
+    time,
+    ticket_url: '#'
+  };
+
+  DB.shows = DB.shows || [];
+  DB.shows.unshift(newShow);
+
+  closeModal();
+  renderProfileGallery();
+  alert('Show adicionado com sucesso à sua agenda!');
+}
+
+function deleteShow(showId) {
+  if (confirm('Deseja realmente excluir este show da agenda?')) {
+    DB.shows = (DB.shows || []).filter(s => s.id !== showId);
+    renderProfileGallery();
+  }
 }
 
 // ==============================================================================
@@ -5419,6 +6467,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   handleDeepLink();
   window.addEventListener('hashchange', handleDeepLink);
+
+  initFrevoAudioEngine();
 
   const modal = document.getElementById('global-modal');
   if (modal) {
