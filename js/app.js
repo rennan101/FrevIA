@@ -6,79 +6,40 @@ const DB = {
   artists: [
     {
       id: 'a1',
-      name: 'Maestro Forró',
-      handle: '@maestroforro',
-      genre: 'Frevo Livre',
-      bio: 'Regente, compositor e arranjador à frente da OPBH (Orquestra Popular da Bomba do Hemetério). Revolucionando o Frevo através de fusões rítmicas globais com jazz, maracatu e música sinfônica contemporânea.',
-      avatar_url: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80',
-      cover_url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80',
-      email: 'forro@cultura.pe.gov.br',
-      phone: '+55 (81) 99876-1111',
+      name: 'SpokFrevo Orquestra',
+      handle: '@spokfrevo',
+      genre: 'Frevo de Rua',
+      bio: 'Comandada pelo maestro e saxofonista Spok (Silvério Pessoa), a big band de 18 músicos é o maior nome do frevo instrumental na atualidade. Criadores de um estilo único que fundiu frevo pernambucano com jazz e música de câmara, levando o gênero aos maiores festivais internacionais.',
+      avatar_url: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=400&q=80',
+      cover_url: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=1200&q=80',
+      email: 'contato@spokfrevo.com.br',
+      phone: '+5581999990001',
       is_approved: true,
       has_story: true,
     },
     {
       id: 'a2',
-      name: 'SpokFrevo Orquestra',
-      handle: '@spokfrevo',
+      name: 'Maestro Duda',
+      handle: '@maestroduda',
       genre: 'Frevo de Rua',
-      bio: 'Comandada pelo virtuoso saxofonista e maestro Spok, a big band de 18 músicos eleva o Frevo de Rua instrumental ao circuito dos maiores festivais internacionais de jazz com técnica e improvisações viscerais.',
-      avatar_url: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=400&q=80',
-      cover_url: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=1200&q=80',
-      email: 'spok@cultura.pe.gov.br',
-      phone: '+55 (81) 99876-2222',
+      bio: 'Ivan da Silva Bezerra, o Maestro Duda (1935–2018), foi o maior compositor de frevo do século XX. Autor de mais de 700 frevos, ganhou o prêmio de melhor compositor do carnaval pernambucano 12 vezes. Sua obra é fundamental para a compreensão e preservação do gênero.',
+      avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
+      cover_url: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=1200&q=80',
+      email: 'acervo@maestroduda.com.br',
+      phone: '+5581999990002',
       is_approved: true,
       has_story: true,
     },
     {
       id: 'a3',
-      name: 'Bloco da Saudade',
-      handle: '@blocodasaudade',
-      genre: 'Frevo de Bloco',
-      bio: 'Fundado em 1974 para reviver os tradicionais blocos líricos de pau e corda do Recife. Composto por coro feminino impecável, violões, banjos, cavaquinhos, flautas e clarinetes inspirados na poesia carnavalesca.',
-      avatar_url: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=400&q=80',
-      cover_url: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=1200&q=80',
-      email: 'saudade@cultura.pe.gov.br',
-      phone: '+55 (81) 99876-3333',
-      is_approved: true,
-      has_story: true,
-    },
-    {
-      id: 'a4',
       name: 'Claudionor Germano',
       handle: '@claudionorgermano',
       genre: 'Frevo Canção',
-      bio: 'Patrimônio Vivo de Pernambuco. A voz definitiva dos frevos de Capiba e Nelson Ferreira. Ao longo de 70 anos de carreira gravou dezenas de discos icônicos celebrando a memória e a alma do carnaval do Recife.',
-      avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
-      cover_url: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=1200&q=80',
-      email: 'claudionor@cultura.pe.gov.br',
-      phone: '+55 (81) 99876-4444',
-      is_approved: true,
-      has_story: true,
-    },
-    {
-      id: 'a5',
-      name: 'Orquestra Popular da Bomba',
-      handle: '@opbh_recife',
-      genre: 'Frevo Contemporâneo',
-      bio: 'Coletivo de jovens instrumentistas e percussionistas da Bomba do Hemetério no Recife. Exploram novas harmonias, metais velozes e a pulsação contagiante do frevo de rua para as novas gerações.',
-      avatar_url: 'https://images.unsplash.com/photo-1520523839898-507127053c37?auto=format&fit=crop&w=400&q=80',
+      bio: 'Patrimônio Vivo de Pernambuco e o cantor mais completo do frevo-canção. Com 70 anos de carreira, Claudionor Germano gravou dezenas de discos interpretando os maiores clássicos de Capiba e Nelson Ferreira, tornando-se referência máxima da voz do frevo pernambucano.',
+      avatar_url: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=400&q=80',
       cover_url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80',
-      email: 'contato@opbh.com.br',
-      phone: '+55 (81) 99876-5555',
-      is_approved: true,
-      has_story: true,
-    },
-    {
-      id: 'a6',
-      name: 'Giselle Andrade',
-      handle: '@gisellepassista',
-      genre: 'Dança & Passos de Frevo',
-      bio: 'Passista premiada, coreógrafa e pesquisadora corporal do Frevo. Diretora de oficinas no Paço do Frevo, dedicando sua trajetória à formação de passistas e inovação dos passos acrobáticos pernambucanos.',
-      avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-      cover_url: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=1200&q=80',
-      email: 'giselle@passistaspe.org',
-      phone: '+55 (81) 99876-6666',
+      email: 'contato@claudionorgermano.art.br',
+      phone: '+5581999990003',
       is_approved: true,
       has_story: true,
     }
@@ -198,208 +159,198 @@ const DB = {
   ],
 
   songs: [
+    // ========================================================
+    // MÚSICAS — SpokFrevo Orquestra (a1)
+    // ========================================================
     {
       id: 's1',
-      title: 'Passo da Fervura',
-      artist: 'Maestro Forró',
-      genre: 'Frevo Livre',
-      description: 'Arranjo completo para saxofones, trompetes e base rítmica sincopada.',
-      lyrics: `(Metais atacam com vigor)
-Lá vem o frevo fervendo nas ladeiras
-Pula passista, gira a sombrinha no ar
-Recife acorda ao toque dos clarins
-Que a festa popular não tem mais fim!
+      title: 'Vassourinhas (SpokFrevo)',
+      artist: 'SpokFrevo Orquestra',
+      genre: 'Frevo de Rua',
+      description: 'Releitura magistral da mais célebre marcha pernambucana de todos os tempos, com arranjo de big band criado por Spok para o álbum "Ao Vivo em Lisboa".',
+      lyrics: `(Instrumental — Frevo de Rua com Big Band)
 
-(Solo enérgico de trompete)
-Na Bomba do Hemetério a massa vibra
-O passo é ligeiro e faz a terra tremer
-Vem na cadência desse frevo livre
-Pernambuco ensina como é viver!`,
-      score_file: 'passo-da-fervura-metais.pdf',
+Vassourinhas que varrem as ruas do Recife
+No carnaval que o pernambucano nunca esquece
+O sax de Spok conduz os 18 músicos
+Num voo rasante sobre o coração do frevo!
+
+(Improviso de saxofone alto — cadência livre)
+Quando a trompete ataca as ladeiras cantam
+E o mundo inteiro aprende como frevo se faz!`,
+      score_file: 'spokfrevo-vassourinhas-bigband.pdf',
       audio_url: 'https://assets.mixkit.co/music/preview/mixkit-brazilian-carnival-brass-band-1120.mp3',
-      cover_url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&q=80',
-      duration_seconds: 184,
-      plays_count: 14200,
+      cover_url: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=400&q=80',
+      duration_seconds: 247,
+      plays_count: 58400,
       is_popular: true,
       album_id: 'alb1',
       status: 'published',
-      downloads_count: 1420,
+      downloads_count: 3220,
       author_id: 'a1'
     },
     {
       id: 's2',
-      title: 'Fervura no Recife Antigo',
-      artist: 'Maestro Forró',
+      title: 'Passo de Anjo',
+      artist: 'SpokFrevo Orquestra',
       genre: 'Frevo de Rua',
-      description: 'Partitura orquestral com cadência acelerada executada nas ladeiras e pontes do Recife.',
-      lyrics: `Clarins anunciam no Marco Zero
-A orquestra rasga a madrugada inteira
-Vem no compasso desse frevo quente
-Arrastando a multidão pelas ladeiras!`,
-      score_file: 'fervura-recife-antigo.pdf',
-      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-latin-carnival-party-1122.mp3',
-      cover_url: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80',
-      duration_seconds: 165,
-      plays_count: 9800,
+      description: 'Composição original premiada internacionalmente, com arranjo para big band e improv de saxofone alto em Re Maior. Destaque do álbum "Spok Frevo Orquestra".',
+      lyrics: `(Instrumental — Frevo de Rua para Big Band de 18 Músicos)
+
+Anjos de sombrinha colorida descem as ladeiras
+Enquanto os metais sobem até o marco zero
+O Passo de Anjo é leve mas com garra
+No coração de Recife que não para!
+
+(Solo de saxofone em improviso livre)
+Trombones, trompetes e a caixa marcando
+O passo mais bonito que eu já vi tocando!`,
+      score_file: 'spokfrevo-passo-de-anjo.pdf',
+      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-carnival-brass-groove-1121.mp3',
+      cover_url: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=400&q=80',
+      duration_seconds: 198,
+      plays_count: 41200,
       is_popular: true,
       album_id: 'alb1',
       status: 'published',
-      downloads_count: 890,
+      downloads_count: 2180,
       author_id: 'a1'
     },
     {
       id: 's3',
-      title: 'Vassourinhas (Arranjo OPBH)',
-      artist: 'Maestro Forró',
+      title: 'Moraes é Frevo',
+      artist: 'SpokFrevo Orquestra',
       genre: 'Frevo de Rua',
-      description: 'Releitura sinfônica vigorosa da marcha mais célebre do carnaval pernambucano.',
-      lyrics: `(Solo acrobático e acelerado de metais)
-Vassoura, vassourinha que varre a tristeza
-No passo do frevo que é nossa riqueza!`,
-      score_file: 'vassourinhas-opbh.pdf',
-      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-samba-brazil-fiesta-1124.mp3',
-      cover_url: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=400&q=80',
-      duration_seconds: 210,
-      plays_count: 28400,
+      description: 'Homenagem ao lendário compositor Moraes Moreira. Arranjo exclusivo de Spok para big band com seção rítmica percussiva e improvisação de sopros.',
+      lyrics: `(Instrumental — Tributo a Moraes Moreira)
+
+Moderna orquestra, ancestral pulsação
+O frevo é a alma desse povo em festa
+Moraes nos ensinou que a tradição
+Não se perde — ela se reinventa!
+
+(Cadência de bateria e naipe de metais)`,
+      score_file: 'spokfrevo-moraes-e-frevo.pdf',
+      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-latin-carnival-party-1122.mp3',
+      cover_url: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=400&q=80',
+      duration_seconds: 224,
+      plays_count: 29700,
       is_popular: true,
       album_id: 'alb2',
       status: 'published',
-      downloads_count: 2150,
+      downloads_count: 1890,
       author_id: 'a1'
     },
     {
       id: 's4',
-      title: 'Moraes é Frevo',
-      artist: 'SpokFrevo Orquestra',
-      genre: 'Frevo de Rua',
-      description: 'Partitura completa para Big Band com solos expressivos de sax alto.',
-      lyrics: `(Instrumental Jazz-Frevo de vanguarda)
-Harmonias arrojadas e improvisações livres no pulsar pernambucano.`,
-      score_file: 'moraes-e-frevo-bigband.pdf',
-      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-carnival-brass-groove-1121.mp3',
-      cover_url: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=400&q=80',
-      duration_seconds: 242,
-      plays_count: 18900,
-      is_popular: true,
-      album_id: 'alb3',
-      status: 'published',
-      downloads_count: 1780,
-      author_id: 'a2'
-    },
-    {
-      id: 's5',
       title: 'Frevo Sanfonado',
       artist: 'SpokFrevo Orquestra',
       genre: 'Frevo Instrumental',
-      description: 'Fusão primorosa de saxofone com sanfona e naipes de trombones.',
-      lyrics: `(Diálogo rítmico entre fole de oito baixos e naipes de sopro)`,
-      score_file: 'frevo-sanfonado-spok.pdf',
-      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-latin-carnival-party-1122.mp3',
+      description: 'Fusão única entre o sax de Spok e a sanfona nordestina. Destaque do álbum "Frevo Nação" — uma viagem sonora da periferia ao palco internacional.',
+      lyrics: `(Instrumental — Diálogo entre saxofone e fole nordestino)
+
+O fole responde ao sopro do sax
+Pernambuco dialoga com o mundo
+Frevo e baião na mesma cadência
+Nordeste fundo!`,
+      score_file: 'spokfrevo-frevo-sanfonado.pdf',
+      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-samba-brazil-fiesta-1124.mp3',
       cover_url: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=400&q=80',
-      duration_seconds: 198,
-      plays_count: 12400,
+      duration_seconds: 212,
+      plays_count: 18600,
+      is_popular: true,
+      album_id: 'alb2',
+      status: 'published',
+      downloads_count: 1340,
+      author_id: 'a1'
+    },
+
+    // ========================================================
+    // MÚSICAS — Maestro Duda (a2)
+    // ========================================================
+    {
+      id: 's5',
+      title: 'Frevo Nº 1 — Maestro Duda',
+      artist: 'Maestro Duda',
+      genre: 'Frevo de Rua',
+      description: 'Uma das composições mais executadas do carnaval pernambucano. Arranjo original para orquestra de frevo com metais em destaque e percussão marcante.',
+      lyrics: `(Instrumental — Frevo de Rua Clássico)
+
+Essa é a marca do maior compositor
+Sete notas que valem um carnaval
+Duda escreveu o coração pernambucano
+Em cada pauta, em cada festival!
+
+(Metais em tutti — tutti fortíssimo)
+Não tem um frevo igual no mundo inteiro
+Maestro Duda, nosso maior guerreiro!`,
+      score_file: 'maestroduda-frevo-num1.pdf',
+      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-brazilian-carnival-brass-band-1120.mp3',
+      cover_url: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=400&q=80',
+      duration_seconds: 176,
+      plays_count: 52000,
       is_popular: true,
       album_id: 'alb3',
       status: 'published',
-      downloads_count: 1340,
+      downloads_count: 4100,
       author_id: 'a2'
     },
     {
       id: 's6',
-      title: 'Passo de Anjo',
-      artist: 'SpokFrevo Orquestra',
+      title: 'Escurinho',
+      artist: 'Maestro Duda',
       genre: 'Frevo de Rua',
-      description: 'Pauta e partes orquestrais para concerto e cortejos carnavalescos.',
-      lyrics: `(Marcha instrumental premiada internacionalmente com arranjo para big band)`,
-      score_file: 'passo-de-anjo.pdf',
-      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-brazilian-carnival-brass-band-1120.mp3',
-      cover_url: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=400&q=80',
-      duration_seconds: 220,
-      plays_count: 8700,
-      is_popular: false,
+      description: 'Um dos frevos mais populares e executados do carnaval do Recife. Ritmo irresistível com naipes de saxofones e trompetes em pergunta e resposta.',
+      lyrics: `(Instrumental — Frevo de Rua)
+
+Quando o escurinho chega nas ruas do Recife
+As sombrinhas sobem e o povo vai à loucura
+A orquestra toca e ninguém fica parado
+Escurinho é frevo de segunda e de segunda-feira!`,
+      score_file: 'maestroduda-escurinho.pdf',
+      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-carnival-brass-groove-1121.mp3',
+      cover_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
+      duration_seconds: 163,
+      plays_count: 38900,
+      is_popular: true,
       album_id: 'alb3',
       status: 'published',
-      downloads_count: 960,
+      downloads_count: 2960,
       author_id: 'a2'
     },
     {
       id: 's7',
-      title: 'Madeira Que Cupim Não Rói',
-      artist: 'Bloco da Saudade',
-      genre: 'Frevo de Bloco',
-      description: 'Hino lírico da resistência e orgulho carnavalesco com arranjo para coro e cordas.',
-      lyrics: `Madeira do Rosário vem a ver contar
-Como é que se faz pra vencer
-Pernambuco é terra de cabra da peste
-Não há quem conteste o nosso valor!
+      title: 'Foguete',
+      artist: 'Maestro Duda',
+      genre: 'Frevo de Rua',
+      description: 'Frevo veloz e energético, um dos mais desafiadores para as orquestras. Considerado por muitos músicos como o "frevo dos frevos" pela exigência técnica.',
+      lyrics: `(Instrumental — Frevo de Rua de alta velocidade)
 
-Se a gente desce a ladeira cantando
-Não tem quem segure o coral de pau e corda
-Nossa saudade é a chama viva
-Do carnaval que nunca se acaba!`,
-      score_file: 'madeira-cupim-coro.pdf',
-      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-samba-brazil-fiesta-1124.mp3',
-      cover_url: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=400&q=80',
-      duration_seconds: 235,
-      plays_count: 31200,
+Rapidez é tudo no Foguete de Duda
+Os músicos respiram fundo e partem
+Em cada nota uma explosão de alegria
+Pernambuco em chamas que ninguém parte!`,
+      score_file: 'maestroduda-foguete.pdf',
+      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-latin-carnival-party-1122.mp3',
+      cover_url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&q=80',
+      duration_seconds: 148,
+      plays_count: 27400,
       is_popular: true,
       album_id: 'alb4',
       status: 'published',
-      downloads_count: 1980,
-      author_id: 'a3'
+      downloads_count: 2210,
+      author_id: 'a2'
     },
+
+    // ========================================================
+    // MÚSICAS — Claudionor Germano (a3)
+    // ========================================================
     {
       id: 's8',
-      title: 'Valores do Passado',
-      artist: 'Bloco da Saudade',
-      genre: 'Frevo de Bloco',
-      description: 'Poesia nostálgica de Edgar Moraes para flautas, clarinetes e coro feminino.',
-      lyrics: `Bloco das Flores, Batutas de São José
-Pavão Dourado, Flor da Lira
-Um bloco em cada esquina a desfilar
-Fazendo o coração palpitar...
-
-Relembro os velhos carnavais com emoção
-Clarins de prata sob o luar do Recife
-Guardo no peito a poesia e a canção!`,
-      score_file: 'valores-do-passado.pdf',
-      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-carnival-brass-groove-1121.mp3',
-      cover_url: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=400&q=80',
-      duration_seconds: 195,
-      plays_count: 15600,
-      is_popular: true,
-      album_id: 'alb4',
-      status: 'published',
-      downloads_count: 1250,
-      author_id: 'a3'
-    },
-    {
-      id: 's9',
-      title: 'Minha Saudade Lírica',
-      artist: 'Bloco da Saudade',
-      genre: 'Frevo de Bloco',
-      description: 'Marcha de bloco com violões de 7 cordas, banjos e coro a quatro vozes.',
-      lyrics: `Quanta saudade eu tenho dos carnavais de outrora
-Das noites enluaradas sob os clarins da aurora...
-Vem meu amor dançar comigo
-Ao som das cordas e do violão amigo!`,
-      score_file: 'minha-saudade-lirica.pdf',
-      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-latin-carnival-party-1122.mp3',
-      cover_url: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=400&q=80',
-      duration_seconds: 210,
-      plays_count: 8300,
-      is_popular: false,
-      album_id: 'alb4',
-      status: 'published',
-      downloads_count: 740,
-      author_id: 'a3'
-    },
-    {
-      id: 's10',
       title: 'Voltei Recife',
       artist: 'Claudionor Germano',
       genre: 'Frevo Canção',
-      description: 'Melodia imortalizada com cifras e arranjo vocal para orquestra de frevo.',
+      description: 'Uma das mais belas canções de saudade do carnaval recifense. Claudionor Germano interpreta com emoção incomparável o retorno à cidade amada.',
       lyrics: `Voltei, Recife!
 Foi a saudade que me trouxe pelo braço
 Quero rever a Rua da Aurora
@@ -407,224 +358,213 @@ O Passo da Pátria e o meu pedaço!
 
 Recife, linda cidade formosa
 Das pontes cortando o Capibaribe
-Vim pra cantar o meu Frevo com você!`,
-      score_file: 'voltei-recife-cifras.pdf',
-      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-brazilian-carnival-brass-band-1120.mp3',
-      cover_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
-      duration_seconds: 190,
-      plays_count: 42000,
-      is_popular: true,
-      album_id: 'alb5',
-      status: 'published',
-      downloads_count: 2430,
-      author_id: 'a4'
-    },
-    {
-      id: 's11',
-      title: 'Hino de Capiba (É de Fazer Chorar)',
-      artist: 'Claudionor Germano',
-      genre: 'Frevo Canção',
-      description: 'Pauta vocal com arranjo de sopros e introdução de trompetes.',
-      lyrics: `Quero ver quem não chora quando o frevo começa a tocar
-No meio da multidão a gente não pode parar...
-É de fazer chorar de tanta alegria!`,
-      score_file: 'hino-capiba-metais.pdf',
+Vim pra cantar o meu Frevo com você
+Do Marco Zero até o fim do Recife!
+
+(Refrão)
+Voltei! Voltei! Voltei, meu bem!
+A saudade do frevo
+Não tem quem segure, não!`,
+      score_file: 'claudionor-voltei-recife.pdf',
       audio_url: 'https://assets.mixkit.co/music/preview/mixkit-samba-brazil-fiesta-1124.mp3',
-      cover_url: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=400&q=80',
-      duration_seconds: 175,
-      plays_count: 26500,
+      cover_url: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=400&q=80',
+      duration_seconds: 210,
+      plays_count: 67000,
       is_popular: true,
       album_id: 'alb5',
       status: 'published',
-      downloads_count: 1620,
-      author_id: 'a4'
+      downloads_count: 3540,
+      author_id: 'a3'
     },
     {
-      id: 's12',
-      title: 'Frevo Nº 1 de Nelson Ferreira',
+      id: 's9',
+      title: 'É de Fazer Chorar (Capiba)',
       artist: 'Claudionor Germano',
       genre: 'Frevo Canção',
-      description: 'Arranjo histórico com naipe de clarinetes e percussão tradicional.',
-      lyrics: `O frevo não é para quem quer, é para quem pode
-Quando a orquestra ataca ninguém fica parado!`,
-      score_file: 'frevo-num1-nelson.pdf',
+      description: 'O mais emocionante frevo-canção de Capiba, na interpretação definitiva de Claudionor Germano. Arranjo para orquestra com metais e coro.',
+      lyrics: `Quero ver quem não chora quando o frevo começa a tocar
+No meio da multidão a gente não pode parar
+É de fazer chorar de tanta alegria!
+
+Capiba escreveu a alma pernambucana
+E Claudionor canta com toda a emoção
+Quando o frevo toca ninguém fica na cama
+É festa, é amor, é celebração!`,
+      score_file: 'claudionor-capiba-chorar.pdf',
       audio_url: 'https://assets.mixkit.co/music/preview/mixkit-carnival-brass-groove-1121.mp3',
       cover_url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&q=80',
-      duration_seconds: 188,
-      plays_count: 14700,
-      is_popular: false,
+      duration_seconds: 192,
+      plays_count: 45200,
+      is_popular: true,
       album_id: 'alb5',
       status: 'published',
-      downloads_count: 1110,
-      author_id: 'a4'
+      downloads_count: 2780,
+      author_id: 'a3'
     },
     {
-      id: 's13',
-      title: 'Fervura da Bomba',
-      artist: 'Orquestra Popular da Bomba',
-      genre: 'Frevo Contemporâneo',
-      description: 'Partitura enérgica com trombones em destaque e percussão de maracatu.',
-      lyrics: `Metais incandescentes da Bomba do Hemetério
-Fazendo a periferia ferver de orgulho e arte!`,
-      score_file: 'fervura-bomba.pdf',
+      id: 's10',
+      title: 'Hino do Frevo (Nelson Ferreira)',
+      artist: 'Claudionor Germano',
+      genre: 'Frevo Canção',
+      description: 'A mais famosa composição de Nelson Ferreira interpretada pelo maior cantor de frevo-canção da história. Partitura completa com arranjo vocal e orquestral.',
+      lyrics: `O frevo não é para quem quer, é para quem pode
+Quando a orquestra ataca ninguém fica parado!
+
+Nelson Ferreira escreveu com o coração
+E Claudionor traz ao mundo em voz e emoção
+Pernambuco ensina ao mundo o que é frevo
+Nossa tradição é o nosso maior tesouro!
+
+(Tutti orquestral)
+Viva o frevo! Viva Recife!
+Viva Pernambuco e sua gente!`,
+      score_file: 'claudionor-hino-frevo-nelson.pdf',
       audio_url: 'https://assets.mixkit.co/music/preview/mixkit-latin-carnival-party-1122.mp3',
-      cover_url: 'https://images.unsplash.com/photo-1520523839898-507127053c37?auto=format&fit=crop&w=400&q=80',
-      duration_seconds: 170,
-      plays_count: 6400,
-      is_popular: true,
-      album_id: 'alb6',
-      status: 'published',
-      downloads_count: 530,
-      author_id: 'a5'
-    },
-    {
-      id: 's14',
-      title: 'Clarins da Aurora',
-      artist: 'Orquestra Popular da Bomba',
-      genre: 'Frevo de Rua',
-      description: 'Abertura festiva para grupos juvenis e bandas escolares de frevo.',
-      lyrics: `O dia amanhece com clarins em marcha
-Juventude recifense que toca e dança!`,
-      score_file: 'clarins-da-aurora.pdf',
-      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-brazilian-carnival-brass-band-1120.mp3',
-      cover_url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&q=80',
-      duration_seconds: 160,
-      plays_count: 4200,
+      cover_url: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=400&q=80',
+      duration_seconds: 225,
+      plays_count: 31800,
       is_popular: false,
       album_id: 'alb6',
       status: 'published',
-      downloads_count: 480,
-      author_id: 'a5'
-    },
-    {
-      id: 's15',
-      title: 'Marcha Rítmica dos Passistas',
-      artist: 'Giselle Andrade',
-      genre: 'Dança & Passos',
-      description: 'Partitura com marcação rítmica precisa para sincronização de passos acrobáticos.',
-      lyrics: `Ferrolho, Tesoura, Parafuso e Ponta
-O corpo responde ao sopro dos metais!`,
-      score_file: 'marcha-passistas.pdf',
-      audio_url: 'https://assets.mixkit.co/music/preview/mixkit-samba-brazil-fiesta-1124.mp3',
-      cover_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-      duration_seconds: 178,
-      plays_count: 9100,
-      is_popular: true,
-      album_id: 'alb7',
-      status: 'published',
-      downloads_count: 820,
-      author_id: 'a6'
+      downloads_count: 1920,
+      author_id: 'a3'
     }
   ],
 
   albums: [
+    // ========= SpokFrevo Orquestra (a1) =========
     {
       id: 'alb1',
       artist_id: 'a1',
-      title: 'Fervura Global',
-      cover_url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=500&q=80',
-      release_year: 2025,
-      tracks_count: 12
+      title: 'Ao Vivo em Lisboa',
+      cover_url: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=500&q=80',
+      release_year: 2010,
+      tracks_count: 14
     },
     {
       id: 'alb2',
       artist_id: 'a1',
-      title: 'Sinfonia da Bomba',
-      cover_url: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=500&q=80',
-      release_year: 2023,
-      tracks_count: 10
+      title: 'Frevo Nação',
+      cover_url: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=500&q=80',
+      release_year: 2016,
+      tracks_count: 12
     },
+    {
+      id: 'alb2b',
+      artist_id: 'a1',
+      title: 'SpokFrevo Orquestra',
+      cover_url: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=500&q=80',
+      release_year: 2003,
+      tracks_count: 16
+    },
+    // ========= Maestro Duda (a2) =========
     {
       id: 'alb3',
       artist_id: 'a2',
-      title: 'Frevo de Big Band ao Vivo',
-      cover_url: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=500&q=80',
-      release_year: 2024,
-      tracks_count: 14
+      title: '700 Frevos — Obra Completa Vol. 1',
+      cover_url: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=500&q=80',
+      release_year: 2008,
+      tracks_count: 20
     },
     {
       id: 'alb4',
+      artist_id: 'a2',
+      title: 'Maestro Duda — Frevos Imortais',
+      cover_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=500&q=80',
+      release_year: 2015,
+      tracks_count: 18
+    },
+    // ========= Claudionor Germano (a3) =========
+    {
+      id: 'alb5',
       artist_id: 'a3',
-      title: '50 Anos de Poesia Lírica',
-      cover_url: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=500&q=80',
-      release_year: 2024,
+      title: 'Vozes de Capiba',
+      cover_url: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=500&q=80',
+      release_year: 2012,
       tracks_count: 16
     },
     {
-      id: 'alb5',
-      artist_id: 'a4',
-      title: 'Vozes da Memória de Capiba',
-      cover_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=500&q=80',
-      release_year: 2022,
-      tracks_count: 18
-    },
-    {
       id: 'alb6',
-      artist_id: 'a5',
-      title: 'Nova Geração dos Metais',
-      cover_url: 'https://images.unsplash.com/photo-1520523839898-507127053c37?auto=format&fit=crop&w=500&q=80',
-      release_year: 2025,
-      tracks_count: 8
-    },
-    {
-      id: 'alb7',
-      artist_id: 'a6',
-      title: 'Trilhas do Passo',
-      cover_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=500&q=80',
-      release_year: 2024,
-      tracks_count: 6
+      artist_id: 'a3',
+      title: '70 Anos de Frevo Canção',
+      cover_url: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=500&q=80',
+      release_year: 2020,
+      tracks_count: 22
     }
   ],
 
   shows: [
+    // SpokFrevo Orquestra (a1)
     {
       id: 'sh1',
       artist_id: 'a1',
-      title: 'Concerto da Fervura ao Ar Livre',
-      venue: 'Praça do Arsenal, Recife Antigo',
+      title: 'SpokFrevo Ao Vivo — Festival do Frevo 2026',
+      venue: 'Paço do Frevo',
       city: 'Recife - PE',
-      date: '2026-09-27',
-      time: '19:30',
+      date: '2027-02-08',
+      time: '20:00',
       ticket_url: '#'
     },
     {
       id: 'sh2',
       artist_id: 'a1',
-      title: 'Encontro dos Clarins da Noite',
-      venue: 'Pátio de São Pedro',
+      title: 'Noite de Gala do Frevo Jazz',
+      venue: 'Teatro Santa Isabel',
       city: 'Recife - PE',
-      date: '2026-10-12',
+      date: '2026-10-18',
       time: '21:00',
       ticket_url: '#'
     },
     {
       id: 'sh3',
-      artist_id: 'a2',
-      title: 'Noite de Gala do Frevo Jazz',
-      venue: 'Teatro Santa Isabel',
-      city: 'Recife - PE',
-      date: '2026-09-30',
-      time: '20:00',
+      artist_id: 'a1',
+      title: 'SpokFrevo — Turnê Internacional',
+      venue: 'Casa da Música do Porto',
+      city: 'Porto - Portugal',
+      date: '2026-11-14',
+      time: '20:30',
       ticket_url: '#'
     },
+    // Maestro Duda (a2)
     {
       id: 'sh4',
-      artist_id: 'a3',
-      title: 'Acerto de Marcha Lírico',
-      venue: 'Largo do Amparo',
-      city: 'Olinda - PE',
-      date: '2026-10-04',
-      time: '17:00',
+      artist_id: 'a2',
+      title: 'Concerto Tributo ao Maestro Duda',
+      venue: 'Teatro do Parque',
+      city: 'Recife - PE',
+      date: '2026-09-30',
+      time: '19:00',
       ticket_url: '#'
     },
     {
       id: 'sh5',
-      artist_id: 'a4',
-      title: 'Tributo aos 70 Anos de Frevo',
+      artist_id: 'a2',
+      title: 'Acervo do Maestro — 700 Frevos',
+      venue: 'Pátio de São Pedro',
+      city: 'Recife - PE',
+      date: '2026-10-25',
+      time: '17:00',
+      ticket_url: '#'
+    },
+    // Claudionor Germano (a3)
+    {
+      id: 'sh6',
+      artist_id: 'a3',
+      title: '70 Anos de Frevo Canção',
       venue: 'Paço do Frevo',
       city: 'Recife - PE',
-      date: '2026-10-18',
+      date: '2026-11-08',
       time: '18:30',
+      ticket_url: '#'
+    },
+    {
+      id: 'sh7',
+      artist_id: 'a3',
+      title: 'Claudionor Germano no Carnaval de Olinda',
+      venue: 'Quatro Cantos de Olinda',
+      city: 'Olinda - PE',
+      date: '2027-02-28',
+      time: '16:00',
       ticket_url: '#'
     }
   ],
@@ -1918,7 +1858,7 @@ function openArtistProfile(artistId) {
             <svg width="15" height="15" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
             </svg>
-            <span class="hidden sm:inline">${isFav ? 'Favoritado ★' : 'Favoritar'}</span>
+            <span class="hidden sm:inline">${isFav ? 'Favoritado' : 'Favoritar'}</span>
           </button>
         </div>
 
@@ -1940,7 +1880,7 @@ function openArtistProfile(artistId) {
               </a>
             ` : ''}
             ${artist.phone ? `
-              <a href="https://wa.me/${artist.phone.replace(/[^0-9]/g, '')}" target="_blank" rel="noopener noreferrer" class="text-[11px] font-bold text-frevo-green bg-frevo-green/10 hover:bg-frevo-green/20 px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors">
+              <a href="https://wa.me/${artist.phone.replace(/[^0-9]/g, '')}" target="_blank" rel="noopener noreferrer" class="text-[11px] font-bold text-green-800 bg-green-100 hover:bg-green-200 px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2z"/></svg>
                 WhatsApp Oficial
               </a>
