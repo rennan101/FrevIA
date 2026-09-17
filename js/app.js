@@ -1828,13 +1828,10 @@ function openArtistProfile(artistId) {
 
   modalBody.innerHTML = `
     <div class="text-left space-y-4 -m-2">
-      <!-- Banner de Capa com Botão Fechar -->
+      <!-- Banner de Capa -->
       <div class="relative h-28 sm:h-32 rounded-2xl overflow-hidden bg-gradient-to-r from-frevo-orange to-frevo-red shadow-inner">
         <img src="${artist.cover_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80'}" alt="${artist.name}" class="w-full h-full object-cover opacity-85" />
         <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent"></div>
-        <button onclick="closeModal()" class="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-black/45 text-white flex items-center justify-center hover:bg-black/70 transition-colors z-10" aria-label="Fechar">
-          ✕
-        </button>
       </div>
 
       <!-- Avatar & Informações Principais -->
@@ -3099,9 +3096,6 @@ function openAlbumDetails(albumId) {
       <div class="relative h-44 rounded-2xl overflow-hidden shadow-inner">
         <img src="${album.cover_url}" alt="${album.title}" class="w-full h-full object-cover" />
         <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent"></div>
-        <button onclick="closeModal()" class="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-black/45 text-white flex items-center justify-center hover:bg-black/70 transition-colors z-10" aria-label="Fechar">
-          ✕
-        </button>
         <div class="absolute bottom-3 left-3 right-3 text-white">
           <span class="badge bg-frevo-purple/40 backdrop-blur-md text-white border border-white/20 text-[10px] font-bold">Álbum • ${album.release_year}</span>
           <h3 class="font-display font-extrabold text-xl leading-tight mt-1 text-white">${album.title}</h3>
@@ -6319,6 +6313,16 @@ async function syncAllWithSupabase() {
       renderArtists();
     }
 
+    const liveAlbums = await window.supabaseService.getAlbums?.();
+    if (liveAlbums && liveAlbums.length > 0) {
+      DB.albums = liveAlbums;
+    }
+
+    const liveShows = await window.supabaseService.getArtistEvents?.();
+    if (liveShows && liveShows.length > 0) {
+      DB.shows = liveShows;
+    }
+
     const liveSongs = await window.supabaseService.getSongs();
     if (liveSongs && liveSongs.length > 0) {
       DB.songs = liveSongs;
@@ -6338,22 +6342,32 @@ async function syncAllWithSupabase() {
 
 // Inicialização Global
 document.addEventListener('DOMContentLoaded', () => {
-  renderStories();
-  renderFeed();
-  renderProfileGallery();
-  renderArtists();
-  renderSongs();
-  renderSteps();
-  renderHistory();
-  renderMap();
-  renderAdminCMS();
-  updateProfileUI();
-  updateSessionUI();
-  checkPwaPrompt();
+  // 1. Vinculação prioritária de cliques nos botões de navegação
+  document.querySelectorAll('[data-view]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.preventDefault();
+      const view = el.dataset.view;
+      if (view) switchView(view);
+    });
+  });
+
+  // 2. Renderização de todas as visões com tratamento individual de erros
+  try { renderStories(); } catch (e) { console.error('Erro renderStories:', e); }
+  try { renderFeed(); } catch (e) { console.error('Erro renderFeed:', e); }
+  try { renderProfileGallery(); } catch (e) { console.error('Erro renderProfileGallery:', e); }
+  try { renderArtists(); } catch (e) { console.error('Erro renderArtists:', e); }
+  try { renderSongs(); } catch (e) { console.error('Erro renderSongs:', e); }
+  try { renderSteps(); } catch (e) { console.error('Erro renderSteps:', e); }
+  try { renderHistory(); } catch (e) { console.error('Erro renderHistory:', e); }
+  try { renderMap(); } catch (e) { console.error('Erro renderMap:', e); }
+  try { renderAdminCMS(); } catch (e) { console.error('Erro renderAdminCMS:', e); }
+  try { updateProfileUI(); } catch (e) { console.error('Erro updateProfileUI:', e); }
+  try { updateSessionUI(); } catch (e) { console.error('Erro updateSessionUI:', e); }
+  try { checkPwaPrompt(); } catch (e) { console.error('Erro checkPwaPrompt:', e); }
 
   // Inicializar o Infinite Scroll com IntersectionObserver para otimização mobile
   if (typeof InfiniteScrollManager !== 'undefined' && InfiniteScrollManager.init) {
-    InfiniteScrollManager.init();
+    try { InfiniteScrollManager.init(); } catch (e) { console.warn(e); }
   }
 
   if (window.FREVIA_CONFIG && window.FREVIA_CONFIG.isConfigured()) {
@@ -6363,55 +6377,48 @@ document.addEventListener('DOMContentLoaded', () => {
   // Ouvinte de mudança de autenticação no Supabase
   if (window.supabaseService) {
     window.supabaseService.onAuthStateChange(async (event, session) => {
-      if (session && session.user) {
-        // Tenta obter perfil do banco ou cria se não existir
-        let dbProfile = await window.supabaseService.getProfile(session.user.id);
-        const isBrandNew = !dbProfile;
-        if (!dbProfile) {
-          dbProfile = await window.supabaseService.upsertProfile(session.user);
+      try {
+        if (session && session.user) {
+          let dbProfile = await window.supabaseService.getProfile(session.user.id);
+          if (!dbProfile) {
+            dbProfile = await window.supabaseService.upsertProfile(session.user);
+          }
+
+          const googleAvatar = session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture;
+          const currentAvatar = dbProfile?.avatar_url || googleAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
+
+          currentUserSession = {
+            id: session.user.id,
+            role: dbProfile?.role || session.user.user_metadata?.role || 'user',
+            name: dbProfile?.display_name || session.user.user_metadata?.full_name || session.user.user_metadata?.name || '',
+            handle: dbProfile?.handle || (session.user.email ? '@' + session.user.email.split('@')[0] : ''),
+            avatar: currentAvatar,
+            email: session.user.email,
+            artist_id: null,
+            favorites: []
+          };
+
+          currentUserProfile.name = currentUserSession.name;
+          currentUserProfile.handle = currentUserSession.handle;
+          currentUserProfile.avatar = currentAvatar;
+          currentUserProfile.email = session.user.email;
+          if (dbProfile?.bio) currentUserProfile.bio = dbProfile.bio;
+
+          saveCurrentSession();
+          updateProfileUI();
+          renderProfileGallery();
+
+          if (event === 'SIGNED_IN' && (!currentUserProfile.name || !localStorage.getItem('frevai_onboarding_completed'))) {
+            setTimeout(() => {
+              openEditProfileModal(true);
+            }, 350);
+          }
         }
-
-        const googleAvatar = session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture;
-        const currentAvatar = dbProfile?.avatar_url || googleAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
-
-        currentUserSession = {
-          id: session.user.id,
-          role: dbProfile?.role || session.user.user_metadata?.role || 'user',
-          name: dbProfile?.display_name || session.user.user_metadata?.full_name || session.user.user_metadata?.name || '',
-          handle: dbProfile?.handle || (session.user.email ? '@' + session.user.email.split('@')[0] : ''),
-          avatar: currentAvatar,
-          email: session.user.email,
-          artist_id: null,
-          favorites: []
-        };
-
-        currentUserProfile.name = currentUserSession.name;
-        currentUserProfile.handle = currentUserSession.handle;
-        currentUserProfile.avatar = currentAvatar;
-        currentUserProfile.email = session.user.email;
-        if (dbProfile?.bio) currentUserProfile.bio = dbProfile.bio;
-
-        saveCurrentSession();
-        updateProfileUI();
-        renderProfileGallery();
-
-        // Se o usuário acabou de entrar e o perfil está em branco ou é novo login, abrir modal de edição
-        if (event === 'SIGNED_IN' && (!currentUserProfile.name || !localStorage.getItem('frevai_onboarding_completed'))) {
-          setTimeout(() => {
-            openEditProfileModal(true);
-          }, 350);
-        }
+      } catch (authErr) {
+        console.warn('Erro ao processar auth state change:', authErr);
       }
     });
   }
-
-  document.querySelectorAll('[data-view]').forEach(el => {
-    el.addEventListener('click', (e) => {
-      e.preventDefault();
-      const view = el.dataset.view;
-      if (view) switchView(view);
-    });
-  });
 
   // Registrar Service Worker para PWA e instalação na tela inicial
   if ('serviceWorker' in navigator) {

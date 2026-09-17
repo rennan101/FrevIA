@@ -367,14 +367,16 @@ class SupabaseService {
           id: a.id,
           name: a.name,
           slug: a.slug,
+          handle: a.handle || (a.slug ? `@${a.slug}` : '@artista'),
           genre: a.genre || 'Frevo de Rua',
           bio: a.bio,
-          avatar: a.avatar_url || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80',
-          cover: a.cover_url,
+          avatar_url: a.avatar_url || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80',
+          cover_url: a.cover_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80',
           instagram: a.instagram_url,
           youtube: a.youtube_url,
           website: a.website_url,
           is_approved: a.is_published !== false,
+          has_story: true,
           email: a.email || `${a.slug}@cultura.pe.gov.br`
         }));
       }
@@ -401,7 +403,67 @@ class SupabaseService {
   }
 
   // ============================================================================
-  // MÚSICAS & PARTITURAS (COM MÉTRICAS DE DOWNLOADS)
+  // ÁLBUNS & DISCOGRAFIA
+  // ============================================================================
+  async getAlbums() {
+    if (!this.client) return null;
+    try {
+      const { data, error } = await this.client
+        .from('albums')
+        .select('*')
+        .order('release_year', { ascending: false });
+
+      if (error) throw error;
+      if (data && data.length > 0) {
+        return data.map(alb => ({
+          id: alb.id,
+          artist_id: alb.artist_id,
+          title: alb.title,
+          cover_url: alb.cover_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=500&q=80',
+          release_year: alb.release_year || 2026,
+          tracks_count: alb.tracks_count || 10
+        }));
+      }
+      return null;
+    } catch (err) {
+      console.warn('[Supabase] Falha ao carregar álbuns:', err.message);
+      return null;
+    }
+  }
+
+  // ============================================================================
+  // SHOWS & AGENDA CULTURAL
+  // ============================================================================
+  async getArtistEvents() {
+    if (!this.client) return null;
+    try {
+      const { data, error } = await this.client
+        .from('artist_events')
+        .select('*')
+        .order('event_date', { ascending: true });
+
+      if (error) throw error;
+      if (data && data.length > 0) {
+        return data.map(sh => ({
+          id: sh.id,
+          artist_id: sh.artist_id,
+          title: sh.event_name || 'Show de Frevo',
+          venue: sh.venue_name || 'Recife Antigo',
+          city: sh.city || 'Recife - PE',
+          date: sh.event_date,
+          time: sh.event_time || '20:00',
+          ticket_url: sh.ticket_url || '#'
+        }));
+      }
+      return null;
+    } catch (err) {
+      console.warn('[Supabase] Falha ao carregar eventos:', err.message);
+      return null;
+    }
+  }
+
+  // ============================================================================
+  // MÚSICAS & PARTITURAS (COM ÁUDIO, DURAÇÃO E CAPA)
   // ============================================================================
   async getSongs() {
     if (!this.client) return null;
@@ -418,7 +480,12 @@ class SupabaseService {
           score_path,
           status,
           artist_id,
-          artist:artist_id(name)
+          audio_url,
+          album_id,
+          plays_count,
+          duration_seconds,
+          is_popular,
+          artist:artist_id(name, cover_url, avatar_url)
         `)
         .order('title');
 
@@ -427,12 +494,19 @@ class SupabaseService {
         return data.map(s => ({
           id: s.id,
           artist_id: s.artist_id,
+          author_id: s.artist_id,
           title: s.title,
           artist: s.artist?.name || 'Maestro do Frevo',
           genre: s.genre || 'Frevo de Rua',
           description: s.description || 'Partitura disponível no acervo oficial do FrevAI.',
           lyrics: s.lyrics || '',
           score_file: s.score_path || 'partitura-oficial.pdf',
+          audio_url: s.audio_url || 'https://assets.mixkit.co/music/preview/mixkit-brazilian-carnival-brass-band-1120.mp3',
+          cover_url: s.cover_url || s.artist?.cover_url || s.artist?.avatar_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&q=80',
+          duration_seconds: s.duration_seconds || 180,
+          plays_count: s.plays_count || Math.floor(Math.random() * 5000) + 1200,
+          is_popular: s.is_popular || false,
+          album_id: s.album_id || null,
           status: s.status || 'published',
           downloads_count: Math.floor(Math.random() * 120) + 15
         }));
