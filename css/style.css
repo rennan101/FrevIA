@@ -1475,9 +1475,9 @@ body {
 .real-sheet-canvas {
   background: #FAF8F2;
   border: 1px solid #E4DFD3;
-  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.02);
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.03);
   border-radius: 16px;
-  font-family: serif;
+  font-family: 'Times New Roman', Times, serif;
 }
 
 .real-sheet-stave {
@@ -1492,6 +1492,20 @@ body {
 
 .real-sheet-note {
   fill: #1A1A1A;
+}
+
+.musical-note-group {
+  transition: transform 0.15s ease, opacity 0.15s ease;
+  cursor: pointer;
+}
+
+.musical-note-group:hover ellipse {
+  fill: #FF8A00 !important;
+  stroke: #FF8A00 !important;
+}
+
+.musical-note-group:hover line {
+  stroke: #FF8A00 !important;
 }
 
 @media (min-width: 1280px) {

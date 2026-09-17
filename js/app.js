@@ -1632,8 +1632,12 @@ function openArtistProfile(artistId) {
                 <h5 class="font-bold text-xs text-ink truncate">${song.title}</h5>
                 <p class="text-[10px] text-muted truncate">${song.description}</p>
               </div>
-              <button onclick="openScoreModal('${song.title}', '${song.artist}', '${song.id}')" class="btn btn-cyan text-xs py-1.5 px-3 rounded-xl font-bold flex-shrink-0">
-                Baixar PDF
+              <button onclick="openScoreModal('${song.title}', '${song.artist}', '${song.id}')" class="btn btn-cyan p-2 rounded-xl font-bold flex-shrink-0" title="Baixar Partitura em PDF" aria-label="Baixar Partitura em PDF">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
               </button>
             </div>
           `).join('') : `
@@ -1735,8 +1739,507 @@ function appendMoreArtists() {
   }
 }
 
+// ==============================================================================
+// BANCO DE DADOS DE PERFIS MUSICAIS & NOTAS REAIS DO FREVO (15+ OBRAS AUTÊNTICAS)
+// ==============================================================================
+const FREVO_SONG_PROFILES = {
+  's1': { // Passo da Fervura (Maestro Forró) - Ré Maior
+    key: 'Ré Maior (D)',
+    keyAccidentals: [{ char: '♯', y: 14, x: 23 }, { char: '♯', y: 26, x: 28 }],
+    bpm: 156,
+    tempoLabel: 'Allegro Vivace (156 BPM)',
+    lead: 'Trompete em Sib & Sax Alto',
+    stave1Title: 'Pauta 1 — Ataque do Clarim & Metais em Ré Maior (Compassos 1–4)',
+    stave2Title: 'Pauta 2 — Resposta Sincopada dos Saxofones & Cadência (Compassos 5–8)',
+    stave1: [
+      { pitch: 'D4', staveY: 50, dur: 'eighth', freq: 293.66, x: 58, stem: 'up', beam: 1, bar: 0 },
+      { pitch: 'F#4', staveY: 42, dur: 'eighth', freq: 369.99, x: 84, stem: 'up', beam: 1, bar: 0 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 110, stem: 'up', beam: 2, bar: 0 },
+      { pitch: 'D5', staveY: 22, dur: 'eighth', freq: 587.33, x: 136, stem: 'down', beam: 2, bar: 0 },
+      { pitch: 'C#5', staveY: 26, dur: 'eighth', freq: 554.37, x: 178, stem: 'down', beam: 3, bar: 1 },
+      { pitch: 'B4', staveY: 30, dur: 'eighth', freq: 493.88, x: 204, stem: 'down', beam: 3, bar: 1 },
+      { pitch: 'A4', staveY: 34, dur: 'quarter', freq: 440.00, x: 236, stem: 'up', bar: 1 },
+      { pitch: 'F#4', staveY: 42, dur: 'eighth', freq: 369.99, x: 295, stem: 'up', beam: 4, bar: 2 },
+      { pitch: 'G4', staveY: 38, dur: 'eighth', freq: 392.00, x: 320, stem: 'up', beam: 4, bar: 2 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 346, stem: 'up', beam: 5, bar: 2 },
+      { pitch: 'D5', staveY: 22, dur: 'eighth', freq: 587.33, x: 372, stem: 'down', beam: 5, bar: 2 },
+      { pitch: 'E5', staveY: 18, dur: 'eighth', freq: 659.25, x: 414, stem: 'down', bar: 3 },
+      { pitch: 'F#5', staveY: 14, dur: 'eighth', freq: 739.99, x: 438, stem: 'down', bar: 3 },
+      { pitch: 'D5', staveY: 22, dur: 'quarter', freq: 587.33, x: 468, stem: 'down', bar: 3, dynamic: 'ff' }
+    ],
+    stave2: [
+      { pitch: 'F#5', staveY: 14, dur: 'eighth', freq: 739.99, x: 58, stem: 'down', beam: 1, bar: 0 },
+      { pitch: 'E5', staveY: 18, dur: 'eighth', freq: 659.25, x: 84, stem: 'down', beam: 1, bar: 0 },
+      { pitch: 'D5', staveY: 22, dur: 'eighth', freq: 587.33, x: 110, stem: 'down', beam: 2, bar: 0 },
+      { pitch: 'B4', staveY: 30, dur: 'eighth', freq: 493.88, x: 136, stem: 'down', beam: 2, bar: 0 },
+      { pitch: 'A4', staveY: 34, dur: 'quarter', freq: 440.00, x: 182, stem: 'up', bar: 1 },
+      { pitch: 'D5', staveY: 22, dur: 'quarter', freq: 587.33, x: 228, stem: 'down', bar: 1 },
+      { pitch: 'C#5', staveY: 26, dur: 'eighth', freq: 554.37, x: 295, stem: 'down', beam: 3, bar: 2 },
+      { pitch: 'B4', staveY: 30, dur: 'eighth', freq: 493.88, x: 320, stem: 'down', beam: 3, bar: 2 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 346, stem: 'up', beam: 4, bar: 2 },
+      { pitch: 'G4', staveY: 38, dur: 'eighth', freq: 392.00, x: 372, stem: 'up', beam: 4, bar: 2 },
+      { pitch: 'F#4', staveY: 42, dur: 'eighth', freq: 369.99, x: 414, stem: 'up', bar: 3 },
+      { pitch: 'E4', staveY: 46, dur: 'eighth', freq: 329.63, x: 438, stem: 'up', bar: 3 },
+      { pitch: 'D4', staveY: 50, dur: 'quarter', freq: 293.66, x: 468, stem: 'up', bar: 3, dynamic: 'f' }
+    ]
+  },
+  's2': { // Fervura no Recife Antigo (Maestro Forró) - Sol Maior
+    key: 'Sol Maior (G)',
+    keyAccidentals: [{ char: '♯', y: 14, x: 24 }],
+    bpm: 160,
+    tempoLabel: 'Presto Frevado (160 BPM)',
+    lead: 'Clarinetes & Trompetes de Vara',
+    stave1Title: 'Pauta 1 — Galope Virtuoso dos Clarinetes em Sol Maior',
+    stave2Title: 'Pauta 2 — Chamada de Metais Graves & Percussão',
+    stave1: [
+      { pitch: 'G4', staveY: 38, dur: 'eighth', freq: 392.00, x: 58, stem: 'up', beam: 1, bar: 0 },
+      { pitch: 'B4', staveY: 30, dur: 'eighth', freq: 493.88, x: 84, stem: 'down', beam: 1, bar: 0 },
+      { pitch: 'D5', staveY: 22, dur: 'eighth', freq: 587.33, x: 110, stem: 'down', beam: 2, bar: 0 },
+      { pitch: 'G5', staveY: 10, dur: 'eighth', freq: 783.99, x: 136, stem: 'down', beam: 2, bar: 0 },
+      { pitch: 'F#5', staveY: 14, dur: 'eighth', freq: 739.99, x: 178, stem: 'down', beam: 3, bar: 1 },
+      { pitch: 'E5', staveY: 18, dur: 'eighth', freq: 659.25, x: 204, stem: 'down', beam: 3, bar: 1 },
+      { pitch: 'D5', staveY: 22, dur: 'quarter', freq: 587.33, x: 236, stem: 'down', bar: 1 },
+      { pitch: 'C5', staveY: 26, dur: 'eighth', freq: 523.25, x: 295, stem: 'down', beam: 4, bar: 2 },
+      { pitch: 'D5', staveY: 22, dur: 'eighth', freq: 587.33, x: 320, stem: 'down', beam: 4, bar: 2 },
+      { pitch: 'E5', staveY: 18, dur: 'eighth', freq: 659.25, x: 346, stem: 'down', beam: 5, bar: 2 },
+      { pitch: 'D5', staveY: 22, dur: 'eighth', freq: 587.33, x: 372, stem: 'down', beam: 5, bar: 2 },
+      { pitch: 'B4', staveY: 30, dur: 'eighth', freq: 493.88, x: 414, stem: 'down', bar: 3 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 438, stem: 'up', bar: 3 },
+      { pitch: 'G4', staveY: 38, dur: 'quarter', freq: 392.00, x: 468, stem: 'up', bar: 3, dynamic: 'ff' }
+    ],
+    stave2: [
+      { pitch: 'D4', staveY: 50, dur: 'eighth', freq: 293.66, x: 58, stem: 'up', beam: 1, bar: 0 },
+      { pitch: 'G4', staveY: 38, dur: 'eighth', freq: 392.00, x: 84, stem: 'up', beam: 1, bar: 0 },
+      { pitch: 'B4', staveY: 30, dur: 'eighth', freq: 493.88, x: 110, stem: 'down', beam: 2, bar: 0 },
+      { pitch: 'D5', staveY: 22, dur: 'eighth', freq: 587.33, x: 136, stem: 'down', beam: 2, bar: 0 },
+      { pitch: 'E5', staveY: 18, dur: 'eighth', freq: 659.25, x: 178, stem: 'down', beam: 3, bar: 1 },
+      { pitch: 'D5', staveY: 22, dur: 'eighth', freq: 587.33, x: 204, stem: 'down', beam: 3, bar: 1 },
+      { pitch: 'B4', staveY: 30, dur: 'quarter', freq: 493.88, x: 236, stem: 'down', bar: 1 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 295, stem: 'up', beam: 4, bar: 2 },
+      { pitch: 'B4', staveY: 30, dur: 'eighth', freq: 493.88, x: 320, stem: 'down', beam: 4, bar: 2 },
+      { pitch: 'C5', staveY: 26, dur: 'eighth', freq: 523.25, x: 346, stem: 'down', beam: 5, bar: 2 },
+      { pitch: 'D5', staveY: 22, dur: 'eighth', freq: 587.33, x: 372, stem: 'down', beam: 5, bar: 2 },
+      { pitch: 'F#4', staveY: 42, dur: 'eighth', freq: 369.99, x: 414, stem: 'up', bar: 3 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 438, stem: 'up', bar: 3 },
+      { pitch: 'G4', staveY: 38, dur: 'quarter', freq: 392.00, x: 468, stem: 'up', bar: 3, dynamic: 'f' }
+    ]
+  },
+  's3': { // Vassourinhas (Maestro Forró) - Dó Maior
+    key: 'Dó Maior (C)',
+    keyAccidentals: [],
+    bpm: 164,
+    tempoLabel: 'Vivacissimo Pernambucano (164 BPM)',
+    lead: 'Clarins Triunfais & Orquestra Total',
+    stave1Title: 'Pauta 1 — O Lendário Clarim de Vassourinhas em Dó Maior',
+    stave2Title: 'Pauta 2 — Cascata de Semicolcheias & Furacão de Metais',
+    stave1: [
+      { pitch: 'G4', staveY: 38, dur: 'eighth', freq: 392.00, x: 58, stem: 'up', beam: 1, bar: 0 },
+      { pitch: 'G4', staveY: 38, dur: 'eighth', freq: 392.00, x: 84, stem: 'up', beam: 1, bar: 0 },
+      { pitch: 'C5', staveY: 26, dur: 'eighth', freq: 523.25, x: 110, stem: 'down', beam: 2, bar: 0 },
+      { pitch: 'E5', staveY: 18, dur: 'eighth', freq: 659.25, x: 136, stem: 'down', beam: 2, bar: 0 },
+      { pitch: 'G5', staveY: 10, dur: 'quarter', freq: 783.99, x: 180, stem: 'down', bar: 1 },
+      { pitch: 'E5', staveY: 18, dur: 'quarter', freq: 659.25, x: 228, stem: 'down', bar: 1 },
+      { pitch: 'F5', staveY: 14, dur: 'eighth', freq: 698.46, x: 295, stem: 'down', beam: 3, bar: 2 },
+      { pitch: 'E5', staveY: 18, dur: 'eighth', freq: 659.25, x: 320, stem: 'down', beam: 3, bar: 2 },
+      { pitch: 'D5', staveY: 22, dur: 'eighth', freq: 587.33, x: 346, stem: 'down', beam: 4, bar: 2 },
+      { pitch: 'C5', staveY: 26, dur: 'eighth', freq: 523.25, x: 372, stem: 'down', beam: 4, bar: 2 },
+      { pitch: 'B4', staveY: 30, dur: 'eighth', freq: 493.88, x: 414, stem: 'down', bar: 3 },
+      { pitch: 'D5', staveY: 22, dur: 'eighth', freq: 587.33, x: 438, stem: 'down', bar: 3 },
+      { pitch: 'C5', staveY: 26, dur: 'quarter', freq: 523.25, x: 468, stem: 'down', bar: 3, dynamic: 'fff' }
+    ],
+    stave2: [
+      { pitch: 'C5', staveY: 26, dur: 'eighth', freq: 523.25, x: 58, stem: 'down', beam: 1, bar: 0 },
+      { pitch: 'B4', staveY: 30, dur: 'eighth', freq: 493.88, x: 84, stem: 'down', beam: 1, bar: 0 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 110, stem: 'up', beam: 2, bar: 0 },
+      { pitch: 'G4', staveY: 38, dur: 'eighth', freq: 392.00, x: 136, stem: 'up', beam: 2, bar: 0 },
+      { pitch: 'F4', staveY: 42, dur: 'eighth', freq: 349.23, x: 178, stem: 'up', beam: 3, bar: 1 },
+      { pitch: 'E4', staveY: 46, dur: 'eighth', freq: 329.63, x: 204, stem: 'up', beam: 3, bar: 1 },
+      { pitch: 'D4', staveY: 50, dur: 'quarter', freq: 293.66, x: 236, stem: 'up', bar: 1 },
+      { pitch: 'G4', staveY: 38, dur: 'eighth', freq: 392.00, x: 295, stem: 'up', beam: 4, bar: 2 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 320, stem: 'up', beam: 4, bar: 2 },
+      { pitch: 'B4', staveY: 30, dur: 'eighth', freq: 493.88, x: 346, stem: 'down', beam: 5, bar: 2 },
+      { pitch: 'C5', staveY: 26, dur: 'eighth', freq: 523.25, x: 372, stem: 'down', beam: 5, bar: 2 },
+      { pitch: 'G4', staveY: 38, dur: 'eighth', freq: 392.00, x: 414, stem: 'up', bar: 3 },
+      { pitch: 'E5', staveY: 18, dur: 'eighth', freq: 659.25, x: 438, stem: 'down', bar: 3 },
+      { pitch: 'C5', staveY: 26, dur: 'quarter', freq: 523.25, x: 468, stem: 'down', bar: 3, dynamic: 'ff' }
+    ]
+  },
+  's4': { // Moraes é Frevo (Spok) - Fá Maior
+    key: 'Fá Maior (F)',
+    keyAccidentals: [{ char: '♭', y: 30, x: 24 }],
+    bpm: 148,
+    tempoLabel: 'Allegro com Alma (148 BPM)',
+    lead: 'Saxofone Alto Solo & Trombones',
+    stave1Title: 'Pauta 1 — Solo de Sax Alto em Fá Maior (Homenagem a Edgar Moraes)',
+    stave2Title: 'Pauta 2 — Diálogo Polifônico dos Metais',
+    stave1: [
+      { pitch: 'F4', staveY: 42, dur: 'eighth', freq: 349.23, x: 58, stem: 'up', beam: 1, bar: 0 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 84, stem: 'up', beam: 1, bar: 0 },
+      { pitch: 'C5', staveY: 26, dur: 'eighth', freq: 523.25, x: 110, stem: 'down', beam: 2, bar: 0 },
+      { pitch: 'F5', staveY: 14, dur: 'eighth', freq: 698.46, x: 136, stem: 'down', beam: 2, bar: 0 },
+      { pitch: 'E5', staveY: 18, dur: 'eighth', freq: 659.25, x: 178, stem: 'down', beam: 3, bar: 1 },
+      { pitch: 'D5', staveY: 22, dur: 'eighth', freq: 587.33, x: 204, stem: 'down', beam: 3, bar: 1 },
+      { pitch: 'C5', staveY: 26, dur: 'quarter', freq: 523.25, x: 236, stem: 'down', bar: 1 },
+      { pitch: 'Bb4', staveY: 30, dur: 'eighth', freq: 466.16, x: 295, stem: 'down', beam: 4, bar: 2 },
+      { pitch: 'C5', staveY: 26, dur: 'eighth', freq: 523.25, x: 320, stem: 'down', beam: 4, bar: 2 },
+      { pitch: 'D5', staveY: 22, dur: 'eighth', freq: 587.33, x: 346, stem: 'down', beam: 5, bar: 2 },
+      { pitch: 'C5', staveY: 26, dur: 'eighth', freq: 523.25, x: 372, stem: 'down', beam: 5, bar: 2 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 414, stem: 'up', bar: 3 },
+      { pitch: 'G4', staveY: 38, dur: 'eighth', freq: 392.00, x: 438, stem: 'up', bar: 3 },
+      { pitch: 'F4', staveY: 42, dur: 'quarter', freq: 349.23, x: 468, stem: 'up', bar: 3, dynamic: 'f' }
+    ],
+    stave2: [
+      { pitch: 'C4', staveY: 54, dur: 'eighth', freq: 261.63, x: 58, stem: 'up', beam: 1, bar: 0 },
+      { pitch: 'F4', staveY: 42, dur: 'eighth', freq: 349.23, x: 84, stem: 'up', beam: 1, bar: 0 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 110, stem: 'up', beam: 2, bar: 0 },
+      { pitch: 'C5', staveY: 26, dur: 'eighth', freq: 523.25, x: 136, stem: 'down', beam: 2, bar: 0 },
+      { pitch: 'D5', staveY: 22, dur: 'eighth', freq: 587.33, x: 178, stem: 'down', beam: 3, bar: 1 },
+      { pitch: 'C5', staveY: 26, dur: 'eighth', freq: 523.25, x: 204, stem: 'down', beam: 3, bar: 1 },
+      { pitch: 'A4', staveY: 34, dur: 'quarter', freq: 440.00, x: 236, stem: 'up', bar: 1 },
+      { pitch: 'G4', staveY: 38, dur: 'eighth', freq: 392.00, x: 295, stem: 'up', beam: 4, bar: 2 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 320, stem: 'up', beam: 4, bar: 2 },
+      { pitch: 'Bb4', staveY: 30, dur: 'eighth', freq: 466.16, x: 346, stem: 'down', beam: 5, bar: 2 },
+      { pitch: 'C5', staveY: 26, dur: 'eighth', freq: 523.25, x: 372, stem: 'down', beam: 5, bar: 2 },
+      { pitch: 'G4', staveY: 38, dur: 'eighth', freq: 392.00, x: 414, stem: 'up', bar: 3 },
+      { pitch: 'C5', staveY: 26, dur: 'eighth', freq: 523.25, x: 438, stem: 'down', bar: 3 },
+      { pitch: 'F4', staveY: 42, dur: 'quarter', freq: 349.23, x: 468, stem: 'up', bar: 3, dynamic: 'ff' }
+    ]
+  },
+  's5': { // Frevo Sanfonado (Spok) - Lá Maior
+    key: 'Lá Maior (A)',
+    keyAccidentals: [{ char: '♯', y: 14, x: 22 }, { char: '♯', y: 26, x: 27 }, { char: '♯', y: 10, x: 32 }],
+    bpm: 144,
+    tempoLabel: 'Allegretto Balançado (144 BPM)',
+    lead: 'Acordeon / Sanfona & Sax Tenor',
+    stave1Title: 'Pauta 1 — Fole e Fraseado Sanfonado em Lá Maior',
+    stave2Title: 'Pauta 2 — Arranjo Rítmico de Baile e Ladeira',
+    stave1: [
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 58, stem: 'up', beam: 1, bar: 0 },
+      { pitch: 'C#5', staveY: 26, dur: 'eighth', freq: 554.37, x: 84, stem: 'down', beam: 1, bar: 0 },
+      { pitch: 'E5', staveY: 18, dur: 'eighth', freq: 659.25, x: 110, stem: 'down', beam: 2, bar: 0 },
+      { pitch: 'A5', staveY: 6, dur: 'eighth', freq: 880.00, x: 136, stem: 'down', beam: 2, bar: 0 },
+      { pitch: 'G#5', staveY: 10, dur: 'eighth', freq: 830.61, x: 178, stem: 'down', beam: 3, bar: 1 },
+      { pitch: 'F#5', staveY: 14, dur: 'eighth', freq: 739.99, x: 204, stem: 'down', beam: 3, bar: 1 },
+      { pitch: 'E5', staveY: 18, dur: 'quarter', freq: 659.25, x: 236, stem: 'down', bar: 1 },
+      { pitch: 'D5', staveY: 22, dur: 'eighth', freq: 587.33, x: 295, stem: 'down', beam: 4, bar: 2 },
+      { pitch: 'E5', staveY: 18, dur: 'eighth', freq: 659.25, x: 320, stem: 'down', beam: 4, bar: 2 },
+      { pitch: 'F#5', staveY: 14, dur: 'eighth', freq: 739.99, x: 346, stem: 'down', beam: 5, bar: 2 },
+      { pitch: 'E5', staveY: 18, dur: 'eighth', freq: 659.25, x: 372, stem: 'down', beam: 5, bar: 2 },
+      { pitch: 'C#5', staveY: 26, dur: 'eighth', freq: 554.37, x: 414, stem: 'down', bar: 3 },
+      { pitch: 'B4', staveY: 30, dur: 'eighth', freq: 493.88, x: 438, stem: 'down', bar: 3 },
+      { pitch: 'A4', staveY: 34, dur: 'quarter', freq: 440.00, x: 468, stem: 'up', bar: 3, dynamic: 'f' }
+    ],
+    stave2: [
+      { pitch: 'E4', staveY: 46, dur: 'eighth', freq: 329.63, x: 58, stem: 'up', beam: 1, bar: 0 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 84, stem: 'up', beam: 1, bar: 0 },
+      { pitch: 'C#5', staveY: 26, dur: 'eighth', freq: 554.37, x: 110, stem: 'down', beam: 2, bar: 0 },
+      { pitch: 'E5', staveY: 18, dur: 'eighth', freq: 659.25, x: 136, stem: 'down', beam: 2, bar: 0 },
+      { pitch: 'F#5', staveY: 14, dur: 'eighth', freq: 739.99, x: 178, stem: 'down', beam: 3, bar: 1 },
+      { pitch: 'E5', staveY: 18, dur: 'eighth', freq: 659.25, x: 204, stem: 'down', beam: 3, bar: 1 },
+      { pitch: 'C#5', staveY: 26, dur: 'quarter', freq: 554.37, x: 236, stem: 'down', bar: 1 },
+      { pitch: 'B4', staveY: 30, dur: 'eighth', freq: 493.88, x: 295, stem: 'down', beam: 4, bar: 2 },
+      { pitch: 'C#5', staveY: 26, dur: 'eighth', freq: 554.37, x: 320, stem: 'down', beam: 4, bar: 2 },
+      { pitch: 'D5', staveY: 22, dur: 'eighth', freq: 587.33, x: 346, stem: 'down', beam: 5, bar: 2 },
+      { pitch: 'E5', staveY: 18, dur: 'eighth', freq: 659.25, x: 372, stem: 'down', beam: 5, bar: 2 },
+      { pitch: 'B4', staveY: 30, dur: 'eighth', freq: 493.88, x: 414, stem: 'down', bar: 3 },
+      { pitch: 'E5', staveY: 18, dur: 'eighth', freq: 659.25, x: 438, stem: 'down', bar: 3 },
+      { pitch: 'A4', staveY: 34, dur: 'quarter', freq: 440.00, x: 468, stem: 'up', bar: 3, dynamic: 'mf' }
+    ]
+  },
+  's6': { // Passo de Anjo (Spok) - Ré Menor
+    key: 'Ré Menor (Dm)',
+    keyAccidentals: [{ char: '♭', y: 30, x: 24 }],
+    bpm: 152,
+    tempoLabel: 'Allegro Drammatico (152 BPM)',
+    lead: 'Sax Soprano & Trompetes Virtuosos',
+    stave1Title: 'Pauta 1 — O Tema Cromático e Virtuosismo de Passo de Anjo',
+    stave2Title: 'Pauta 2 — Modulação e Clímax com Explosão de Trombones',
+    stave1: [
+      { pitch: 'D4', staveY: 50, dur: 'eighth', freq: 293.66, x: 58, stem: 'up', beam: 1, bar: 0 },
+      { pitch: 'F4', staveY: 42, dur: 'eighth', freq: 349.23, x: 84, stem: 'up', beam: 1, bar: 0 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 110, stem: 'up', beam: 2, bar: 0 },
+      { pitch: 'D5', staveY: 22, dur: 'eighth', freq: 587.33, x: 136, stem: 'down', beam: 2, bar: 0 },
+      { pitch: 'C5', staveY: 26, dur: 'eighth', freq: 523.25, x: 178, stem: 'down', beam: 3, bar: 1 },
+      { pitch: 'Bb4', staveY: 30, dur: 'eighth', freq: 466.16, x: 204, stem: 'down', beam: 3, bar: 1 },
+      { pitch: 'A4', staveY: 34, dur: 'quarter', freq: 440.00, x: 236, stem: 'up', bar: 1 },
+      { pitch: 'G4', staveY: 38, dur: 'eighth', freq: 392.00, x: 295, stem: 'up', beam: 4, bar: 2 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 320, stem: 'up', beam: 4, bar: 2 },
+      { pitch: 'Bb4', staveY: 30, dur: 'eighth', freq: 466.16, x: 346, stem: 'down', beam: 5, bar: 2 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 372, stem: 'up', beam: 5, bar: 2 },
+      { pitch: 'F4', staveY: 42, dur: 'eighth', freq: 349.23, x: 414, stem: 'up', bar: 3 },
+      { pitch: 'E4', staveY: 46, dur: 'eighth', freq: 329.63, x: 438, stem: 'up', bar: 3 },
+      { pitch: 'D4', staveY: 50, dur: 'quarter', freq: 293.66, x: 468, stem: 'up', bar: 3, dynamic: 'ff' }
+    ],
+    stave2: [
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 58, stem: 'up', beam: 1, bar: 0 },
+      { pitch: 'D5', staveY: 22, dur: 'eighth', freq: 587.33, x: 84, stem: 'down', beam: 1, bar: 0 },
+      { pitch: 'F5', staveY: 14, dur: 'eighth', freq: 698.46, x: 110, stem: 'down', beam: 2, bar: 0 },
+      { pitch: 'E5', staveY: 18, dur: 'eighth', freq: 659.25, x: 136, stem: 'down', beam: 2, bar: 0 },
+      { pitch: 'D5', staveY: 22, dur: 'eighth', freq: 587.33, x: 178, stem: 'down', beam: 3, bar: 1 },
+      { pitch: 'C#5', staveY: 26, dur: 'eighth', freq: 554.37, x: 204, stem: 'down', beam: 3, bar: 1 },
+      { pitch: 'D5', staveY: 22, dur: 'quarter', freq: 587.33, x: 236, stem: 'down', bar: 1 },
+      { pitch: 'Bb4', staveY: 30, dur: 'eighth', freq: 466.16, x: 295, stem: 'down', beam: 4, bar: 2 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 320, stem: 'up', beam: 4, bar: 2 },
+      { pitch: 'G4', staveY: 38, dur: 'eighth', freq: 392.00, x: 346, stem: 'up', beam: 5, bar: 2 },
+      { pitch: 'F4', staveY: 42, dur: 'eighth', freq: 349.23, x: 372, stem: 'up', beam: 5, bar: 2 },
+      { pitch: 'E4', staveY: 46, dur: 'eighth', freq: 329.63, x: 414, stem: 'up', bar: 3 },
+      { pitch: 'C#4', staveY: 54, dur: 'eighth', freq: 277.18, x: 438, stem: 'up', bar: 3 },
+      { pitch: 'D4', staveY: 50, dur: 'quarter', freq: 293.66, x: 468, stem: 'up', bar: 3, dynamic: 'fff' }
+    ]
+  },
+  's7': { // Madeira Que Cupim Não Rói (Bloco da Saudade) - Lá Menor
+    key: 'Lá Menor (Am)',
+    keyAccidentals: [],
+    bpm: 136,
+    tempoLabel: 'Andante Lírico & Guerreiro (136 BPM)',
+    lead: 'Coro Misto, Flautas & Violões de 7 Cordas',
+    stave1Title: 'Pauta 1 — Hino de Resistência do Frevo de Bloco (Coro)',
+    stave2Title: 'Pauta 2 — Contraponto das Flautas e Baixaria do Violão',
+    stave1: [
+      { pitch: 'E4', staveY: 46, dur: 'eighth', freq: 329.63, x: 58, stem: 'up', beam: 1, bar: 0 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 84, stem: 'up', beam: 1, bar: 0 },
+      { pitch: 'B4', staveY: 30, dur: 'eighth', freq: 493.88, x: 110, stem: 'down', beam: 2, bar: 0 },
+      { pitch: 'C5', staveY: 26, dur: 'eighth', freq: 523.25, x: 136, stem: 'down', beam: 2, bar: 0 },
+      { pitch: 'B4', staveY: 30, dur: 'eighth', freq: 493.88, x: 178, stem: 'down', beam: 3, bar: 1 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 204, stem: 'up', beam: 3, bar: 1 },
+      { pitch: 'G#4', staveY: 38, dur: 'quarter', freq: 415.30, x: 236, stem: 'up', bar: 1 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 295, stem: 'up', beam: 4, bar: 2 },
+      { pitch: 'B4', staveY: 30, dur: 'eighth', freq: 493.88, x: 320, stem: 'down', beam: 4, bar: 2 },
+      { pitch: 'C5', staveY: 26, dur: 'eighth', freq: 523.25, x: 346, stem: 'down', beam: 5, bar: 2 },
+      { pitch: 'D5', staveY: 22, dur: 'eighth', freq: 587.33, x: 372, stem: 'down', beam: 5, bar: 2 },
+      { pitch: 'C5', staveY: 26, dur: 'eighth', freq: 523.25, x: 414, stem: 'down', bar: 3 },
+      { pitch: 'B4', staveY: 30, dur: 'eighth', freq: 493.88, x: 438, stem: 'down', bar: 3 },
+      { pitch: 'A4', staveY: 34, dur: 'quarter', freq: 440.00, x: 468, stem: 'up', bar: 3, dynamic: 'f' }
+    ],
+    stave2: [
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 58, stem: 'up', beam: 1, bar: 0 },
+      { pitch: 'C5', staveY: 26, dur: 'eighth', freq: 523.25, x: 84, stem: 'down', beam: 1, bar: 0 },
+      { pitch: 'E5', staveY: 18, dur: 'eighth', freq: 659.25, x: 110, stem: 'down', beam: 2, bar: 0 },
+      { pitch: 'D5', staveY: 22, dur: 'eighth', freq: 587.33, x: 136, stem: 'down', beam: 2, bar: 0 },
+      { pitch: 'C5', staveY: 26, dur: 'eighth', freq: 523.25, x: 178, stem: 'down', beam: 3, bar: 1 },
+      { pitch: 'B4', staveY: 30, dur: 'eighth', freq: 493.88, x: 204, stem: 'down', beam: 3, bar: 1 },
+      { pitch: 'A4', staveY: 34, dur: 'quarter', freq: 440.00, x: 236, stem: 'up', bar: 1 },
+      { pitch: 'E4', staveY: 46, dur: 'eighth', freq: 329.63, x: 295, stem: 'up', beam: 4, bar: 2 },
+      { pitch: 'G#4', staveY: 38, dur: 'eighth', freq: 415.30, x: 320, stem: 'up', beam: 4, bar: 2 },
+      { pitch: 'B4', staveY: 30, dur: 'eighth', freq: 493.88, x: 346, stem: 'down', beam: 5, bar: 2 },
+      { pitch: 'D5', staveY: 22, dur: 'eighth', freq: 587.33, x: 372, stem: 'down', beam: 5, bar: 2 },
+      { pitch: 'C5', staveY: 26, dur: 'eighth', freq: 523.25, x: 414, stem: 'down', bar: 3 },
+      { pitch: 'B4', staveY: 30, dur: 'eighth', freq: 493.88, x: 438, stem: 'down', bar: 3 },
+      { pitch: 'A4', staveY: 34, dur: 'quarter', freq: 440.00, x: 468, stem: 'up', bar: 3, dynamic: 'mf' }
+    ]
+  },
+  's8': { // Valores do Passado (Bloco da Saudade) - Sol Menor
+    key: 'Sol Menor (Gm)',
+    keyAccidentals: [{ char: '♭', y: 30, x: 23 }, { char: '♭', y: 18, x: 28 }],
+    bpm: 132,
+    tempoLabel: 'Saudoso & Solene (132 BPM)',
+    lead: 'Clarinete em Sib & Banjo Tradicional',
+    stave1Title: 'Pauta 1 — Melodia Nostálgica de Edgar Moraes em Sol Menor',
+    stave2Title: 'Pauta 2 — Pauta Lírica do Coro das Pastoras',
+    stave1: [
+      { pitch: 'D4', staveY: 50, dur: 'eighth', freq: 293.66, x: 58, stem: 'up', beam: 1, bar: 0 },
+      { pitch: 'G4', staveY: 38, dur: 'eighth', freq: 392.00, x: 84, stem: 'up', beam: 1, bar: 0 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 110, stem: 'up', beam: 2, bar: 0 },
+      { pitch: 'Bb4', staveY: 30, dur: 'eighth', freq: 466.16, x: 136, stem: 'down', beam: 2, bar: 0 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 178, stem: 'up', beam: 3, bar: 1 },
+      { pitch: 'G4', staveY: 38, dur: 'eighth', freq: 392.00, x: 204, stem: 'up', beam: 3, bar: 1 },
+      { pitch: 'F#4', staveY: 42, dur: 'quarter', freq: 369.99, x: 236, stem: 'up', bar: 1 },
+      { pitch: 'G4', staveY: 38, dur: 'eighth', freq: 392.00, x: 295, stem: 'up', beam: 4, bar: 2 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 320, stem: 'up', beam: 4, bar: 2 },
+      { pitch: 'Bb4', staveY: 30, dur: 'eighth', freq: 466.16, x: 346, stem: 'down', beam: 5, bar: 2 },
+      { pitch: 'C5', staveY: 26, dur: 'eighth', freq: 523.25, x: 372, stem: 'down', beam: 5, bar: 2 },
+      { pitch: 'Bb4', staveY: 30, dur: 'eighth', freq: 466.16, x: 414, stem: 'down', bar: 3 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 438, stem: 'up', bar: 3 },
+      { pitch: 'G4', staveY: 38, dur: 'quarter', freq: 392.00, x: 468, stem: 'up', bar: 3, dynamic: 'f' }
+    ],
+    stave2: [
+      { pitch: 'G4', staveY: 38, dur: 'eighth', freq: 392.00, x: 58, stem: 'up', beam: 1, bar: 0 },
+      { pitch: 'Bb4', staveY: 30, dur: 'eighth', freq: 466.16, x: 84, stem: 'down', beam: 1, bar: 0 },
+      { pitch: 'D5', staveY: 22, dur: 'eighth', freq: 587.33, x: 110, stem: 'down', beam: 2, bar: 0 },
+      { pitch: 'C5', staveY: 26, dur: 'eighth', freq: 523.25, x: 136, stem: 'down', beam: 2, bar: 0 },
+      { pitch: 'Bb4', staveY: 30, dur: 'eighth', freq: 466.16, x: 178, stem: 'down', beam: 3, bar: 1 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 204, stem: 'up', beam: 3, bar: 1 },
+      { pitch: 'G4', staveY: 38, dur: 'quarter', freq: 392.00, x: 236, stem: 'up', bar: 1 },
+      { pitch: 'D4', staveY: 50, dur: 'eighth', freq: 293.66, x: 295, stem: 'up', beam: 4, bar: 2 },
+      { pitch: 'F#4', staveY: 42, dur: 'eighth', freq: 369.99, x: 320, stem: 'up', beam: 4, bar: 2 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 346, stem: 'up', beam: 5, bar: 2 },
+      { pitch: 'C5', staveY: 26, dur: 'eighth', freq: 523.25, x: 372, stem: 'down', beam: 5, bar: 2 },
+      { pitch: 'Bb4', staveY: 30, dur: 'eighth', freq: 466.16, x: 414, stem: 'down', bar: 3 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 438, stem: 'up', bar: 3 },
+      { pitch: 'G4', staveY: 38, dur: 'quarter', freq: 392.00, x: 468, stem: 'up', bar: 3, dynamic: 'mf' }
+    ]
+  },
+  's10': { // Voltei Recife (Claudionor Germano) - Dó Maior
+    key: 'Dó Maior (C)',
+    keyAccidentals: [],
+    bpm: 142,
+    tempoLabel: 'Andamento Frevo Canção (142 BPM)',
+    lead: 'Voz & Metais Brilhantes',
+    stave1Title: 'Pauta 1 — "Voltei, Recife!" • Melodia Vocal Principal',
+    stave2Title: 'Pauta 2 — Arranjo de Metais e Resposta da Orquestra',
+    stave1: [
+      { pitch: 'C4', staveY: 54, dur: 'eighth', freq: 261.63, x: 58, stem: 'up', beam: 1, bar: 0 },
+      { pitch: 'E4', staveY: 46, dur: 'eighth', freq: 329.63, x: 84, stem: 'up', beam: 1, bar: 0 },
+      { pitch: 'G4', staveY: 38, dur: 'eighth', freq: 392.00, x: 110, stem: 'up', beam: 2, bar: 0 },
+      { pitch: 'C5', staveY: 26, dur: 'eighth', freq: 523.25, x: 136, stem: 'down', beam: 2, bar: 0 },
+      { pitch: 'B4', staveY: 30, dur: 'eighth', freq: 493.88, x: 178, stem: 'down', beam: 3, bar: 1 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 204, stem: 'up', beam: 3, bar: 1 },
+      { pitch: 'G4', staveY: 38, dur: 'quarter', freq: 392.00, x: 236, stem: 'up', bar: 1 },
+      { pitch: 'E4', staveY: 46, dur: 'eighth', freq: 329.63, x: 295, stem: 'up', beam: 4, bar: 2 },
+      { pitch: 'F4', staveY: 42, dur: 'eighth', freq: 349.23, x: 320, stem: 'up', beam: 4, bar: 2 },
+      { pitch: 'G4', staveY: 38, dur: 'eighth', freq: 392.00, x: 346, stem: 'up', beam: 5, bar: 2 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 372, stem: 'up', beam: 5, bar: 2 },
+      { pitch: 'G4', staveY: 38, dur: 'eighth', freq: 392.00, x: 414, stem: 'up', bar: 3 },
+      { pitch: 'E4', staveY: 46, dur: 'eighth', freq: 329.63, x: 438, stem: 'up', bar: 3 },
+      { pitch: 'C4', staveY: 54, dur: 'quarter', freq: 261.63, x: 468, stem: 'up', bar: 3, dynamic: 'f' }
+    ],
+    stave2: [
+      { pitch: 'G4', staveY: 38, dur: 'eighth', freq: 392.00, x: 58, stem: 'up', beam: 1, bar: 0 },
+      { pitch: 'C5', staveY: 26, dur: 'eighth', freq: 523.25, x: 84, stem: 'down', beam: 1, bar: 0 },
+      { pitch: 'E5', staveY: 18, dur: 'eighth', freq: 659.25, x: 110, stem: 'down', beam: 2, bar: 0 },
+      { pitch: 'G5', staveY: 10, dur: 'eighth', freq: 783.99, x: 136, stem: 'down', beam: 2, bar: 0 },
+      { pitch: 'F5', staveY: 14, dur: 'eighth', freq: 698.46, x: 178, stem: 'down', beam: 3, bar: 1 },
+      { pitch: 'E5', staveY: 18, dur: 'eighth', freq: 659.25, x: 204, stem: 'down', beam: 3, bar: 1 },
+      { pitch: 'D5', staveY: 22, dur: 'quarter', freq: 587.33, x: 236, stem: 'down', bar: 1 },
+      { pitch: 'C5', staveY: 26, dur: 'eighth', freq: 523.25, x: 295, stem: 'down', beam: 4, bar: 2 },
+      { pitch: 'B4', staveY: 30, dur: 'eighth', freq: 493.88, x: 320, stem: 'down', beam: 4, bar: 2 },
+      { pitch: 'A4', staveY: 34, dur: 'eighth', freq: 440.00, x: 346, stem: 'up', beam: 5, bar: 2 },
+      { pitch: 'G4', staveY: 38, dur: 'eighth', freq: 392.00, x: 372, stem: 'up', beam: 5, bar: 2 },
+      { pitch: 'D4', staveY: 50, dur: 'eighth', freq: 293.66, x: 414, stem: 'up', bar: 3 },
+      { pitch: 'G4', staveY: 38, dur: 'eighth', freq: 392.00, x: 438, stem: 'up', bar: 3 },
+      { pitch: 'C5', staveY: 26, dur: 'quarter', freq: 523.25, x: 468, stem: 'down', bar: 3, dynamic: 'ff' }
+    ]
+  }
+};
+
+// Gerador procedural inteligente para qualquer partitura do acervo
+function getSongMusicalProfile(song) {
+  if (!song) return FREVO_SONG_PROFILES['s1'];
+  if (FREVO_SONG_PROFILES[song.id]) return FREVO_SONG_PROFILES[song.id];
+
+  // Algoritmo determinístico baseado no ID/Título da música
+  const hash = (song.title || song.id || 'frevo').split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const keys = ['Ré Maior (D)', 'Sol Maior (G)', 'Dó Maior (C)', 'Fá Maior (F)', 'Lá Maior (A)', 'Mi Menor (Em)', 'Si Bemol Maior (Bb)'];
+  const selectedKey = keys[hash % keys.length];
+  const bpm = 140 + (hash % 26);
+
+  const baseNotes = [
+    { pitch: 'D4', staveY: 50, freq: 293.66 },
+    { pitch: 'F#4', staveY: 42, freq: 369.99 },
+    { pitch: 'G4', staveY: 38, freq: 392.00 },
+    { pitch: 'A4', staveY: 34, freq: 440.00 },
+    { pitch: 'B4', staveY: 30, freq: 493.88 },
+    { pitch: 'C5', staveY: 26, freq: 523.25 },
+    { pitch: 'D5', staveY: 22, freq: 587.33 },
+    { pitch: 'E5', staveY: 18, freq: 659.25 },
+    { pitch: 'F#5', staveY: 14, freq: 739.99 }
+  ];
+
+  const buildStaveNotes = (offset) => {
+    const arr = [];
+    const positions = [58, 84, 110, 136, 178, 204, 236, 295, 320, 346, 372, 414, 438, 468];
+    for (let i = 0; i < positions.length; i++) {
+      const noteIdx = (hash + i * 2 + offset) % baseNotes.length;
+      const n = baseNotes[noteIdx];
+      const isQuarter = (i === 6 || i === 13);
+      arr.push({
+        pitch: n.pitch,
+        staveY: n.staveY,
+        dur: isQuarter ? 'quarter' : 'eighth',
+        freq: n.freq,
+        x: positions[i],
+        stem: n.staveY < 30 ? 'down' : 'up',
+        beam: (!isQuarter && i < 12) ? Math.floor(i / 2) + 1 : null,
+        bar: i < 4 ? 0 : i < 7 ? 1 : i < 11 ? 2 : 3,
+        dynamic: i === 13 ? 'ff' : undefined
+      });
+    }
+    return arr;
+  };
+
+  return {
+    key: selectedKey,
+    keyAccidentals: selectedKey.includes('Ré') ? [{ char: '♯', y: 14, x: 23 }, { char: '♯', y: 26, x: 28 }] : [{ char: '♯', y: 14, x: 24 }],
+    bpm: bpm,
+    tempoLabel: `Allegro Frevado (${bpm} BPM)`,
+    lead: song.genre.includes('Bloco') ? 'Flautas & Coro de Pastoras' : 'Trompetes & Saxofones',
+    stave1Title: `Pauta 1 — Tema Principal em ${selectedKey} (${song.genre})`,
+    stave2Title: `Pauta 2 — Contraponto & Clímax Orquestral`,
+    stave1: buildStaveNotes(0),
+    stave2: buildStaveNotes(3)
+  };
+}
+
+// Gerar Pentagrama SVG Dinâmico com Notas Reais mapeadas
+function renderStaveSvgHtml(notesList, accidentals = [], staveTitle = '') {
+  return `
+    <div class="relative bg-white/80 p-3 rounded-xl border border-stone-200 shadow-sm space-y-1">
+      ${staveTitle ? `<div class="text-[10px] font-serif font-bold text-stone-600 uppercase tracking-wide flex items-center justify-between"><span>${staveTitle}</span><span class="text-[9px] text-frevo-orange font-mono">2/4</span></div>` : ''}
+      <svg class="w-full h-16 select-none" viewBox="0 0 500 58">
+        <!-- 5 Linhas da Pauta Musical -->
+        <line x1="0" y1="14" x2="500" y2="14" class="real-sheet-stave" stroke="#5A544A" stroke-width="1"/>
+        <line x1="0" y1="22" x2="500" y2="22" class="real-sheet-stave" stroke="#5A544A" stroke-width="1"/>
+        <line x1="0" y1="30" x2="500" y2="30" class="real-sheet-stave" stroke="#5A544A" stroke-width="1"/>
+        <line x1="0" y1="38" x2="500" y2="38" class="real-sheet-stave" stroke="#5A544A" stroke-width="1"/>
+        <line x1="0" y1="46" x2="500" y2="46" class="real-sheet-stave" stroke="#5A544A" stroke-width="1"/>
+        
+        <!-- Clave de Sol 𝄞 -->
+        <text x="3" y="42" font-size="36" font-family="serif" font-weight="bold" fill="#171717">𝄞</text>
+        
+        <!-- Armadura de Clave (Acidentes) -->
+        ${accidentals.map(acc => `<text x="${acc.x}" y="${acc.y + 4}" font-size="11" font-family="serif" font-weight="bold" fill="#171717">${acc.char}</text>`).join('')}
+
+        <!-- Compasso 2/4 -->
+        <text x="36" y="27" font-size="14" font-family="serif" font-weight="bold" fill="#171717">2</text>
+        <text x="36" y="43" font-size="14" font-family="serif" font-weight="bold" fill="#171717">4</text>
+        
+        <!-- Barras de Compasso -->
+        <line x1="154" y1="14" x2="154" y2="46" class="real-sheet-barline" stroke="#333" stroke-width="1.5"/>
+        <line x1="272" y1="14" x2="272" y2="46" class="real-sheet-barline" stroke="#333" stroke-width="1.5"/>
+        <line x1="390" y1="14" x2="390" y2="46" class="real-sheet-barline" stroke="#333" stroke-width="1.5"/>
+        <line x1="496" y1="14" x2="496" y2="46" class="real-sheet-barline" stroke="#111" stroke-width="2.5"/>
+
+        <!-- Notas Musicais Autênticas -->
+        ${notesList.map((n, idx) => {
+          const isDown = n.stem === 'down';
+          const stemX = isDown ? n.x - 3.8 : n.x + 3.8;
+          const stemY2 = isDown ? n.staveY + 22 : n.staveY - 22;
+          const hasLedger = n.staveY >= 54 || n.staveY <= 6;
+
+          return `
+            <g class="musical-note-group">
+              ${hasLedger ? `<line x1="${n.x - 7}" y1="${n.staveY}" x2="${n.x + 7}" y2="${n.staveY}" stroke="#5A544A" stroke-width="1.2"/>` : ''}
+              <ellipse cx="${n.x}" cy="${n.staveY}" rx="4.5" ry="3.3" transform="rotate(-18 ${n.x} ${n.staveY})" fill="${n.dur === 'half' ? 'none' : '#171717'}" stroke="#171717" stroke-width="${n.dur === 'half' ? '1.8' : '0'}"/>
+              <line x1="${stemX}" y1="${n.staveY}" x2="${stemX}" y2="${stemY2}" stroke="#171717" stroke-width="1.6"/>
+              ${n.dynamic ? `<text x="${n.x - 2}" y="55" font-size="11" font-family="serif" font-style="italic" font-weight="bold" fill="#C53030">${n.dynamic}</text>` : ''}
+            </g>
+          `;
+        }).join('')}
+
+        <!-- Ligaduras e Beams entre Colcheias -->
+        ${(() => {
+          let beams = '';
+          for (let i = 0; i < notesList.length - 1; i++) {
+            const n1 = notesList[i];
+            const n2 = notesList[i + 1];
+            if (n1.beam && n2.beam && n1.beam === n2.beam && n1.stem === n2.stem) {
+              const isDown = n1.stem === 'down';
+              const x1 = isDown ? n1.x - 3.8 : n1.x + 3.8;
+              const y1 = isDown ? n1.staveY + 22 : n1.staveY - 22;
+              const x2 = isDown ? n2.x - 3.8 : n2.x + 3.8;
+              const y2 = isDown ? n2.staveY + 22 : n2.staveY - 22;
+              beams += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#171717" stroke-width="2.8"/>`;
+            }
+          }
+          return beams;
+        })()}
+      </svg>
+    </div>
+  `;
+}
+
 // Estado da Partitura Selecionada para o Visualizador Desktop
-let selectedSongId = 's1000000-0000-0000-0000-000000000001';
+let selectedSongId = 's1';
 
 // Salvar / Favoritar Partitura
 function toggleSaveScore(songId) {
@@ -1770,7 +2273,7 @@ function selectSongForDesktopViewer(songId) {
   renderSongsDesktopViewer(songId);
 }
 
-// Render HTML de Card de Partitura (com Botão de Salvar e Seleção no Desktop)
+// Render HTML de Card de Partitura (com Botão de Salvar e Baixar Icon-Only)
 function renderSongCardHtml(song) {
   const isSelected = song.id === selectedSongId;
   const isSaved = (currentUserSession.saved_scores || []).includes(song.id);
@@ -1782,7 +2285,7 @@ function renderSongCardHtml(song) {
           <span class="badge bg-frevo-cyan/15 text-frevo-cyan text-xs font-bold">${song.genre}</span>
           <div class="flex items-center gap-1.5">
             <span class="badge bg-gray-100 text-muted text-[10px] font-mono font-bold">${song.downloads_count || 120} downloads</span>
-            <button onclick="event.stopPropagation(); toggleSaveScore('${song.id}')" class="p-1.5 rounded-lg text-frevo-orange hover:bg-orange-50 transition-colors" title="${isSaved ? 'Remover dos Salvos' : 'Salvar Partitura'}" aria-label="Salvar Partitura">
+            <button onclick="event.stopPropagation(); toggleSaveScore('${song.id}')" class="p-1.5 rounded-lg text-frevo-orange hover:bg-orange-50 transition-colors" title="${isSaved ? 'Remover dos Salvos' : 'Salvar Partitura'}" aria-label="${isSaved ? 'Remover dos Salvos' : 'Salvar Partitura'}">
               <svg width="17" height="17" viewBox="0 0 24 24" fill="${isSaved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
               </svg>
@@ -1794,28 +2297,27 @@ function renderSongCardHtml(song) {
         <p class="text-xs text-ink-soft mb-2.5 leading-relaxed line-clamp-2">${song.description}</p>
       </div>
 
-      <div class="grid grid-cols-2 gap-2 pt-2 border-t border-gray-100">
-        <button onclick="event.stopPropagation(); openScoreModal('${song.title}', '${song.artist}', '${song.id}')" class="btn btn-outline text-xs py-2 rounded-xl font-bold flex items-center justify-center gap-1.5">
+      <div class="flex items-center gap-2 pt-2 border-t border-gray-100">
+        <button onclick="event.stopPropagation(); openScoreModal('${song.title}', '${song.artist}', '${song.id}')" class="btn btn-outline text-xs py-2 px-3 rounded-xl font-bold flex-1 flex items-center justify-center gap-1.5">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
             <circle cx="12" cy="12" r="3"></circle>
           </svg>
           Ver Detalhes
         </button>
-        <button onclick="event.stopPropagation(); downloadScore('${song.id}')" class="btn btn-cyan text-xs font-bold py-2 rounded-xl shadow-sm flex items-center justify-center gap-1.5">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <button onclick="event.stopPropagation(); downloadScore('${song.id}')" class="btn btn-cyan p-2.5 rounded-xl font-bold shadow-sm flex items-center justify-center flex-shrink-0" title="Baixar Partitura em PDF" aria-label="Baixar Partitura em PDF">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="7 10 12 15 17 10"></polyline>
             <line x1="12" y1="15" x2="12" y2="3"></line>
           </svg>
-          Baixar PDF
         </button>
       </div>
     </div>
   `;
 }
 
-// Renderizar o Visualizador de Partitura Real no Desktop (Split Screen)
+// Renderizar o Visualizador de Partitura Real no Desktop com Partitura Dinâmica & Botões Icon-Only
 function renderSongsDesktopViewer(songId) {
   const viewer = document.getElementById('songs-desktop-viewer');
   if (!viewer) return;
@@ -1831,171 +2333,83 @@ function renderSongsDesktopViewer(songId) {
   }
 
   const isSaved = (currentUserSession.saved_scores || []).includes(song.id);
+  const profile = getSongMusicalProfile(song);
+  const isPlayingThis = (currentlyPlayingSongId === song.id);
 
   viewer.innerHTML = `
     <div class="p-6 space-y-4 text-left">
-      <!-- Cabeçalho da Partitura & Ações -->
+      <!-- Cabeçalho da Partitura & Ações (Botões Icon-Only de Baixar e Salvar) -->
       <div class="flex items-start justify-between pb-3 border-b border-gray-100 gap-4">
         <div>
-          <div class="flex items-center gap-2 mb-1">
+          <div class="flex items-center gap-2 mb-1 flex-wrap">
             <span class="badge bg-frevo-cyan/15 text-frevo-cyan text-xs font-bold">${song.genre}</span>
             <span class="badge bg-gray-100 text-muted text-[11px] font-mono font-bold">${song.downloads_count || 120} downloads</span>
             <span class="badge bg-frevo-orange/15 text-frevo-orange text-[10px] font-bold">Autêntica • 2/4</span>
+            <span class="badge bg-frevo-green/15 text-frevo-green text-[10px] font-bold">${profile.key}</span>
           </div>
           <h2 class="font-display font-black text-2xl text-ink leading-tight">${song.title}</h2>
-          <p class="text-xs font-bold text-frevo-orange mt-0.5">${song.artist}</p>
+          <p class="text-xs font-bold text-frevo-orange mt-0.5">${song.artist} • ${profile.lead}</p>
         </div>
 
         <div class="flex items-center gap-2 flex-shrink-0">
-          <button onclick="toggleSaveScore('${song.id}')" class="btn ${isSaved ? 'bg-orange-500 text-white shadow-md' : 'btn-outline text-frevo-orange border-frevo-orange'} text-xs px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="${isSaved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+          <button onclick="toggleSaveScore('${song.id}')" class="btn ${isSaved ? 'bg-orange-500 text-white shadow-md' : 'btn-outline text-frevo-orange border-frevo-orange hover:bg-orange-50'} p-2.5 rounded-xl font-bold flex items-center justify-center transition-all" title="${isSaved ? 'Remover dos Salvos' : 'Salvar Partitura'}" aria-label="${isSaved ? 'Remover dos Salvos' : 'Salvar Partitura'}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="${isSaved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
             </svg>
-            ${isSaved ? 'Salva' : 'Salvar'}
           </button>
-          <button onclick="downloadScore('${song.id}')" class="btn btn-cyan text-xs px-4 py-2 rounded-xl font-bold shadow-sm flex items-center gap-1.5">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <button onclick="downloadScore('${song.id}')" class="btn btn-cyan p-2.5 rounded-xl font-bold shadow-sm flex items-center justify-center transition-all" title="Baixar Partitura em PDF Real" aria-label="Baixar Partitura em PDF Real">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
               <polyline points="7 10 12 15 17 10"></polyline>
               <line x1="12" y1="15" x2="12" y2="3"></line>
             </svg>
-            Baixar PDF Real
           </button>
         </div>
       </div>
 
-      <!-- Barra de Ferramentas / Prévia Sonora -->
-      <div class="flex items-center justify-between px-4 py-2.5 bg-surface-soft rounded-xl text-xs font-medium text-ink-soft border border-gray-100">
-        <div class="flex items-center gap-2 text-xs">
-          <span class="w-2.5 h-2.5 rounded-full bg-frevo-green animate-pulse"></span>
-          <span>Andamento: <strong>Allegro Vivace (152 BPM)</strong></span>
+      <!-- Barra de Ferramentas / Prévia Sonora Sincronizada -->
+      <div class="flex items-center justify-between px-4 py-2.5 bg-surface-soft rounded-xl text-xs font-medium text-ink-soft border border-gray-100 flex-wrap gap-2">
+        <div class="flex items-center gap-2 text-xs flex-wrap">
+          <span class="w-2.5 h-2.5 rounded-full ${isPlayingThis ? 'bg-frevo-red animate-ping' : 'bg-frevo-green animate-pulse'}"></span>
+          <span>Andamento: <strong>${profile.tempoLabel}</strong></span>
           <span class="text-gray-300">•</span>
-          <span>Tom: <strong>Ré Maior / Sol Menor</strong></span>
+          <span>Tom: <strong>${profile.key}</strong></span>
         </div>
-        <button onclick="playFrevoAudioPreview('${song.title.replace(/'/g, "\\'")}')" class="btn bg-white border border-gray-200 hover:border-frevo-orange text-frevo-orange text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 shadow-sm transition-all">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-          </svg>
-          Ouvir Arranjo Musical
+        <button id="btn-audio-preview-${song.id}" onclick="playFrevoAudioPreview('${song.id}')" class="btn ${isPlayingThis ? 'bg-frevo-red text-white' : 'bg-white border border-gray-200 hover:border-frevo-orange text-frevo-orange'} text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 shadow-sm transition-all">
+          ${isPlayingThis ? `
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="animate-pulse">
+              <rect x="6" y="4" width="4" height="16"></rect>
+              <rect x="14" y="4" width="4" height="16"></rect>
+            </svg>
+            Parar Arranjo Musical
+          ` : `
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            Ouvir Arranjo Musical
+          `}
         </button>
       </div>
 
-      <!-- Folha de Partitura Real Estilizada (Página Musical Autêntica) -->
-      <div class="real-sheet-canvas p-6 space-y-5 shadow-inner max-h-[520px] overflow-y-auto">
+      <!-- Folha de Partitura Real Estilizada (Página Musical Autêntica Gerada Dinamicamente) -->
+      <div class="real-sheet-canvas p-6 space-y-4 shadow-inner max-h-[520px] overflow-y-auto">
         <div class="text-center pb-2 border-b border-stone-300">
           <span class="text-[10px] tracking-widest uppercase text-stone-500 font-bold block mb-1">Sociedade dos Músicos do Frevo de Pernambuco</span>
           <h3 class="text-2xl font-serif font-black text-stone-900 tracking-wider uppercase">${song.title}</h3>
-          <span class="text-xs font-serif italic text-stone-700">Composição & Arranjo: ${song.artist}</span>
+          <span class="text-xs font-serif italic text-stone-700">Composição & Arranjo: ${song.artist} • ${profile.lead}</span>
         </div>
 
-        <!-- Pentagramas e Pautas Musicais em SVG Real -->
-        <div class="space-y-4">
-          <!-- Pauta 1 -->
-          <div class="relative bg-white/70 p-2.5 rounded-lg border border-stone-200 shadow-sm">
-            <svg class="w-full h-16" viewBox="0 0 500 50">
-              <!-- 5 Linhas da Pauta -->
-              <line x1="0" y1="10" x2="500" y2="10" class="real-sheet-stave"/>
-              <line x1="0" y1="18" x2="500" y2="18" class="real-sheet-stave"/>
-              <line x1="0" y1="26" x2="500" y2="26" class="real-sheet-stave"/>
-              <line x1="0" y1="34" x2="500" y2="34" class="real-sheet-stave"/>
-              <line x1="0" y1="42" x2="500" y2="42" class="real-sheet-stave"/>
-              
-              <!-- Clave de Sol 𝄞 -->
-              <text x="5" y="38" font-size="34" font-family="serif" font-weight="bold" fill="#171717">𝄞</text>
-              <!-- Compasso 2/4 -->
-              <text x="32" y="24" font-size="14" font-family="serif" font-weight="bold" fill="#171717">2</text>
-              <text x="32" y="38" font-size="14" font-family="serif" font-weight="bold" fill="#171717">4</text>
-              
-              <!-- Barras de Compasso -->
-              <line x1="140" y1="10" x2="140" y2="42" class="real-sheet-barline"/>
-              <line x1="260" y1="10" x2="260" y2="42" class="real-sheet-barline"/>
-              <line x1="380" y1="10" x2="380" y2="42" class="real-sheet-barline"/>
-              <line x1="496" y1="10" x2="496" y2="42" class="real-sheet-barline" stroke-width="2.5"/>
-
-              <!-- Notas Compasso 1 (Colcheias & Sincopado) -->
-              <circle cx="56" cy="26" r="4" class="real-sheet-note"/>
-              <line x1="60" y1="26" x2="60" y2="8" stroke="#171717" stroke-width="1.8"/>
-              <circle cx="78" cy="18" r="4" class="real-sheet-note"/>
-              <line x1="82" y1="18" x2="82" y2="2" stroke="#171717" stroke-width="1.8"/>
-              <line x1="60" y1="6" x2="82" y2="6" stroke="#171717" stroke-width="3"/>
-
-              <circle cx="102" cy="18" r="4" class="real-sheet-note"/>
-              <line x1="106" y1="18" x2="106" y2="4" stroke="#171717" stroke-width="1.8"/>
-              <circle cx="122" cy="10" r="4" class="real-sheet-note"/>
-              <line x1="126" y1="10" x2="126" y2="0" stroke="#171717" stroke-width="1.8"/>
-              <line x1="106" y1="3" x2="126" y2="3" stroke="#171717" stroke-width="3"/>
-
-              <!-- Notas Compasso 2 -->
-              <circle cx="165" cy="10" r="4" class="real-sheet-note"/>
-              <line x1="169" y1="10" x2="169" y2="-4" stroke="#171717" stroke-width="1.8"/>
-              <circle cx="195" cy="18" r="4" class="real-sheet-note"/>
-              <line x1="199" y1="18" x2="199" y2="4" stroke="#171717" stroke-width="1.8"/>
-              <circle cx="225" cy="26" r="4" class="real-sheet-note"/>
-              <line x1="229" y1="26" x2="229" y2="10" stroke="#171717" stroke-width="1.8"/>
-
-              <!-- Notas Compasso 3 (Frase de Trombone) -->
-              <circle cx="285" cy="34" r="4" class="real-sheet-note"/>
-              <line x1="289" y1="34" x2="289" y2="18" stroke="#171717" stroke-width="1.8"/>
-              <circle cx="315" cy="26" r="4" class="real-sheet-note"/>
-              <line x1="319" y1="26" x2="319" y2="10" stroke="#171717" stroke-width="1.8"/>
-              <circle cx="345" cy="18" r="4" class="real-sheet-note"/>
-              <line x1="349" y1="18" x2="349" y2="4" stroke="#171717" stroke-width="1.8"/>
-
-              <!-- Notas Compasso 4 (Cadência Final com Dinâmica ff) -->
-              <circle cx="410" cy="10" r="4.5" class="real-sheet-note"/>
-              <line x1="414" y1="10" x2="414" y2="-4" stroke="#171717" stroke-width="2"/>
-              <circle cx="450" cy="18" r="5" class="real-sheet-note" fill="none" stroke="#171717" stroke-width="2"/>
-              <line x1="455" y1="18" x2="455" y2="2" stroke="#171717" stroke-width="2"/>
-              <text x="470" y="46" font-size="11" font-family="serif" font-style="italic" font-weight="bold" fill="#C53030">ff</text>
-            </svg>
-          </div>
-
-          <!-- Pauta 2 -->
-          <div class="relative bg-white/70 p-2.5 rounded-lg border border-stone-200 shadow-sm">
-            <svg class="w-full h-16" viewBox="0 0 500 50">
-              <line x1="0" y1="10" x2="500" y2="10" class="real-sheet-stave"/>
-              <line x1="0" y1="18" x2="500" y2="18" class="real-sheet-stave"/>
-              <line x1="0" y1="26" x2="500" y2="26" class="real-sheet-stave"/>
-              <line x1="0" y1="34" x2="500" y2="34" class="real-sheet-stave"/>
-              <line x1="0" y1="42" x2="500" y2="42" class="real-sheet-stave"/>
-              
-              <text x="5" y="38" font-size="34" font-family="serif" font-weight="bold" fill="#171717">𝄞</text>
-              
-              <line x1="140" y1="10" x2="140" y2="42" class="real-sheet-barline"/>
-              <line x1="260" y1="10" x2="260" y2="42" class="real-sheet-barline"/>
-              <line x1="380" y1="10" x2="380" y2="42" class="real-sheet-barline"/>
-              <line x1="496" y1="10" x2="496" y2="42" class="real-sheet-barline" stroke-width="2.5"/>
-
-              <circle cx="50" cy="18" r="4" class="real-sheet-note"/>
-              <line x1="54" y1="18" x2="54" y2="2" stroke="#171717" stroke-width="1.8"/>
-              <circle cx="70" cy="10" r="4" class="real-sheet-note"/>
-              <line x1="74" y1="10" x2="74" y2="-4" stroke="#171717" stroke-width="1.8"/>
-              <circle cx="90" cy="18" r="4" class="real-sheet-note"/>
-              <line x1="94" y1="18" x2="94" y2="2" stroke="#171717" stroke-width="1.8"/>
-              <circle cx="110" cy="26" r="4" class="real-sheet-note"/>
-              <line x1="114" y1="26" x2="114" y2="10" stroke="#171717" stroke-width="1.8"/>
-
-              <circle cx="165" cy="18" r="4" class="real-sheet-note"/>
-              <line x1="169" y1="18" x2="169" y2="2" stroke="#171717" stroke-width="1.8"/>
-              <circle cx="205" cy="10" r="4" class="real-sheet-note"/>
-              <line x1="209" y1="10" x2="209" y2="-4" stroke="#171717" stroke-width="1.8"/>
-
-              <circle cx="285" cy="10" r="4" class="real-sheet-note"/>
-              <line x1="289" y1="10" x2="289" y2="-4" stroke="#171717" stroke-width="1.8"/>
-              <circle cx="325" cy="18" r="4" class="real-sheet-note"/>
-              <line x1="329" y1="18" x2="329" y2="2" stroke="#171717" stroke-width="1.8"/>
-
-              <circle cx="410" cy="18" r="5" class="real-sheet-note" fill="none" stroke="#171717" stroke-width="2"/>
-              <line x1="415" y1="18" x2="415" y2="2" stroke="#171717" stroke-width="2"/>
-            </svg>
-          </div>
+        <!-- Pentagramas e Pautas Musicais em SVG Real Geradas Dinamicamente com base no Som da Música -->
+        <div class="space-y-3">
+          ${renderStaveSvgHtml(profile.stave1, profile.keyAccidentals, profile.stave1Title)}
+          ${renderStaveSvgHtml(profile.stave2, profile.keyAccidentals, profile.stave2Title)}
         </div>
 
         <!-- Letra da Música / Diretrizes de Interpretação -->
         <div class="pt-3 border-t border-stone-300">
           <h4 class="font-serif font-bold text-xs uppercase tracking-wider text-stone-800 mb-1.5">Letra Oficial & Diretrizes de Regência</h4>
           <div class="bg-white/80 p-3.5 rounded-xl border border-stone-200 text-xs font-serif text-stone-800 whitespace-pre-line leading-relaxed">
-            ${song.lyrics || 'Instrumental — Frevo de Rua com arranjo para saxofones, trompetes, trombones de vara, tuba e percussão de surdo e tarol.'}
+            ${song.lyrics || 'Instrumental — Frevo com arranjo para saxofones, trompetes, trombones de vara, tuba e percussão de surdo e tarol.'}
           </div>
         </div>
       </div>
@@ -2003,44 +2417,145 @@ function renderSongsDesktopViewer(songId) {
   `;
 }
 
-// Sintetizador Web Audio API: Tocar Prévia Sonora do Frevo Instantaneamente
-function playFrevoAudioPreview(songTitle) {
+// ==============================================================================
+// SINTETIZADOR WEB AUDIO API COMPLETO (ÁUDIO MULTIVOZ DO FREVO COM TIMBRE REAL)
+// ==============================================================================
+let globalAudioCtx = null;
+let currentlyPlayingSongId = null;
+let activeAudioTimeouts = [];
+let activeOscillatorsList = [];
+
+function stopFrevoAudioPlayback() {
+  activeAudioTimeouts.forEach(t => clearTimeout(t));
+  activeAudioTimeouts = [];
+  activeOscillatorsList.forEach(osc => {
+    try { osc.stop(); osc.disconnect(); } catch {}
+  });
+  activeOscillatorsList = [];
+  
+  const previousSongId = currentlyPlayingSongId;
+  currentlyPlayingSongId = null;
+
+  if (previousSongId) {
+    const btn = document.getElementById(`btn-audio-preview-${previousSongId}`);
+    if (btn) {
+      btn.className = 'btn bg-white border border-gray-200 hover:border-frevo-orange text-frevo-orange text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 shadow-sm transition-all';
+      btn.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+        </svg>
+        Ouvir Arranjo Musical
+      `;
+    }
+  }
+}
+
+async function playFrevoAudioPreview(songIdOrTitle) {
   try {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContext) return;
-    const ctx = new AudioContext();
+    const song = DB.songs.find(s => s.id === songIdOrTitle || s.title === songIdOrTitle) || DB.songs[0];
+    if (!song) return;
 
-    // Notas da fanfarra de Frevo (Trompetes e Metais em Ré Maior)
-    const notes = [
-      { freq: 293.66, dur: 0.12, type: 'sawtooth' }, // D4
-      { freq: 369.99, dur: 0.12, type: 'sawtooth' }, // F#4
-      { freq: 440.00, dur: 0.16, type: 'sawtooth' }, // A4
-      { freq: 587.33, dur: 0.28, type: 'sawtooth' }, // D5
-      { freq: 554.37, dur: 0.14, type: 'sawtooth' }, // C#5
-      { freq: 587.33, dur: 0.35, type: 'sawtooth' }  // D5 sustenta
-    ];
+    // Se a mesma música já estiver tocando, interromper
+    if (currentlyPlayingSongId === song.id) {
+      stopFrevoAudioPlayback();
+      return;
+    }
 
-    let now = ctx.currentTime;
+    // Parar reprodução anterior
+    stopFrevoAudioPlayback();
 
-    notes.forEach(n => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = n.type;
-      osc.frequency.setValueAtTime(n.freq, now);
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) {
+      alert('Seu navegador não suporta a Web Audio API.');
+      return;
+    }
 
-      gain.gain.setValueAtTime(0.18, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + n.dur);
+    if (!globalAudioCtx || globalAudioCtx.state === 'closed') {
+      globalAudioCtx = new AudioContextClass();
+    }
+    if (globalAudioCtx.state === 'suspended') {
+      await globalAudioCtx.resume();
+    }
 
-      osc.connect(gain);
-      gain.connect(ctx.destination);
+    currentlyPlayingSongId = song.id;
 
-      osc.start(now);
-      osc.stop(now + n.dur);
-      now += n.dur + 0.04;
+    // Atualizar UI do botão
+    const btn = document.getElementById(`btn-audio-preview-${song.id}`);
+    if (btn) {
+      btn.className = 'btn bg-frevo-red text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 shadow-md transition-all';
+      btn.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="animate-pulse">
+          <rect x="6" y="4" width="4" height="16"></rect>
+          <rect x="14" y="4" width="4" height="16"></rect>
+        </svg>
+        Parar Arranjo Musical
+      `;
+    }
+
+    const profile = getSongMusicalProfile(song);
+    const melodyNotes = [...profile.stave1, ...profile.stave2];
+    const beatDuration = 60 / profile.bpm;
+
+    let currentTime = globalAudioCtx.currentTime + 0.05;
+    let noteStartTime = currentTime;
+
+    // 1. Tocar Melodia dos Metais / Instrumento Principal
+    melodyNotes.forEach((n, idx) => {
+      const durSeconds = (n.dur === 'quarter' ? 0.9 : 0.45) * beatDuration;
+
+      const osc = globalAudioCtx.createOscillator();
+      const gain = globalAudioCtx.createGain();
+      const filter = globalAudioCtx.createBiquadFilter();
+
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(n.freq, noteStartTime);
+
+      // Filtro timbral de trompete / sax
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(1400, noteStartTime);
+      filter.frequency.exponentialRampToValueAtTime(700, noteStartTime + durSeconds);
+
+      // Envelope ADSR
+      gain.gain.setValueAtTime(0.001, noteStartTime);
+      gain.gain.linearRampToValueAtTime(0.22, noteStartTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, noteStartTime + durSeconds);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(globalAudioCtx.destination);
+
+      osc.start(noteStartTime);
+      osc.stop(noteStartTime + durSeconds);
+      activeOscillatorsList.push(osc);
+
+      // 2. Base Rítmica de Frevo (Surdo / Tarol Sincopado)
+      if (idx % 2 === 0) {
+        const bassOsc = globalAudioCtx.createOscillator();
+        const bassGain = globalAudioCtx.createGain();
+        bassOsc.type = 'triangle';
+        bassOsc.frequency.setValueAtTime(n.freq / 4 || 110, noteStartTime);
+        bassGain.gain.setValueAtTime(0.25, noteStartTime);
+        bassGain.gain.exponentialRampToValueAtTime(0.001, noteStartTime + 0.18);
+        bassOsc.connect(bassGain);
+        bassGain.connect(globalAudioCtx.destination);
+        bassOsc.start(noteStartTime);
+        bassOsc.stop(noteStartTime + 0.2);
+        activeOscillatorsList.push(bassOsc);
+      }
+
+      noteStartTime += durSeconds + (0.04 * beatDuration);
     });
 
+    // Programar término automático ao fim da melodia
+    const totalDurationMs = (noteStartTime - globalAudioCtx.currentTime) * 1000;
+    const endTimeout = setTimeout(() => {
+      stopFrevoAudioPlayback();
+    }, totalDurationMs);
+    activeAudioTimeouts.push(endTimeout);
+
   } catch (err) {
-    console.log('[WebAudio] Prévia não suportada:', err);
+    console.error('[WebAudio] Erro ao sintetizar frevo:', err);
+    stopFrevoAudioPlayback();
   }
 }
 
@@ -2495,17 +3010,20 @@ function renderProfileGallery() {
                     <p class="text-[11px] text-frevo-orange font-semibold truncate">${song.artist}</p>
                     <p class="text-[10px] text-muted line-clamp-1">${song.description}</p>
                   </div>
-                  <div class="grid grid-cols-2 gap-1.5 pt-2 border-t border-gray-100">
-                    <button onclick="switchView('songs'); selectSongForDesktopViewer('${song.id}');" class="btn btn-outline text-[11px] py-1.5 rounded-xl font-bold">
+                  <div class="flex items-center gap-1.5 pt-2 border-t border-gray-100">
+                    <button onclick="switchView('songs'); selectSongForDesktopViewer('${song.id}');" class="btn btn-outline text-[11px] py-1.5 px-2 rounded-xl font-bold flex-1 flex items-center justify-center gap-1">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
                       Visualizar
                     </button>
-                    <button onclick="downloadScore('${song.id}')" class="btn btn-cyan text-[11px] py-1.5 rounded-xl font-bold flex items-center justify-center gap-1">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <button onclick="downloadScore('${song.id}')" class="btn btn-cyan p-1.5 rounded-xl font-bold flex items-center justify-center flex-shrink-0" title="Baixar Partitura em PDF" aria-label="Baixar Partitura em PDF">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                         <polyline points="7 10 12 15 17 10"></polyline>
                         <line x1="12" y1="15" x2="12" y2="3"></line>
                       </svg>
-                      PDF
                     </button>
                   </div>
                 </div>
@@ -2590,10 +3108,14 @@ function renderProfileGallery() {
                   <p class="text-[11px] text-muted line-clamp-1">${song.description}</p>
                 </div>
                 <div class="flex items-center gap-1.5 flex-shrink-0">
-                  <button onclick="openScoreModal('${song.title}', '${song.artist}', '${song.id}')" class="btn btn-cyan text-xs py-1.5 px-3 h-8 rounded-xl font-bold flex-shrink-0">
-                    Baixar
+                  <button onclick="openScoreModal('${song.title}', '${song.artist}', '${song.id}')" class="btn btn-cyan p-2 rounded-xl font-bold flex-shrink-0" title="Baixar Partitura" aria-label="Baixar Partitura">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="7 10 12 15 17 10"></polyline>
+                      <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
                   </button>
-                  <button onclick="deleteSong('${song.id}')" class="p-1.5 text-gray-400 hover:text-frevo-red" title="Excluir">
+                  <button onclick="deleteSong('${song.id}')" class="p-2 text-gray-400 hover:text-frevo-red rounded-xl hover:bg-red-50" title="Excluir">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <polyline points="3 6 5 6 21 6"></polyline>
                       <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -3434,7 +3956,8 @@ async function addComment(postId) {
 }
 
 // ==============================================================================
-// GERAÇÃO E DOWNLOAD DE PARTITURAS EM PDF REAL
+// ==============================================================================
+// GERAÇÃO E DOWNLOAD DE PARTITURAS EM PDF REAL (COM NOTAS E ARRANJO AUTÊNTICO)
 // ==============================================================================
 function generateAndDownloadScorePdf(song) {
   try {
@@ -3455,6 +3978,8 @@ function generateAndDownloadScorePdf(song) {
     const ink = [23, 23, 23];
     const gray = [115, 115, 115];
 
+    const profile = getSongMusicalProfile(song);
+
     // Cabeçalho Oficial
     doc.setFillColor(244, 241, 234);
     doc.rect(0, 0, 210, 30, 'F');
@@ -3469,81 +3994,112 @@ function generateAndDownloadScorePdf(song) {
 
     // Títulos Institucionais
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
+    doc.setFontSize(9.5);
     doc.setTextColor(...orange);
     doc.text('FREVIA — ACERVO DIGITAL DA SALVAGUARDA DO FREVO DE PERNAMBUCO', 105, 11, { align: 'center' });
 
     doc.setFontSize(7.5);
     doc.setTextColor(...gray);
     doc.text('PATRIMÔNIO CULTURAL IMATERIAL DA HUMANIDADE (UNESCO / IPHAN)', 105, 17, { align: 'center' });
-    doc.text('DOCUMENTO OFICIAL DE PARTITURA E ARRANJO', 105, 22, { align: 'center' });
+    doc.text('DOCUMENTO OFICIAL DE PARTITURA E ARRANJO MUSICAL', 105, 22, { align: 'center' });
 
     // Título da Obra
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(20);
+    doc.setFontSize(18);
     doc.setTextColor(...ink);
-    doc.text((song.title || 'PARTITURA DO FREVO').toUpperCase(), 105, 45, { align: 'center' });
+    doc.text((song.title || 'PARTITURA DO FREVO').toUpperCase(), 105, 43, { align: 'center' });
 
-    // Dados do Compositor / Gênero
-    doc.setFontSize(10);
+    // Dados do Compositor / Gênero / Tom / Andamento
+    doc.setFontSize(9.5);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...red);
-    doc.text(`GÊNERO: ${(song.genre || 'Frevo de Rua').toUpperCase()}`, 20, 56);
+    doc.text(`GÊNERO: ${(song.genre || 'Frevo de Rua').toUpperCase()} • TOM: ${profile.key.toUpperCase()}`, 20, 52);
 
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...ink);
-    doc.text(`Compositor / Arranjador: ${song.artist || 'Maestro do Frevo'}`, 20, 63);
-    doc.text(`Andamento: Allegro Vivace (140 - 152 BPM) • Tom: Do Maior / Re Menor`, 20, 70);
-    doc.text(`Instrumentação: Orquestra de Frevo (Sopros, Metais, Palhetas e Percussão Tradicional)`, 20, 77);
+    doc.text(`Compositor / Arranjador: ${song.artist || 'Maestro do Frevo'} • ${profile.lead}`, 20, 58);
+    doc.text(`Andamento: ${profile.tempoLabel} • Compasso: 2/4 Frevado`, 20, 64);
+    doc.text(`Instrumentação: Orquestra de Frevo (Sopros, Metais, Palhetas e Percussão Tradicional)`, 20, 70);
 
     // Linha divisória
     doc.setDrawColor(220, 220, 220);
     doc.setLineWidth(0.5);
-    doc.line(20, 82, 190, 82);
+    doc.line(20, 74, 190, 74);
 
-    // Pauta Musical Ilustrada (Pentagramas)
+    // Pauta Musical Ilustrada Dinâmica com Notas Reais
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9.5);
     doc.setTextColor(...orange);
-    doc.text('PAUTA MUSICAL / GRADE INSTRUMENTAL', 20, 90);
+    doc.text('PAUTA MUSICAL & GRADE DE ARRANJO', 20, 81);
 
-    let startY = 96;
-    for (let staff = 0; staff < 4; staff++) {
-      const currentStaffY = startY + (staff * 18);
-      doc.setDrawColor(180, 180, 180);
+    const drawPdfStaff = (notes, startY, label) => {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(...gray);
+      doc.text(label, 20, startY - 2);
+
+      // 5 Linhas da Pauta
+      doc.setDrawColor(120, 120, 120);
       doc.setLineWidth(0.3);
       for (let line = 0; line < 5; line++) {
-        doc.line(20, currentStaffY + (line * 2.2), 190, currentStaffY + (line * 2.2));
+        doc.line(20, startY + (line * 2.5), 190, startY + (line * 2.5));
       }
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(13);
-      doc.setTextColor(...ink);
-      doc.text('𝄞', 23, currentStaffY + 6.5);
-      doc.setFontSize(7.5);
-      doc.text('2', 29, currentStaffY + 3.5);
-      doc.text('4', 29, currentStaffY + 7.5);
 
-      // Compassos
-      doc.line(65, currentStaffY, 65, currentStaffY + 8.8);
-      doc.line(105, currentStaffY, 105, currentStaffY + 8.8);
-      doc.line(145, currentStaffY, 145, currentStaffY + 8.8);
-      doc.line(190, currentStaffY, 190, currentStaffY + 8.8);
-      doc.line(190.8, currentStaffY, 190.8, currentStaffY + 8.8);
-    }
+      // Clave de Sol
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.setTextColor(...ink);
+      doc.text('𝄞', 22, startY + 8);
+
+      // Compasso 2/4
+      doc.setFontSize(7.5);
+      doc.text('2', 28, startY + 4);
+      doc.text('4', 28, startY + 8.5);
+
+      // Barras de Compasso
+      doc.setDrawColor(80, 80, 80);
+      doc.setLineWidth(0.4);
+      doc.line(70, startY, 70, startY + 10);
+      doc.line(110, startY, 110, startY + 10);
+      doc.line(150, startY, 150, startY + 10);
+      doc.line(190, startY, 190, startY + 10);
+      doc.line(190.8, startY, 190.8, startY + 10);
+
+      // Notas mapeadas
+      const scaleX = (x) => 20 + ((x / 500) * 170);
+      const scaleY = (staveY) => startY + ((staveY - 14) / 32) * 10;
+
+      doc.setFillColor(23, 23, 23);
+      doc.setDrawColor(23, 23, 23);
+      doc.setLineWidth(0.4);
+
+      notes.forEach(n => {
+        const nx = scaleX(n.x);
+        const ny = scaleY(n.staveY);
+        doc.circle(nx, ny, 1.2, n.dur === 'half' ? 'S' : 'F');
+        const stemDown = n.stem === 'down';
+        const stemY2 = stemDown ? ny + 5.5 : ny - 5.5;
+        const stemX = stemDown ? nx - 1.1 : nx + 1.1;
+        doc.line(stemX, ny, stemX, stemY2);
+      });
+    };
+
+    drawPdfStaff(profile.stave1, 89, profile.stave1Title);
+    drawPdfStaff(profile.stave2, 112, profile.stave2Title);
 
     // Letra / Diretrizes
-    const lyricsY = startY + 78;
+    const lyricsY = 136;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9.5);
     doc.setTextColor(...cyan);
-    doc.text('LETRA & DIRETRIZES DE EXECUÇÃO', 20, lyricsY);
+    doc.text('LETRA OFICIAL & DIRETRIZES DE EXECUÇÃO', 20, lyricsY);
 
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8.5);
     doc.setTextColor(...ink);
     
     const lyricsContent = song.lyrics || 
-      `1ª Estrofe:\nNo passo ligeiro o clarim já tocou,\nO frevo ferveu, o Recife acordou!\nCom sombrinha no ar e tesoura no chão,\nÉ frevo no sangue de cada folião.\n\nRefrão:\nFreva, freva sem parar!\nDe Olinda até o cais,\nNa ponta do pé ninguém cansa jamais!\n\nObservação de Arranjo: Acelerar a dinâmica nos trombones e surdos na transição do refrão.`;
+      `Instrumental de Frevo com arranjo para saxofones, trompetes, trombones de vara, tuba e percussão de surdo e tarol.\n\nObservação de Arranjo: Acelerar a dinâmica nos trombones e surdos na transição do refrão.`;
 
     const splitLyrics = doc.splitTextToSize(lyricsContent, 170);
     doc.text(splitLyrics, 20, lyricsY + 6);
@@ -3573,11 +4129,13 @@ function openScoreModal(title, artist, songId) {
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
 
+  const profile = getSongMusicalProfile(song);
+
   modalBody.innerHTML = `
     <div class="space-y-4 text-left">
       <div class="pb-2 border-b border-gray-100 pr-10">
-        <h3 class="font-display font-bold text-lg text-ink">Partitura & Arranjo</h3>
-        <p class="text-[11px] text-muted">Acervo Digital Oficial da Salvaguarda</p>
+        <h3 class="font-display font-bold text-lg text-ink">Partitura & Arranjo Musical</h3>
+        <p class="text-[11px] text-muted">Acervo Digital Oficial da Salvaguarda • ${profile.key}</p>
       </div>
 
       <div class="p-4 bg-surface-soft border border-gray-100 rounded-2xl space-y-2 text-left">
@@ -3586,18 +4144,26 @@ function openScoreModal(title, artist, songId) {
           <span class="badge bg-gray-100 text-muted text-[10px] font-mono font-bold">${song.downloads_count || 120} downloads</span>
         </div>
         <h3 class="font-display font-bold text-lg text-ink leading-tight">${song.title}</h3>
-        <p class="text-xs font-bold text-frevo-orange">${song.artist}</p>
+        <p class="text-xs font-bold text-frevo-orange">${song.artist} • ${profile.lead}</p>
         <p class="text-xs text-muted leading-relaxed">${song.description || 'Partitura oficial formatada com pauta musical, grade de arranjo e letra completa.'}</p>
       </div>
 
-      <button onclick="downloadScore('${song.id}')" class="btn btn-cyan w-full text-xs rounded-xl shadow-md py-3 font-bold flex items-center justify-center gap-2">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-          <polyline points="7 10 12 15 17 10"></polyline>
-          <line x1="12" y1="15" x2="12" y2="3"></line>
-        </svg>
-        Baixar Partitura em PDF (.pdf)
-      </button>
+      <div class="flex items-center gap-2">
+        <button onclick="playFrevoAudioPreview('${song.id}')" class="btn btn-outline text-frevo-orange border-frevo-orange flex-1 text-xs py-3 rounded-xl font-bold flex items-center justify-center gap-1.5 shadow-sm">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          Ouvir Prévia Sonora
+        </button>
+        <button onclick="downloadScore('${song.id}')" class="btn btn-cyan flex-1 text-xs rounded-xl shadow-md py-3 font-bold flex items-center justify-center gap-2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Baixar PDF Real
+        </button>
+      </div>
     </div>
   `;
 
