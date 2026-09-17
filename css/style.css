@@ -909,6 +909,77 @@ body {
   transform: scale(1) translateY(0);
 }
 
+/* Custom Alert & Confirm Modal - FrevAI Design System */
+.alert-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(18, 18, 20, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 20px;
+}
+
+.alert-modal-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.alert-modal-card {
+  background: #FFFFFF;
+  border-radius: 26px;
+  max-width: 420px;
+  width: 100%;
+  padding: 24px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22), 0 4px 16px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  position: relative;
+  transform: scale(0.92) translateY(8px);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.alert-modal-overlay.open .alert-modal-card {
+  transform: scale(1) translateY(0);
+}
+
+.alert-modal-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.alert-modal-icon.icon-info {
+  background: rgba(43, 90, 237, 0.1);
+  color: #2b5aed;
+}
+
+.alert-modal-icon.icon-success {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+}
+
+.alert-modal-icon.icon-warning {
+  background: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+}
+
+.alert-modal-icon.icon-error {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+}
+
 /* PWA Banner Flutuante de Instalação */
 .pwa-install-banner {
   position: fixed;

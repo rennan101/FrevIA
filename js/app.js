@@ -685,7 +685,8 @@ Viva Pernambuco e sua gente!`,
       time_ago: 'Ontem',
       read: true
     }
-  ]
+  ],
+  artistRequests: []
 };
 
 // ==============================================================================
@@ -718,6 +719,110 @@ if (savedSession) {
 function saveCurrentSession() {
   localStorage.setItem('frevai_user_session', JSON.stringify(currentUserSession));
   updateSessionUI();
+}
+
+// -----------------------------------------------------------------------------
+// PERSISTÊNCIA LOCAL DE SOLICITAÇÕES DE ARTISTAS & NOTIFICAÇÕES
+// -----------------------------------------------------------------------------
+function loadArtistRequestsLocal() {
+  try {
+    const saved = localStorage.getItem('frevia_artist_requests');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) DB.artistRequests = parsed;
+    }
+  } catch (e) {
+    DB.artistRequests = DB.artistRequests || [];
+  }
+}
+
+function saveArtistRequestsLocal() {
+  try {
+    localStorage.setItem('frevia_artist_requests', JSON.stringify(DB.artistRequests || []));
+  } catch (e) {}
+}
+
+function saveNotificationsLocal() {
+  try {
+    localStorage.setItem('frevia_notifications', JSON.stringify(DB.notifications || []));
+  } catch (e) {}
+}
+
+function loadNotificationsLocal() {
+  try {
+    const saved = localStorage.getItem('frevia_notifications');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        DB.notifications = parsed;
+      }
+    }
+  } catch (e) {}
+}
+
+loadArtistRequestsLocal();
+loadNotificationsLocal();
+
+// -----------------------------------------------------------------------------
+// VALIDAÇÃO E UNICIDADE DO NOME DE USUÁRIO (@HANDLE)
+// -----------------------------------------------------------------------------
+function sanitizeHandle(val) {
+  if (!val) return '';
+  let s = val.trim();
+  if (!s.startsWith('@')) s = '@' + s;
+  const body = s.substring(1).toLowerCase().replace(/[^a-z0-9_]/g, '');
+  return body ? '@' + body : '';
+}
+
+function formatSignupHandleInput(input) {
+  const errEl = document.getElementById('signup-error-msg');
+  if (errEl) errEl.classList.add('hidden');
+  let val = input.value;
+  if (!val) return;
+  if (!val.startsWith('@')) {
+    val = '@' + val;
+  }
+  const body = val.substring(1).toLowerCase().replace(/[^a-z0-9_]/g, '');
+  input.value = '@' + body;
+}
+
+async function isHandleTaken(handle, excludeUserId = null) {
+  const clean = sanitizeHandle(handle);
+  if (!clean || clean.length < 4) {
+    return { taken: true, reason: 'O nome de usuário (@) deve conter pelo menos 3 caracteres (letras, números ou sublinhados).' };
+  }
+  const lower = clean.toLowerCase();
+
+  // 1. Checar no Supabase se conectado
+  if (window.supabaseService && window.supabaseService.isConnected()) {
+    const isAvailable = await window.supabaseService.checkHandleAvailable(clean, excludeUserId);
+    if (!isAvailable) {
+      return { taken: true, reason: `O nome de usuário ${clean} já está em uso por outro folião. Por favor, escolha outro.` };
+    }
+  }
+
+  // 2. Checar em artistas cadastrados
+  if (DB && DB.artists) {
+    const conflictArtist = DB.artists.some(a => 
+      a.handle && a.handle.toLowerCase() === lower && (!excludeUserId || a.id !== excludeUserId)
+    );
+    if (conflictArtist) {
+      return { taken: true, reason: `O nome de usuário ${clean} já pertence a um artista oficial. Por favor, escolha outro.` };
+    }
+  }
+
+  // 3. Checar em usuários locais salvos
+  try {
+    const localUsers = JSON.parse(localStorage.getItem('frevia_local_users') || '[]');
+    const conflictUser = localUsers.some(u => 
+      u.handle && u.handle.toLowerCase() === lower && (!excludeUserId || u.id !== excludeUserId)
+    );
+    if (conflictUser) {
+      return { taken: true, reason: `O nome de usuário ${clean} já está em uso por outro folião. Por favor, escolha outro.` };
+    }
+  } catch (e) {}
+
+  return { taken: false };
 }
 
 function updateSessionUI() {
@@ -948,6 +1053,11 @@ function openSessionModal() {
               <input type="text" id="signup-name" required placeholder="Seu nome ou como quer ser chamado" oninput="document.getElementById('signup-error-msg')?.classList.add('hidden')" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
             </div>
             <div>
+              <label class="block text-[11px] font-bold text-ink uppercase mb-1">Nome de Usuário (@) *</label>
+              <input type="text" id="signup-handle" required placeholder="@seunome" oninput="formatSignupHandleInput(this)" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange font-medium" />
+              <span class="block text-[10px] text-muted mt-0.5">Identificador exclusivo na comunidade (ex: @mariasilva).</span>
+            </div>
+            <div>
               <label class="block text-[11px] font-bold text-ink uppercase mb-1">E-mail *</label>
               <input type="email" id="signup-email" required placeholder="seuemail@exemplo.com" oninput="document.getElementById('signup-error-msg')?.classList.add('hidden')" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
             </div>
@@ -969,11 +1079,11 @@ function openSessionModal() {
               <label class="block text-[11px] font-bold text-ink uppercase mb-1.5">Como deseja participar?</label>
               <div class="flex gap-2">
                 <button type="button" id="signup-role-fan-btn" onclick="setSignupRole('fan')" class="flex-1 p-2.5 rounded-xl border-2 border-frevo-cyan bg-frevo-cyan/10 text-left transition-all">
-                  <span class="block text-xs font-bold text-ink">🎉 Folião / Fã</span>
+                  <span class="block text-xs font-bold text-ink">Folião / Fã</span>
                   <span class="block text-[10px] text-muted">Curtir, salvar e ouvir</span>
                 </button>
                 <button type="button" id="signup-role-artist-btn" onclick="setSignupRole('artist')" class="flex-1 p-2.5 rounded-xl border border-gray-200 bg-surface-soft text-left transition-all opacity-60">
-                  <span class="block text-xs font-bold text-ink">🎺 Artista / Músico</span>
+                  <span class="block text-xs font-bold text-ink">Artista / Músico</span>
                   <span class="block text-[10px] text-muted">Publicar partituras e acervo</span>
                 </button>
               </div>
@@ -982,7 +1092,7 @@ function openSessionModal() {
             <!-- Campos Condicionais para Artista -->
             <div id="signup-artist-fields" class="space-y-2.5 p-3 rounded-xl bg-frevo-orange/5 border border-frevo-orange/20 hidden">
               <div class="text-[11px] text-amber-800 leading-snug">
-                <strong>🎺 Aprovação de Curadoria:</strong> Sua conta entrará inicialmente como fã comum. O comitê gestor aprovará seu projeto para liberação das ferramentas de publicação.
+                <strong>Aprovação de Curadoria:</strong> Sua conta entrará inicialmente como fã comum. O comitê gestor aprovará seu projeto para liberação das ferramentas de publicação.
               </div>
               <div>
                 <label class="block text-[10px] font-bold text-ink uppercase mb-0.5">Nome Artístico / Grupo *</label>
@@ -1048,7 +1158,7 @@ function openSessionModal() {
             <span class="text-xs text-muted block truncate">${currentUserSession.handle}</span>
             <span class="text-[11px] text-ink-soft block truncate">${currentUserSession.email || 'Conta Local'}</span>
             <span class="badge ${currentUserSession.role === 'admin' ? 'bg-frevo-red/15 text-frevo-red' : currentUserSession.role === 'artist' ? 'bg-frevo-orange/15 text-frevo-orange' : 'bg-gray-200 text-ink'} text-[10px] font-bold mt-1">
-              ${currentUserSession.role === 'admin' ? '👑 Administrador' : currentUserSession.role === 'artist' ? '🎺 Artista Oficial' : '🎉 Folião'}
+              ${currentUserSession.role === 'admin' ? 'Administrador' : currentUserSession.role === 'artist' ? 'Artista Oficial' : 'Folião'}
             </span>
           </div>
         </div>
@@ -1056,7 +1166,9 @@ function openSessionModal() {
         <!-- Banner de Status de Artista se Houver Solicitação Pendente -->
         ${currentUserSession.artist_request_status === 'pending' ? `
           <div class="p-3 bg-amber-50 border border-amber-200 rounded-2xl flex items-center gap-2.5 text-xs text-amber-800">
-            <span class="text-base">🎺</span>
+            <div class="w-7 h-7 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center flex-shrink-0">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </div>
             <div>
               <strong class="block">Solicitação Artística em Análise</strong>
               <span class="text-[11px] text-amber-700">Aguardando aprovação do administrador para liberação do perfil de artista.</span>
@@ -1134,11 +1246,11 @@ async function handleEmailLogin(e) {
         let msg = error.message;
         const lower = msg.toLowerCase();
         if (lower.includes('invalid login credentials') || lower.includes('invalid_grant')) {
-          msg = '⚠️ E-mail ou senha incorretos. Verifique os dados digitados e tente novamente.';
+          msg = 'E-mail ou senha incorretos. Verifique os dados digitados e tente novamente.';
         } else if (lower.includes('email not confirmed')) {
-          msg = '⚠️ Seu e-mail ainda não foi confirmado. Verifique a caixa de entrada (e spam) do seu e-mail.';
+          msg = 'Seu e-mail ainda não foi confirmado. Verifique a caixa de entrada (e spam) do seu e-mail.';
         } else {
-          msg = `⚠️ Erro ao entrar: ${error.message}`;
+          msg = `Erro ao entrar: ${error.message}`;
         }
         errEl.innerText = msg;
         errEl.classList.remove('hidden');
@@ -1210,6 +1322,8 @@ async function handleEmailLogin(e) {
 async function handleEmailSignUp(e) {
   e.preventDefault();
   const name = document.getElementById('signup-name')?.value?.trim();
+  const rawHandle = document.getElementById('signup-handle')?.value?.trim();
+  const handle = sanitizeHandle(rawHandle);
   const email = document.getElementById('signup-email')?.value?.trim();
   const password = document.getElementById('signup-password')?.value;
   const errEl = document.getElementById('signup-error-msg');
@@ -1220,6 +1334,31 @@ async function handleEmailSignUp(e) {
 
   if (!name || !email || !password) return;
 
+  // Validação de formato e tamanho do @handle
+  if (!handle || handle.length < 4) {
+    if (errEl) {
+      errEl.innerText = 'O nome de usuário (@) deve conter pelo menos 3 caracteres (letras, números ou sublinhados).';
+      errEl.classList.remove('hidden');
+    } else {
+      alert('O nome de usuário (@) deve conter pelo menos 3 caracteres após o @.');
+    }
+    document.getElementById('signup-handle')?.focus();
+    return;
+  }
+
+  // Validação de unicidade do @handle em toda a plataforma
+  const handleCheck = await isHandleTaken(handle);
+  if (handleCheck.taken) {
+    if (errEl) {
+      errEl.innerText = handleCheck.reason;
+      errEl.classList.remove('hidden');
+    } else {
+      alert(handleCheck.reason);
+    }
+    document.getElementById('signup-handle')?.focus();
+    return;
+  }
+
   const isArtistChoice = currentSignupRole === 'artist';
   const artistName = document.getElementById('signup-artist-name')?.value || name;
   const genreSelect = document.getElementById('signup-artist-genre')?.value || 'Frevo de Rua';
@@ -1228,10 +1367,16 @@ async function handleEmailSignUp(e) {
   const whatsapp = document.getElementById('signup-artist-whatsapp')?.value || '';
 
   if (window.supabaseService && window.supabaseService.isConnected()) {
-    // Cadastra sempre com role inicial 'user'
+    // Cadastra com o @handle escolhido e role inicial 'user'
     const { data, error } = await window.supabaseService.signUpWithEmail(email, password, {
       display_name: name,
-      role: 'user'
+      name: name,
+      handle: handle,
+      role: 'user',
+      is_artist_applicant: isArtistChoice ? 'true' : 'false',
+      artist_name: artistName,
+      artist_genre: genre,
+      artist_whatsapp: whatsapp
     });
 
     if (error) {
@@ -1239,15 +1384,15 @@ async function handleEmailSignUp(e) {
         let msg = error.message;
         const lower = msg.toLowerCase();
         if (lower.includes('database error saving new user')) {
-          msg = '⚠️ Erro interno no banco do Supabase ao salvar usuário. Se você administra o projeto, execute a migração 004_fix_signup_trigger.sql no SQL Editor do Supabase.';
+          msg = 'Erro interno no banco do Supabase ao salvar usuário. Execute a migração 005_unique_handles_and_artist_requests.sql no SQL Editor do Supabase.';
         } else if (lower.includes('user already registered') || lower.includes('already exists')) {
-          msg = '⚠️ Este e-mail já está cadastrado. Alterne para a aba "Entrar" para acessar sua conta.';
+          msg = 'Este e-mail já está cadastrado. Alterne para a aba "Entrar" para acessar sua conta.';
         } else if (lower.includes('password should be at least')) {
-          msg = '⚠️ A senha deve ter no mínimo 6 caracteres.';
+          msg = 'A senha deve ter no mínimo 6 caracteres.';
         } else if (lower.includes('valid email')) {
-          msg = '⚠️ Por favor, insira um endereço de e-mail válido.';
+          msg = 'Por favor, insira um endereço de e-mail válido.';
         } else {
-          msg = `⚠️ Erro no cadastro: ${error.message}`;
+          msg = `Erro no cadastro: ${error.message}`;
         }
         errEl.innerText = msg;
         errEl.classList.remove('hidden');
@@ -1257,24 +1402,122 @@ async function handleEmailSignUp(e) {
       return;
     }
 
-    // Se escolheu ser artista, registra a solicitação para o admin aprovar
-    if (isArtistChoice && data?.user) {
-      await window.supabaseService.requestArtistRole(data.user.id, {
+    // Se escolheu ser artista, registra a solicitação no Supabase e no DB local
+    if (isArtistChoice) {
+      const reqId = 'req-' + Date.now();
+      const targetUserId = data?.user?.id || ('user-' + Date.now());
+
+      if (data?.user) {
+        await window.supabaseService.requestArtistRole(data.user.id, {
+          requested_name: artistName,
+          genre: genre,
+          whatsapp: whatsapp
+        });
+      }
+
+      // Adicionar à fila local de solicitações para o admin visualizar imediatamente
+      loadArtistRequestsLocal();
+      DB.artistRequests.unshift({
+        id: reqId,
+        user_id: targetUserId,
         requested_name: artistName,
         genre: genre,
-        whatsapp: whatsapp
+        whatsapp: whatsapp,
+        status: 'pending',
+        created_at: new Date().toISOString(),
+        user: {
+          display_name: name,
+          handle: handle,
+          avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'
+        }
       });
-      alert('🎺 Conta criada com sucesso!\n\nSua solicitação para se tornar Artista foi enviada para aprovação da moderação.\n\nEnquanto o administrador analisa seu projeto, você já pode navegar e aproveitar o FrevAI como fã!');
+      saveArtistRequestsLocal();
+
+      // Notificar o admin
+      loadNotificationsLocal();
+      DB.notifications.unshift({
+        id: 'notif-artist-' + Date.now(),
+        type: 'artist_request',
+        targetId: reqId,
+        author: artistName,
+        author_avatar: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80',
+        title: 'Nova Solicitação de Artista',
+        message: `${artistName} (${handle}) solicitou verificação de perfil de artista no gênero ${genre}.`,
+        time_ago: 'Agora mesmo',
+        read: false,
+        forRole: 'admin'
+      });
+      saveNotificationsLocal();
+      updateNotificationBadge();
+
+      alert('Conta criada com sucesso!\n\nSua solicitação para se tornar Artista foi enviada para aprovação da moderação.\n\nEnquanto o administrador analisa seu projeto, você já pode navegar e aproveitar o FrevAI como fã!');
     } else {
-      alert('🎉 Conta criada com sucesso! Seja bem-vindo ao FrevAI!');
+      alert('Conta criada com sucesso! Seja bem-vindo ao FrevAI!');
     }
 
     closeModal();
     // Alterna para tela de login com o email pré-preenchido
     switchAuthTab('login');
   } else {
-    alert('Cadastro simulado com sucesso!');
+    // Modo local / offline
+    const reqId = 'req-' + Date.now();
+    const newLocalUser = {
+      id: 'local-u-' + Date.now(),
+      name: name,
+      email: email,
+      handle: handle,
+      role: 'user',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      artist_request_status: isArtistChoice ? 'pending' : 'none'
+    };
+
+    try {
+      const localUsers = JSON.parse(localStorage.getItem('frevia_local_users') || '[]');
+      localUsers.push(newLocalUser);
+      localStorage.setItem('frevia_local_users', JSON.stringify(localUsers));
+    } catch (e) {}
+
+    if (isArtistChoice) {
+      loadArtistRequestsLocal();
+      DB.artistRequests.unshift({
+        id: reqId,
+        user_id: newLocalUser.id,
+        requested_name: artistName,
+        genre: genre,
+        whatsapp: whatsapp,
+        status: 'pending',
+        created_at: new Date().toISOString(),
+        user: {
+          display_name: name,
+          handle: handle,
+          avatar_url: newLocalUser.avatar
+        }
+      });
+      saveArtistRequestsLocal();
+
+      loadNotificationsLocal();
+      DB.notifications.unshift({
+        id: 'notif-artist-' + Date.now(),
+        type: 'artist_request',
+        targetId: reqId,
+        author: artistName,
+        author_avatar: newLocalUser.avatar,
+        title: 'Nova Solicitação de Artista',
+        message: `${artistName} (${handle}) solicitou verificação de perfil de artista no gênero ${genre}.`,
+        time_ago: 'Agora mesmo',
+        read: false,
+        forRole: 'admin'
+      });
+      saveNotificationsLocal();
+      updateNotificationBadge();
+
+      alert('Conta criada com sucesso!\n\nSua solicitação para se tornar Artista foi enviada para aprovação da moderação.\n\nEnquanto o administrador analisa seu projeto, você já pode navegar e aproveitar o FrevAI como fã!');
+    } else {
+      alert('Conta criada com sucesso! Seja bem-vindo ao FrevAI!');
+    }
+
     closeModal();
+    switchAuthTab('login');
   }
 }
 
@@ -1357,16 +1600,17 @@ function openArtistRequestModal() {
 
 async function handleArtistRequestSubmit(e) {
   e.preventDefault();
-  const name = document.getElementById('req-artist-name')?.value;
+  const name = document.getElementById('req-artist-name')?.value?.trim();
   const genreSelect = document.getElementById('req-artist-genre')?.value || 'Frevo de Rua';
   const customGenre = document.getElementById('req-custom-genre')?.value?.trim();
   const genre = (genreSelect === 'Outro' && customGenre) ? customGenre : genreSelect;
-  const bio = document.getElementById('req-artist-bio')?.value;
-  const instagram = document.getElementById('req-artist-instagram')?.value;
-  const whatsapp = document.getElementById('req-artist-whatsapp')?.value;
+  const bio = document.getElementById('req-artist-bio')?.value?.trim();
+  const instagram = document.getElementById('req-artist-instagram')?.value?.trim();
+  const whatsapp = document.getElementById('req-artist-whatsapp')?.value?.trim();
 
   if (!name) return;
 
+  const reqId = 'req-' + Date.now();
   if (window.supabaseService && window.supabaseService.isConnected()) {
     const { error } = await window.supabaseService.requestArtistRole(currentUserSession.id, {
       requested_name: name,
@@ -1376,16 +1620,53 @@ async function handleArtistRequestSubmit(e) {
       whatsapp: whatsapp
     });
     if (error) {
-      alert('Erro ao enviar solicitação: ' + error.message);
-      return;
+      console.warn('[Supabase] Aviso ao enviar solicitação:', error.message);
     }
   }
 
   currentUserSession.artist_request_status = 'pending';
   saveCurrentSession();
+
+  // Salvar no DB.artistRequests local para o admin visualizar imediatamente
+  loadArtistRequestsLocal();
+  DB.artistRequests.unshift({
+    id: reqId,
+    user_id: currentUserSession.id || ('u-' + Date.now()),
+    requested_name: name,
+    genre: genre,
+    bio: bio,
+    instagram_url: instagram,
+    whatsapp: whatsapp,
+    status: 'pending',
+    created_at: new Date().toISOString(),
+    user: {
+      display_name: currentUserSession.name,
+      handle: currentUserSession.handle,
+      avatar_url: currentUserSession.avatar
+    }
+  });
+  saveArtistRequestsLocal();
+
+  // Disparar notificação para o administrador
+  loadNotificationsLocal();
+  DB.notifications.unshift({
+    id: 'notif-artist-' + Date.now(),
+    type: 'artist_request',
+    targetId: reqId,
+    author: name,
+    author_avatar: currentUserSession.avatar,
+    title: 'Nova Solicitação de Artista',
+    message: `${name} (${currentUserSession.handle}) solicitou verificação de perfil de artista no gênero ${genre}.`,
+    time_ago: 'Agora mesmo',
+    read: false,
+    forRole: 'admin'
+  });
+  saveNotificationsLocal();
+  updateNotificationBadge();
+
   closeModal();
   updateProfileUI();
-  alert('🎺 Sua solicitação de perfil artístico foi enviada com sucesso!\n\nNossa curadoria analisará as informações. Você continua com acesso normal de folião.');
+  alert('Sua solicitação de perfil artístico foi enviada com sucesso!\n\nNossa curadoria analisará as informações. Você continua com acesso normal de folião.');
 }
 
 function logoutSession() {
@@ -1470,7 +1751,9 @@ async function handleUserAvatarUpload(event) {
 function updateNotificationBadge() {
   const badge = document.getElementById('header-notification-badge');
   if (!badge) return;
-  const unreadCount = (DB.notifications || []).filter(n => !n.read).length;
+  const isAdm = currentUserSession.role === 'admin';
+  const notifs = (DB.notifications || []).filter(n => isAdm || n.forRole !== 'admin');
+  const unreadCount = notifs.filter(n => !n.read).length;
   badge.style.display = unreadCount > 0 ? 'block' : 'none';
 }
 
@@ -1515,6 +1798,7 @@ function sendCulturalPushNotification({ title, message, url, type, targetId }) {
 
 function markAllNotificationsAsRead() {
   (DB.notifications || []).forEach(n => { n.read = true; });
+  saveNotificationsLocal();
   updateNotificationBadge();
   openNotificationsModal();
 }
@@ -1523,6 +1807,7 @@ function handleNotificationClick(notifId, type, targetId) {
   if (notifId) {
     const notif = (DB.notifications || []).find(n => n.id === notifId);
     if (notif) notif.read = true;
+    saveNotificationsLocal();
   }
   updateNotificationBadge();
   closeModal();
@@ -1545,6 +1830,13 @@ function handleNotificationClick(notifId, type, targetId) {
         openScoreModal(song.title, song.artist, song.id);
       }, 250);
     }
+  } else if (type === 'artist_request') {
+    switchView('admin');
+    currentAdminTab = 'artists';
+    document.querySelectorAll('.admin-tab-pill').forEach(b => {
+      b.classList.toggle('active', b.innerText.toLowerCase().includes('solicitaç') || b.innerText.toLowerCase().includes('artista'));
+    });
+    renderAdminCMS();
   }
 }
 
@@ -1552,7 +1844,9 @@ function handleNotificationClick(notifId, type, targetId) {
 function openNotificationsModal() {
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
-  const notifications = DB.notifications || [];
+  loadNotificationsLocal();
+  const isAdm = currentUserSession.role === 'admin';
+  const notifications = (DB.notifications || []).filter(n => isAdm || n.forRole !== 'admin');
   const unreadCount = notifications.filter(n => !n.read).length;
 
   modalBody.innerHTML = `
@@ -1574,8 +1868,12 @@ function openNotificationsModal() {
           <div onclick="handleNotificationClick('${notif.id}', '${notif.type}', '${notif.targetId}')" class="notification-item p-3.5 ${notif.read ? 'bg-white border border-gray-100 opacity-80' : 'bg-surface-soft border border-frevo-orange/30 shadow-sm'} rounded-2xl flex items-start gap-3 cursor-pointer hover:border-frevo-orange transition-all">
             <div class="relative flex-shrink-0">
               <img src="${notif.author_avatar || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80'}" alt="${notif.author || 'FrevAI'}" class="w-10 h-10 rounded-full object-cover border border-gray-200" />
-              <div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold text-white ${notif.type === 'score' ? 'bg-frevo-cyan' : 'bg-frevo-orange'}">
-                ${notif.type === 'score' ? '♫' : '★'}
+              <div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-white ${notif.type === 'score' ? 'bg-frevo-cyan' : notif.type === 'artist_request' ? 'bg-frevo-green' : 'bg-frevo-orange'}">
+                ${notif.type === 'score' 
+                  ? '<svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>' 
+                  : notif.type === 'artist_request'
+                    ? '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>'
+                    : '<svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>'}
               </div>
             </div>
             <div class="flex-1 min-w-0">
@@ -1587,7 +1885,7 @@ function openNotificationsModal() {
               <div class="flex items-center justify-between mt-1.5 pt-1 border-t border-gray-100/60">
                 <span class="text-[10px] text-muted font-medium">${notif.time_ago || 'Recentemente'}</span>
                 <span class="text-[10px] font-bold text-frevo-orange flex items-center gap-0.5">
-                  ${notif.type === 'score' ? 'Ver Partitura' : 'Ver no Feed'} →
+                  ${notif.type === 'score' ? 'Ver Partitura' : notif.type === 'artist_request' ? 'Revisar no CMS' : 'Ver no Feed'} →
                 </span>
               </div>
             </div>
@@ -1854,7 +2152,7 @@ function renderFeedPostHtml(post) {
       <div id="comments-drawer-${post.id}" class="comments-drawer space-y-3">
         <div class="flex items-center justify-between pb-1.5 border-b border-gray-100">
           <span class="text-xs font-bold text-ink" id="comments-count-${post.id}">Comentários (${(post.comments || []).length})</span>
-          <button onclick="toggleCommentsDrawer('${post.id}')" class="text-[11px] text-muted hover:text-ink font-semibold">Fechar ✕</button>
+          <button onclick="toggleCommentsDrawer('${post.id}')" class="text-[11px] text-muted hover:text-ink font-semibold">Fechar</button>
         </div>
 
         <div id="comments-list-${post.id}" class="space-y-2.5 max-h-56 overflow-y-auto pr-1">
@@ -2297,7 +2595,9 @@ function openArtistProfile(artistId) {
           <div class="flex items-center gap-3.5">
             <div class="relative flex-shrink-0">
               <img src="${artist.avatar_url}" alt="${artist.name}" class="w-16 h-16 rounded-full object-cover border-2 border-frevo-orange/30 shadow-md bg-white" />
-              <span class="absolute bottom-0 right-0 w-5 h-5 bg-frevo-green text-white rounded-full flex items-center justify-center text-[10px] border-2 border-white font-bold" title="Artista Verificado">✓</span>
+              <span class="absolute bottom-0 right-0 w-5 h-5 bg-frevo-green text-white rounded-full flex items-center justify-center border-2 border-white font-bold" title="Artista Verificado">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </span>
             </div>
             <div>
               <h3 class="font-display font-extrabold text-lg text-ink leading-tight">${artist.name}</h3>
@@ -4151,7 +4451,7 @@ function renderMapPointCardHtml(point) {
           <line x1="8" y1="2" x2="8" y2="18"></line>
           <line x1="16" y1="6" x2="16" y2="22"></line>
         </svg>
-        <span id="map-toggle-text-${point.id}">Ver Mapa Embutido no App ▼</span>
+        <span id="map-toggle-text-${point.id}">Ver Mapa no App</span>
       </button>
 
       <div id="map-embed-${point.id}" class="map-embed-container">
@@ -4220,7 +4520,7 @@ function toggleMapEmbed(pointId) {
 
   const isOpen = container.classList.toggle('open');
   if (toggleText) {
-    toggleText.innerText = isOpen ? 'Ocultar Mapa no App ▲' : 'Ver Mapa no App ▼';
+    toggleText.innerText = isOpen ? 'Ocultar Mapa no App' : 'Ver Mapa no App';
   }
 }
 
@@ -4597,10 +4897,23 @@ async function renderAdminCMS() {
   if (!container) return;
 
   if (currentAdminTab === 'artists') {
-    // Buscar solicitações pendentes do Supabase
+    // Buscar solicitações pendentes do Supabase e da fila local
     let pendingRequests = [];
     if (window.supabaseService && window.supabaseService.isConnected()) {
-      pendingRequests = await window.supabaseService.getPendingArtistRequests();
+      try {
+        pendingRequests = await window.supabaseService.getPendingArtistRequests();
+      } catch (err) {
+        console.warn('Erro ao obter solicitações do Supabase:', err);
+      }
+    }
+
+    loadArtistRequestsLocal();
+    const localPending = (DB.artistRequests || []).filter(r => r.status === 'pending');
+    const existingIds = new Set(pendingRequests.map(r => r.id));
+    for (const lr of localPending) {
+      if (!existingIds.has(lr.id)) {
+        pendingRequests.push(lr);
+      }
     }
 
     container.innerHTML = `
@@ -4610,7 +4923,7 @@ async function renderAdminCMS() {
           <div class="flex items-center justify-between pb-2 border-b border-gray-100">
             <div>
               <h3 class="font-display font-bold text-sm text-ink flex items-center gap-2">
-                <span>🎺 Solicitações de Artistas</span>
+                <span>Solicitações de Artistas</span>
                 <span class="badge ${pendingRequests.length > 0 ? 'bg-frevo-orange text-white' : 'bg-gray-100 text-muted'} text-[10px] font-bold px-2 py-0.5 rounded-full">
                   ${pendingRequests.length} pendente${pendingRequests.length === 1 ? '' : 's'}
                 </span>
@@ -4627,16 +4940,16 @@ async function renderAdminCMS() {
                     <img src="${req.user?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}" alt="${req.requested_name}" class="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-amber-300" />
                     <div class="min-w-0">
                       <strong class="text-ink text-xs block font-bold truncate">${req.requested_name}</strong>
-                      <span class="text-[11px] text-muted block">Fã: ${req.user?.display_name || 'Usuário'}</span>
+                      <span class="text-[11px] text-muted block">Fã: ${req.user?.display_name || 'Usuário'} (${req.user?.handle || '@foliao'})</span>
                       <span class="badge bg-frevo-orange/20 text-frevo-orange text-[10px] font-bold mt-0.5">${req.genre || 'Frevo de Rua'}</span>
                     </div>
                   </div>
                   <div class="flex gap-1.5 flex-shrink-0">
                     <button onclick="confirmApproveArtistRequest('${req.id}')" class="btn btn-green text-[11px] px-2.5 py-1 rounded-xl font-bold shadow-sm">
-                      ✓ Aprovar
+                      Aprovar
                     </button>
                     <button onclick="confirmRejectArtistRequest('${req.id}')" class="btn btn-destructive text-[11px] px-2.5 py-1 rounded-xl font-bold shadow-sm">
-                      ✕ Recusar
+                      Recusar
                     </button>
                   </div>
                 </div>
@@ -4811,17 +5124,62 @@ async function renderAdminCMS() {
 // Ações de Aprovação e Recusa de Solicitações de Artistas no CMS
 async function confirmApproveArtistRequest(requestId) {
   if (!confirm('Deseja realmente aprovar esta solicitação e promover o usuário a Artista Oficial do FrevAI?')) return;
+
+  loadArtistRequestsLocal();
+  const req = (DB.artistRequests || []).find(r => r.id === requestId);
+  if (req) {
+    req.status = 'approved';
+    saveArtistRequestsLocal();
+
+    const alreadyArtist = DB.artists.some(a => a.name.toLowerCase() === req.requested_name.toLowerCase());
+    if (!alreadyArtist) {
+      DB.artists.unshift({
+        id: 'artist-' + Date.now(),
+        name: req.requested_name,
+        handle: req.user?.handle || ('@' + req.requested_name.toLowerCase().replace(/[^a-z0-9_]/g, '')),
+        genre: req.genre || 'Frevo de Rua',
+        bio: req.bio || 'Artista oficial da comunidade FrevAI.',
+        avatar_url: req.user?.avatar_url || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80',
+        cover_url: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=1200&q=80',
+        email: '',
+        phone: req.whatsapp || '',
+        is_approved: true,
+        has_story: false
+      });
+    }
+
+    if (currentUserSession.id === req.user_id) {
+      currentUserSession.role = 'artist';
+      currentUserSession.artist_request_status = 'approved';
+      saveCurrentSession();
+    }
+  }
+
   if (window.supabaseService && window.supabaseService.isConnected()) {
     const res = await window.supabaseService.approveArtistRequest(requestId, currentUserSession.id);
     if (res && res.error) {
-      alert('Erro ao aprovar artista: ' + res.error.message);
-      return;
+      console.warn('Aviso Supabase ao aprovar:', res.error.message);
     }
-    // Sincronizar artistas com os dados novos do Supabase
     const freshArtists = await window.supabaseService.getArtists();
     if (freshArtists && freshArtists.length > 0) DB.artists = freshArtists;
   }
-  alert('🎺 Artista aprovado com sucesso! O perfil do usuário agora é "Artista" e suas ferramentas de publicação foram liberadas.');
+
+  loadNotificationsLocal();
+  DB.notifications.unshift({
+    id: 'notif-approved-' + Date.now(),
+    type: 'artist_approved',
+    targetId: requestId,
+    title: 'Parabéns! Perfil de Artista Aprovado',
+    message: 'Sua solicitação artística foi aprovada com sucesso! Você agora é um Artista Oficial e suas ferramentas de publicação de músicas, álbuns e shows foram liberadas.',
+    author: 'Equipe FrevAI',
+    author_avatar: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=200&q=80',
+    time_ago: 'Agora mesmo',
+    read: false
+  });
+  saveNotificationsLocal();
+  updateNotificationBadge();
+
+  alert('Artista aprovado com sucesso! O perfil do usuário agora é "Artista" e suas ferramentas de publicação foram liberadas.');
   renderAdminCMS();
   renderArtists();
 }
@@ -4829,6 +5187,14 @@ async function confirmApproveArtistRequest(requestId) {
 async function confirmRejectArtistRequest(requestId) {
   const reason = prompt('Informe o motivo da recusa (opcional):', 'Dados incompletos ou fora das diretrizes');
   if (reason === null) return;
+
+  loadArtistRequestsLocal();
+  const req = (DB.artistRequests || []).find(r => r.id === requestId);
+  if (req) {
+    req.status = 'rejected';
+    saveArtistRequestsLocal();
+  }
+
   if (window.supabaseService && window.supabaseService.isConnected()) {
     await window.supabaseService.rejectArtistRequest(requestId, currentUserSession.id, reason);
   }
@@ -5732,6 +6098,107 @@ function closeModal() {
 }
 
 // ==============================================================================
+// SISTEMA DE ALERTAS & CONFIRMAÇÕES FREVAI (DESIGN SYSTEM OFICIAL, ZERO EMOJIS)
+// ==============================================================================
+let alertModalResolve = null;
+
+function stripAllEmojis(text) {
+  if (typeof text !== 'string') return text;
+  return text
+    .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2702}-\u{27B0}\u{24C2}-\u{1F251}\u{1F900}-\u{1F9FF}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2300}-\u{23FF}✓✕▲▼♫★]/gu, '')
+    .trim();
+}
+
+function showAlertModal(message, options = {}) {
+  return new Promise((resolve) => {
+    alertModalResolve = resolve;
+    const modalEl = document.getElementById('app-alert-modal');
+    const titleEl = document.getElementById('app-alert-title');
+    const msgEl = document.getElementById('app-alert-message');
+    const iconContainer = document.getElementById('app-alert-icon-container');
+    const confirmBtn = document.getElementById('app-alert-confirm-btn');
+    const cancelBtn = document.getElementById('app-alert-cancel-btn');
+
+    if (!modalEl) {
+      console.warn('Modal de alerta não encontrado no DOM:', message);
+      resolve(true);
+      return;
+    }
+
+    const cleanMsg = stripAllEmojis(String(message || ''));
+    const lower = cleanMsg.toLowerCase();
+    const type = options.type || (
+      lower.includes('erro') || lower.includes('falha') || lower.includes('incorret')
+        ? 'error'
+        : lower.includes('sucesso') || lower.includes('aprovad') || lower.includes('bem-vindo') || lower.includes('salva')
+          ? 'success'
+          : lower.includes('atenção') || lower.includes('aviso') || lower.includes('certeza')
+            ? 'warning'
+            : 'info'
+    );
+    const title = options.title || (type === 'error' ? 'Atenção' : type === 'success' ? 'Sucesso' : type === 'warning' ? 'Aviso' : 'Informação');
+
+    if (titleEl) titleEl.innerText = title;
+    if (msgEl) msgEl.innerText = cleanMsg;
+
+    if (iconContainer) {
+      iconContainer.className = `alert-modal-icon mb-4 icon-${type}`;
+      if (type === 'success') {
+        iconContainer.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>`;
+      } else if (type === 'error') {
+        iconContainer.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+      } else if (type === 'warning') {
+        iconContainer.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+      } else {
+        iconContainer.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
+      }
+    }
+
+    if (confirmBtn) {
+      confirmBtn.innerText = options.confirmText || 'Entendido';
+      confirmBtn.className = `btn ${type === 'error' ? 'btn-destructive' : 'btn-primary'} px-5 py-2 text-xs rounded-xl font-bold shadow-md`;
+    }
+
+    if (cancelBtn) {
+      if (options.showCancel) {
+        cancelBtn.classList.remove('hidden');
+        cancelBtn.innerText = options.cancelText || 'Cancelar';
+      } else {
+        cancelBtn.classList.add('hidden');
+      }
+    }
+
+    modalEl.style.display = 'flex';
+    void modalEl.offsetWidth;
+    modalEl.classList.add('open');
+  });
+}
+
+function closeAlertModal(confirmed = true) {
+  const modalEl = document.getElementById('app-alert-modal');
+  if (modalEl) {
+    modalEl.classList.remove('open');
+    setTimeout(() => {
+      modalEl.style.display = 'none';
+    }, 250);
+  }
+  if (alertModalResolve) {
+    const resolve = alertModalResolve;
+    alertModalResolve = null;
+    resolve(confirmed);
+  }
+}
+
+function showConfirmModal(message, options = {}) {
+  return showAlertModal(message, { ...options, showCancel: true, confirmText: options.confirmText || 'Confirmar' });
+}
+
+// Substituição transparente de window.alert para respeitar o design system do FrevAI
+window.alert = function(msg) {
+  showAlertModal(msg);
+};
+
+// ==============================================================================
 // MODAL DE EDIÇÃO DE PERFIL E CONTATO
 // ==============================================================================
 let currentUserProfile = {
@@ -5818,7 +6285,9 @@ function updateProfileUI() {
       artistBannerEl.innerHTML = `
         <div class="p-2.5 bg-frevo-green/10 border border-frevo-green/30 rounded-2xl flex items-center justify-between text-xs text-ink">
           <div class="flex items-center gap-2">
-            <span class="text-base">🎺</span>
+            <div class="w-7 h-7 rounded-lg bg-frevo-green/20 text-frevo-green flex items-center justify-center flex-shrink-0">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
             <div>
               <strong class="block text-ink text-xs font-bold">Artista Oficial Verificado</strong>
               <span class="text-[10px] text-muted">Acesso completo para gerenciar músicas, álbuns e shows.</span>
@@ -5832,7 +6301,9 @@ function updateProfileUI() {
     } else if (currentUserSession.artist_request_status === 'pending') {
       artistBannerEl.innerHTML = `
         <div class="p-2.5 bg-amber-50 border border-amber-200 rounded-2xl flex items-center gap-2 text-xs text-amber-800">
-          <span class="text-base">⏳</span>
+          <div class="w-7 h-7 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center flex-shrink-0">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </div>
           <div>
             <strong class="block text-xs font-bold">Solicitação de Artista em Análise</strong>
             <span class="text-[10px] text-amber-700">Aguardando aprovação do administrador para liberar a publicação do seu acervo.</span>
@@ -6170,10 +6641,28 @@ function removeSocialLinkField(btn) {
 async function saveProfileChanges(e) {
   e.preventDefault();
   const name = document.getElementById('edit-name-input').value.trim();
-  const handle = document.getElementById('edit-handle-input').value.trim();
+  const rawHandle = document.getElementById('edit-handle-input').value.trim();
+  const cleanHandle = sanitizeHandle(rawHandle);
   const bio = document.getElementById('edit-bio-input').value.trim();
   const email = document.getElementById('edit-email-input').value.trim();
   const phone = document.getElementById('edit-phone-input').value.trim();
+
+  // Validação do @handle
+  if (!cleanHandle || cleanHandle.length < 4) {
+    alert('O nome de usuário (@) deve conter pelo menos 3 caracteres (letras, números ou sublinhados).');
+    document.getElementById('edit-handle-input')?.focus();
+    return;
+  }
+
+  // Se o usuário alterou o @handle, checar se já está ocupado por outro usuário
+  if (cleanHandle.toLowerCase() !== (currentUserSession.handle || '').toLowerCase()) {
+    const handleCheck = await isHandleTaken(cleanHandle, currentUserSession.id);
+    if (handleCheck.taken) {
+      alert(handleCheck.reason || `O nome de usuário ${cleanHandle} já está em uso por outro folião. Por favor, escolha outro.`);
+      document.getElementById('edit-handle-input')?.focus();
+      return;
+    }
+  }
 
   const rows = document.querySelectorAll('.social-link-row');
   const socialLinks = [];
@@ -6186,7 +6675,7 @@ async function saveProfileChanges(e) {
   });
 
   currentUserProfile.name = name;
-  currentUserProfile.handle = handle ? (handle.startsWith('@') ? handle : '@' + handle) : '';
+  currentUserProfile.handle = cleanHandle;
   currentUserProfile.bio = bio;
   currentUserProfile.email = email;
   currentUserProfile.phone = phone;
@@ -6196,7 +6685,35 @@ async function saveProfileChanges(e) {
     currentUserSession.avatar = tempUploadedAvatar;
   }
   if (name) currentUserSession.name = name;
-  if (handle) currentUserSession.handle = currentUserProfile.handle;
+  currentUserSession.handle = cleanHandle;
+
+  // Se o usuário for artista oficial, sincronizar o @handle nos dados do artista local
+  if (currentUserSession.role === 'artist' && DB.artists) {
+    const myArtist = DB.artists.find(a => a.id === currentUserSession.artist_id || a.name.toLowerCase() === name.toLowerCase());
+    if (myArtist) {
+      myArtist.handle = cleanHandle;
+    }
+  }
+
+  // Atualizar no localStorage de usuários locais
+  try {
+    const localUsers = JSON.parse(localStorage.getItem('frevia_local_users') || '[]');
+    const idx = localUsers.findIndex(u => u.id === currentUserSession.id || u.email === currentUserSession.email);
+    if (idx >= 0) {
+      localUsers[idx].name = name;
+      localUsers[idx].handle = cleanHandle;
+      localUsers[idx].avatar = currentUserSession.avatar;
+    } else if (currentUserSession.email) {
+      localUsers.push({
+        id: currentUserSession.id || ('u-' + Date.now()),
+        name: name,
+        handle: cleanHandle,
+        email: currentUserSession.email,
+        avatar: currentUserSession.avatar
+      });
+    }
+    localStorage.setItem('frevia_local_users', JSON.stringify(localUsers));
+  } catch (e) {}
 
   saveCurrentSession();
   updateProfileUI();
@@ -6210,12 +6727,15 @@ async function saveProfileChanges(e) {
         full_name: currentUserProfile.name,
         name: currentUserProfile.name,
         display_name: currentUserProfile.name,
+        handle: cleanHandle,
         avatar_url: currentUserProfile.avatar
       }
     }, {
       display_name: currentUserProfile.name,
+      handle: cleanHandle,
       avatar_url: currentUserProfile.avatar
     });
+    window.supabaseService.updateProfileHandle(currentUserSession.id, cleanHandle);
   }
 
   const wasFirstLogin = isFirstLoginFlow;
@@ -6681,7 +7201,7 @@ function openSubmitSongModal() {
         <div>
           <div class="flex items-center justify-between mb-1">
             <label class="block text-[11px] font-bold text-ink uppercase tracking-wider">Letra Oficial / Estrofes</label>
-            <button type="button" onclick="autoGenerateLyricsPrompt()" class="text-[10px] text-frevo-orange font-bold hover:underline">✨ Gerar Letra Auto</button>
+            <button type="button" onclick="autoGenerateLyricsPrompt()" class="text-[10px] text-frevo-orange font-bold hover:underline">Gerar Letra com IA</button>
           </div>
           <textarea id="song-lyrics-input" rows="3" placeholder="Insira os versos ou o arranjo orquestral da canção..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange"></textarea>
         </div>
@@ -6813,7 +7333,7 @@ async function submitNewSong(e) {
     closeModal();
     renderSongs();
     renderProfileGallery();
-    alert(`🎺 Música "${newSong.title}" publicada com sucesso com áudio e partitura!`);
+    alert(`Música "${newSong.title}" publicada com sucesso com áudio e partitura!`);
   } catch (err) {
     console.error('Erro ao publicar música:', err);
     alert('Erro ao enviar música: ' + err.message);

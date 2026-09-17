@@ -625,7 +625,12 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
             <span>Partitura PDF</span>
           </button>
-          <button onclick="toggleLyricsModal()" class="w-8 h-8 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center font-bold transition-all" aria-label="Fechar Letra">✕</button>
+          <button onclick="toggleLyricsModal()" class="w-8 h-8 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center transition-all" aria-label="Fechar Letra">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
         </div>
       </div>
 
@@ -653,6 +658,23 @@
         </svg>
       </button>
       <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL DE ALERTA & CONFIRMAÇÃO DO SISTEMA FREVAI (DESIGN REFINADO)
+       ========================================================================= -->
+  <div id="app-alert-modal" class="modal-overlay alert-modal-overlay" style="display: none; z-index: 1200;" role="dialog" aria-modal="true" aria-labelledby="app-alert-title">
+    <div class="alert-modal-card">
+      <div id="app-alert-icon-container" class="alert-modal-icon mb-4">
+        <!-- SVG injetado dinamicamente -->
+      </div>
+      <h3 id="app-alert-title" class="font-display font-bold text-base sm:text-lg text-ink mb-1.5">Atenção</h3>
+      <div id="app-alert-message" class="text-xs sm:text-sm text-ink-soft mb-5 leading-relaxed whitespace-pre-line"></div>
+      <div class="flex items-center justify-end gap-2.5 w-full" id="app-alert-actions">
+        <button id="app-alert-cancel-btn" type="button" class="btn btn-outline px-4 py-2 text-xs rounded-xl font-bold hidden" onclick="closeAlertModal(false)">Cancelar</button>
+        <button id="app-alert-confirm-btn" type="button" class="btn btn-primary px-5 py-2 text-xs rounded-xl font-bold shadow-md" onclick="closeAlertModal(true)">Entendido</button>
+      </div>
     </div>
   </div>
 

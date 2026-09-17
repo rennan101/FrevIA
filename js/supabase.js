@@ -119,7 +119,48 @@ class SupabaseService {
     }
   }
 
-  // Inserir ou atualizar perfil do usuário logado preservando papel e vínculo de artista
+  // Verificar se um @handle está disponível no banco (case-insensitive)
+  async checkHandleAvailable(handle, excludeUserId = null) {
+    if (!this.client || !handle) return true;
+    try {
+      const clean = handle.startsWith('@') ? handle : '@' + handle;
+      let query = this.client
+        .from('profiles')
+        .select('id, handle')
+        .ilike('handle', clean);
+      if (excludeUserId) {
+        query = query.neq('id', excludeUserId);
+      }
+      const { data, error } = await query;
+      if (error) {
+        console.warn('[Supabase] Aviso ao verificar disponibilidade do @:', error.message);
+        return true;
+      }
+      return !(data && data.length > 0);
+    } catch (err) {
+      console.warn('[Supabase] Erro ao checar @handle:', err);
+      return true;
+    }
+  }
+
+  // Atualizar especificamente o @handle do usuário
+  async updateProfileHandle(userId, newHandle) {
+    if (!this.client || !userId || !newHandle) return false;
+    try {
+      const clean = newHandle.startsWith('@') ? newHandle : '@' + newHandle;
+      const { error } = await this.client
+        .from('profiles')
+        .update({ handle: clean, updated_at: new Date().toISOString() })
+        .eq('id', userId);
+      if (error) throw error;
+      return true;
+    } catch (err) {
+      console.error('[Supabase] Erro ao atualizar @handle:', err.message);
+      return false;
+    }
+  }
+
+  // Inserir ou atualizar perfil do usuário logado preservando papel, handle e vínculo de artista
   async upsertProfile(user, extraData = {}) {
     if (!this.client || !user) return null;
     try {
@@ -129,12 +170,14 @@ class SupabaseService {
       const role = existing?.role || extraData.role || 'user';
       const artistId = existing?.artist_id || extraData.artist_id || null;
       const artistRequestStatus = existing?.artist_request_status || extraData.artist_request_status || 'none';
+      const handle = extraData.handle || user.user_metadata?.handle || existing?.handle || ('@' + (user.email ? user.email.split('@')[0] : 'foliao'));
 
       const { data, error } = await this.client
         .from('profiles')
         .upsert({
           id: user.id,
           display_name: displayName,
+          handle: handle,
           avatar_url: avatarUrl,
           role: role,
           artist_id: artistId,
@@ -674,23 +717,29 @@ class SupabaseService {
           bio: reqData.bio || '',
           instagram_url: reqData.instagram_url || '',
           whatsapp: reqData.whatsapp || '',
-          status: 'pending'
+          status: 'pending',
+          created_at: new Date().toISOString()
         }])
-        .select()
-        .single();
+        .select();
 
-      if (reqError) throw reqError;
+      if (reqError) {
+        console.warn('[Supabase] Aviso ao inserir em artist_requests:', reqError.message);
+      }
 
       // 2. Atualizar perfil com status pendente (role continua 'user')
-      await this.client
-        .from('profiles')
-        .update({
-          artist_request_status: 'pending',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', userId);
+      try {
+        await this.client
+          .from('profiles')
+          .update({
+            artist_request_status: 'pending',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', userId);
+      } catch (profErr) {
+        console.warn('[Supabase] Aviso ao atualizar status no profile:', profErr);
+      }
 
-      return { data: request, error: null };
+      return { data: request && request[0], error: null };
     } catch (err) {
       console.error('[Supabase] Erro ao solicitar papel de artista:', err.message);
       return { error: err };
@@ -700,25 +749,41 @@ class SupabaseService {
   async getPendingArtistRequests() {
     if (!this.client) return [];
     try {
+      // 1. Carregar solicitações com status 'pending'
       const { data, error } = await this.client
         .from('artist_requests')
-        .select(`
-          id,
-          user_id,
-          requested_name,
-          genre,
-          bio,
-          instagram_url,
-          whatsapp,
-          status,
-          created_at,
-          user:user_id(display_name, avatar_url)
-        `)
+        .select('*')
         .eq('status', 'pending')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      if (!data || data.length === 0) return [];
+
+      // 2. Buscar perfis associados para obter display_name, avatar_url e handle
+      const userIds = [...new Set(data.map(r => r.user_id).filter(Boolean))];
+      let userMap = {};
+      if (userIds.length > 0) {
+        try {
+          const { data: profs } = await this.client
+            .from('profiles')
+            .select('id, display_name, avatar_url, handle')
+            .in('id', userIds);
+          if (profs) {
+            profs.forEach(p => { userMap[p.id] = p; });
+          }
+        } catch (pe) {
+          console.warn('[Supabase] Aviso ao carregar dados complementares de perfil:', pe.message);
+        }
+      }
+
+      return data.map(r => ({
+        ...r,
+        user: userMap[r.user_id] || {
+          display_name: r.requested_name,
+          avatar_url: '',
+          handle: '@' + (r.requested_name || 'artista').toLowerCase().replace(/[^a-z0-9_]/g, '')
+        }
+      }));
     } catch (err) {
       console.warn('[Supabase] Falha ao carregar pedidos de artista:', err.message);
       return [];
