@@ -80,6 +80,86 @@ class SupabaseService {
     });
   }
 
+  // Redefinição de senha para qualquer usuário (esqueci minha senha)
+  async resetPasswordForEmail(email) {
+    if (!this.client) return { error: { message: 'Supabase não conectado' } };
+    try {
+      const { data, error } = await this.client.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + window.location.pathname
+      });
+      return { data, error };
+    } catch (err) {
+      return { error: err };
+    }
+  }
+
+  // Cadastro de artista diretamente pelo Administrador
+  async registerArtistByAdmin({ ownerName, handle, email, password, artistName, genre, whatsapp, bio }) {
+    if (!this.client) return { error: { message: 'Supabase não conectado' } };
+    try {
+      const cleanHandle = handle.startsWith('@') ? handle : '@' + handle;
+      // 1. Cadastrar usuário no Supabase Auth com senha padrão
+      const authRes = await this.signUpWithEmail(email, password, {
+        display_name: artistName,
+        name: ownerName,
+        handle: cleanHandle,
+        role: 'artist',
+        is_approved: true,
+        artist_request_status: 'approved',
+        bio: bio || '',
+        phone: whatsapp || '',
+        genre: genre || 'Frevo de Rua'
+      });
+
+      if (authRes.error) {
+        return { error: authRes.error };
+      }
+
+      const newUserId = authRes.data?.user?.id || null;
+      const slug = cleanHandle.replace('@', '').toLowerCase();
+
+      // 2. Criar registro do Artista na tabela 'artists'
+      const artistData = {
+        name: artistName,
+        slug: slug,
+        genre: genre || 'Frevo de Rua',
+        bio: bio || '',
+        contact_phone: whatsapp || '',
+        contact_email: email,
+        is_approved: true,
+        user_id: newUserId
+      };
+
+      const { data: artistRecord, error: artistErr } = await this.client
+        .from('artists')
+        .insert(artistData)
+        .select()
+        .single();
+
+      if (artistErr) {
+        console.warn('[Supabase] Aviso ao inserir artista na tabela artists:', artistErr.message);
+      }
+
+      // 3. Vincular perfil caso o usuário tenha sido criado
+      if (newUserId && artistRecord?.id) {
+        await this.client
+          .from('profiles')
+          .update({
+            artist_id: artistRecord.id,
+            role: 'artist',
+            artist_request_status: 'approved',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', newUserId);
+      }
+
+      return { data: { user: authRes.data?.user, artist: artistRecord }, error: null };
+    } catch (err) {
+      console.error('[Supabase] Erro ao cadastrar artista pelo admin:', err);
+      return { error: err };
+    }
+  }
+
   async signOut() {
     if (!this.client) return;
     return await this.client.auth.signOut();
@@ -166,7 +246,7 @@ class SupabaseService {
     try {
       const existing = await this.getProfile(user.id);
       const displayName = extraData.display_name || user.user_metadata?.full_name || user.user_metadata?.name || user.user_metadata?.display_name || user.email?.split('@')[0] || 'Folião';
-      const avatarUrl = extraData.avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
+      const avatarUrl = extraData.avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture || null;
       const role = existing?.role || extraData.role || 'user';
       const artistId = existing?.artist_id || extraData.artist_id || null;
       const artistRequestStatus = existing?.artist_request_status || extraData.artist_request_status || 'none';
@@ -225,7 +305,7 @@ class SupabaseService {
           id: p.id,
           author: p.artist?.name || p.author?.display_name || 'Artista do Frevo',
           handle: p.artist?.handle || 'frevocultural',
-          avatar: p.artist?.avatar_url || p.author?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+          avatar: p.artist?.avatar_url || p.author?.avatar_url || null,
           image: p.cover_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=80',
           location: 'Recife Antigo, PE',
           type: p.type || 'culture',

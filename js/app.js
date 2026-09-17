@@ -50,7 +50,7 @@ const DB = {
       id: 'p1',
       author: 'Paço do Frevo',
       handle: 'pacodofrevo',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+      avatar: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=200&q=80',
       image: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=1000&q=80',
       location: 'Praça do Arsenal, Recife Antigo',
       type: 'event',
@@ -66,8 +66,8 @@ const DB = {
       time_ago: 'HÁ 2 HORAS',
       created_at: '2026-09-16T12:00:00Z',
       comments: [
-        { id: 'c1', user: 'Mariana Silva', user_handle: 'mariana.passista', user_id: 'u_mariana', text: 'Estarei lá com toda a turma do passo!', created_at: '2026-09-16T12:30:00Z', time_ago: 'HÁ 1 HORA' },
-        { id: 'c2', user: 'Carlos Metais', user_handle: 'carlos_metais', user_id: 'u_carlos', text: 'Os arranjos deste ano estão impecáveis.', created_at: '2026-09-16T13:00:00Z', time_ago: 'HÁ 30 MIN' }
+        { id: 'c1', user: 'Mariana Silva', user_handle: 'mariana.passista', user_id: 'u_mariana', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80', text: 'Estarei lá com toda a turma do passo!', created_at: '2026-09-16T12:30:00Z', time_ago: 'HÁ 1 HORA' },
+        { id: 'c2', user: 'Carlos Metais', user_handle: 'carlos_metais', user_id: 'u_carlos', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80', text: 'Os arranjos deste ano estão impecáveis.', created_at: '2026-09-16T13:00:00Z', time_ago: 'HÁ 30 MIN' }
       ]
     },
     {
@@ -90,7 +90,7 @@ const DB = {
       time_ago: 'HÁ 6 HORAS',
       created_at: '2026-09-16T08:30:00Z',
       comments: [
-        { id: 'c3', user: 'Orquestra Olinda', user_handle: 'orquestra_olinda', user_id: 'u_olinda', text: 'Já baixamos e vamos ensaiar hoje à noite!', created_at: '2026-09-16T09:15:00Z', time_ago: 'HÁ 5 HORAS' }
+        { id: 'c3', user: 'Orquestra Olinda', user_handle: 'orquestra_olinda', user_id: 'u_olinda', avatar: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=150&q=80', text: 'Já baixamos e vamos ensaiar hoje à noite!', created_at: '2026-09-16T09:15:00Z', time_ago: 'HÁ 5 HORAS' }
       ]
     },
     {
@@ -139,7 +139,7 @@ const DB = {
       id: 'p5',
       author: 'Giselle Andrade',
       handle: 'giselleandrade',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80',
       image: 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1000&q=80',
       location: 'Quatro Cantos, Olinda',
       type: 'culture',
@@ -670,7 +670,7 @@ Viva Pernambuco e sua gente!`,
       title: 'Comunicado Cultural',
       message: 'Edital do Festival Nacional do Frevo 2026 bate recorde de inscrições!',
       author: 'FrevAI Notícias',
-      author_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+      author_avatar: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=200&q=80',
       time_ago: 'Há 5 horas',
       read: false
     },
@@ -694,11 +694,26 @@ Viva Pernambuco e sua gente!`,
 // Roles: 'guest' (Visitante), 'user' (Usuário Comum), 'artist' (Artista), 'admin' (Admin)
 // ==============================================================================
 
+// Placeholder neutro minimalista para avatares de usuários sem foto cadastrada
+const DEFAULT_AVATAR_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23F3F4F6'/%3E%3Cpath d='M50 48a16 16 0 1 0 0-32 16 16 0 0 0 0 32zm0 8c-14 0-32 7.5-32 18v6h64v-6c0-10.5-18-18-32-18z' fill='%239CA3AF'/%3E%3C/svg%3E";
+
+function hasCustomAvatar(url) {
+  if (!url || typeof url !== 'string') return false;
+  const clean = url.trim();
+  if (!clean) return false;
+  if (clean.includes('photo-1534528741775-53994a69daeb')) return false;
+  return true;
+}
+
+function getUserAvatarUrl(url) {
+  return hasCustomAvatar(url) ? url : DEFAULT_AVATAR_PLACEHOLDER;
+}
+
 let currentUserSession = {
   role: 'guest', // Inicia como visitante sem login por padrão
   name: 'Visitante',
   handle: '@visitante',
-  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+  avatar: null,
   email: '',
   artist_id: null,
   favorites: ['a1'], // IDs dos artistas favoritados
@@ -710,6 +725,9 @@ const savedSession = localStorage.getItem('frevai_user_session');
 if (savedSession) {
   try {
     currentUserSession = Object.assign(currentUserSession, JSON.parse(savedSession));
+    if (!hasCustomAvatar(currentUserSession.avatar)) {
+      currentUserSession.avatar = null;
+    }
     if (!currentUserSession.saved_scores) {
       currentUserSession.saved_scores = ['s1000000-0000-0000-0000-000000000001', 's3000000-0000-0000-0000-000000000003'];
     }
@@ -880,7 +898,7 @@ function switchTestRole(role, silent = false) {
       role: 'admin',
       name: 'Administrador FrevAI',
       handle: '@admin_cultura',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      avatar: null,
       email: 'admin@cultura.pe.gov.br',
       artist_id: null,
       favorites: ['a1', 'a2', 'a3']
@@ -910,7 +928,7 @@ function switchTestRole(role, silent = false) {
       role: 'guest',
       name: 'Visitante',
       handle: '@visitante',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+      avatar: null,
       email: '',
       artist_id: null,
       favorites: []
@@ -1029,7 +1047,12 @@ function openSessionModal() {
               <input type="email" id="auth-email" required placeholder="seuemail@exemplo.com" oninput="document.getElementById('login-error-msg')?.classList.add('hidden')" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
             </div>
             <div>
-              <label class="block text-[11px] font-bold text-ink uppercase mb-1">Senha</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="block text-[11px] font-bold text-ink uppercase">Senha</label>
+                <button type="button" onclick="openForgotPasswordModal()" class="text-[11px] font-semibold text-frevo-orange hover:underline focus:outline-none">
+                  Esqueci minha senha
+                </button>
+              </div>
               <div class="relative">
                 <input type="password" id="auth-password" required placeholder="••••••••" oninput="document.getElementById('login-error-msg')?.classList.add('hidden')" class="w-full pl-3 pr-10 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
                 <button type="button" onclick="togglePasswordVisibility('auth-password', this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-ink transition-colors" aria-label="Ver senha" title="Ver senha">
@@ -1144,7 +1167,7 @@ function openSessionModal() {
         <!-- Usuário Logado -->
         <div class="p-4 bg-surface-soft rounded-2xl flex items-center gap-3.5 border border-gray-100">
           <div class="relative flex-shrink-0">
-            <img id="session-avatar-preview" src="${currentUserSession.avatar}" alt="${currentUserSession.name}" class="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm" />
+            <img id="session-avatar-preview" src="${getUserAvatarUrl(currentUserSession.avatar)}" alt="${currentUserSession.name}" class="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR_PLACEHOLDER}'" />
             <label for="session-avatar-file-input" class="absolute -bottom-1 -right-1 w-6 h-6 bg-ink text-white rounded-full flex items-center justify-center cursor-pointer shadow-md hover:bg-frevo-orange transition-colors" title="Alterar foto">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
@@ -1212,6 +1235,83 @@ function openSessionModal() {
   modal.classList.add('open');
 }
 
+// Modal de Recuperação de Senha (Esqueci minha senha)
+function openForgotPasswordModal() {
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+
+  modalBody.innerHTML = `
+    <div class="space-y-4 text-left">
+      <div class="pb-2 border-b border-gray-100 pr-10">
+        <h3 class="font-display font-bold text-lg text-ink">Recuperar Senha</h3>
+        <p class="text-[11px] text-muted">Informe seu e-mail cadastrado para receber as instruções de redefinição de senha.</p>
+      </div>
+
+      <div id="forgot-error-msg" class="hidden text-xs text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-200 flex items-start gap-2"></div>
+      <div id="forgot-success-msg" class="hidden text-xs text-emerald-700 bg-emerald-50 p-3 rounded-xl border border-emerald-200 leading-relaxed"></div>
+
+      <form id="forgot-password-form" onsubmit="handleForgotPasswordSubmit(event)" class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">E-mail Cadastrado *</label>
+          <input type="email" id="forgot-email" required placeholder="seuemail@exemplo.com" oninput="document.getElementById('forgot-error-msg')?.classList.add('hidden')" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+        </div>
+
+        <button type="submit" id="forgot-submit-btn" class="btn btn-primary w-full text-xs rounded-xl py-2.5 font-bold shadow-md">
+          Enviar Link de Recuperação
+        </button>
+      </form>
+
+      <div class="text-center pt-2 border-t border-gray-100">
+        <button type="button" onclick="openSessionModal(); switchAuthTab('login');" class="text-xs text-muted hover:text-ink font-semibold transition-colors">
+          Voltar para o Login
+        </button>
+      </div>
+    </div>
+  `;
+
+  modal.classList.add('open');
+}
+
+async function handleForgotPasswordSubmit(e) {
+  e.preventDefault();
+  const emailInput = document.getElementById('forgot-email');
+  const errorMsg = document.getElementById('forgot-error-msg');
+  const successMsg = document.getElementById('forgot-success-msg');
+  const submitBtn = document.getElementById('forgot-submit-btn');
+  const form = document.getElementById('forgot-password-form');
+
+  if (!emailInput || !emailInput.value.trim()) return;
+  const email = emailInput.value.trim();
+
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerText = 'Enviando instruções...';
+  }
+
+  if (window.supabaseService && window.supabaseService.isConnected()) {
+    const res = await window.supabaseService.resetPasswordForEmail(email);
+    if (res?.error) {
+      if (errorMsg) {
+        errorMsg.innerText = res.error.message || 'Não foi possível enviar o e-mail de recuperação. Verifique o endereço digitado.';
+        errorMsg.classList.remove('hidden');
+      }
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Enviar Link de Recuperação';
+      }
+      return;
+    }
+  }
+
+  // Sucesso
+  if (form) form.classList.add('hidden');
+  if (errorMsg) errorMsg.classList.add('hidden');
+  if (successMsg) {
+    successMsg.innerHTML = `<strong>E-mail de recuperação enviado!</strong><br/>Enviamos as instruções para <strong>${email}</strong>. Verifique sua caixa de entrada e spam para redefinir sua senha com segurança.`;
+    successMsg.classList.remove('hidden');
+  }
+}
+
 async function loginWithGoogle() {
   if (window.supabaseService && window.supabaseService.isConnected()) {
     try {
@@ -1276,7 +1376,7 @@ async function handleEmailLogin(e) {
       role: userRole,
       name: dbProfile?.display_name || data.user.user_metadata?.display_name || email.split('@')[0],
       handle: dbProfile?.handle || ('@' + email.split('@')[0]),
-      avatar: dbProfile?.avatar_url || data.user.user_metadata?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      avatar: hasCustomAvatar(dbProfile?.avatar_url) ? dbProfile.avatar_url : (hasCustomAvatar(data.user.user_metadata?.avatar_url) ? data.user.user_metadata.avatar_url : null),
       email: email,
       artist_id: artistId,
       artist_request_status: dbProfile?.artist_request_status || 'none',
@@ -1304,7 +1404,7 @@ async function handleEmailLogin(e) {
       role: email.includes('admin') ? 'admin' : email.includes('artista') ? 'artist' : 'user',
       name: email.split('@')[0],
       handle: '@' + email.split('@')[0],
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      avatar: null,
       email: email,
       artist_id: null,
       artist_request_status: email.includes('artista') ? 'pending' : 'none',
@@ -1428,7 +1528,7 @@ async function handleEmailSignUp(e) {
         user: {
           display_name: name,
           handle: handle,
-          avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'
+          avatar_url: null
         }
       });
       saveArtistRequestsLocal();
@@ -1450,9 +1550,9 @@ async function handleEmailSignUp(e) {
       saveNotificationsLocal();
       updateNotificationBadge();
 
-      alert('Conta criada com sucesso!\n\nSua solicitação para se tornar Artista foi enviada para aprovação da moderação.\n\nEnquanto o administrador analisa seu projeto, você já pode navegar e aproveitar o FrevAI como fã!');
+      showPlatformAlert('Conta criada com sucesso!\n\nSua solicitação para se tornar Artista foi enviada para aprovação da moderação.\n\nEnquanto o administrador analisa seu projeto, você já pode navegar e aproveitar o FrevAI como fã!', 'Conta Criada');
     } else {
-      alert('Conta criada com sucesso! Seja bem-vindo ao FrevAI!');
+      showPlatformAlert('Conta criada com sucesso! Seja bem-vindo ao FrevAI!', 'Cadastro Realizado');
     }
 
     closeModal();
@@ -1467,7 +1567,7 @@ async function handleEmailSignUp(e) {
       email: email,
       handle: handle,
       role: 'user',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      avatar: null,
       artist_request_status: isArtistChoice ? 'pending' : 'none'
     };
 
@@ -2035,12 +2135,11 @@ function renderCommentItemHtml(c, postId) {
   const canEdit = isAuthor;
   const canDelete = isAuthor || isAdmin;
   const timeLabel = c.time_ago || formatCommentRelativeTime(c.created_at);
+  const avatarSrc = getUserAvatarUrl(c.avatar || c.user_avatar);
 
   return `
     <div class="flex items-start gap-2 text-xs group/comment" id="comment-item-${postId}-${c.id}">
-      <div class="w-6 h-6 rounded-full bg-frevo-orange/20 text-frevo-orange font-bold flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">
-        ${(c.user || 'F').charAt(0).toUpperCase()}
-      </div>
+      <img src="${avatarSrc}" alt="${c.user || 'Folião'}" class="w-6 h-6 rounded-full object-cover flex-shrink-0 mt-0.5 border border-gray-200" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR_PLACEHOLDER}'" />
       <div class="comment-bubble flex-1 text-left relative">
         <div class="flex items-center justify-between gap-1 mb-0.5">
           <div class="flex items-center gap-1.5 flex-wrap">
@@ -2076,6 +2175,17 @@ function renderCommentItemHtml(c, postId) {
         <div id="comment-text-container-${postId}-${c.id}">
           <span class="text-ink-soft text-[11px] leading-relaxed block">${c.text}</span>
         </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderPostCommentsHtml(post) {
+  const commentsList = (post.comments || []).map(c => renderCommentItemHtml(c, post.id)).join('');
+  return `
+    <div class="comments-section pt-2 border-t border-gray-100">
+      <div class="space-y-2 mb-2" id="comments-container-${post.id}">
+        ${commentsList}
       </div>
     </div>
   `;
@@ -2200,7 +2310,7 @@ function updateCommentsDrawerUI(postId) {
 async function submitInlineComment(event, postId) {
   event.preventDefault();
   if (currentUserSession.role === 'guest') {
-    alert('Crie uma conta ou faça login para comentar!');
+    showPlatformAlert('Crie uma conta ou faça login para comentar!', 'Atenção');
     openSessionModal();
     return;
   }
@@ -2219,6 +2329,7 @@ async function submitInlineComment(event, postId) {
       user_id: currentUserSession.id || null,
       user_handle: currentUserSession.handle.replace('@', ''),
       user: currentUserSession.name || currentUserSession.handle.replace('@', ''),
+      avatar: currentUserSession.avatar || null,
       text: text,
       created_at: new Date().toISOString(),
       time_ago: 'agora'
@@ -2792,7 +2903,7 @@ function openArtistProfileByAuthor(authorName) {
   if (artist) {
     openArtistProfile(artist.id);
   } else {
-    openStoryModal(authorName, 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80', 'Recife, PE');
+    openStoryModal(authorName, DEFAULT_AVATAR_PLACEHOLDER, 'Recife, PE');
   }
 }
 
@@ -4937,7 +5048,7 @@ async function renderAdminCMS() {
               <div class="p-3 bg-amber-50/70 rounded-2xl border border-amber-200/80 space-y-2">
                 <div class="flex items-start justify-between gap-2">
                   <div class="flex items-center gap-2.5 min-w-0">
-                    <img src="${req.user?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}" alt="${req.requested_name}" class="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-amber-300" />
+                    <img src="${getUserAvatarUrl(req.user?.avatar_url)}" alt="${req.requested_name}" class="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-amber-300" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR_PLACEHOLDER}'" />
                     <div class="min-w-0">
                       <strong class="text-ink text-xs block font-bold truncate">${req.requested_name}</strong>
                       <span class="text-[11px] text-muted block">Fã: ${req.user?.display_name || 'Usuário'} (${req.user?.handle || '@foliao'})</span>
@@ -5584,30 +5695,81 @@ function openNewArtistModal() {
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left">
-      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+      <div class="pb-2 border-b border-gray-100 pr-10">
         <h3 class="font-display font-bold text-lg text-ink">Cadastrar Novo Artista</h3>
+        <p class="text-[11px] text-muted">Cadastre a conta oficial do artista. Ele receberá um e-mail de confirmação para acessar a plataforma com a senha padrão.</p>
       </div>
 
-      <form onsubmit="submitNewArtist(event)" class="space-y-3">
+      <div id="new-artist-error-msg" class="hidden text-xs text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-200 flex items-start gap-2"></div>
+
+      <form id="new-artist-form" onsubmit="submitNewArtist(event)" class="space-y-3">
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Nome do Artista / Orquestra</label>
-          <input type="text" id="new-artist-name" required placeholder="Ex: Maestro Duda" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Nome do Responsável / Nome Completo *</label>
+          <input type="text" id="new-artist-owner-name" required placeholder="Ex: Roberto Silva" oninput="document.getElementById('new-artist-error-msg')?.classList.add('hidden')" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
         </div>
+
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Gênero / Estilo</label>
-          <input type="text" id="new-artist-genre" required placeholder="Frevo de Rua / Frevo Canção" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Nome de Usuário (@) *</label>
+          <input type="text" id="new-artist-handle" required placeholder="@orquestrasomdaterra" oninput="formatSignupHandleInput(this); document.getElementById('new-artist-error-msg')?.classList.add('hidden')" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange font-medium" />
+          <span class="block text-[10px] text-muted mt-0.5">Identificador exclusivo na comunidade (ex: @maestroduda).</span>
         </div>
+
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase mb-1">E-mail de Contato</label>
-          <input type="email" id="new-artist-email" required placeholder="artista@cultura.pe.gov.br" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">E-mail de Acesso *</label>
+          <input type="email" id="new-artist-email" required placeholder="artista@culturape.com" oninput="document.getElementById('new-artist-error-msg')?.classList.add('hidden')" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+          <span class="block text-[10px] text-muted mt-0.5">O artista receberá neste e-mail a confirmação para acessar a conta.</span>
         </div>
+
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Mini-Biografia</label>
-          <textarea id="new-artist-bio" rows="3" required placeholder="Histórico cultural do artista..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none"></textarea>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Senha Padrão *</label>
+          <div class="relative">
+            <input type="password" id="new-artist-password" required minlength="6" value="Frevo2026@" placeholder="Mínimo 6 caracteres" oninput="document.getElementById('new-artist-error-msg')?.classList.add('hidden')" class="w-full pl-3 pr-10 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+            <button type="button" onclick="togglePasswordVisibility('new-artist-password', this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-ink transition-colors" aria-label="Ver senha" title="Ver senha">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+          <span class="block text-[10px] text-muted mt-0.5">Senha de primeiro acesso que o artista usará para entrar.</span>
         </div>
+
+        <!-- Campos Artísticos -->
+        <div class="space-y-2.5 p-3 rounded-xl bg-frevo-orange/5 border border-frevo-orange/20">
+          <div>
+            <label class="block text-[10px] font-bold text-ink uppercase mb-0.5">Nome Artístico / Grupo / Orquestra *</label>
+            <input type="text" id="new-artist-name" required placeholder="Ex: Orquestra Som da Terra" oninput="document.getElementById('new-artist-error-msg')?.classList.add('hidden')" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+          </div>
+
+          <div>
+            <label class="block text-[10px] font-bold text-ink uppercase mb-0.5">Gênero Tradicional</label>
+            <select id="new-artist-genre" onchange="handleGenreSelectChange('new-artist-genre', 'new-artist-custom-genre-container')" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange">
+              <option value="Frevo de Rua">Frevo de Rua</option>
+              <option value="Frevo Canção">Frevo Canção</option>
+              <option value="Frevo de Bloco">Frevo de Bloco</option>
+              <option value="Frevo Livre Instrumental">Frevo Livre Instrumental</option>
+              <option value="Frevo Contemporâneo">Frevo Contemporâneo</option>
+              <option value="Outro">Outro</option>
+            </select>
+            <div id="new-artist-custom-genre-container" class="mt-1.5 hidden">
+              <input type="text" id="new-artist-custom-genre" placeholder="Especifique o gênero tradicional..." class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[10px] font-bold text-ink uppercase mb-0.5">WhatsApp / Contato</label>
+            <input type="text" id="new-artist-whatsapp" placeholder="(81) 99999-9999" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+          </div>
+
+          <div>
+            <label class="block text-[10px] font-bold text-ink uppercase mb-0.5">Mini-Biografia / Histórico Cultural</label>
+            <textarea id="new-artist-bio" rows="2" placeholder="Trajetória cultural, participações no carnaval e histórico..." class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange"></textarea>
+          </div>
+        </div>
+
         <div class="flex gap-2 pt-2">
           <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl">Cancelar</button>
-          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl font-bold">Cadastrar Artista</button>
+          <button type="submit" id="new-artist-submit-btn" class="btn btn-primary flex-1 text-xs rounded-xl font-bold">Cadastrar Artista</button>
         </div>
       </form>
     </div>
@@ -5616,33 +5778,106 @@ function openNewArtistModal() {
   modal.classList.add('open');
 }
 
-function submitNewArtist(e) {
+async function submitNewArtist(e) {
   e.preventDefault();
-  const name = document.getElementById('new-artist-name').value;
-  const genre = document.getElementById('new-artist-genre').value;
-  const email = document.getElementById('new-artist-email').value;
-  const bio = document.getElementById('new-artist-bio').value;
+  const errorMsg = document.getElementById('new-artist-error-msg');
+  const submitBtn = document.getElementById('new-artist-submit-btn');
 
+  const ownerName = document.getElementById('new-artist-owner-name')?.value.trim();
+  const rawHandle = document.getElementById('new-artist-handle')?.value.trim();
+  const email = document.getElementById('new-artist-email')?.value.trim();
+  const password = document.getElementById('new-artist-password')?.value;
+  const artistName = document.getElementById('new-artist-name')?.value.trim();
+  const genreSelect = document.getElementById('new-artist-genre')?.value;
+  const customGenre = document.getElementById('new-artist-custom-genre')?.value.trim();
+  const finalGenre = genreSelect === 'Outro' ? (customGenre || 'Frevo Contemporâneo') : (genreSelect || 'Frevo de Rua');
+  const whatsapp = document.getElementById('new-artist-whatsapp')?.value.trim() || '';
+  const bio = document.getElementById('new-artist-bio')?.value.trim() || '';
+
+  if (!ownerName || !rawHandle || !email || !password || !artistName) {
+    if (errorMsg) {
+      errorMsg.innerText = 'Preencha todos os campos obrigatórios (*).';
+      errorMsg.classList.remove('hidden');
+    }
+    return;
+  }
+
+  const cleanHandle = sanitizeHandle(rawHandle);
+  if (!cleanHandle || cleanHandle.length < 4) {
+    if (errorMsg) {
+      errorMsg.innerText = 'O nome de usuário (@) deve ter pelo menos 3 caracteres alfanuméricos.';
+      errorMsg.classList.remove('hidden');
+    }
+    return;
+  }
+
+  // Verificar disponibilidade do @
+  const handleCheck = await isHandleTaken(cleanHandle);
+  if (handleCheck.taken) {
+    if (errorMsg) {
+      errorMsg.innerText = handleCheck.reason;
+      errorMsg.classList.remove('hidden');
+    }
+    return;
+  }
+
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerText = 'Cadastrando e enviando e-mail...';
+  }
+
+  let artistRecord = null;
+  if (window.supabaseService && window.supabaseService.isConnected()) {
+    const res = await window.supabaseService.registerArtistByAdmin({
+      ownerName,
+      handle: cleanHandle,
+      email,
+      password,
+      artistName,
+      genre: finalGenre,
+      whatsapp,
+      bio
+    });
+
+    if (res?.error) {
+      if (errorMsg) {
+        errorMsg.innerText = res.error.message || 'Erro ao cadastrar artista no Supabase.';
+        errorMsg.classList.remove('hidden');
+      }
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Cadastrar Artista';
+      }
+      return;
+    }
+    artistRecord = res.data?.artist || null;
+  }
+
+  // Inserir no estado local DB.artists
   const newArt = {
-    id: `a-${Date.now()}`,
-    name,
-    handle: '@' + name.toLowerCase().replace(/[^a-z0-9]+/g, ''),
-    genre,
-    bio,
-    avatar_url: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80',
+    id: artistRecord?.id || `a-${Date.now()}`,
+    name: artistName,
+    handle: cleanHandle,
+    genre: finalGenre,
+    bio: bio,
+    avatar_url: null,
     cover_url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80',
-    email,
-    phone: '',
+    email: email,
+    phone: whatsapp,
     is_approved: true,
     has_story: false
   };
 
-  DB.artists.push(newArt);
+  DB.artists.unshift(newArt);
 
   closeModal();
   renderArtists();
   renderAdminCMS();
-  alert('Artista cadastrado e ativado no sistema!');
+
+  showPlatformAlert(
+    `O artista "${artistName}" foi cadastrado com sucesso!\n\nUm e-mail de confirmação foi enviado para ${email} com a senha padrão configurada para o primeiro acesso.`,
+    'Artista Cadastrado com Sucesso'
+  );
 }
 
 // ==============================================================================
@@ -5779,7 +6014,7 @@ function openCommentsModal(postId) {
 
 async function addComment(postId) {
   if (currentUserSession.role === 'guest') {
-    alert('Você precisa estar logado para comentar.');
+    showPlatformAlert('Você precisa estar logado para comentar.', 'Atenção');
     openSessionModal();
     return;
   }
@@ -5797,6 +6032,7 @@ async function addComment(postId) {
       user_id: currentUserSession.id || null,
       user_handle: currentUserSession.handle.replace('@', ''),
       user: currentUserSession.name || currentUserSession.handle.replace('@', ''),
+      avatar: currentUserSession.avatar || null,
       text: text,
       created_at: new Date().toISOString(),
       time_ago: 'agora'
@@ -6204,7 +6440,7 @@ window.alert = function(msg) {
 let currentUserProfile = {
   name: '',
   handle: '',
-  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+  avatar: null,
   bio: '',
   socialLinks: [],
   email: '',
@@ -6227,7 +6463,7 @@ function updateProfileUI() {
     if (currentUserSession.email) currentUserProfile.email = currentUserSession.email;
   }
 
-  if (avatarEl) avatarEl.src = currentUserProfile.avatar || currentUserSession.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
+  if (avatarEl) avatarEl.src = getUserAvatarUrl(currentUserProfile.avatar || currentUserSession.avatar);
   if (nameEl) nameEl.innerText = currentUserProfile.name || (currentUserSession.role === 'guest' ? 'Visitante' : 'Novo Folião');
   if (handleEl) handleEl.innerText = currentUserProfile.handle || (currentUserSession.role === 'guest' ? '@visitante' : '@foliao');
   if (bioEl) {
@@ -6417,7 +6653,7 @@ function confirmDeleteAccount() {
     currentUserProfile = {
       name: 'Visitante',
       handle: '@visitante',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      avatar: null,
       bio: 'Perfil convidado da plataforma FrevAI.',
       socialLinks: [],
       email: '',
@@ -6426,7 +6662,7 @@ function confirmDeleteAccount() {
     switchTestRole('guest');
     updateProfileUI();
     closeModal();
-    alert('Sua conta foi removida com sucesso!');
+    showPlatformAlert('Sua conta foi removida com sucesso!', 'Conta Removida');
   }
 }
 
@@ -6469,7 +6705,7 @@ function openSettingsModal() {
         </button>
 
         <!-- Limpar Cache Local -->
-        <button onclick="localStorage.clear(); alert('Dados locais limpos!'); location.reload();" class="w-full p-3 bg-surface-soft hover:bg-red-50 rounded-2xl flex items-center justify-between border border-gray-100 transition-colors">
+        <button onclick="localStorage.clear(); showPlatformAlert('Dados locais limpos com sucesso!', 'Armazenamento'); location.reload();" class="w-full p-3 bg-surface-soft hover:bg-red-50 rounded-2xl flex items-center justify-between border border-gray-100 transition-colors">
           <div>
             <span class="font-bold text-xs text-frevo-red block">Limpar Armazenamento Local</span>
             <span class="text-[10px] text-muted">Restaurar padrões de fábrica do aplicativo</span>
@@ -6494,7 +6730,7 @@ let isFirstLoginFlow = false;
 
 function openEditProfileModal(isFirstLogin = false) {
   if (currentUserSession.role === 'guest') {
-    alert('Faça login para editar o seu perfil.');
+    showPlatformAlert('Faça login para editar o seu perfil.', 'Atenção');
     openSessionModal();
     return;
   }
@@ -6516,7 +6752,7 @@ function openEditProfileModal(isFirstLogin = false) {
 
       <div class="flex flex-col items-center justify-center space-y-2 py-2">
         <div class="relative">
-          <img id="edit-avatar-preview" src="${currentUserProfile.avatar || currentUserSession.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'}" alt="Preview" class="w-20 h-20 rounded-full object-cover border-2 border-frevo-orange shadow-md" />
+          <img id="edit-avatar-preview" src="${getUserAvatarUrl(currentUserProfile.avatar || currentUserSession.avatar)}" alt="Preview" class="w-20 h-20 rounded-full object-cover border-2 border-frevo-orange shadow-md" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR_PLACEHOLDER}'" />
           <label for="profile-avatar-file-input" class="absolute bottom-0 right-0 w-7 h-7 bg-ink text-white rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:bg-frevo-orange transition-colors" title="Carregar nova foto">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
@@ -7714,7 +7950,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
 
           const googleAvatar = session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture;
-          const currentAvatar = dbProfile?.avatar_url || googleAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
+          const currentAvatar = hasCustomAvatar(dbProfile?.avatar_url) ? dbProfile.avatar_url : (hasCustomAvatar(googleAvatar) ? googleAvatar : null);
 
           // Regra de Ouro: artist_id só é vinculado se role === 'artist' E aprovado pelo admin
           const isApprovedArtist = dbProfile?.role === 'artist' && dbProfile?.artist_id;
