@@ -23,22 +23,15 @@ FrevIA é uma Progressive Web App (PWA) e Single Page Application (SPA) standalo
 
 ---
 
-## ⚡ Integração com o Supabase
+## ⚡ Infraestrutura e Serviços em Nuvem (AWS)
 
-A aplicação conecta-se diretamente ao seu projeto **Supabase** (PostgreSQL + Auth + Storage).
+A aplicação FrevAI opera de forma nativa e unificada na infraestrutura da **Amazon Web Services (AWS)** (Região `sa-east-1` - São Paulo):
 
-### 1. Criar as Tabelas no Supabase (SQL Editor)
-No painel do seu projeto Supabase, acesse **SQL Editor > New Query**, copie o conteúdo de [`supabase/migrations/001_initial_schema.sql`](supabase/migrations/001_initial_schema.sql) e clique em **Run**.
-
-O script criará automaticamente:
-- Tabelas: `profiles`, `artists`, `songs`, `posts`, `comments`, `post_likes`, `map_points`, `frevo_steps`, `history_entries`.
-- Políticas de Segurança (Row Level Security - RLS).
-- Dados iniciais do patrimônio e mestres do Frevo.
-
-### 2. Conectar as Chaves na Aplicação
-Você pode conectar de duas formas:
-1. **Pela própria interface do App:** Clique no botão **"Conectar Supabase"** no topo da página e cole sua `Project URL` e `Anon Public Key`.
-2. **Via Arquivo:** Edite o arquivo [`js/config.js`](js/config.js) inserindo sua URL e Anon Key.
+1. **Hospedagem & CI/CD**: [AWS Amplify Hosting](https://main.d4g55spy61el0.amplifyapp.com) (App ID: `d4g55spy61el0`).
+2. **Autenticação de Usuários & Artistas**: Amazon Cognito User Pools (`sa-east-1_egnFYahtb`), com suporte nativo a Login/Cadastro por E-mail e Google OAuth 2.0.
+3. **Mídias, Áudios & Partituras**: Amazon S3 (`frevia-media-196156785860`), para upload e streaming de áudios (MP3), partituras em PDF, fotos e vídeos.
+4. **Banco de Dados Relacional**: Amazon Aurora PostgreSQL Serverless v2 (`sa-east-1`), garantindo escalabilidade automática sob demanda.
+5. **Configurações Centralizadas**: Todas as variáveis e endpoints são configurados em [`js/config.js`](js/config.js).
 
 ---
 

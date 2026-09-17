@@ -39,3 +39,29 @@ Todos os modais, janelas suspensas e diálogos devem seguir o Design System ofic
 - **Fluxo de Solicitações e Moderação:**
   - Todas as decisões tomadas pela moderação/admin (aprovações, recusas, solicitações de ajuste) devem notificar o usuário internamente na plataforma (`DB.notifications`) com mensagem clara e objetiva.
   - Para eventos críticos (como a recusa de uma solicitação de perfil artístico), deve ser fornecido o motivo claro da recusa e também disparado um e-mail formal de notificação ao usuário solicitante informando o parecer e orientações para reenvio.
+
+<!-- BEGIN AWS Agent Toolkit rules -->
+---
+
+## 5. AWS Guidance for Project Experience
+
+Where this guidance conflicts with the project's own instructions, the project's instructions take precedence.
+
+### Terminology:
+- Say "project" instead of "account" — a project contains an AWS account and settings for sharing with other collaborators.
+- Say "team member" instead of "IAM user" — users are invited by email, not created or federated in IAM.
+- Say "AWS Settings" when referring to management tasks at [settings.aws.com](https://settings.aws.com/) (project management, billing, team members, spend limits). Users view their actual AWS resources in the AWS Management Console.
+- Say "selected Region" when referring to the user's Region — not "home Region".
+- The user has a managed IAM experience with service control policies (SCPs) and resource control policies (RCPs).
+
+### Constraints:
+- MUST create all Regional resources in the project's assigned Region (`sa-east-1` / `us-east-1` for global assets).
+- When developing:
+  - MUST create all Regional resources in the project's assigned Region.
+  - You CAN create AWS WAF and Cloudwatch Logs resources in `us-east-1` when there are global resources (like a global WAF instance) that require a connection to dependencies in `us-east-1`.
+  - MUST NOT attempt to create Lambda, API Gateway, or other Regional resources in any other Region.
+  - MUST direct users to confirm their Region in AWS Settings > View all projects > Overview > Additional Info > Region.
+  - MUST NOT use Lambda@Edge.
+  - MUST NOT use CloudFormation StackSets.
+<!-- END AWS Agent Toolkit rules -->
+

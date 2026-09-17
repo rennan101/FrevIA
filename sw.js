@@ -5,7 +5,7 @@ const ASSETS_TO_CACHE = [
   './index.html',
   './css/style.css',
   './js/config.js',
-  './js/supabase.js',
+  './js/aws.js',
   './js/app.js',
   './manifest.json',
   './assets/icons/icon.svg',

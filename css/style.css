@@ -1989,7 +1989,8 @@ body {
   display: flex;
   gap: 16px;
   overflow-x: auto;
-  padding: 4px 4px 16px 4px;
+  padding: 12px 6px 18px 6px;
+  margin: -6px -6px -6px -6px;
   scrollbar-width: none;
   -ms-overflow-style: none;
   cursor: grab;
@@ -2013,12 +2014,13 @@ body {
   padding: 10px;
   border: 1px solid #EDEDED;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
   cursor: pointer;
+  will-change: transform;
 }
 
 .album-card-item:hover {
-  transform: translateY(-4px) scale(1.02);
+  transform: translateY(-4px);
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.09);
   border-color: #FF8A00;
 }

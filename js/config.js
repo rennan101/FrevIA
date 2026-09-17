@@ -1,43 +1,59 @@
 // ==============================================================================
-// FREVAI CONFIGURATION & SUPABASE KEYS
+// FREVAI CONFIGURATION — AWS CLOUD & BACKEND
 // ==============================================================================
-// Credenciais do Projeto FrevAI no Supabase
+// Infraestrutura em Nuvem na AWS (Amazon Web Services)
+// Região Oficial: sa-east-1 (São Paulo) | Projeto / Conta: 196156785860
+// Hosting: AWS Amplify Hosting (d4g55spy61el0.amplifyapp.com)
 
-const DEFAULT_SUPABASE_URL = 'https://mzskenialclybcfpzlel.supabase.co';
-const DEFAULT_SUPABASE_ANON_KEY = 'sb_publishable_fnArOa9s5qVGMrDF3WF9Pg_a439cmfK';
-
-// Função auxiliar para normalizar a URL do Supabase
-function sanitizeSupabaseUrl(url) {
-  if (!url) return '';
-  return url.trim().replace(/\/rest\/v1\/?$/, '').replace(/\/+$/, '');
-}
+window.FREVIA_AWS_CONFIG = {
+  REGION: 'sa-east-1',
+  ACCOUNT_ID: '196156785860',
+  AMPLIFY_APP_ID: 'd4g55spy61el0',
+  AMPLIFY_DOMAIN: 'd4g55spy61el0.amplifyapp.com',
+  
+  // Storage de Mídia (S3) para Áudios, Partituras PDF, Imagens e Vídeos
+  S3_BUCKET: 'frevia-media-196156785860',
+  S3_BASE_URL: 'https://frevia-media-196156785860.s3.sa-east-1.amazonaws.com',
+  
+  // Autenticação (Amazon Cognito User Pools)
+  COGNITO_USER_POOL_ID: 'sa-east-1_egnFYahtb',
+  COGNITO_CLIENT_ID: '46t8rd0jlv6c3gmje9uj10s6c8',
+  COGNITO_DOMAIN: 'frevia-auth.auth.sa-east-1.amazoncognito.com',
+  
+  // Banco de Dados Relacional: Aurora PostgreSQL Serverless v2
+  AURORA_ENDPOINT: localStorage.getItem('frevai_aurora_endpoint') || '',
+  API_GATEWAY_URL: localStorage.getItem('frevai_api_gateway_url') || '',
+  
+  TABLES: {
+    PROFILES: 'frevai_profiles',
+    ARTISTS: 'frevai_artists',
+    POSTS: 'frevai_posts',
+    SONGS: 'frevai_songs',
+    STEPS: 'frevai_steps',
+    HISTORY: 'frevai_history',
+    MAP_POINTS: 'frevai_map_points',
+    ARTIST_REQUESTS: 'frevai_artist_requests',
+    NOTIFICATIONS: 'frevai_notifications',
+    COMMENTS: 'frevai_post_comments',
+    LIKES: 'frevai_post_likes'
+  }
+};
 
 window.FREVIA_CONFIG = {
-  SUPABASE_URL: sanitizeSupabaseUrl(localStorage.getItem('frevai_supabase_url') || localStorage.getItem('frevia_supabase_url') || DEFAULT_SUPABASE_URL),
-  SUPABASE_ANON_KEY: (localStorage.getItem('frevai_supabase_anon_key') || localStorage.getItem('frevia_supabase_anon_key') || DEFAULT_SUPABASE_ANON_KEY).trim(),
-  
-  // Salvar credenciais no LocalStorage
-  saveCredentials(url, key) {
-    const cleanUrl = sanitizeSupabaseUrl(url);
-    const cleanKey = key ? key.trim() : '';
-    if (cleanUrl) localStorage.setItem('frevai_supabase_url', cleanUrl);
-    if (cleanKey) localStorage.setItem('frevai_supabase_anon_key', cleanKey);
-    this.SUPABASE_URL = cleanUrl;
-    this.SUPABASE_ANON_KEY = cleanKey;
-  },
-  
-  // Limpar credenciais
-  clearCredentials() {
-    localStorage.removeItem('frevai_supabase_url');
-    localStorage.removeItem('frevai_supabase_anon_key');
-    localStorage.removeItem('frevia_supabase_url');
-    localStorage.removeItem('frevia_supabase_anon_key');
-    this.SUPABASE_URL = DEFAULT_SUPABASE_URL;
-    this.SUPABASE_ANON_KEY = DEFAULT_SUPABASE_ANON_KEY;
+  AWS: window.FREVIA_AWS_CONFIG,
+
+  saveAwsEndpoints(apiGatewayUrl, auroraEndpoint) {
+    if (apiGatewayUrl) {
+      localStorage.setItem('frevai_api_gateway_url', apiGatewayUrl.trim());
+      this.AWS.API_GATEWAY_URL = apiGatewayUrl.trim();
+    }
+    if (auroraEndpoint) {
+      localStorage.setItem('frevai_aurora_endpoint', auroraEndpoint.trim());
+      this.AWS.AURORA_ENDPOINT = auroraEndpoint.trim();
+    }
   },
 
-  // Verificar se o Supabase está configurado
   isConfigured() {
-    return Boolean(this.SUPABASE_URL && this.SUPABASE_ANON_KEY);
+    return Boolean(this.AWS && this.AWS.S3_BUCKET && this.AWS.COGNITO_USER_POOL_ID);
   }
 };

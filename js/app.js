@@ -1313,14 +1313,11 @@ async function handleForgotPasswordSubmit(e) {
 }
 
 async function loginWithGoogle() {
-  if (window.supabaseService && window.supabaseService.isConnected()) {
+  if (window.awsService && window.awsService.isConnected()) {
     try {
-      const { data, error } = await window.supabaseService.signInWithGoogle();
-      if (error) {
-        alert('Erro ao conectar com o Google: ' + error.message + '\n\nCertifique-se de habilitar o provedor Google no painel do Supabase (Authentication -> Providers -> Google).');
-      }
+      window.awsService.signInWithGoogle();
     } catch (err) {
-      alert('Falha na comunicação com o Google OAuth: ' + err.message);
+      alert('Falha na comunicação com o Amazon Cognito / Google OAuth: ' + err.message);
     }
   } else {
     switchTestRole('user');

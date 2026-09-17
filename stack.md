@@ -1,62 +1,40 @@
 # stack.md — Stack, Arquitetura e Infraestrutura
 
-## 1. Stack recomendada
+## 1. Stack Oficial — AWS Cloud Architecture
 
 ### Frontend
+- HTML5 / Vanilla JavaScript (SPA/PWA)
+- Tailwind CSS (CDN & Design System)
+- PWA Nativo (Service Worker, Web App Manifest)
+- SVG customizado para ícones (Padrão Oficial Zero Emojis)
+- jsPDF para geração de documentos e partituras
 
-- Next.js
-- React
-- TypeScript
-- App Router
-- Tailwind CSS
-- shadcn/ui somente para componentes estruturais, customizando completamente o visual
-- React Hook Form
-- Zod
-- TanStack Query quando necessário para dados altamente interativos
-- SVG customizado para ícones
-
-### Backend / BaaS
-
-**Supabase**
-
-Usar:
-- Supabase Auth;
-- PostgreSQL;
-- Row Level Security;
-- Storage;
-- Realtime somente onde fizer sentido;
-- Edge Functions para operações privilegiadas.
+### Backend & Nuvem (Amazon Web Services — AWS)
+- **Hosting**: AWS Amplify Hosting (`amplify.yml`, domínio `d4g55spy61el0.amplifyapp.com`)
+- **Autenticação**: Amazon Cognito User Pools (`sa-east-1_egnFYahtb` com suporte a Email/Senha e Google OAuth)
+- **Banco de Dados Relacional**: Amazon Aurora PostgreSQL Serverless v2 (escalabilidade dinâmica 0.5 a 1 ACU na região `sa-east-1`)
+- **API & Camada de Serviços**: Amazon API Gateway + AWS Lambda / Aurora Data API (PostgreSQL REST endpoints)
+- **Storage de Mídia**: Amazon S3 Bucket (`frevia-media-196156785860` em `sa-east-1`) com CloudFront para streaming de áudio (MP3/WAV), imagens e download seguro de partituras (PDF)
 
 ### Mapas
+- Google Maps Embed com geocodificação validada e OpenStreetMap/MapLibre para rotas culturais.
 
-Opções:
-- MapLibre GL JS;
-- OpenStreetMap como fonte de dados/base quando os termos de uso forem respeitados;
-- serviço de tiles adequado para produção.
-
-Evitar depender de uma API de mapas proprietária cara sem necessidade.
-
-### Hosting
-
-Recomendação de arquitetura:
+### Hosting & Fluxo de Deploy
 
 ```text
-GitHub
+Repositório Git
    ↓
-Vercel
+AWS Amplify Hosting (sa-east-1)
    ↓
-Next.js
-   ↓
-Supabase
- ├── Auth
- ├── PostgreSQL
- ├── Storage
- └── Edge Functions
+Frontend PWA (FrevAI)
+   ├── Auth: Amazon Cognito User Pools (Google OAuth & Email/Senha)
+   ├── Media: Amazon S3 (Áudios, Partituras PDF, Fotos e Vídeos)
+   └── Data: Amazon API Gateway / Lambda ──► Aurora PostgreSQL Serverless v2
 ```
 
 ---
 
-# 2. Por que Supabase
+# 2. Por que AWS Aurora PostgreSQL Serverless v2 & S3
 
 O produto possui muitos dados relacionais:
 
