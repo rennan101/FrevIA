@@ -1085,18 +1085,29 @@ body {
 }
 
 /* ==========================================================================
-   ONBOARDING CARDS SLIDER & BREADCRUMBS
+   ONBOARDING CARDS SLIDER, SWIPE/DRAG PHYSICS & BREADCRUMBS
    ========================================================================== */
 .onboarding-carousel {
   position: relative;
   overflow: hidden;
   width: 100%;
+  cursor: grab;
+  cursor: -webkit-grab;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;
+}
+
+.onboarding-carousel.is-dragging {
+  cursor: grabbing;
+  cursor: -webkit-grabbing;
 }
 
 .onboarding-track {
   display: flex;
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   width: 100%;
+  will-change: transform;
 }
 
 .onboarding-slide {
@@ -1107,17 +1118,22 @@ body {
   box-sizing: border-box;
 }
 
+.onboarding-slide > div {
+  transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.2), box-shadow 0.35s ease;
+  will-change: transform, box-shadow;
+}
+
 .onboarding-dot {
   width: 8px;
   height: 8px;
   border-radius: 9999px;
   background-color: #E2E8F0;
-  transition: all 0.25s ease;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   cursor: pointer;
 }
 
 .onboarding-dot.active {
-  width: 22px;
+  width: 24px;
   background-color: #FF8A00;
   border-radius: 9999px;
 }
@@ -1140,6 +1156,221 @@ body {
 .notification-item:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* ==========================================================================
+   DESKTOP WEB VIEW (INSTAGRAM WEB STYLE: SIDEBAR ESQUERDA & GRID 3x3)
+   ========================================================================== */
+@media (min-width: 992px) {
+  /* 1. Sidebar Lateral Esquerda Fixa */
+  .bottom-nav {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    right: auto !important;
+    width: 250px !important;
+    height: 100vh !important;
+    background: #FFFFFF !important;
+    background: linear-gradient(180deg, #FFFFFF 0%, #FAFAF8 100%) !important;
+    border-right: 1px solid #EAEAEA !important;
+    border-top: none !important;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.03) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+    padding: 24px 16px 20px 16px !important;
+    z-index: 50 !important;
+    gap: 8px !important;
+  }
+
+  .sidebar-brand {
+    display: flex !important;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px 22px 12px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #F0F0F0;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .sidebar-brand:hover .gradient-frevo {
+    transform: scale(1.06) rotate(4deg);
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .sidebar-footer {
+    display: block !important;
+  }
+
+  .nav-item {
+    flex: none !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    padding: 10px 16px !important;
+    border-radius: 14px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 14px !important;
+    color: #4A4A4A !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    transform: none !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+
+  .nav-item:hover {
+    background: #FFF5EB !important;
+    color: #FF8A00 !important;
+    transform: translateX(4px) !important;
+  }
+
+  .nav-item.active {
+    background: linear-gradient(135deg, #FF8A00 0%, #F0442E 100%) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 4px 14px rgba(255, 138, 0, 0.32) !important;
+    transform: none !important;
+  }
+
+  .nav-item.active svg {
+    stroke: #FFFFFF !important;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+  }
+
+  .nav-label {
+    display: inline-block !important;
+  }
+
+  /* 2. Header & Main Deslocados */
+  header {
+    margin-left: 250px !important;
+    width: calc(100% - 250px) !important;
+  }
+
+  header > div {
+    max-width: 1180px !important;
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+  }
+
+  /* Ocultar logo do header no desktop pois a sidebar já tem */
+  header [data-view="feed"] {
+    opacity: 0.9;
+  }
+
+  main {
+    margin-left: 250px !important;
+    width: calc(100% - 250px) !important;
+    padding-bottom: 48px !important;
+    padding-top: 16px !important;
+  }
+
+  /* 3. Containers de Views Expandidos */
+  .view-section {
+    max-width: 1180px !important;
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+  }
+
+  /* 4. Feed Grid em 3 Cards por Linha (Estilo Instagram Web) */
+  #feed-items-stream {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 24px !important;
+    align-items: start !important;
+  }
+
+  #feed-items-stream > .feed-card-immersive {
+    margin-bottom: 0 !important;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  #feed-items-stream > .feed-card-immersive:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  }
+
+  #feed-items-stream .feed-card-image-wrap {
+    height: 260px !important;
+  }
+
+  #feed-items-stream .feed-card-caption-container {
+    flex: 1;
+  }
+
+  /* 5. Explorar: 3 Cards em Linha Horizontal */
+  #view-explore > .space-y-3\.5 {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 20px !important;
+    margin-top: 16px !important;
+  }
+
+  #view-explore .music-category-card {
+    min-height: 180px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    padding: 24px !important;
+  }
+
+  /* 6. Artistas: Grid Responsiva em 3 Colunas */
+  #artists-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 20px !important;
+  }
+
+  /* 7. Letras & Partituras: Grid em 3 Colunas */
+  #songs-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 20px !important;
+  }
+
+  /* 8. Passos de Frevo: Grid em 3 Colunas */
+  #steps-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 20px !important;
+  }
+
+  /* 9. Mapa Cultural: Grid em 2 Colunas */
+  #map-points-list {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 20px !important;
+  }
+
+  /* 10. Perfil do Usuário / Artista */
+  #view-artist-panel .profile-header-card {
+    padding: 24px !important;
+  }
+
+  /* Banner PWA */
+  .pwa-install-banner {
+    left: 270px !important;
+    right: auto !important;
+    max-width: 440px !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  #artists-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

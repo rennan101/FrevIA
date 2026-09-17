@@ -2053,7 +2053,7 @@ function renderProfileGallery() {
         </div>
 
         ${savedPosts.length > 0 ? `
-          <div class="space-y-2.5">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             ${savedPosts.map(post => `
               <div class="bg-white border border-gray-200 rounded-2xl p-3 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
                 <div onclick="handleNotificationClick(null, 'post', '${post.id}')" class="flex items-center gap-3 min-w-0 cursor-pointer flex-1 mr-2">
@@ -2106,29 +2106,33 @@ function renderProfileGallery() {
           <span class="text-xs font-bold text-ink">Minhas Obras & Partituras (${artistSongs.length})</span>
           <button onclick="openSubmitSongModal()" class="text-xs font-bold text-frevo-orange hover:underline">+ Nova Obra</button>
         </div>
-        ${artistSongs.length > 0 ? artistSongs.map(song => `
-          <div class="bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
-            <div class="space-y-0.5 min-w-0 pr-2">
-              <div class="flex items-center gap-1.5 flex-wrap">
-                <span class="badge bg-frevo-cyan/15 text-frevo-cyan text-[10px] font-bold">${song.genre}</span>
-                <span class="badge bg-gray-100 text-muted text-[10px] font-mono font-bold">${song.downloads_count || 120} downloads</span>
+        ${artistSongs.length > 0 ? `
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            ${artistSongs.map(song => `
+              <div class="bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
+                <div class="space-y-0.5 min-w-0 pr-2">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="badge bg-frevo-cyan/15 text-frevo-cyan text-[10px] font-bold">${song.genre}</span>
+                    <span class="badge bg-gray-100 text-muted text-[10px] font-mono font-bold">${song.downloads_count || 120} downloads</span>
+                  </div>
+                  <h4 class="font-bold text-xs text-ink leading-tight truncate">${song.title}</h4>
+                  <p class="text-[11px] text-muted line-clamp-1">${song.description}</p>
+                </div>
+                <div class="flex items-center gap-1.5 flex-shrink-0">
+                  <button onclick="openScoreModal('${song.title}', '${song.artist}', '${song.id}')" class="btn btn-cyan text-xs py-1.5 px-3 h-8 rounded-xl font-bold flex-shrink-0">
+                    Baixar
+                  </button>
+                  <button onclick="deleteSong('${song.id}')" class="p-1.5 text-gray-400 hover:text-frevo-red" title="Excluir">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                  </button>
+                </div>
               </div>
-              <h4 class="font-bold text-xs text-ink leading-tight truncate">${song.title}</h4>
-              <p class="text-[11px] text-muted line-clamp-1">${song.description}</p>
-            </div>
-            <div class="flex items-center gap-1.5 flex-shrink-0">
-              <button onclick="openScoreModal('${song.title}', '${song.artist}', '${song.id}')" class="btn btn-cyan text-xs py-1.5 px-3 h-8 rounded-xl font-bold flex-shrink-0">
-                Baixar
-              </button>
-              <button onclick="deleteSong('${song.id}')" class="p-1.5 text-gray-400 hover:text-frevo-red" title="Excluir">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
-              </button>
-            </div>
+            `).join('')}
           </div>
-        `).join('') : `
+        ` : `
           <div class="p-8 text-center bg-white rounded-2xl border border-gray-200">
             <p class="text-xs text-muted mb-2">Nenhuma partitura cadastrada ainda.</p>
             <button onclick="openSubmitSongModal()" class="btn btn-primary text-xs px-3 py-1.5 rounded-xl font-bold">
@@ -3776,24 +3780,100 @@ function openOnboardingModal() {
     </div>
   `;
 
-  // Adicionar suporte a gestos de arrasto touch (Swipe)
+  // Suporte avançado e prazeroso a gestos de arrasto (Touch e Mouse Drag com Física e Rotação)
+  const carousel = document.querySelector('.onboarding-carousel');
   const track = document.getElementById('onboarding-track');
-  if (track) {
-    let touchStartX = 0;
-    let touchEndX = 0;
 
-    track.addEventListener('touchstart', (e) => {
-      touchStartX = e.changedTouches[0].screenX;
-    }, { passive: true });
+  if (carousel && track) {
+    let isDragging = false;
+    let startX = 0;
+    let currentX = 0;
+    let deltaX = 0;
 
-    track.addEventListener('touchend', (e) => {
-      touchEndX = e.changedTouches[0].screenX;
-      if (touchStartX - touchEndX > 45) {
-        onboardingNext();
-      } else if (touchEndX - touchStartX > 45) {
-        onboardingPrev();
+    const startDrag = (clientX) => {
+      isDragging = true;
+      startX = clientX;
+      currentX = clientX;
+      deltaX = 0;
+      carousel.classList.add('is-dragging');
+      track.style.transition = 'none';
+      const activeCard = track.children[currentOnboardingIndex]?.firstElementChild;
+      if (activeCard) {
+        activeCard.style.transition = 'none';
       }
+    };
+
+    const moveDrag = (clientX) => {
+      if (!isDragging) return;
+      currentX = clientX;
+      deltaX = currentX - startX;
+
+      // Resistência elástica nos extremos (primeiro e último card)
+      let effectiveDelta = deltaX;
+      if ((currentOnboardingIndex === 0 && deltaX > 0) || (currentOnboardingIndex === totalOnboardingSlides - 1 && deltaX < 0)) {
+        effectiveDelta = deltaX * 0.32;
+      }
+
+      // Rotação suave baseada no deslocamento para sensação física orgânica e prazerosa
+      const tilt = (effectiveDelta / 280) * 6; // até ~6 graus
+      const scale = 1 - Math.min(Math.abs(effectiveDelta) / 3000, 0.035);
+
+      track.style.transform = `translateX(calc(-${currentOnboardingIndex * 100}% + ${effectiveDelta}px))`;
+
+      const activeCard = track.children[currentOnboardingIndex]?.firstElementChild;
+      if (activeCard) {
+        activeCard.style.transform = `rotate(${tilt}deg) scale(${scale})`;
+      }
+    };
+
+    const endDrag = () => {
+      if (!isDragging) return;
+      isDragging = false;
+      carousel.classList.remove('is-dragging');
+
+      track.style.transition = 'transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.2)';
+
+      const activeCard = track.children[currentOnboardingIndex]?.firstElementChild;
+      if (activeCard) {
+        activeCard.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2), box-shadow 0.4s ease';
+        activeCard.style.transform = '';
+      }
+
+      // Se arrastou mais que o limiar (45px)
+      if (deltaX < -45) {
+        onboardingNext();
+      } else if (deltaX > 45) {
+        onboardingPrev();
+      } else {
+        updateOnboardingView();
+      }
+    };
+
+    // Touch events
+    carousel.addEventListener('touchstart', (e) => {
+      if (e.touches && e.touches.length === 1) startDrag(e.touches[0].clientX);
     }, { passive: true });
+
+    carousel.addEventListener('touchmove', (e) => {
+      if (e.touches && e.touches.length === 1) moveDrag(e.touches[0].clientX);
+    }, { passive: true });
+
+    carousel.addEventListener('touchend', endDrag, { passive: true });
+    carousel.addEventListener('touchcancel', endDrag, { passive: true });
+
+    // Mouse drag events
+    carousel.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      startDrag(e.clientX);
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (isDragging) moveDrag(e.clientX);
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isDragging) endDrag();
+    });
   }
 
   modal.classList.add('open');
@@ -3802,7 +3882,16 @@ function openOnboardingModal() {
 function updateOnboardingView() {
   const track = document.getElementById('onboarding-track');
   if (track) {
+    track.style.transition = 'transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.2)';
     track.style.transform = `translateX(-${currentOnboardingIndex * 100}%)`;
+    
+    // Limpar transformações inline dos cards filhos
+    Array.from(track.children).forEach(slide => {
+      const card = slide.firstElementChild;
+      if (card) {
+        card.style.transform = '';
+      }
+    });
   }
 
   // Atualizar dots
