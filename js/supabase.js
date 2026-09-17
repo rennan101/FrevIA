@@ -376,7 +376,9 @@ class SupabaseService {
           slug: (postData.title || 'post').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now(),
           content: postData.content,
           type: postData.type || 'culture',
-          cover_url: postData.image,
+          cover_url: postData.image || postData.media_url || null,
+          media_url: postData.media_url || postData.image || null,
+          media_type: postData.media_type || (postData.isVideo ? 'video' : 'image'),
           tags: postData.tags || ['Frevo'],
           status: 'published'
         }])
@@ -393,14 +395,18 @@ class SupabaseService {
   async updatePost(id, postData) {
     if (!this.client) return null;
     try {
+      const updatePayload = {
+        title: postData.title,
+        content: postData.content,
+        cover_url: postData.image || postData.media_url || null,
+        tags: postData.tags
+      };
+      if (postData.media_url) updatePayload.media_url = postData.media_url;
+      if (postData.media_type) updatePayload.media_type = postData.media_type;
+
       const { data, error } = await this.client
         .from('posts')
-        .update({
-          title: postData.title,
-          content: postData.content,
-          cover_url: postData.image,
-          tags: postData.tags
-        })
+        .update(updatePayload)
         .eq('id', id)
         .select();
       if (error) throw error;
@@ -1188,6 +1194,175 @@ class SupabaseService {
     }
   }
 
+  async deleteMapPoint(id) {
+    if (!this.client) return false;
+    try {
+      const { error } = await this.client.from('map_points').delete().eq('id', id);
+      if (error) throw error;
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  // ============================================================================
+  // PASSOS DO FREVO (CRUD)
+  // ============================================================================
+  async getSteps() {
+    if (!this.client) return null;
+    try {
+      const { data, error } = await this.client.from('frevo_steps').select('*').order('name');
+      if (error) throw error;
+      if (data && data.length > 0) {
+        return data.map(s => ({
+          id: s.id,
+          name: s.name,
+          difficulty: s.difficulty || 'Iniciante',
+          category: s.category || 'Tradicional',
+          description: s.description || '',
+          instructions: s.instructions || '',
+          media_url: s.media_url || null,
+          media_type: s.media_type || 'image',
+          author_role: 'admin'
+        }));
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  async createStep(step) {
+    if (!this.client) return null;
+    try {
+      const { data, error } = await this.client.from('frevo_steps').insert([{
+        name: step.name,
+        slug: step.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now(),
+        description: step.description,
+        instructions: step.instructions,
+        difficulty: step.difficulty || 'Iniciante',
+        category: step.category || 'Tradicional',
+        media_url: step.media_url || null,
+        media_type: step.media_type || 'image',
+        is_published: true
+      }]).select();
+      if (error) throw error;
+      return data;
+    } catch (err) {
+      console.error('[Supabase] Erro ao salvar passo:', err.message);
+      return null;
+    }
+  }
+
+  async deleteStep(stepId) {
+    if (!this.client) return false;
+    try {
+      const { error } = await this.client.from('frevo_steps').delete().eq('id', stepId);
+      if (error) throw error;
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  // ============================================================================
+  // LINHA DO TEMPO HISTÓRICA (CRUD)
+  // ============================================================================
+  async getHistoryEntries() {
+    if (!this.client) return null;
+    try {
+      const { data, error } = await this.client.from('history_entries').select('*').order('created_at', { ascending: true });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        return data.map(h => ({
+          id: h.id,
+          title: h.title,
+          period: h.period_label || 'Histórico',
+          content: h.content,
+          source: h.source_text || 'Acervo FrevAI',
+          media_url: h.media_url || h.image_url || null,
+          media_type: h.media_type || 'image'
+        }));
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  async createHistoryEntry(item) {
+    if (!this.client) return null;
+    try {
+      const { data, error } = await this.client.from('history_entries').insert([{
+        title: item.title,
+        slug: item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now(),
+        period_label: item.period,
+        content: item.content,
+        source_text: item.source,
+        image_url: item.media_type === 'image' ? item.media_url : null,
+        media_url: item.media_url || null,
+        media_type: item.media_type || 'image',
+        is_published: true
+      }]).select();
+      if (error) throw error;
+      return data;
+    } catch (err) {
+      console.error('[Supabase] Erro ao salvar marco histórico:', err.message);
+      return null;
+    }
+  }
+
+  async deleteHistoryEntry(historyId) {
+    if (!this.client) return false;
+    try {
+      const { error } = await this.client.from('history_entries').delete().eq('id', historyId);
+      if (error) throw error;
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  // ============================================================================
+  // UPLOAD DE MÍDIA UNIVERSAL (IMAGENS E VÍDEOS)
+  // ============================================================================
+  async uploadMedia(file, folder = 'general') {
+    if (!this.client || !file) return null;
+    try {
+      const isVideo = file.type && file.type.startsWith('video');
+      const ext = file.name ? file.name.split('.').pop().toLowerCase() : (isVideo ? 'mp4' : 'jpg');
+      const cleanName = (file.name || 'media').replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 30);
+      const filePath = `${folder}/${Date.now()}_${cleanName}.${ext}`;
+
+      // Tenta upload no bucket 'media'; fallback para 'covers' ou 'scores'
+      let targetBucket = 'media';
+      let res = await this.client.storage.from(targetBucket).upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: true
+      });
+
+      if (res.error) {
+        // Fallback para 'covers' se 'media' ainda não existir no projeto do usuário
+        targetBucket = 'covers';
+        res = await this.client.storage.from(targetBucket).upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+      }
+
+      if (res.error) throw res.error;
+
+      const { data: { publicUrl } } = this.client.storage
+        .from(targetBucket)
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (err) {
+      console.warn('[Supabase Storage] Aviso no upload de mídia:', err.message);
+      return null;
+    }
+  }
+
   // ============================================================================
   // UPLOAD DE AVATAR (STORAGE)
   // ============================================================================
@@ -1216,6 +1391,70 @@ class SupabaseService {
       console.warn('[Supabase] Falha no upload do avatar:', err.message);
       return null;
     }
+  }
+
+  // ============================================================================
+  // GEOCODIFICAÇÃO DE ENDEREÇO COM GOOGLE MAPS / NOMINATIM
+  // ============================================================================
+  async geocodeAddress(addressQuery) {
+    if (!addressQuery || !addressQuery.trim()) return null;
+    const query = addressQuery.trim();
+
+    // Dicionário com marcos célebres de Pernambuco para resposta instantânea e precisão absoluta
+    const knownLandmarks = [
+      { keys: ['paço do frevo', 'paco do frevo', 'arsenal da marinha', 'praça do arsenal'], coords: [-8.0617, -34.8711], address: 'Praça do Arsenal da Marinha, s/n - Bairro do Recife, Recife - PE' },
+      { keys: ['vassourinhas', 'largo do amparo', 'amparo'], coords: [-8.0534, -34.8778], address: 'Largo do Amparo, Olinda / Recife - PE' },
+      { keys: ['marco zero', 'praça barão do rio branco'], coords: [-8.0631, -34.8711], address: 'Praça do Marco Zero, Recife Antigo, Recife - PE' },
+      { keys: ['galo da madrugada', 'palácio enéas freire', 'rua da concórdia'], coords: [-8.0673, -34.8821], address: 'Rua da Concórdia, 1024 - São José, Recife - PE' },
+      { keys: ['rua da aurora', 'aurora'], coords: [-8.0595, -34.8812], address: 'Rua da Aurora - Boa Vista, Recife - PE' },
+      { keys: ['teatro santa isabel', 'santa isabel', 'praça da república'], coords: [-8.0604, -34.8781], address: 'Praça da República, s/n - Santo Antônio, Recife - PE' },
+      { keys: ['pitombeira', 'rua 27 de janeiro', 'carmo olinda'], coords: [-8.0125, -34.8519], address: 'Rua 27 de Janeiro, Carmo - Olinda - PE' },
+      { keys: ['alto da sé', 'igreja da sé'], coords: [-8.0142, -34.8483], address: 'Alto da Sé, Carmo - Olinda - PE' },
+      { keys: ['mercado da boa vista', 'boa vista'], coords: [-8.0628, -34.8911], address: 'Rua da Santa Cruz - Boa Vista, Recife - PE' },
+      { keys: ['rua do bom jesus', 'bom jesus', 'sinagoga kahal zur'], coords: [-8.0625, -34.8718], address: 'Rua do Bom Jesus - Recife Antigo, Recife - PE' },
+      { keys: ['bomba do hemetério', 'bomba do hemeterio'], coords: [-8.0215, -34.8973], address: 'Bomba do Hemetério - Zona Norte, Recife - PE' },
+      { keys: ['cais da alfândega', 'shopping paço alfândega', 'madre de deus'], coords: [-8.0645, -34.8732], address: 'Cais da Alfândega - Bairro do Recife, Recife - PE' }
+    ];
+
+    const lower = query.toLowerCase();
+    for (const lm of knownLandmarks) {
+      if (lm.keys.some(k => lower.includes(k))) {
+        return {
+          displayName: lm.address,
+          coords: lm.coords,
+          source: 'curated'
+        };
+      }
+    }
+
+    // Geocodificação real via Nominatim OpenStreetMap focada em Pernambuco/Recife
+    try {
+      const sanitized = encodeURIComponent(`${query}, Pernambuco, Brasil`);
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${sanitized}&addressdetails=1&limit=1`, {
+        headers: { 'Accept-Language': 'pt-BR,pt;q=0.9', 'User-Agent': 'FrevAI-Cultural-App' }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.length > 0) {
+          const lat = parseFloat(data[0].lat);
+          const lon = parseFloat(data[0].lon);
+          return {
+            displayName: data[0].display_name,
+            coords: [lat, lon],
+            source: 'geocoded'
+          };
+        }
+      }
+    } catch (e) {
+      console.warn('[Geocoding] Aviso ao consultar geocodificador:', e.message);
+    }
+
+    // Fallback inteligente para o centro do Recife
+    return {
+      displayName: query,
+      coords: [-8.0631, -34.8711],
+      source: 'fallback'
+    };
   }
 }
 

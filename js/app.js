@@ -2221,7 +2221,11 @@ function renderFeedPostHtml(post) {
   return `
     <article class="feed-card-immersive infinite-scroll-item" id="post-card-${post.id}">
       <div class="feed-card-media">
-        <img src="${post.image}" alt="${post.title}" loading="lazy" />
+        ${(post.media_type === 'video' || post.isVideo || (post.image && post.image.match(/\.(mp4|webm|mov)(\?.*)?$/i))) ? `
+          <video src="${post.media_url || post.image}" poster="${post.cover_url || ''}" controls playsinline preload="metadata" class="w-full h-full object-cover" style="max-height: 480px;"></video>
+        ` : `
+          <img src="${post.image || post.media_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=80'}" alt="${post.title}" loading="lazy" />
+        `}
 
         <!-- Top-Left Floating Author Pill -->
         <div class="floating-author-pill" onclick="openArtistProfileByAuthor('${post.author}')" title="Ver perfil de ${post.author}">
@@ -4417,6 +4421,16 @@ function renderStepCardHtml(step) {
           <span class="font-bold text-[10px] text-muted uppercase tracking-wider block">Como Executar:</span>
           <div class="whitespace-pre-line text-xs font-medium leading-relaxed">${step.instructions}</div>
         </div>
+
+        ${step.media_url ? `
+          <div class="mt-3 rounded-xl overflow-hidden border border-gray-200 bg-black/5">
+            ${(step.media_type === 'video' || step.media_url.match(/\.(mp4|webm|mov)(\?.*)?$/i)) ? `
+              <video src="${step.media_url}" controls playsinline preload="metadata" class="w-full h-44 object-cover rounded-xl"></video>
+            ` : `
+              <img src="${step.media_url}" alt="Demonstração do Passo ${step.name}" class="w-full h-44 object-cover rounded-xl" loading="lazy" />
+            `}
+          </div>
+        ` : ''}
       </div>
 
       ${canManage ? `
@@ -4493,6 +4507,15 @@ function renderHistoryItemHtml(item) {
         <span class="badge bg-frevo-yellow/40 text-ink text-[11px] font-bold">${item.period}</span>
         <h3 class="font-display font-bold text-lg text-ink">${item.title}</h3>
         <p class="text-xs text-ink-soft leading-relaxed">${item.content}</p>
+        ${(item.media_url || item.image_url) ? `
+          <div class="mt-2.5 rounded-xl overflow-hidden border border-gray-200 bg-black/5">
+            ${(item.media_type === 'video' || (item.media_url && item.media_url.match(/\.(mp4|webm|mov)(\?.*)?$/i))) ? `
+              <video src="${item.media_url}" controls playsinline preload="metadata" class="w-full h-44 object-cover rounded-xl"></video>
+            ` : `
+              <img src="${item.media_url || item.image_url}" alt="${item.title}" class="w-full h-44 object-cover rounded-xl" loading="lazy" />
+            `}
+          </div>
+        ` : ''}
         <div class="pt-2 text-[11px] text-muted border-t border-line">
           <strong>Fonte:</strong> ${item.source}
         </div>
@@ -5621,41 +5644,136 @@ function deleteHistory(id) {
   }
 }
 
-// Modal de Criação de Post no Feed
+// Helper reutilizável para upload de mídia (fotos ou vídeos) pelo administrador
+async function handleAdminMediaUpload(inputElement, previewContainerId, hiddenUrlInputId, hiddenTypeInputId, folder = 'general') {
+  const file = inputElement.files && inputElement.files[0];
+  if (!file) return;
+
+  const isVideo = file.type && file.type.startsWith('video');
+  const isImage = file.type && file.type.startsWith('image');
+
+  if (!isImage && !isVideo) {
+    showAlertModal('Por favor, selecione um arquivo de imagem (PNG, JPG, WEBP) ou vídeo (MP4, WEBM).', { title: 'Formato Não Suportado', type: 'warning' });
+    return;
+  }
+
+  const container = document.getElementById(previewContainerId);
+  const hiddenUrl = document.getElementById(hiddenUrlInputId);
+  const hiddenType = document.getElementById(hiddenTypeInputId);
+
+  if (container) {
+    container.innerHTML = `
+      <div class="p-3 bg-surface-soft rounded-xl border border-gray-200 flex items-center justify-center gap-2 text-xs text-muted">
+        <svg class="animate-spin h-4 w-4 text-frevo-orange" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+        </svg>
+        <span>Processando e enviando mídia...</span>
+      </div>
+    `;
+  }
+
+  // Se o Supabase estiver conectado, faz upload para o Storage
+  let uploadedUrl = null;
+  if (window.supabaseService && window.supabaseService.isConnected()) {
+    try {
+      uploadedUrl = await window.supabaseService.uploadMedia(file, folder);
+    } catch (e) {
+      console.warn('[Storage] Fallback para local preview:', e.message);
+    }
+  }
+
+  // Caso não esteja conectado ou ocorra falha, utiliza Data URL local segura
+  if (!uploadedUrl) {
+    uploadedUrl = await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (ev) => resolve(ev.target.result);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  if (hiddenUrl) hiddenUrl.value = uploadedUrl;
+  if (hiddenType) hiddenType.value = isVideo ? 'video' : 'image';
+
+  if (container) {
+    container.innerHTML = `
+      <div class="relative rounded-xl overflow-hidden border border-gray-200 bg-black/5 mt-1.5">
+        ${isVideo ? `
+          <video src="${uploadedUrl}" controls class="w-full h-36 object-cover rounded-xl" playsinline preload="metadata"></video>
+        ` : `
+          <img src="${uploadedUrl}" class="w-full h-36 object-cover rounded-xl" alt="Preview da Mídia" />
+        `}
+        <div class="absolute top-2 right-2 bg-black/70 text-white text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">
+          ${isVideo ? 'Vídeo Selecionado' : 'Imagem Selecionada'}
+        </div>
+      </div>
+    `;
+  }
+}
+
+// Modal de Criação de Post no Feed (com Upload de Imagem e Vídeo)
 function openNewPostModal() {
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left">
-      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
-        <h3 class="font-display font-bold text-lg text-ink">Publicar Nova Notícia no Feed</h3>
+      <div class="flex items-center justify-between pb-2 border-b border-gray-100 pr-8">
+        <div>
+          <h3 class="font-display font-bold text-lg text-ink">Publicar Nova Notícia no Feed</h3>
+          <p class="text-xs text-muted">Upload de fotos, vídeos e novidades para a comunidade</p>
+        </div>
       </div>
 
       <form onsubmit="submitNewPost(event)" class="space-y-3">
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Título</label>
-          <input type="text" id="new-post-title" required placeholder="Ex: Abertura Oficial do Carnaval" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Título da Publicação *</label>
+          <input type="text" id="new-post-title" required placeholder="Ex: Abertura Oficial do Carnaval do Recife" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
         </div>
+
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Autor / Responsável</label>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Autor / Responsável *</label>
           <input type="text" id="new-post-author" required value="${currentUserSession.name}" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
         </div>
-        <div>
-          <label class="block text-[11px] font-bold text-ink uppercase mb-1">URL da Foto de Capa</label>
-          <input type="url" id="new-post-image" required value="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=80" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+
+        <!-- Bloco de Mídia: Upload de Imagem ou Vídeo -->
+        <div class="p-3 bg-surface-soft rounded-2xl border border-gray-200 space-y-2">
+          <label class="block text-[11px] font-bold text-ink uppercase">Mídia do Post (Foto ou Vídeo)</label>
+          
+          <div class="flex items-center gap-2">
+            <label class="btn btn-outline text-xs px-3 py-2 rounded-xl cursor-pointer flex items-center gap-1.5 font-bold flex-1 justify-center bg-white hover:bg-gray-50">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              Upload do Dispositivo
+              <input type="file" id="new-post-file-input" accept="image/*,video/mp4,video/webm,video/quicktime" class="hidden" onchange="handleAdminMediaUpload(this, 'new-post-media-preview', 'new-post-media-url', 'new-post-media-type', 'posts')" />
+            </label>
+          </div>
+
+          <div class="pt-1">
+            <label class="block text-[10px] font-bold text-muted uppercase mb-0.5">Ou cole a URL da Mídia / Imagem</label>
+            <input type="url" id="new-post-media-url" placeholder="https://exemplo.com/video-ou-foto.mp4" oninput="document.getElementById('new-post-media-type').value = this.value.match(/\\.(mp4|webm|mov)(\\?.*)?$/i) ? 'video' : 'image'" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none font-mono" />
+            <input type="hidden" id="new-post-media-type" value="image" />
+          </div>
+
+          <div id="new-post-media-preview"></div>
         </div>
+
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Conteúdo da Notícia</label>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Conteúdo da Notícia *</label>
           <textarea id="new-post-content" rows="4" required placeholder="Escreva a notícia completa..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none"></textarea>
         </div>
+
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase mb-1">Tags (separadas por vírgula)</label>
           <input type="text" id="new-post-tags" placeholder="Frevo, Carnaval, Recife" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
         </div>
-        <div class="flex gap-2 pt-2">
-          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl">Cancelar</button>
-          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl font-bold">Publicar no Feed</button>
+
+        <div class="flex gap-2 pt-2 border-t border-gray-100">
+          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl py-2.5 font-bold text-ink">Cancelar</button>
+          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl py-2.5 font-bold shadow-md">Publicar no Feed</button>
         </div>
       </form>
     </div>
@@ -5666,10 +5784,11 @@ function openNewPostModal() {
 
 function submitNewPost(e) {
   e.preventDefault();
-  const title = document.getElementById('new-post-title').value;
-  const author = document.getElementById('new-post-author').value;
-  const image = document.getElementById('new-post-image').value;
-  const content = document.getElementById('new-post-content').value;
+  const title = document.getElementById('new-post-title').value.trim();
+  const author = document.getElementById('new-post-author').value.trim();
+  const mediaUrl = document.getElementById('new-post-media-url')?.value?.trim() || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=80';
+  const mediaType = document.getElementById('new-post-media-type')?.value || (mediaUrl.match(/\.(mp4|webm|mov)(\?.*)?$/i) ? 'video' : 'image');
+  const content = document.getElementById('new-post-content').value.trim();
   const tags = document.getElementById('new-post-tags').value.split(',').map(t => t.trim()).filter(Boolean);
 
   const newPost = {
@@ -5677,7 +5796,10 @@ function submitNewPost(e) {
     author: author || 'FrevAI Notícias',
     handle: 'frevai',
     avatar: currentUserSession.avatar,
-    image,
+    image: mediaUrl,
+    media_url: mediaUrl,
+    media_type: mediaType,
+    isVideo: mediaType === 'video',
     location: 'Recife, PE',
     type: 'news',
     title,
@@ -5686,6 +5808,7 @@ function submitNewPost(e) {
     likes: 0,
     is_liked: false,
     is_saved: false,
+    is_admin_post: true,
     time_ago: 'AGORA',
     created_at: new Date().toISOString(),
     comments: []
@@ -5722,7 +5845,7 @@ function submitNewPost(e) {
   closeModal();
   renderFeed();
   renderAdminCMS();
-  alert('Notícia publicada com sucesso!');
+  showAlertModal('Publicação adicionada ao Acervo de Posts com sucesso!', { title: 'Publicado', type: 'success' });
 }
 
 function openEditPostModal(postId) {
@@ -5731,11 +5854,16 @@ function openEditPostModal(postId) {
 
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
+  const mediaUrl = post.media_url || post.image || '';
+  const isVideo = post.media_type === 'video' || (mediaUrl && mediaUrl.match(/\.(mp4|webm|mov)(\?.*)?$/i));
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left">
-      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
-        <h3 class="font-display font-bold text-lg text-ink">Editar Notícia</h3>
+      <div class="flex items-center justify-between pb-2 border-b border-gray-100 pr-8">
+        <div>
+          <h3 class="font-display font-bold text-lg text-ink">Editar Notícia</h3>
+          <p class="text-xs text-muted">Atualize as informações, fotos ou vídeos da publicação</p>
+        </div>
       </div>
 
       <form onsubmit="saveEditPost(event, '${post.id}')" class="space-y-3">
@@ -5743,13 +5871,47 @@ function openEditPostModal(postId) {
           <label class="block text-[11px] font-bold text-ink uppercase mb-1">Título</label>
           <input type="text" id="edit-post-title" value="${post.title}" required class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
         </div>
+
+        <!-- Mídia do Post (Foto / Vídeo) -->
+        <div class="p-3 bg-surface-soft rounded-2xl border border-gray-200 space-y-2">
+          <label class="block text-[11px] font-bold text-ink uppercase">Mídia do Post (Foto ou Vídeo)</label>
+          <label class="btn btn-outline text-xs px-3 py-2 rounded-xl cursor-pointer flex items-center gap-1.5 font-bold justify-center bg-white hover:bg-gray-50">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            Substituir Arquivo de Mídia
+            <input type="file" id="edit-post-file-input" accept="image/*,video/mp4,video/webm,video/quicktime" class="hidden" onchange="handleAdminMediaUpload(this, 'edit-post-media-preview', 'edit-post-media-url', 'edit-post-media-type', 'posts')" />
+          </label>
+          
+          <div class="pt-1">
+            <label class="block text-[10px] font-bold text-muted uppercase mb-0.5">URL da Mídia</label>
+            <input type="url" id="edit-post-media-url" value="${mediaUrl}" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none font-mono" />
+            <input type="hidden" id="edit-post-media-type" value="${isVideo ? 'video' : 'image'}" />
+          </div>
+
+          <div id="edit-post-media-preview">
+            ${mediaUrl ? `
+              <div class="relative rounded-xl overflow-hidden border border-gray-200 bg-black/5 mt-1.5">
+                ${isVideo ? `
+                  <video src="${mediaUrl}" controls class="w-full h-36 object-cover rounded-xl" playsinline preload="metadata"></video>
+                ` : `
+                  <img src="${mediaUrl}" class="w-full h-36 object-cover rounded-xl" alt="Preview da Mídia" />
+                `}
+              </div>
+            ` : ''}
+          </div>
+        </div>
+
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase mb-1">Conteúdo</label>
           <textarea id="edit-post-content" rows="4" required class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none">${post.content}</textarea>
         </div>
-        <div class="flex gap-2 pt-2">
-          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl">Cancelar</button>
-          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl font-bold">Salvar Alterações</button>
+
+        <div class="flex gap-2 pt-2 border-t border-gray-100">
+          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl py-2.5 font-bold text-ink">Cancelar</button>
+          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl py-2.5 font-bold shadow-md">Salvar Alterações</button>
         </div>
       </form>
     </div>
@@ -5762,8 +5924,16 @@ function saveEditPost(e, postId) {
   e.preventDefault();
   const post = DB.posts.find(p => p.id === postId);
   if (post) {
-    post.title = document.getElementById('edit-post-title').value;
-    post.content = document.getElementById('edit-post-content').value;
+    const newMediaUrl = document.getElementById('edit-post-media-url')?.value?.trim() || post.image;
+    const newMediaType = document.getElementById('edit-post-media-type')?.value || (newMediaUrl.match(/\.(mp4|webm|mov)(\?.*)?$/i) ? 'video' : 'image');
+
+    post.title = document.getElementById('edit-post-title').value.trim();
+    post.content = document.getElementById('edit-post-content').value.trim();
+    post.image = newMediaUrl;
+    post.media_url = newMediaUrl;
+    post.media_type = newMediaType;
+    post.isVideo = newMediaType === 'video';
+
     if (window.supabaseService && window.supabaseService.isConnected()) {
       window.supabaseService.updatePost(postId, post);
     }
@@ -5772,39 +5942,103 @@ function saveEditPost(e, postId) {
   closeModal();
   renderFeed();
   renderAdminCMS();
-  alert('Publicação atualizada com sucesso!');
+  showAlertModal('Publicação atualizada com sucesso!', { title: 'Atualizado', type: 'success' });
 }
 
+// ==============================================================================
+// MODAL DE NOVO PONTO NO MAPA (COM BUSCA E CONFIRMAÇÃO REAL NO GOOGLE MAPS)
+// ==============================================================================
+let pendingMapPointCoords = null;
+let pendingMapPointConfirmed = false;
+
 function openNewMapPointModal() {
+  pendingMapPointCoords = [-8.0631, -34.8711];
+  pendingMapPointConfirmed = false;
+
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left">
-      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
-        <h3 class="font-display font-bold text-lg text-ink">Adicionar Ponto ao Mapa</h3>
+      <div class="flex items-center justify-between pb-2 border-b border-gray-100 pr-8">
+        <div>
+          <h3 class="font-display font-bold text-lg text-ink">Adicionar Ponto ao Mapa Cultural</h3>
+          <p class="text-xs text-muted">Localize o endereço com confirmação precisa no Google Maps</p>
+        </div>
       </div>
 
       <form onsubmit="submitNewMapPoint(event)" class="space-y-3">
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Nome do Local</label>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Nome do Ponto Cultural *</label>
           <input type="text" id="new-map-name" required placeholder="Ex: Sede do Galo da Madrugada" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
         </div>
+
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Categoria</label>
-          <input type="text" id="new-map-cat" required placeholder="Agremiação / Polo / Museu" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Categoria *</label>
+          <select id="new-map-cat" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none">
+            <option value="Agremiação Histórica">Agremiação Histórica</option>
+            <option value="Museu / Centro Cultural">Museu / Centro Cultural</option>
+            <option value="Polo de Carnaval">Polo de Carnaval</option>
+            <option value="Marco Histórico">Marco Histórico</option>
+            <option value="Espaço Cultural">Espaço Cultural</option>
+          </select>
         </div>
+
+        <!-- Endereço com Busca e Confirmação no Google Maps -->
+        <div class="p-3 bg-surface-soft rounded-2xl border border-gray-200 space-y-2.5">
+          <div>
+            <label class="block text-[11px] font-bold text-ink uppercase mb-1">Endereço Completo *</label>
+            <div class="flex gap-2">
+              <input type="text" id="new-map-addr" required placeholder="Ex: Rua da Concórdia, 1024, Recife - PE" class="flex-1 px-3 py-2 text-xs border border-gray-200 rounded-xl bg-white text-ink focus:outline-none" oninput="resetMapConfirmation()" />
+              <button type="button" id="btn-find-address" onclick="findAddressOnGoogleMaps()" class="btn btn-primary text-xs px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 shadow-sm whitespace-nowrap">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                Localizar
+              </button>
+            </div>
+            <span class="text-[10px] text-muted block mt-1">Digite o logradouro e clique em "Localizar" para checar no mapa.</span>
+          </div>
+
+          <!-- Box de Confirmação do Google Maps -->
+          <div id="map-address-confirmation-box" class="hidden space-y-2 pt-1 border-t border-gray-200/80">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold text-ink flex items-center gap-1 text-frevo-orange">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                Localização Encontrada:
+              </span>
+              <span id="map-coords-badge" class="badge bg-gray-200 text-ink text-[10px] font-mono font-bold"></span>
+            </div>
+
+            <p id="map-resolved-address-text" class="text-xs text-ink-soft bg-white p-2 rounded-xl border border-gray-200"></p>
+
+            <!-- Mini Mapa Interativo Embutido do Google Maps -->
+            <div id="map-preview-embed" class="w-full h-40 rounded-xl overflow-hidden border border-gray-200"></div>
+
+            <!-- Botão de Confirmação Obrigatória -->
+            <div id="map-confirm-action-container" class="pt-1">
+              <button type="button" onclick="confirmGoogleMapsLocation()" id="btn-confirm-map-location" class="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                Confirmar que o endereço é este
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Endereço Completo</label>
-          <input type="text" id="new-map-addr" required placeholder="Rua da Concórdia, Recife - PE" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Descrição e Relevância Cultural *</label>
+          <textarea id="new-map-desc" rows="3" required placeholder="História, fundação e relevância para o Frevo..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none"></textarea>
         </div>
-        <div>
-          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Descrição</label>
-          <textarea id="new-map-desc" rows="3" required placeholder="História e relevância cultural..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none"></textarea>
-        </div>
-        <div class="flex gap-2 pt-2">
-          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl">Cancelar</button>
-          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl font-bold">Salvar Ponto</button>
+
+        <div class="flex gap-2 pt-2 border-t border-gray-100">
+          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl py-2.5 font-bold text-ink">Cancelar</button>
+          <button type="submit" id="btn-submit-map-point" class="btn btn-primary flex-1 text-xs rounded-xl py-2.5 font-bold shadow-md">Salvar Ponto</button>
         </div>
       </form>
     </div>
@@ -5813,12 +6047,116 @@ function openNewMapPointModal() {
   modal.classList.add('open');
 }
 
-function submitNewMapPoint(e) {
+function resetMapConfirmation() {
+  pendingMapPointConfirmed = false;
+  const confirmBox = document.getElementById('map-address-confirmation-box');
+  if (confirmBox) confirmBox.classList.add('hidden');
+}
+
+async function findAddressOnGoogleMaps() {
+  const addrInput = document.getElementById('new-map-addr');
+  const query = addrInput ? addrInput.value.trim() : '';
+
+  if (!query) {
+    showAlertModal('Por favor, digite o endereço do local para pesquisar no mapa.', { title: 'Atenção', type: 'warning' });
+    return;
+  }
+
+  const btnFind = document.getElementById('btn-find-address');
+  if (btnFind) {
+    btnFind.disabled = true;
+    btnFind.innerText = 'Buscando...';
+  }
+
+  let geoResult = null;
+  if (window.supabaseService && window.supabaseService.geocodeAddress) {
+    geoResult = await window.supabaseService.geocodeAddress(query);
+  }
+
+  if (btnFind) {
+    btnFind.disabled = false;
+    btnFind.innerHTML = `
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      Localizar
+    `;
+  }
+
+  if (geoResult && geoResult.coords) {
+    pendingMapPointCoords = geoResult.coords;
+    pendingMapPointConfirmed = false;
+
+    const confirmBox = document.getElementById('map-address-confirmation-box');
+    const badge = document.getElementById('map-coords-badge');
+    const textEl = document.getElementById('map-resolved-address-text');
+    const embedEl = document.getElementById('map-preview-embed');
+    const confirmBtn = document.getElementById('btn-confirm-map-location');
+
+    if (badge) badge.innerText = `${geoResult.coords[0].toFixed(4)}, ${geoResult.coords[1].toFixed(4)}`;
+    if (textEl) textEl.innerText = geoResult.displayName || query;
+    if (embedEl) {
+      embedEl.innerHTML = `
+        <iframe 
+          title="Google Maps Preview"
+          class="w-full h-full border-0"
+          loading="lazy"
+          src="https://maps.google.com/maps?q=${geoResult.coords[0]},${geoResult.coords[1]}&hl=pt-BR&z=16&output=embed"
+          allowfullscreen>
+        </iframe>
+      `;
+    }
+
+    if (confirmBtn) {
+      confirmBtn.className = 'w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition';
+      confirmBtn.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        Confirmar que o endereço é este
+      `;
+    }
+
+    if (confirmBox) confirmBox.classList.remove('hidden');
+  } else {
+    showAlertModal('Não foi possível localizar este endereço automaticamente. Verifique se digitou o nome da rua, número e cidade.', { title: 'Endereço Não Localizado', type: 'warning' });
+  }
+}
+
+function confirmGoogleMapsLocation() {
+  pendingMapPointConfirmed = true;
+  const confirmBtn = document.getElementById('btn-confirm-map-location');
+  if (confirmBtn) {
+    confirmBtn.className = 'w-full py-2 px-3 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold flex items-center justify-center gap-2 transition';
+    confirmBtn.innerHTML = `
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+      Localização Confirmada no Google Maps
+    `;
+  }
+}
+
+async function submitNewMapPoint(e) {
   e.preventDefault();
-  const name = document.getElementById('new-map-name').value;
+  const name = document.getElementById('new-map-name').value.trim();
   const category = document.getElementById('new-map-cat').value;
-  const address = document.getElementById('new-map-addr').value;
-  const description = document.getElementById('new-map-desc').value;
+  const address = document.getElementById('new-map-addr').value.trim();
+  const description = document.getElementById('new-map-desc').value.trim();
+
+  // Exige confirmação explícita do endereço pelo Google Maps
+  if (!pendingMapPointConfirmed) {
+    const wantsToFind = await showConfirmModal(
+      'Você ainda não confirmou o local no Google Maps.\n\nDeseja que a plataforma localize agora para você validar no mapa?',
+      { title: 'Confirmação de Endereço', confirmText: 'Localizar no Mapa', cancelText: 'Ajustar Endereço' }
+    );
+    if (wantsToFind) {
+      await findAddressOnGoogleMaps();
+    }
+    return;
+  }
 
   const newPt = {
     id: `m-${Date.now()}`,
@@ -5826,7 +6164,7 @@ function submitNewMapPoint(e) {
     category,
     address,
     description,
-    coords: [-8.0631, -34.8711]
+    coords: pendingMapPointCoords || [-8.0631, -34.8711]
   };
 
   DB.mapPoints.push(newPt);
@@ -5837,39 +6175,69 @@ function submitNewMapPoint(e) {
   closeModal();
   renderMap();
   renderAdminCMS();
-  alert('Novo ponto histórico adicionado ao mapa!');
+  showAlertModal('Ponto cultural confirmado e adicionado com sucesso ao mapa!', { title: 'Local Adicionado', type: 'success' });
 }
 
+// Modal de Adicionar Marco Histórico (com Upload de Imagem ou Vídeo de Época)
 function openNewHistoryModal() {
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left">
-      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
-        <h3 class="font-display font-bold text-lg text-ink">Adicionar Marco Histórico</h3>
+      <div class="flex items-center justify-between pb-2 border-b border-gray-100 pr-8">
+        <div>
+          <h3 class="font-display font-bold text-lg text-ink">Adicionar Marco Histórico</h3>
+          <p class="text-xs text-muted">Documentos, fotografias de época e registros da memória do Frevo</p>
+        </div>
       </div>
 
       <form onsubmit="submitNewHistory(event)" class="space-y-3">
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Título do Marco</label>
-          <input type="text" id="new-hist-title" required placeholder="Ex: Criação da Troça Pitombeira" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Título do Marco *</label>
+          <input type="text" id="new-hist-title" required placeholder="Ex: Criação da Troça Pitombeira dos Quatro Cantos" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
         </div>
+
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Período / Ano</label>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Período / Data Histórica *</label>
           <input type="text" id="new-hist-period" required placeholder="Ex: Carnaval de 1947" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
         </div>
-        <div>
-          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Conteúdo Histórico</label>
-          <textarea id="new-hist-content" rows="3" required placeholder="Relato documentado..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none"></textarea>
+
+        <!-- Bloco de Mídia: Foto ou Vídeo Histórico -->
+        <div class="p-3 bg-surface-soft rounded-2xl border border-gray-200 space-y-2">
+          <label class="block text-[11px] font-bold text-ink uppercase">Documento / Mídia de Época (Foto ou Vídeo)</label>
+          <label class="btn btn-outline text-xs px-3 py-2 rounded-xl cursor-pointer flex items-center gap-1.5 font-bold justify-center bg-white hover:bg-gray-50">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            Upload do Dispositivo
+            <input type="file" id="new-hist-file-input" accept="image/*,video/mp4,video/webm" class="hidden" onchange="handleAdminMediaUpload(this, 'new-hist-media-preview', 'new-hist-media-url', 'new-hist-media-type', 'history')" />
+          </label>
+
+          <div class="pt-1">
+            <label class="block text-[10px] font-bold text-muted uppercase mb-0.5">Ou cole o link do arquivo</label>
+            <input type="url" id="new-hist-media-url" placeholder="https://exemplo.com/registro-historico.jpg" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none font-mono" />
+            <input type="hidden" id="new-hist-media-type" value="image" />
+          </div>
+
+          <div id="new-hist-media-preview"></div>
         </div>
+
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Fonte / Acervo</label>
-          <input type="text" id="new-hist-source" required placeholder="Fundação Joaquim Nabuco" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Conteúdo Histórico Documentado *</label>
+          <textarea id="new-hist-content" rows="3" required placeholder="Relato documentado, contexto social e fatos comprovados..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none"></textarea>
         </div>
-        <div class="flex gap-2 pt-2">
-          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl">Cancelar</button>
-          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl font-bold">Salvar Marco</button>
+
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Fonte / Acervo Responsável *</label>
+          <input type="text" id="new-hist-source" required placeholder="Ex: Fundação Joaquim Nabuco / Paço do Frevo" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+        </div>
+
+        <div class="flex gap-2 pt-2 border-t border-gray-100">
+          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl py-2.5 font-bold text-ink">Cancelar</button>
+          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl py-2.5 font-bold shadow-md">Salvar Marco</button>
         </div>
       </form>
     </div>
@@ -5880,23 +6248,150 @@ function openNewHistoryModal() {
 
 function submitNewHistory(e) {
   e.preventDefault();
-  const title = document.getElementById('new-hist-title').value;
-  const period = document.getElementById('new-hist-period').value;
-  const content = document.getElementById('new-hist-content').value;
-  const source = document.getElementById('new-hist-source').value;
+  const title = document.getElementById('new-hist-title').value.trim();
+  const period = document.getElementById('new-hist-period').value.trim();
+  const content = document.getElementById('new-hist-content').value.trim();
+  const source = document.getElementById('new-hist-source').value.trim();
+  const mediaUrl = document.getElementById('new-hist-media-url')?.value?.trim() || null;
+  const mediaType = document.getElementById('new-hist-media-type')?.value || 'image';
 
-  DB.history.push({
+  const newHist = {
     id: `h-${Date.now()}`,
     title,
     period,
     content,
-    source
-  });
+    source,
+    media_url: mediaUrl,
+    image_url: mediaUrl,
+    media_type: mediaType
+  };
+
+  DB.history.push(newHist);
+  if (window.supabaseService && window.supabaseService.isConnected()) {
+    window.supabaseService.createHistoryEntry(newHist);
+  }
 
   closeModal();
   renderHistory();
   renderAdminCMS();
-  alert('Marco histórico adicionado com sucesso!');
+  showAlertModal('Marco histórico adicionado com sucesso!', { title: 'Marco Salvo', type: 'success' });
+}
+
+// Modal de Adicionar Novo Passo de Frevo (com Upload de Vídeo e Imagem)
+function openNewStepModal() {
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+
+  modalBody.innerHTML = `
+    <div class="space-y-4 text-left">
+      <div class="flex items-center justify-between pb-2 border-b border-gray-100 pr-8">
+        <div>
+          <h3 class="font-display font-bold text-lg text-ink">Adicionar Passo de Frevo</h3>
+          <p class="text-xs text-muted">Cadastre passos técnicos com demonstração em vídeo ou imagem</p>
+        </div>
+      </div>
+
+      <form onsubmit="submitNewStep(event)" class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Nome do Passo *</label>
+          <input type="text" id="new-step-name" required placeholder="Ex: Saci-Pererê" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] font-bold text-ink uppercase mb-1">Dificuldade *</label>
+            <select id="new-step-difficulty" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none">
+              <option value="Iniciante">Iniciante</option>
+              <option value="Intermediário">Intermediário</option>
+              <option value="Avançado">Avançado</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold text-ink uppercase mb-1">Categoria *</label>
+            <select id="new-step-category" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none">
+              <option value="Tradicional">Tradicional</option>
+              <option value="Acrobático">Acrobático</option>
+              <option value="Tesouras">Tesouras</option>
+              <option value="Pontas e Calcanhares">Pontas e Calcanhares</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Demonstração Visual: Upload de Vídeo ou Imagem -->
+        <div class="p-3 bg-surface-soft rounded-2xl border border-gray-200 space-y-2">
+          <label class="block text-[11px] font-bold text-ink uppercase">Demonstração Visual (Vídeo ou Foto)</label>
+          <label class="btn btn-outline text-xs px-3 py-2 rounded-xl cursor-pointer flex items-center gap-1.5 font-bold justify-center bg-white hover:bg-gray-50">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            Upload de Vídeo/Foto do Passo
+            <input type="file" id="new-step-file-input" accept="video/mp4,video/webm,image/*" class="hidden" onchange="handleAdminMediaUpload(this, 'new-step-media-preview', 'new-step-media-url', 'new-step-media-type', 'steps')" />
+          </label>
+
+          <div class="pt-1">
+            <label class="block text-[10px] font-bold text-muted uppercase mb-0.5">Ou URL externa da demonstração</label>
+            <input type="url" id="new-step-media-url" placeholder="https://exemplo.com/demonstracao-passo.mp4" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none font-mono" />
+            <input type="hidden" id="new-step-media-type" value="video" />
+          </div>
+
+          <div id="new-step-media-preview"></div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Descrição Curta *</label>
+          <input type="text" id="new-step-desc" required placeholder="Breve resumo da movimentação corporal e ritmo..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Instruções de Execução (Passo a Passo) *</label>
+          <textarea id="new-step-instructions" rows="4" required placeholder="1. Posição inicial dos pés&#10;2. Movimento de sombrinha&#10;3. Salto e aterrissagem..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none leading-relaxed"></textarea>
+        </div>
+
+        <div class="flex gap-2 pt-2 border-t border-gray-100">
+          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl py-2.5 font-bold text-ink">Cancelar</button>
+          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl py-2.5 font-bold shadow-md">Salvar Passo</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  modal.classList.add('open');
+}
+
+function submitNewStep(e) {
+  e.preventDefault();
+  const name = document.getElementById('new-step-name').value.trim();
+  const difficulty = document.getElementById('new-step-difficulty').value;
+  const category = document.getElementById('new-step-category').value;
+  const description = document.getElementById('new-step-desc').value.trim();
+  const instructions = document.getElementById('new-step-instructions').value.trim();
+  const mediaUrl = document.getElementById('new-step-media-url')?.value?.trim() || null;
+  const mediaType = document.getElementById('new-step-media-type')?.value || (mediaUrl && mediaUrl.match(/\.(mp4|webm|mov)(\?.*)?$/i) ? 'video' : 'image');
+
+  const newStep = {
+    id: `st-${Date.now()}`,
+    name,
+    difficulty,
+    category,
+    description,
+    instructions,
+    media_url: mediaUrl,
+    media_type: mediaType,
+    author_role: 'admin'
+  };
+
+  DB.steps.push(newStep);
+  if (window.supabaseService && window.supabaseService.isConnected()) {
+    window.supabaseService.createStep(newStep);
+  }
+
+  closeModal();
+  renderSteps();
+  renderAdminCMS();
+  showAlertModal('Novo passo de Frevo adicionado ao catálogo com sucesso!', { title: 'Passo Salvo', type: 'success' });
 }
 
 function openNewArtistModal() {
@@ -8109,6 +8604,18 @@ async function syncAllWithSupabase() {
     if (liveMap && liveMap.length > 0) {
       DB.mapPoints = liveMap;
       renderMap();
+    }
+
+    const liveSteps = await window.supabaseService.getSteps?.();
+    if (liveSteps && liveSteps.length > 0) {
+      DB.steps = liveSteps;
+      renderSteps();
+    }
+
+    const liveHistory = await window.supabaseService.getHistoryEntries?.();
+    if (liveHistory && liveHistory.length > 0) {
+      DB.history = liveHistory;
+      renderHistory();
     }
   } catch (err) {
     console.warn('[Supabase] Erro durante sincronização:', err);
