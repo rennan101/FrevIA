@@ -725,12 +725,32 @@ function updateSessionUI() {
   const cmsBtn = document.getElementById('header-cms-btn');
   const addStepBtn = document.getElementById('btn-add-step');
   const submitSongBtn = document.getElementById('btn-submit-song');
+  const profileNavBtn = document.getElementById('nav-item-profile');
+
+  const isGuest = currentUserSession.role === 'guest';
 
   if (userNameEl) {
-    if (currentUserSession.role === 'guest') {
+    if (isGuest) {
       userNameEl.innerText = 'Entrar';
     } else {
       userNameEl.innerText = (currentUserSession.name || 'Folião').split(' ')[0];
+    }
+  }
+
+  // Ocultar ícone de perfil na barra de navegação para visitante, exibir quando logado
+  if (profileNavBtn) {
+    if (isGuest) {
+      profileNavBtn.classList.add('nav-item-hidden');
+    } else {
+      profileNavBtn.classList.remove('nav-item-hidden');
+    }
+  }
+
+  // Redirecionar visitante para o feed caso esteja com a tela de perfil ativa
+  if (isGuest) {
+    const artistPanelView = document.getElementById('view-artist-panel');
+    if (artistPanelView && artistPanelView.classList.contains('active')) {
+      switchView('feed');
     }
   }
 
@@ -1536,6 +1556,11 @@ const InfiniteScrollManager = {
 // ==============================================================================
 
 function switchView(viewName) {
+  if (viewName === 'artist-panel' && currentUserSession.role === 'guest') {
+    openSessionModal();
+    return;
+  }
+
   if (viewName === 'admin-panel' && currentUserSession.role !== 'admin') {
     alert('Acesso restrito: Apenas administradores autorizados podem acessar o painel de gestão.');
     viewName = 'feed';

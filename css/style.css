@@ -823,9 +823,13 @@ body {
   border-radius: 16px;
   width: auto;
   flex: 1;
-  max-width: 68px;
-  position: relative;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav-item.nav-item-hidden,
+.bottom-nav .nav-item.nav-item-hidden,
+.bottom-nav:hover .nav-item.nav-item-hidden {
+  display: none !important;
 }
 
 .nav-item:hover {
