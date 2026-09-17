@@ -847,6 +847,28 @@ function handleGenreSelectChange(selectId, containerId) {
   }
 }
 
+function togglePasswordVisibility(inputId, btnEl) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const isPassword = input.type === 'password';
+  input.type = isPassword ? 'text' : 'password';
+  if (btnEl) {
+    btnEl.innerHTML = isPassword ? `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+        <line x1="1" y1="1" x2="23" y2="23"></line>
+      </svg>
+    ` : `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+        <circle cx="12" cy="12" r="3"></circle>
+      </svg>
+    `;
+    btnEl.setAttribute('aria-label', isPassword ? 'Ocultar senha' : 'Ver senha');
+    btnEl.setAttribute('title', isPassword ? 'Ocultar senha' : 'Ver senha');
+  }
+}
+
 function switchAuthTab(tab) {
   currentAuthTab = tab;
   openSessionModal();
@@ -896,13 +918,22 @@ function openSessionModal() {
         ${currentAuthTab === 'login' ? `
           <!-- Formulário de Login (E-mail e Senha) -->
           <form onsubmit="handleEmailLogin(event)" class="space-y-3">
+            <div id="login-error-msg" class="hidden text-xs text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-200 flex items-start gap-2"></div>
             <div>
               <label class="block text-[11px] font-bold text-ink uppercase mb-1">E-mail</label>
-              <input type="email" id="auth-email" required placeholder="seuemail@exemplo.com" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+              <input type="email" id="auth-email" required placeholder="seuemail@exemplo.com" oninput="document.getElementById('login-error-msg')?.classList.add('hidden')" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
             </div>
             <div>
               <label class="block text-[11px] font-bold text-ink uppercase mb-1">Senha</label>
-              <input type="password" id="auth-password" required placeholder="••••••••" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+              <div class="relative">
+                <input type="password" id="auth-password" required placeholder="••••••••" oninput="document.getElementById('login-error-msg')?.classList.add('hidden')" class="w-full pl-3 pr-10 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+                <button type="button" onclick="togglePasswordVisibility('auth-password', this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-ink transition-colors" aria-label="Ver senha" title="Ver senha">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
+              </div>
             </div>
             <button type="submit" class="btn btn-primary w-full text-xs rounded-xl py-2.5 font-bold shadow-md">
               Entrar
@@ -911,17 +942,26 @@ function openSessionModal() {
         ` : `
           <!-- Formulário de Cadastro (Fã vs Artista) -->
           <form onsubmit="handleEmailSignUp(event)" class="space-y-3">
+            <div id="signup-error-msg" class="hidden text-xs text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-200 flex items-start gap-2"></div>
             <div>
               <label class="block text-[11px] font-bold text-ink uppercase mb-1">Nome Completo *</label>
-              <input type="text" id="signup-name" required placeholder="Seu nome ou como quer ser chamado" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+              <input type="text" id="signup-name" required placeholder="Seu nome ou como quer ser chamado" oninput="document.getElementById('signup-error-msg')?.classList.add('hidden')" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
             </div>
             <div>
               <label class="block text-[11px] font-bold text-ink uppercase mb-1">E-mail *</label>
-              <input type="email" id="signup-email" required placeholder="seuemail@exemplo.com" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+              <input type="email" id="signup-email" required placeholder="seuemail@exemplo.com" oninput="document.getElementById('signup-error-msg')?.classList.add('hidden')" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
             </div>
             <div>
               <label class="block text-[11px] font-bold text-ink uppercase mb-1">Criar Senha *</label>
-              <input type="password" id="signup-password" required minlength="6" placeholder="Mínimo 6 caracteres" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+              <div class="relative">
+                <input type="password" id="signup-password" required minlength="6" placeholder="Mínimo 6 caracteres" oninput="document.getElementById('signup-error-msg')?.classList.add('hidden')" class="w-full pl-3 pr-10 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+                <button type="button" onclick="togglePasswordVisibility('signup-password', this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-ink transition-colors" aria-label="Ver senha" title="Ver senha">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
+              </div>
             </div>
 
             <!-- Seletor: Fã vs Artista -->
@@ -1077,13 +1117,34 @@ async function loginWithGoogle() {
 
 async function handleEmailLogin(e) {
   e.preventDefault();
-  const email = document.getElementById('auth-email').value;
-  const password = document.getElementById('auth-password').value;
+  const email = document.getElementById('auth-email')?.value?.trim();
+  const password = document.getElementById('auth-password')?.value;
+  const errEl = document.getElementById('login-error-msg');
+  if (errEl) {
+    errEl.classList.add('hidden');
+    errEl.innerText = '';
+  }
+
+  if (!email || !password) return;
 
   if (window.supabaseService && window.supabaseService.isConnected()) {
     const { data, error } = await window.supabaseService.signInWithEmail(email, password);
     if (error) {
-      alert('Erro no login Supabase: ' + error.message);
+      if (errEl) {
+        let msg = error.message;
+        const lower = msg.toLowerCase();
+        if (lower.includes('invalid login credentials') || lower.includes('invalid_grant')) {
+          msg = '⚠️ E-mail ou senha incorretos. Verifique os dados digitados e tente novamente.';
+        } else if (lower.includes('email not confirmed')) {
+          msg = '⚠️ Seu e-mail ainda não foi confirmado. Verifique a caixa de entrada (e spam) do seu e-mail.';
+        } else {
+          msg = `⚠️ Erro ao entrar: ${error.message}`;
+        }
+        errEl.innerText = msg;
+        errEl.classList.remove('hidden');
+      } else {
+        alert('Erro no login Supabase: ' + error.message);
+      }
       return;
     }
 
@@ -1148,9 +1209,14 @@ async function handleEmailLogin(e) {
 
 async function handleEmailSignUp(e) {
   e.preventDefault();
-  const name = document.getElementById('signup-name')?.value;
-  const email = document.getElementById('signup-email')?.value;
+  const name = document.getElementById('signup-name')?.value?.trim();
+  const email = document.getElementById('signup-email')?.value?.trim();
   const password = document.getElementById('signup-password')?.value;
+  const errEl = document.getElementById('signup-error-msg');
+  if (errEl) {
+    errEl.classList.add('hidden');
+    errEl.innerText = '';
+  }
 
   if (!name || !email || !password) return;
 
@@ -1169,7 +1235,25 @@ async function handleEmailSignUp(e) {
     });
 
     if (error) {
-      alert('Erro no cadastro Supabase: ' + error.message);
+      if (errEl) {
+        let msg = error.message;
+        const lower = msg.toLowerCase();
+        if (lower.includes('database error saving new user')) {
+          msg = '⚠️ Erro interno no banco do Supabase ao salvar usuário. Se você administra o projeto, execute a migração 004_fix_signup_trigger.sql no SQL Editor do Supabase.';
+        } else if (lower.includes('user already registered') || lower.includes('already exists')) {
+          msg = '⚠️ Este e-mail já está cadastrado. Alterne para a aba "Entrar" para acessar sua conta.';
+        } else if (lower.includes('password should be at least')) {
+          msg = '⚠️ A senha deve ter no mínimo 6 caracteres.';
+        } else if (lower.includes('valid email')) {
+          msg = '⚠️ Por favor, insira um endereço de e-mail válido.';
+        } else {
+          msg = `⚠️ Erro no cadastro: ${error.message}`;
+        }
+        errEl.innerText = msg;
+        errEl.classList.remove('hidden');
+      } else {
+        alert('Erro no cadastro Supabase: ' + error.message);
+      }
       return;
     }
 

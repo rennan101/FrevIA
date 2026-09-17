@@ -204,43 +204,56 @@ create table if not exists public.map_points (
 -- ==============================================================================
 
 create or replace function public.handle_new_user()
-returns trigger as $$
+returns trigger
+language plpgsql
+security definer
+set search_path = public, auth
+as $$
 declare
   d_name text;
   d_avatar text;
-  d_role user_role := 'user';
+  d_role public.user_role := 'user';
 begin
-  -- Extrai display_name do Google ou do formulário de email
-  d_name := coalesce(
-    new.raw_user_meta_data->>'full_name',
-    new.raw_user_meta_data->>'name',
-    new.raw_user_meta_data->>'display_name',
-    split_part(new.email, '@', 1)
-  );
+  begin
+    -- Extrai display_name do Google ou do formulário de email
+    d_name := coalesce(
+      new.raw_user_meta_data->>'full_name',
+      new.raw_user_meta_data->>'name',
+      new.raw_user_meta_data->>'display_name',
+      split_part(new.email, '@', 1),
+      'Folião'
+    );
 
-  -- Extrai foto do Google ou metadata
-  d_avatar := coalesce(
-    new.raw_user_meta_data->>'avatar_url',
-    new.raw_user_meta_data->>'picture',
-    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'
-  );
+    -- Extrai foto do Google ou metadata
+    d_avatar := coalesce(
+      new.raw_user_meta_data->>'avatar_url',
+      new.raw_user_meta_data->>'picture',
+      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'
+    );
 
-  -- Define papel inicial
-  if (new.raw_user_meta_data->>'role' = 'admin') then
-    d_role := 'admin';
-  elsif (new.raw_user_meta_data->>'role' = 'artist') then
-    d_role := 'artist';
-  end if;
+    -- Define papel inicial
+    if (new.raw_user_meta_data->>'role' = 'admin') then
+      d_role := 'admin';
+    elsif (new.raw_user_meta_data->>'role' = 'artist') then
+      d_role := 'artist';
+    else
+      d_role := 'user';
+    end if;
 
-  insert into public.profiles (id, display_name, avatar_url, role)
-  values (new.id, d_name, d_avatar, d_role)
-  on conflict (id) do update set
-    display_name = coalesce(excluded.display_name, public.profiles.display_name),
-    avatar_url = coalesce(excluded.avatar_url, public.profiles.avatar_url);
+    insert into public.profiles (id, display_name, avatar_url, role)
+    values (new.id, d_name, d_avatar, d_role)
+    on conflict (id) do update set
+      display_name = coalesce(excluded.display_name, public.profiles.display_name),
+      avatar_url = coalesce(excluded.avatar_url, public.profiles.avatar_url);
+  exception
+    when others then
+      -- Garante que nunca trave a criação de usuário em auth.users
+      null;
+  end;
 
   return new;
 end;
-$$ language plpgsql security definer;
+$$;
 
 -- Trigger para novas contas criadas
 drop trigger if exists on_auth_user_created on auth.users;

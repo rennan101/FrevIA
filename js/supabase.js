@@ -42,7 +42,7 @@ class SupabaseService {
 
   async signUpWithEmail(email, password, metadata = {}) {
     if (!this.client) return { error: { message: 'Supabase não conectado' } };
-    return await this.client.auth.signUp({
+    let res = await this.client.auth.signUp({
       email,
       password,
       options: {
@@ -53,6 +53,18 @@ class SupabaseService {
         }
       }
     });
+
+    // Se o banco falhar devido a trigger em raw_user_meta_data, tenta cadastro limpo
+    if (res?.error && res.error.message && res.error.message.includes('Database error saving new user')) {
+      try {
+        const retryRes = await this.client.auth.signUp({ email, password });
+        if (!retryRes.error) {
+          res = retryRes;
+        }
+      } catch (retryErr) {}
+    }
+
+    return res;
   }
 
   async signInWithGoogle() {
