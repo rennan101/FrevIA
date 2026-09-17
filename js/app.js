@@ -834,6 +834,19 @@ function switchTestRole(role, silent = false) {
 let currentAuthTab = 'login';
 let currentSignupRole = 'fan'; // 'fan' ou 'artist'
 
+function handleGenreSelectChange(selectId, containerId) {
+  const select = document.getElementById(selectId);
+  const container = document.getElementById(containerId);
+  if (!select || !container) return;
+  if (select.value === 'Outro') {
+    container.classList.remove('hidden');
+    const input = container.querySelector('input');
+    if (input) input.focus();
+  } else {
+    container.classList.add('hidden');
+  }
+}
+
 function switchAuthTab(tab) {
   currentAuthTab = tab;
   openSessionModal();
@@ -937,13 +950,17 @@ function openSessionModal() {
               </div>
               <div>
                 <label class="block text-[10px] font-bold text-ink uppercase mb-0.5">Gênero Tradicional</label>
-                <select id="signup-artist-genre" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange">
+                <select id="signup-artist-genre" onchange="handleGenreSelectChange('signup-artist-genre', 'signup-custom-genre-container')" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange">
                   <option value="Frevo de Rua">Frevo de Rua</option>
                   <option value="Frevo Canção">Frevo Canção</option>
                   <option value="Frevo de Bloco">Frevo de Bloco</option>
                   <option value="Frevo Livre Instrumental">Frevo Livre Instrumental</option>
                   <option value="Frevo Contemporâneo">Frevo Contemporâneo</option>
+                  <option value="Outro">Outro</option>
                 </select>
+                <div id="signup-custom-genre-container" class="mt-1.5 hidden">
+                  <input type="text" id="signup-custom-genre" placeholder="Especifique o gênero tradicional..." class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+                </div>
               </div>
               <div>
                 <label class="block text-[10px] font-bold text-ink uppercase mb-0.5">WhatsApp / Contato</label>
@@ -1139,7 +1156,9 @@ async function handleEmailSignUp(e) {
 
   const isArtistChoice = currentSignupRole === 'artist';
   const artistName = document.getElementById('signup-artist-name')?.value || name;
-  const genre = document.getElementById('signup-artist-genre')?.value || 'Frevo de Rua';
+  const genreSelect = document.getElementById('signup-artist-genre')?.value || 'Frevo de Rua';
+  const customGenre = document.getElementById('signup-custom-genre')?.value?.trim();
+  const genre = (genreSelect === 'Outro' && customGenre) ? customGenre : genreSelect;
   const whatsapp = document.getElementById('signup-artist-whatsapp')?.value || '';
 
   if (window.supabaseService && window.supabaseService.isConnected()) {
@@ -1212,13 +1231,17 @@ function openArtistRequestModal() {
 
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase mb-1">Gênero Tradicional</label>
-          <select id="req-artist-genre" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange">
+          <select id="req-artist-genre" onchange="handleGenreSelectChange('req-artist-genre', 'req-custom-genre-container')" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange">
             <option value="Frevo de Rua">Frevo de Rua</option>
             <option value="Frevo Canção">Frevo Canção</option>
             <option value="Frevo de Bloco">Frevo de Bloco</option>
             <option value="Frevo Livre Instrumental">Frevo Livre Instrumental</option>
             <option value="Frevo Contemporâneo">Frevo Contemporâneo</option>
+            <option value="Outro">Outro</option>
           </select>
+          <div id="req-custom-genre-container" class="mt-1.5 hidden">
+            <input type="text" id="req-custom-genre" placeholder="Especifique o gênero tradicional..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+          </div>
         </div>
 
         <div>
@@ -1251,7 +1274,9 @@ function openArtistRequestModal() {
 async function handleArtistRequestSubmit(e) {
   e.preventDefault();
   const name = document.getElementById('req-artist-name')?.value;
-  const genre = document.getElementById('req-artist-genre')?.value;
+  const genreSelect = document.getElementById('req-artist-genre')?.value || 'Frevo de Rua';
+  const customGenre = document.getElementById('req-custom-genre')?.value?.trim();
+  const genre = (genreSelect === 'Outro' && customGenre) ? customGenre : genreSelect;
   const bio = document.getElementById('req-artist-bio')?.value;
   const instagram = document.getElementById('req-artist-instagram')?.value;
   const whatsapp = document.getElementById('req-artist-whatsapp')?.value;
@@ -2080,7 +2105,18 @@ function toggleLike(postId) {
     window.supabaseService.togglePostLike(postId, currentUserSession.id);
   }
 
-  renderFeed();
+  // Atualizar apenas o botão e contador de curtidas inline (sem re-render do feed inteiro para não piscar a tela)
+  document.querySelectorAll(`button[onclick="toggleLike('${postId}')"]`).forEach(btn => {
+    const svg = btn.querySelector('svg');
+    if (svg) {
+      svg.setAttribute('fill', post.is_liked ? '#F0442E' : 'none');
+      svg.setAttribute('stroke', '#F0442E');
+    }
+    const countSpan = btn.querySelector('span');
+    if (countSpan) {
+      countSpan.innerText = post.likes;
+    }
+  });
 }
 
 // Salvar ou remover dos salvos uma publicação do Feed
@@ -2381,9 +2417,9 @@ window.openArtistModal = function(name, avatar, cover, genre, bio, email, phone,
 };
 
 function renderArtistCardHtml(artist) {
-  const isFav = currentUserSession.favorites.includes(artist.id);
+  const isFav = (currentUserSession.favorites || []).includes(artist.id);
   return `
-    <div class="bg-white border border-gray-200 rounded-2xl p-4 text-center flex flex-col items-center justify-between shadow-sm hover:shadow-md transition-shadow relative infinite-scroll-item">
+    <div data-artist-id="${artist.id}" class="artist-card-item bg-white border border-gray-200 rounded-2xl p-4 text-center flex flex-col items-center justify-between shadow-sm hover:shadow-md transition-shadow relative infinite-scroll-item">
       <button onclick="toggleFavoriteArtist('${artist.id}')" class="btn-fav-artist absolute top-3 right-3 ${isFav ? 'favorited' : ''}" title="Favoritar Artista">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
@@ -2391,7 +2427,7 @@ function renderArtistCardHtml(artist) {
       </button>
 
       <div class="story-ring p-1 mb-2">
-        <img src="${artist.avatar_url}" alt="${artist.name}" class="w-16 h-16 rounded-full object-cover border-2 border-white" />
+        <img src="${artist.avatar_url}" alt="${artist.name}" loading="lazy" class="w-16 h-16 rounded-full object-cover border-2 border-white" />
       </div>
       <div>
         <h3 class="font-display font-bold text-sm text-ink">${artist.name}</h3>
@@ -2407,11 +2443,92 @@ function renderArtistCardHtml(artist) {
   `;
 }
 
-function renderArtists(filterQuery = '') {
+let artistSearchDebounceTimer = null;
+
+function renderArtists(filterQuery = '', forceRerender = false) {
   const container = document.getElementById('artists-grid');
   if (!container) return;
 
-  const query = filterQuery.toLowerCase().trim();
+  if (forceRerender) {
+    container.innerHTML = '';
+  }
+
+  const query = (filterQuery || '').toLowerCase().trim();
+  const stream = document.getElementById('artists-stream');
+  let emptyState = document.getElementById('artists-empty-state');
+
+  // Filtragem direta no DOM sem recriar nós ou tags <img>, eliminando o piscar da tela
+  if (stream && !forceRerender) {
+    const cards = stream.querySelectorAll('.artist-card-item');
+    let visibleCount = 0;
+
+    cards.forEach(card => {
+      const artistId = card.getAttribute('data-artist-id');
+      const artist = DB.artists.find(a => a.id === artistId);
+      if (!artist) return;
+
+      // Sincronizar estado de favorito no botão do card
+      const isFav = (currentUserSession.favorites || []).includes(artist.id);
+      const favBtn = card.querySelector('.btn-fav-artist');
+      if (favBtn) {
+        favBtn.classList.toggle('favorited', isFav);
+      }
+
+      const matches = !query ||
+        artist.name.toLowerCase().includes(query) ||
+        (artist.handle && artist.handle.toLowerCase().includes(query)) ||
+        (artist.genre && artist.genre.toLowerCase().includes(query)) ||
+        (artist.bio && artist.bio.toLowerCase().includes(query));
+
+      if (matches) {
+        card.style.display = '';
+        visibleCount++;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+
+    // Se houver novos artistas em DB.artists ainda não montados no DOM
+    const existingIds = Array.from(cards).map(c => c.getAttribute('data-artist-id'));
+    const missingArtists = DB.artists.filter(a => !existingIds.includes(a.id));
+    if (missingArtists.length > 0) {
+      missingArtists.forEach(a => {
+        const matches = !query ||
+          a.name.toLowerCase().includes(query) ||
+          (a.handle && a.handle.toLowerCase().includes(query)) ||
+          (a.genre && a.genre.toLowerCase().includes(query)) ||
+          (a.bio && a.bio.toLowerCase().includes(query));
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = renderArtistCardHtml(a);
+        const cardEl = tempDiv.firstElementChild;
+        if (!matches) cardEl.style.display = 'none';
+        else visibleCount++;
+        stream.appendChild(cardEl);
+      });
+    }
+
+    // Controle do aviso de busca vazia
+    if (visibleCount === 0) {
+      if (!emptyState) {
+        emptyState = document.createElement('div');
+        emptyState.id = 'artists-empty-state';
+        emptyState.className = 'col-span-full p-8 text-center bg-white rounded-2xl border border-gray-100 space-y-2';
+        emptyState.innerHTML = `
+          <p class="text-xs text-ink font-bold">Nenhum artista encontrado</p>
+          <p class="text-[11px] text-muted">Tente buscar por outro nome, gênero ou arroba.</p>
+        `;
+        container.appendChild(emptyState);
+      } else {
+        emptyState.style.display = '';
+      }
+    } else if (emptyState) {
+      emptyState.style.display = 'none';
+    }
+
+    return;
+  }
+
+  // Render inicial ou forçado
   const filtered = query ? DB.artists.filter(a =>
     a.name.toLowerCase().includes(query) ||
     (a.handle && a.handle.toLowerCase().includes(query)) ||
@@ -2424,7 +2541,7 @@ function renderArtists(filterQuery = '') {
 
   if (filtered.length === 0) {
     container.innerHTML = `
-      <div class="col-span-full p-8 text-center bg-white rounded-2xl border border-gray-100 space-y-2">
+      <div id="artists-empty-state" class="col-span-full p-8 text-center bg-white rounded-2xl border border-gray-100 space-y-2">
         <p class="text-xs text-ink font-bold">Nenhum artista encontrado</p>
         <p class="text-[11px] text-muted">Tente buscar por outro nome, gênero ou arroba.</p>
       </div>
@@ -2454,7 +2571,10 @@ function renderArtists(filterQuery = '') {
 
 function handleArtistSearch(event) {
   const query = event.target.value;
-  renderArtists(query);
+  clearTimeout(artistSearchDebounceTimer);
+  artistSearchDebounceTimer = setTimeout(() => {
+    renderArtists(query);
+  }, 90);
 }
 
 function appendMoreArtists() {
@@ -5089,17 +5209,9 @@ function sharePost(postId) {
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left">
-      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
-        <div>
-          <h3 class="font-display font-bold text-lg text-ink">Compartilhar Publicação</h3>
-          <p class="text-[11px] text-muted line-clamp-1">${post.title}</p>
-        </div>
-        <div class="w-8 h-8 rounded-xl bg-frevo-orange/15 text-frevo-orange flex items-center justify-center flex-shrink-0">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="22" y1="2" x2="11" y2="13"></line>
-            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-          </svg>
-        </div>
+      <div class="pb-2 border-b border-gray-100 pr-10">
+        <h3 class="font-display font-bold text-lg text-ink">Compartilhar Publicação</h3>
+        <p class="text-[11px] text-muted line-clamp-1">${post.title}</p>
       </div>
 
       <div class="grid grid-cols-3 gap-2.5 pt-1">
