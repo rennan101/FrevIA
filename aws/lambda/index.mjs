@@ -4,7 +4,6 @@ import {
   ScanCommand, 
   GetCommand, 
   PutCommand, 
-  UpdateCommand, 
   DeleteCommand 
 } from "@aws-sdk/lib-dynamodb";
 import {
@@ -38,12 +37,13 @@ export const handler = async (event) => {
     const parts = path.replace(/^\/api\/?/, "").split("/").filter(Boolean);
     const firstParam = parts[0];
     const secondParam = parts[1];
+    const thirdParam = parts[2];
 
     if (!firstParam) {
       return {
         statusCode: 200,
         headers: CORS_HEADERS,
-        body: JSON.stringify({ status: "online", service: "FrevAI AWS Core API", version: "1.0.0" })
+        body: JSON.stringify({ status: "online", service: "FrevAI AWS Core API", version: "1.1.0" })
       };
     }
 
@@ -73,7 +73,6 @@ export const handler = async (event) => {
           const idToken = authRes.AuthenticationResult?.IdToken;
           const refreshToken = authRes.AuthenticationResult?.RefreshToken;
 
-          // Recuperar perfil no DynamoDB
           let profile = null;
           try {
             const profRes = await ddb.send(new ScanCommand({
@@ -147,7 +146,6 @@ export const handler = async (event) => {
             created_at: new Date().toISOString()
           };
 
-          // Salva no DynamoDB
           await ddb.send(new PutCommand({
             TableName: "frevai_profiles",
             Item: newProfile
@@ -194,6 +192,109 @@ export const handler = async (event) => {
             headers: CORS_HEADERS,
             body: JSON.stringify({ error: { message: err.message } })
           };
+        }
+      }
+    }
+
+    // =========================================================================
+    // ENDPOINTS SOCIAIS (/api/social/state, /api/social/like, etc.)
+    // =========================================================================
+    if (firstParam === "social") {
+      const body = typeof event.body === "string" ? JSON.parse(event.body || "{}") : (event.body || {});
+
+      // Buscar estado social completo (likes, salvos, favoritos)
+      if (secondParam === "state") {
+        const userId = event.queryStringParameters?.userId || thirdParam || body.userId;
+        if (!userId) {
+          return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ likedPostIds: [], savedPostIds: [], favoriteArtistIds: [] }) };
+        }
+
+        const [likesRes, savesRes, favsRes] = await Promise.all([
+          ddb.send(new ScanCommand({
+            TableName: "frevai_post_likes",
+            FilterExpression: "user_id = :uid",
+            ExpressionAttributeValues: { ":uid": userId }
+          })),
+          ddb.send(new ScanCommand({
+            TableName: "frevai_saved_posts",
+            FilterExpression: "user_id = :uid",
+            ExpressionAttributeValues: { ":uid": userId }
+          })),
+          ddb.send(new ScanCommand({
+            TableName: "frevai_artist_favorites",
+            FilterExpression: "user_id = :uid",
+            ExpressionAttributeValues: { ":uid": userId }
+          }))
+        ]);
+
+        return {
+          statusCode: 200,
+          headers: CORS_HEADERS,
+          body: JSON.stringify({
+            likedPostIds: (likesRes.Items || []).map(i => i.post_id),
+            savedPostIds: (savesRes.Items || []).map(i => i.post_id),
+            favoriteArtistIds: (favsRes.Items || []).map(i => i.artist_id)
+          })
+        };
+      }
+
+      // Alternar Like em Post
+      if (secondParam === "toggle-like") {
+        const { postId, userId } = body;
+        if (!postId || !userId) return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "Faltam parâmetros" }) };
+
+        const idKey = `${userId}_${postId}`;
+        const existing = await ddb.send(new GetCommand({ TableName: "frevai_post_likes", Key: { id: idKey } }));
+
+        if (existing.Item) {
+          await ddb.send(new DeleteCommand({ TableName: "frevai_post_likes", Key: { id: idKey } }));
+          return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ liked: false }) };
+        } else {
+          await ddb.send(new PutCommand({
+            TableName: "frevai_post_likes",
+            Item: { id: idKey, user_id: userId, post_id: postId, created_at: new Date().toISOString() }
+          }));
+          return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ liked: true }) };
+        }
+      }
+
+      // Alternar Post Salvo
+      if (secondParam === "toggle-save") {
+        const { postId, userId } = body;
+        if (!postId || !userId) return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "Faltam parâmetros" }) };
+
+        const idKey = `${userId}_${postId}`;
+        const existing = await ddb.send(new GetCommand({ TableName: "frevai_saved_posts", Key: { id: idKey } }));
+
+        if (existing.Item) {
+          await ddb.send(new DeleteCommand({ TableName: "frevai_saved_posts", Key: { id: idKey } }));
+          return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ saved: false }) };
+        } else {
+          await ddb.send(new PutCommand({
+            TableName: "frevai_saved_posts",
+            Item: { id: idKey, user_id: userId, post_id: postId, created_at: new Date().toISOString() }
+          }));
+          return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ saved: true }) };
+        }
+      }
+
+      // Alternar Artista Favorito
+      if (secondParam === "toggle-favorite") {
+        const { artistId, userId } = body;
+        if (!artistId || !userId) return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "Faltam parâmetros" }) };
+
+        const idKey = `${userId}_${artistId}`;
+        const existing = await ddb.send(new GetCommand({ TableName: "frevai_artist_favorites", Key: { id: idKey } }));
+
+        if (existing.Item) {
+          await ddb.send(new DeleteCommand({ TableName: "frevai_artist_favorites", Key: { id: idKey } }));
+          return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ favorited: false }) };
+        } else {
+          await ddb.send(new PutCommand({
+            TableName: "frevai_artist_favorites",
+            Item: { id: idKey, user_id: userId, artist_id: artistId, created_at: new Date().toISOString() }
+          }));
+          return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ favorited: true }) };
         }
       }
     }

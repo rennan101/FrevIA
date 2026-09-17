@@ -5,6 +5,7 @@
 class AwsService {
   constructor() {
     this.config = window.FREVIA_AWS_CONFIG || {};
+    this.authListeners = [];
     this.init();
   }
 
@@ -24,6 +25,34 @@ class AwsService {
   }
 
   // ============================================================================
+  // EVENTOS DE AUTENTICAÇÃO (onAuthStateChange COMPATÍVEL)
+  // ============================================================================
+  onAuthStateChange(callback) {
+    if (typeof callback === 'function') {
+      this.authListeners.push(callback);
+    }
+    return {
+      data: {
+        subscription: {
+          unsubscribe: () => {
+            this.authListeners = this.authListeners.filter(cb => cb !== callback);
+          }
+        }
+      }
+    };
+  }
+
+  notifyAuthListeners(event, session) {
+    this.authListeners.forEach(cb => {
+      try {
+        cb(event, session);
+      } catch (err) {
+        console.warn('[AwsService] Erro em listener de auth:', err);
+      }
+    });
+  }
+
+  // ============================================================================
   // OAUTH & GOOGLE FEDERATION
   // ============================================================================
   signInWithGoogle() {
@@ -35,7 +64,7 @@ class AwsService {
 
   checkOAuthCallback() {
     const hash = window.location.hash;
-    if (hash && hash.includes('access_token')) {
+    if (hash && (hash.includes('access_token') || hash.includes('id_token'))) {
       const params = new URLSearchParams(hash.substring(1));
       const idToken = params.get('id_token');
       const accessToken = params.get('access_token');
@@ -46,39 +75,78 @@ class AwsService {
           const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
           const payload = JSON.parse(jsonPayload);
           
-          const email = payload.email;
-          const name = payload.given_name || payload.name || email.split('@')[0];
+          const email = payload.email || '';
+          const name = payload.given_name || payload.name || (email ? email.split('@')[0] : 'Folião');
           const avatar = payload.picture || null;
-          const sub = payload.sub;
+          const sub = payload.sub || email;
 
-          setTimeout(async () => {
-            let profile = await this.getProfile(sub);
-            if (!profile) {
-              profile = await this.upsertProfile({
-                id: sub,
-                email: email,
-                user_metadata: { display_name: name, avatar_url: avatar }
-              });
-            }
+          // Limpar hash da URL imediatamente sem perder os dados
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
 
-            if (typeof currentUserSession !== 'undefined') {
-              currentUserSession = {
+          (async () => {
+            try {
+              let profile = await this.getProfile(sub);
+              if (!profile) {
+                profile = await this.upsertProfile({
+                  id: sub,
+                  email: email,
+                  user_metadata: { display_name: name, avatar_url: avatar }
+                });
+              }
+
+              // Carregar estado social existente no backend AWS (likes, salvos, favoritos)
+              const social = await this.getUserSocialState(sub);
+              const favs = social?.favoriteArtistIds || [];
+              if (typeof DB !== 'undefined' && DB.posts && social) {
+                DB.posts.forEach(p => {
+                  p.is_liked = (social.likedPostIds || []).includes(p.id);
+                  p.is_saved = (social.savedPostIds || []).includes(p.id);
+                });
+              }
+
+              const isApprovedArtist = profile?.role === 'artist' && profile?.artist_id;
+              const userRole = profile?.role === 'admin' ? 'admin' : (isApprovedArtist ? 'artist' : 'user');
+
+              const sessionObj = {
                 id: sub,
-                role: profile?.role || 'user',
+                role: userRole,
                 name: profile?.display_name || name,
-                handle: profile?.handle || ('@' + email.split('@')[0]),
-                avatar: avatar,
+                handle: profile?.handle || ('@' + (email ? email.split('@')[0] : 'foliao')),
+                avatar: avatar || profile?.avatar_url || null,
                 email: email,
                 artist_id: profile?.artist_id || null,
                 artist_request_status: profile?.artist_request_status || 'none',
-                favorites: []
+                favorites: favs
               };
+
+              if (typeof currentUserSession !== 'undefined') {
+                Object.assign(currentUserSession, sessionObj);
+              }
+              if (typeof currentUserProfile !== 'undefined') {
+                currentUserProfile.name = sessionObj.name;
+                currentUserProfile.handle = sessionObj.handle;
+                currentUserProfile.avatar = sessionObj.avatar;
+                currentUserProfile.email = sessionObj.email;
+              }
+
               if (typeof saveCurrentSession === 'function') saveCurrentSession();
               if (typeof updateProfileUI === 'function') updateProfileUI();
+              if (typeof updateSessionUI === 'function') updateSessionUI();
               if (typeof renderFeed === 'function') renderFeed();
+              if (typeof renderArtists === 'function') renderArtists();
+
+              // Notificar eventuais listeners
+              this.notifyAuthListeners('SIGNED_IN', {
+                user: {
+                  id: sub,
+                  email: email,
+                  user_metadata: { display_name: name, avatar_url: avatar }
+                }
+              });
+            } catch (err) {
+              console.error('[Cognito OAuth Callback] Erro ao sincronizar sessão:', err);
             }
-            window.location.hash = '';
-          }, 300);
+          })();
         } catch (e) {
           console.error('[Cognito OAuth] Erro ao decodificar token:', e);
         }
@@ -102,6 +170,10 @@ class AwsService {
       const body = await res.json();
       if (!res.ok || body.error) {
         return { data: null, error: body.error || { message: 'Erro ao autenticar no Cognito' } };
+      }
+
+      if (body.data?.user) {
+        this.notifyAuthListeners('SIGNED_IN', { user: body.data.user });
       }
 
       return { data: body.data, error: null };
@@ -151,6 +223,11 @@ class AwsService {
     } catch (err) {
       return { error: { message: err.message } };
     }
+  }
+
+  async signOut() {
+    this.notifyAuthListeners('SIGNED_OUT', null);
+    return { error: null };
   }
 
   // ============================================================================
@@ -205,12 +282,104 @@ class AwsService {
     }
   }
 
+  async requestArtistRole(userId, reqData) {
+    if (!userId || !this.apiGatewayUrl) return { error: { message: 'Configuração ausente' } };
+    try {
+      const payload = {
+        id: 'req_' + Date.now(),
+        user_id: userId,
+        requested_name: reqData.requested_name,
+        genre: reqData.genre || 'Frevo de Rua',
+        bio: reqData.bio || '',
+        whatsapp: reqData.whatsapp || '',
+        status: 'pending',
+        created_at: new Date().toISOString()
+      };
+      await fetch(`${this.apiGatewayUrl}/artist_requests`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      // Atualizar no profile
+      await this.upsertProfile({ id: userId }, { artist_request_status: 'pending' });
+      return { data: payload, error: null };
+    } catch (err) {
+      return { error: { message: err.message } };
+    }
+  }
+
+  // ============================================================================
+  // INTERAÇÕES SOCIAIS: LIKES, SALVOS & FAVORITOS NO BACKEND AWS
+  // ============================================================================
   async getUserSocialState(userId) {
-    return {
-      likedPostIds: [],
-      savedPostIds: [],
-      favoriteArtistIds: []
-    };
+    if (!userId || !this.apiGatewayUrl) {
+      return { likedPostIds: [], savedPostIds: [], favoriteArtistIds: [] };
+    }
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/social/state?userId=${encodeURIComponent(userId)}`);
+      if (res.ok) {
+        return await res.json();
+      }
+      return { likedPostIds: [], savedPostIds: [], favoriteArtistIds: [] };
+    } catch (err) {
+      console.warn('[AWS Social] Falha ao carregar estado social:', err);
+      return { likedPostIds: [], savedPostIds: [], favoriteArtistIds: [] };
+    }
+  }
+
+  async togglePostLike(postId, userId) {
+    if (!postId || !userId || !this.apiGatewayUrl) return null;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/social/toggle-like`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postId, userId })
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+      return null;
+    } catch (err) {
+      console.warn('[AWS Social] Falha ao alternar like:', err);
+      return null;
+    }
+  }
+
+  async toggleSavedPost(postId, userId) {
+    if (!postId || !userId || !this.apiGatewayUrl) return null;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/social/toggle-save`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postId, userId })
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+      return null;
+    } catch (err) {
+      console.warn('[AWS Social] Falha ao alternar post salvo:', err);
+      return null;
+    }
+  }
+
+  async toggleFavoriteArtist(artistId, userId) {
+    if (!artistId || !userId || !this.apiGatewayUrl) return null;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/social/toggle-favorite`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ artistId, userId })
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+      return null;
+    } catch (err) {
+      console.warn('[AWS Social] Falha ao alternar artista favorito:', err);
+      return null;
+    }
   }
 
   // ============================================================================

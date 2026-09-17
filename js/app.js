@@ -2083,6 +2083,10 @@ const InfiniteScrollManager = {
 // ==============================================================================
 
 function switchView(viewName) {
+  // Aliases para manter compatibilidade com notificações e botões legados
+  if (viewName === 'admin') viewName = 'admin-panel';
+  if (viewName === 'profile') viewName = 'artist-panel';
+
   if (viewName === 'artist-panel' && currentUserSession.role === 'guest') {
     openSessionModal();
     return;
@@ -2622,8 +2626,8 @@ function toggleLike(postId) {
     window.supabaseService.togglePostLike(postId, currentUserSession.id);
   }
 
-  // Atualizar apenas o botão e contador de curtidas inline (sem re-render do feed inteiro para não piscar a tela)
-  document.querySelectorAll(`button[onclick="toggleLike('${postId}')"]`).forEach(btn => {
+  // Atualizar imediatamente qualquer botão e contador de curtidas no DOM
+  document.querySelectorAll(`button[onclick*="toggleLike('${postId}')"]`).forEach(btn => {
     const svg = btn.querySelector('svg');
     if (svg) {
       svg.setAttribute('fill', post.is_liked ? '#F0442E' : 'none');
@@ -2632,6 +2636,11 @@ function toggleLike(postId) {
     const countSpan = btn.querySelector('span');
     if (countSpan) {
       countSpan.innerText = post.likes;
+    }
+    if (post.is_liked) {
+      btn.classList.add('liked');
+    } else {
+      btn.classList.remove('liked');
     }
   });
 }
@@ -2651,8 +2660,8 @@ function toggleSave(postId) {
     window.supabaseService.toggleSavedPost(postId, currentUserSession.id);
   }
 
-  // Atualizar apenas o botão de salvar inline (sem re-render do feed inteiro)
-  document.querySelectorAll(`button[onclick="toggleSave('${postId}')"]`).forEach(btn => {
+  // Atualizar imediatamente qualquer botão de salvar no DOM
+  document.querySelectorAll(`button[onclick*="toggleSave('${postId}')"]`).forEach(btn => {
     if (post.is_saved) {
       btn.classList.add('is-saved');
     } else {
@@ -2665,7 +2674,7 @@ function toggleSave(postId) {
     }
   });
 
-  // Atualizar aba Salvos do perfil sem piscar o feed
+  // Atualizar aba Salvos do perfil
   const profileTab = document.querySelector('.profile-tab-btn.tab-saved.active');
   if (profileTab || document.getElementById('view-artist-panel')?.classList.contains('active')) {
     renderProfileGallery();
@@ -2688,21 +2697,33 @@ function toggleFavoriteArtist(artistId) {
   } else {
     currentUserSession.favorites.push(artistId);
   }
+  const nowFav = !isFav;
   saveCurrentSession();
 
   if (window.supabaseService && currentUserSession.id) {
     window.supabaseService.toggleFavoriteArtist(artistId, currentUserSession.id);
   }
 
-  renderArtists();
-  renderProfileGallery();
+  // Atualização direta e imediata de todos os botões de favoritar deste artista
+  document.querySelectorAll(`button[onclick*="toggleFavoriteArtist('${artistId}')"]`).forEach(btn => {
+    if (btn.classList.contains('btn-fav-artist')) {
+      btn.classList.toggle('favorited', nowFav);
+    } else {
+      // Botão do perfil público
+      if (nowFav) {
+        btn.className = 'btn bg-frevo-orange text-white shadow-md text-xs px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all flex-shrink-0';
+      } else {
+        btn.className = 'btn btn-outline text-frevo-orange border-frevo-orange hover:bg-frevo-orange/10 text-xs px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all flex-shrink-0';
+      }
+      const svg = btn.querySelector('svg');
+      if (svg) svg.setAttribute('fill', nowFav ? 'currentColor' : 'none');
+      const textSpan = btn.querySelector('span');
+      if (textSpan) textSpan.innerText = nowFav ? 'Favoritado' : 'Favoritar';
+    }
+  });
 
-  // Se a tela pública do artista estiver aberta, atualizar sua visualização
-  const currentPublicContainer = document.getElementById('artist-public-content');
-  const targetView = document.getElementById('view-artist-public');
-  if (targetView && targetView.classList.contains('active') && currentPublicContainer) {
-    openArtistProfile(artistId);
-  }
+  renderArtists('', false);
+  renderProfileGallery();
 }
 
 // Visualização de Perfil Público do Artista (Página Completa, sem banner, estilo minimalista com músicas, álbuns e shows)
@@ -8651,6 +8672,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (window.FREVIA_CONFIG && window.FREVIA_CONFIG.isConfigured()) {
     syncAllWithSupabase();
+  }
+
+  // Sincronizar estado social se usuário já estiver autenticado na inicialização
+  if (currentUserSession && currentUserSession.id && currentUserSession.role !== 'guest' && window.supabaseService) {
+    window.supabaseService.getUserSocialState(currentUserSession.id).then(social => {
+      if (social) {
+        if (social.favoriteArtistIds) currentUserSession.favorites = social.favoriteArtistIds;
+        if (DB && DB.posts) {
+          DB.posts.forEach(p => {
+            p.is_liked = (social.likedPostIds || []).includes(p.id);
+            p.is_saved = (social.savedPostIds || []).includes(p.id);
+          });
+        }
+        renderFeed();
+        renderArtists();
+        renderProfileGallery();
+        saveCurrentSession();
+      }
+    }).catch(e => console.warn('[FrevAI] Aviso ao sincronizar estado social inicial:', e));
   }
 
   // Ouvinte de mudança de autenticação no Supabase
