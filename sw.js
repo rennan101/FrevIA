@@ -1,5 +1,5 @@
-// Service Worker básico para permitir instalação PWA offline e cache do FrevAI
-const CACHE_NAME = 'frevai-v1';
+// Service Worker do FrevAI — Suporte PWA Offline-First
+const CACHE_NAME = 'frevai-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -12,15 +12,18 @@ const ASSETS_TO_CACHE = [
   './assets/icons/icon-192x192.png',
   './assets/icons/icon-512x512.png',
   './assets/icons/apple-touch-icon.png',
-  './assets/icons/favicon-32x32.png'
+  './assets/icons/favicon-32x32.png',
+  'https://cdn.tailwindcss.com',
+  'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+  'https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    }).catch(err => {
-      console.log('[ServiceWorker] Cache parcial:', err);
+      return Promise.allSettled(
+        ASSETS_TO_CACHE.map(url => cache.add(url).catch(err => console.warn('[SW Cache Item Fail]:', url, err)))
+      );
     })
   );
   self.skipWaiting();

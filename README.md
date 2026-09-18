@@ -18,8 +18,17 @@ FrevIA é uma Progressive Web App (PWA) e Single Page Application (SPA) standalo
   - Ação rápida de contato direto via e-mail/telefone.
 - **Mapa do Frevo Expansível:** Visualização do mapa interativo embutido direto no app + redirecionamento para o Google Maps.
 - **Suporte PWA Completo:** Banner automático de instalação para iOS (Safari) e Android (Chrome).
+- **Controle de Acessos por Cargo (RBAC):**
+  - **Visitante (`guest`):** Navegação pública em todos os acervos;
+  - **Folião (`user`):** Curtidas, posts salvos e favoritos isolados por usuário, comentários no feed, solicitação de perfil de artista e notificações pessoais;
+  - **Artista Oficial (`artist`):** Selo verificado, perfil com catálogo próprio, upload de faixas de áudio (MP3), partituras em PDF, álbuns e shows;
+  - **Administrador (`admin`):** Gestão geral pelo CMS, aprovação/recusa fundamentada de solicitações artísticas, moderação de notícias, catálogo de passos, história e mapa.
+- **Arquitetura de Notificações Isoladas & Moderação Compartilhada:**
+  - Alertas de novas solicitações de artista são recebidos por **todos os administradores** (`forRole: 'admin'`);
+  - Notificações de parecer de aprovação/recusa com justificativa são entregues **estritamente ao usuário solicitante** (`forUserId`), garantindo privacidade e mantendo o sino dos administradores limpo;
+  - Cada usuário e administrador possui seu próprio histórico e contadores de notificações.
 - **Sem Emojis / Design Profissional:** 100% estruturado com ícones vetoriais SVG e tipografia moderna (*Bricolage Grotesque* & *Plus Jakarta Sans*).
-- **Diretrizes e Regras de Desenvolvimento:** Consulte o [`GEMINI.md`](GEMINI.md) e o [`design.md`](design.md) para regras de modais, arquitetura e padrão Zero Emojis.
+- **Diretrizes e Regras de Desenvolvimento:** Consulte o [`GEMINI.md`](GEMINI.md), [`escopo_e_arquitetura.md`](escopo_e_arquitetura.md) e o [`design.md`](design.md) para regras de modais, arquitetura e padrão Zero Emojis.
 
 ---
 

@@ -1848,13 +1848,36 @@ async function handleUserAvatarUpload(event) {
 // ==============================================================================
 // SISTEMA DE NOTIFICAÇÕES & PUSH COM DEEP LINKING
 // ==============================================================================
+// SISTEMA DE NOTIFICAÇÕES (ISOLAMENTO POR USUÁRIO & CANAL DE MODERAÇÃO ADMIN)
+// ==============================================================================
+
+function getVisibleNotificationsForCurrentSession() {
+  loadNotificationsLocal();
+  const session = currentUserSession || {};
+  const currentUserId = session.id;
+  const userRole = session.role || 'guest';
+  const isAdmin = userRole === 'admin';
+
+  return (DB.notifications || []).filter(n => {
+    // 1. Notificação explicitamente direcionada a um usuário específico (ex: recusa/aprovação individual)
+    if (n.forUserId) {
+      return n.forUserId === currentUserId;
+    }
+    // 2. Notificação direcionada a um cargo específico (ex: 'admin' para moderação compartilhada)
+    if (n.forRole) {
+      if (n.forRole === 'admin') return isAdmin;
+      return n.forRole === userRole;
+    }
+    // 3. Notificação global de difusão (broadcast) para a comunidade
+    return true;
+  });
+}
 
 function updateNotificationBadge() {
   const badge = document.getElementById('header-notification-badge');
   if (!badge) return;
-  const isAdm = currentUserSession.role === 'admin';
-  const notifs = (DB.notifications || []).filter(n => isAdm || n.forRole !== 'admin');
-  const unreadCount = notifs.filter(n => !n.read).length;
+  const visibleNotifs = getVisibleNotificationsForCurrentSession();
+  const unreadCount = visibleNotifs.filter(n => !n.read).length;
   badge.style.display = unreadCount > 0 ? 'block' : 'none';
 }
 
@@ -1898,7 +1921,13 @@ function sendCulturalPushNotification({ title, message, url, type, targetId }) {
 }
 
 function markAllNotificationsAsRead() {
-  (DB.notifications || []).forEach(n => { n.read = true; });
+  const visible = getVisibleNotificationsForCurrentSession();
+  const visibleIds = new Set(visible.map(n => n.id));
+  (DB.notifications || []).forEach(n => {
+    if (visibleIds.has(n.id)) {
+      n.read = true;
+    }
+  });
   saveNotificationsLocal();
   updateNotificationBadge();
   openNotificationsModal();
@@ -1959,14 +1988,7 @@ function handleNotificationClick(notifId, type, targetId) {
 function openNotificationsModal() {
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
-  loadNotificationsLocal();
-  const isAdm = currentUserSession.role === 'admin';
-  const notifications = (DB.notifications || []).filter(n => {
-    if (isAdm) return true;
-    if (n.forRole === 'admin') return false;
-    if (n.forUserId) return n.forUserId === currentUserSession.id;
-    return true;
-  });
+  const notifications = getVisibleNotificationsForCurrentSession();
   const unreadCount = notifications.filter(n => !n.read).length;
 
   modalBody.innerHTML = `
@@ -5438,6 +5460,7 @@ async function confirmApproveArtistRequest(requestId) {
     id: 'notif-approved-' + Date.now(),
     type: 'artist_approved',
     targetId: requestId,
+    forUserId: req ? req.user_id : null,
     title: 'Parabéns! Perfil de Artista Aprovado',
     message: 'Sua solicitação artística foi aprovada com sucesso! Você agora é um Artista Oficial e suas ferramentas de publicação de músicas, álbuns e shows foram liberadas.',
     author: 'Equipe FrevAI',
@@ -5727,6 +5750,10 @@ function confirmArtistDecision(artistId, isApprove) {
 }
 
 function deletePost(postId) {
+  if (currentUserSession.role !== 'admin') {
+    showAlertModal('Acesso restrito: Apenas administradores podem excluir publicações.');
+    return;
+  }
   if (confirm('Deseja realmente excluir esta publicação do feed?')) {
     DB.posts = DB.posts.filter(p => p.id !== postId);
     if (window.awsService && window.awsService.isConnected()) {
@@ -5738,6 +5765,10 @@ function deletePost(postId) {
 }
 
 function deleteMapPoint(id) {
+  if (currentUserSession.role !== 'admin') {
+    showAlertModal('Acesso restrito: Apenas administradores podem excluir pontos do mapa.');
+    return;
+  }
   if (confirm('Deseja realmente excluir este ponto do mapa?')) {
     DB.mapPoints = DB.mapPoints.filter(m => m.id !== id);
     if (window.awsService && window.awsService.isConnected()) {
@@ -5749,6 +5780,10 @@ function deleteMapPoint(id) {
 }
 
 function deleteHistory(id) {
+  if (currentUserSession.role !== 'admin') {
+    showAlertModal('Acesso restrito: Apenas administradores podem excluir marcos históricos.');
+    return;
+  }
   if (confirm('Deseja realmente excluir este marco histórico da linha do tempo?')) {
     DB.history = DB.history.filter(h => h.id !== id);
     if (window.awsService && window.awsService.isConnected()) {
@@ -5829,6 +5864,11 @@ async function handleAdminMediaUpload(inputElement, previewContainerId, hiddenUr
 
 // Modal de Criação de Post no Feed (com Upload de Imagem e Vídeo)
 function openNewPostModal() {
+  if (currentUserSession.role !== 'admin') {
+    showAlertModal('Acesso restrito: Apenas administradores podem publicar notícias oficiais no feed.');
+    return;
+  }
+
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
 
@@ -5965,6 +6005,10 @@ function submitNewPost(e) {
 }
 
 function openEditPostModal(postId) {
+  if (currentUserSession.role !== 'admin') {
+    showAlertModal('Acesso restrito: Apenas administradores podem editar notícias.');
+    return;
+  }
   const post = DB.posts.find(p => p.id === postId);
   if (!post) return;
 
@@ -6068,6 +6112,10 @@ let pendingMapPointCoords = null;
 let pendingMapPointConfirmed = false;
 
 function openNewMapPointModal() {
+  if (currentUserSession.role !== 'admin') {
+    showAlertModal('Acesso restrito: Apenas administradores podem adicionar novos pontos ao mapa.');
+    return;
+  }
   pendingMapPointCoords = [-8.0631, -34.8711];
   pendingMapPointConfirmed = false;
 
@@ -6296,6 +6344,11 @@ async function submitNewMapPoint(e) {
 
 // Modal de Adicionar Marco Histórico (com Upload de Imagem ou Vídeo de Época)
 function openNewHistoryModal() {
+  if (currentUserSession.role !== 'admin') {
+    showAlertModal('Acesso restrito: Apenas administradores podem cadastrar marcos históricos.');
+    return;
+  }
+
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
 
@@ -6397,6 +6450,10 @@ function submitNewHistory(e) {
 
 // Modal de Edição de Marco Histórico
 function openEditHistoryModal(historyId) {
+  if (currentUserSession.role !== 'admin') {
+    showAlertModal('Acesso restrito: Apenas administradores podem editar marcos históricos.');
+    return;
+  }
   const item = DB.history.find(h => h.id === historyId);
   if (!item) return;
 
@@ -6512,6 +6569,10 @@ function submitEditHistory(e, historyId) {
 
 // Modal de Adicionar Novo Passo de Frevo (com Upload de Vídeo e Imagem)
 function openNewStepModal() {
+  if (currentUserSession.role !== 'admin' && currentUserSession.role !== 'artist') {
+    showAlertModal('Apenas Administradores e Artistas Oficiais podem cadastrar novos passos de frevo.');
+    return;
+  }
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
 
@@ -6613,7 +6674,7 @@ function submitNewStep(e) {
     instructions,
     media_url: mediaUrl,
     media_type: mediaType,
-    author_role: 'admin'
+    author_role: currentUserSession.role === 'artist' ? 'artist' : 'admin'
   };
 
   DB.steps.push(newStep);
@@ -6628,6 +6689,10 @@ function submitNewStep(e) {
 }
 
 function openNewArtistModal() {
+  if (currentUserSession.role !== 'admin') {
+    showAlertModal('Acesso restrito: Apenas administradores podem cadastrar novos artistas no acervo.');
+    return;
+  }
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
 
@@ -7481,6 +7546,21 @@ function updateProfileUI() {
           <div>
             <strong class="block text-xs font-bold">Solicitação de Artista em Análise</strong>
             <span class="text-[10px] text-amber-700">Aguardando aprovação do administrador para liberar a publicação do seu acervo.</span>
+          </div>
+        </div>
+      `;
+    } else if (currentUserSession.artist_request_status === 'rejected') {
+      artistBannerEl.innerHTML = `
+        <div class="p-3 bg-rose-50 border border-rose-200 rounded-2xl flex items-start gap-2.5 text-xs text-rose-900">
+          <div class="w-7 h-7 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <strong class="block text-xs font-bold text-rose-800">Solicitação Não Aprovada</strong>
+            <p class="text-[11px] text-rose-700 leading-snug mt-0.5">Sua solicitação de perfil artístico anterior não foi aprovada pelo comitê. Você pode atualizar seus dados e reenviar a qualquer momento.</p>
+            <button onclick="openArtistRequestModal()" class="mt-2 text-[11px] font-bold text-rose-700 hover:text-rose-800 bg-white px-2.5 py-1 rounded-lg border border-rose-200 shadow-sm transition">
+              Reenviar Solicitação
+            </button>
           </div>
         </div>
       `;
@@ -8522,6 +8602,11 @@ async function submitNewSong(e) {
 // GESTÃO DE ÁLBUNS DO ARTISTA
 // -----------------------------------------------------------------------------
 function openSubmitAlbumModal() {
+  if (currentUserSession.role !== 'artist' && currentUserSession.role !== 'admin') {
+    showAlertModal('Apenas Artistas Oficiais e Administradores podem cadastrar álbuns e discografias.');
+    return;
+  }
+
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
 
@@ -8597,6 +8682,10 @@ async function submitNewAlbum(e) {
 }
 
 async function deleteAlbum(albumId) {
+  if (currentUserSession.role !== 'artist' && currentUserSession.role !== 'admin') {
+    showAlertModal('Apenas o artista ou administradores podem excluir este álbum.');
+    return;
+  }
   if (confirm('Deseja realmente excluir este álbum?')) {
     DB.albums = (DB.albums || []).filter(a => a.id !== albumId);
     if (window.awsService && window.awsService.isConnected()) {
@@ -8610,6 +8699,11 @@ async function deleteAlbum(albumId) {
 // GESTÃO DE SHOWS & APRESENTAÇÕES DO ARTISTA
 // -----------------------------------------------------------------------------
 function openSubmitShowModal() {
+  if (currentUserSession.role !== 'artist' && currentUserSession.role !== 'admin') {
+    showAlertModal('Apenas Artistas Oficiais e Administradores podem agendar e divulgar shows.');
+    return;
+  }
+
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
 

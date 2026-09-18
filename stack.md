@@ -368,6 +368,53 @@ created_at timestamptz
 
 ---
 
+# artist_requests
+
+Tabela para gerenciamento de solicitações de perfil de artista e workflow de curadoria:
+
+```sql
+id uuid primary key
+user_id uuid references profiles(id) on delete cascade
+requested_name text not null
+genre text not null
+bio text
+whatsapp text
+status text default 'pending' -- 'pending', 'approved', 'rejected'
+review_notes text             -- Parecer fundamentado em caso de recusa
+reviewed_by uuid references profiles(id)
+reviewed_at timestamptz
+created_at timestamptz default now()
+updated_at timestamptz default now()
+```
+
+---
+
+# notifications
+
+Tabela e schema de notificações in-app e canais direcionados:
+
+```sql
+id uuid primary key
+for_user_id uuid references profiles(id) on delete cascade -- Exclusivo para o usuário alvo (null se for broadcast)
+for_role text                                              -- 'admin' para comitê compartilhado, 'artist', 'user'
+type text not null                                         -- 'artist_request', 'artist_approved', 'artist_rejected', 'post', 'score'
+target_id text
+title text not null
+message text not null
+author text
+author_avatar text
+read boolean default false
+created_at timestamptz default now()
+```
+
+### Regras de Roteamento de Notificações:
+1. **Solicitações de Artista Pendentes:** Criadas com `for_role = 'admin'`. Visíveis para **todos os administradores** no sino e no CMS.
+2. **Parecer de Curadoria (Aprovação / Recusa):** Criadas com `for_user_id = target_user_id` e sem `for_role = 'admin'`. Visíveis **exclusivamente na conta do solicitante**.
+3. **Notificações Pessoais de Conta:** Administradores e artistas possuem caixas isoladas para suas próprias interações (`for_user_id = user_id`).
+4. **Difusão Cultural (Broadcasts):** Notificações de novas músicas ou posts oficiais sem `for_user_id` e sem `for_role` são exibidas para toda a comunidade.
+
+---
+
 # 5. Storage
 
 Buckets sugeridos:

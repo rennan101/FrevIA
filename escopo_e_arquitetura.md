@@ -54,13 +54,45 @@ A plataforma está organizada em 7 módulos funcionais integrados:
 - **Geocodificação e Confirmação no Google Maps**: Validação inteligente de endereços digitados com preview em iframe e confirmação prévia para evitar localizações imprecisas.
 
 ### Módulo 7: Painel Administrativo e Gestão de Conteúdo (CMS)
-- **Moderação Completa**: Aprovação de novos perfis artísticos, recusa fundamentada com envio de e-mail e notificação no sistema.
+- **Moderação Completa**: Aprovação de novos perfis artísticos, recusa fundamentada com parecer curatorial, disparo de e-mail formal e notificação interna direcionada exclusivamente ao solicitante.
 - **Cadastramento Centralizado**: Ferramentas simplificadas para upload de mídias de posts, passos, marcos históricos e pontos do mapa.
-- **Segurança e Controle de Acesso**: Gerenciamento de permissões com base em papéis (`admin`, `artist`, `user`) e auditoria.
+- **Segurança e Controle de Acesso**: Gerenciamento rigoroso de permissões com base em papéis (`admin`, `artist`, `user`, `guest`) e auditoria de ações.
 
 ---
 
-## 3. Estrutura de Telas e Interfaces
+## 3. Matriz de Acessos por Cargo (RBAC) e Arquitetura de Notificações
+
+### 3.1. Matriz de Permissões da Plataforma
+
+| Funcionalidade / Módulo | Visitante (`guest`) | Folião (`user`) | Artista Oficial (`artist`) | Administrador (`admin`) |
+| :--- | :---: | :---: | :---: | :---: |
+| **Exploração Pública (Feed, Artistas, Partituras, Passos, História, Mapa)** | Leitura Pública | Leitura Pública | Leitura Pública | Leitura Pública |
+| **Player de Áudio & Visualizador de Partituras** | Acesso Completo | Acesso Completo | Acesso Completo | Acesso Completo |
+| **Curtir e Salvar Posts do Feed** | Bloqueado (Login) | Individual por Conta | Individual por Conta | Individual por Conta |
+| **Favoritar Artistas & Agremiações** | Bloqueado (Login) | Individual por Conta | Individual por Conta | Individual por Conta |
+| **Comentários no Feed** | Bloqueado (Login) | Liberado | Liberado | Liberado (com selo) |
+| **Meu Perfil (Bio, Avatar, Handle, Redes)** | Bloqueado (Login) | Próprio Perfil | Próprio Perfil | Próprio Perfil |
+| **Solicitar Perfil de Artista ("Quero ser Artista")** | Bloqueado (Login) | Liberado | Já Verificado | N/A (Admin) |
+| **Acompanhar Status da Solicitação (Pendente/Recusada)** | N/A | Liberado no Perfil | Aprovado | N/A |
+| **Publicar Músicas e Partituras (MP3 + PDF)** | Bloqueado | Bloqueado | Próprio Acervo | Todo o Acervo |
+| **Cadastrar Álbuns / EPs e Shows** | Bloqueado | Bloqueado | Próprios Discos/Shows | Todos os Discos/Shows |
+| **Cadastrar Novos Passos de Frevo** | Bloqueado | Bloqueado | Passos Autorizados | Gestão Completa |
+| **Painel de Gestão CMS (`#view-admin-panel`)** | Bloqueado | Bloqueado | Bloqueado | Acesso Exclusivo |
+| **Moderação de Artistas (Aprovar / Recusar com Parecer)** | Bloqueado | Bloqueado | Bloqueado | Todos os Administradores |
+| **Gestão Global de Notícias, Marcos Históricos e Mapa** | Bloqueado | Bloqueado | Bloqueado | Todos os Administradores |
+
+### 3.2. Arquitetura de Notificações e Isolamento de Dados por Usuário
+- **Dados Isolados por Usuário (User-Scoped):**
+  - Cada conta autenticada possui seu próprio conjunto de artistas favoritados (`favoriteArtistIds`), posts salvos (`savedPostIds`), posts curtidos (`likedPostIds`) e caixa de notificações pessoais.
+- **Canal Compartilhado de Moderação para Administradores (`forRole: 'admin'`):**
+  - Notificações de novos pedidos de conta artística pendentes chegam no sino de **todos os administradores** para que qualquer membro do comitê possa revisar.
+- **Roteamento de Decisões de Curadoria (`forUserId: targetUserId`):**
+  - Ao aprovar ou recusar um pedido, o parecer e a notificação são despachados **estritamente para a conta do usuário solicitante**, garantindo que nenhum administrador receba o parecer de recusa ou aprovação de outro usuário.
+  - O administrador mantém sua caixa de notificações pessoal ativa e independente para interações sociais e comunicados diretos.
+
+---
+
+## 4. Estrutura de Telas e Interfaces
 
 A experiência do usuário é baseada em uma arquitetura responsiva, estética refinada com tipografia elegante e sem uso de emojis:
 

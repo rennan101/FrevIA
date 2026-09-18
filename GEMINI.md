@@ -35,9 +35,12 @@ Todos os modais, janelas suspensas e diálogos devem seguir o Design System ofic
 
 ---
 
-## 4. Gestão de Notificações e Comunicações
+## 4. Gestão de Notificações, Isolamento por Usuário e Comunicações
 - **Fluxo de Solicitações e Moderação:**
-  - Todas as decisões tomadas pela moderação/admin (aprovações, recusas, solicitações de ajuste) devem notificar o usuário internamente na plataforma (`DB.notifications`) com mensagem clara e objetiva.
+  - Todas as decisões tomadas pela moderação/admin (aprovações, recusas, solicitações de ajuste) devem notificar o usuário internamente na plataforma (`DB.notifications`) direcionadas estritamente ao ID do solicitante (`forUserId`), com mensagem clara e objetiva.
+  - O sino e a lista de notificações de cada usuário (Folião, Artista ou Administrador) são isolados e individuais.
+  - Notificações de novas solicitações de artistas pendentes são transmitidas para todos os administradores do comitê (`forRole: 'admin'`).
+  - Ao recusar ou aprovar um pedido, a notificação com o parecer vai exclusivamente para o usuário solicitante (`forUserId: targetUserId`), não aparecendo no sino dos administradores.
   - Para eventos críticos (como a recusa de uma solicitação de perfil artístico), deve ser fornecido o motivo claro da recusa e também disparado um e-mail formal de notificação ao usuário solicitante informando o parecer e orientações para reenvio.
 
 <!-- BEGIN AWS Agent Toolkit rules -->

@@ -309,6 +309,45 @@ class AwsService {
     }
   }
 
+  async approveArtistRequest(requestId, adminId) {
+    if (!requestId || !this.apiGatewayUrl) return { error: { message: 'Configuração ausente' } };
+    try {
+      const payload = {
+        status: 'approved',
+        reviewed_by: adminId,
+        reviewed_at: new Date().toISOString()
+      };
+      const res = await fetch(`${this.apiGatewayUrl}/artist_requests/${encodeURIComponent(requestId)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      return { data: res.ok ? await res.json() : payload, error: null };
+    } catch (err) {
+      return { error: { message: err.message } };
+    }
+  }
+
+  async rejectArtistRequest(requestId, adminId, reason) {
+    if (!requestId || !this.apiGatewayUrl) return { error: { message: 'Configuração ausente' } };
+    try {
+      const payload = {
+        status: 'rejected',
+        review_notes: reason,
+        reviewed_by: adminId,
+        reviewed_at: new Date().toISOString()
+      };
+      const res = await fetch(`${this.apiGatewayUrl}/artist_requests/${encodeURIComponent(requestId)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      return { data: res.ok ? await res.json() : payload, error: null };
+    } catch (err) {
+      return { error: { message: err.message } };
+    }
+  }
+
   // ============================================================================
   // INTERAÇÕES SOCIAIS: LIKES, SALVOS & FAVORITOS NO BACKEND AWS
   // ============================================================================

@@ -1,0 +1,27 @@
+{
+  "CORSRules": [
+    {
+      "AllowedHeaders": [
+        "*"
+      ],
+      "AllowedMethods": [
+        "GET",
+        "PUT",
+        "POST",
+        "HEAD"
+      ],
+      "AllowedOrigins": [
+        "https://main.d4g55spy61el0.amplifyapp.com",
+        "https://frevai.is-a.dev",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "*"
+      ],
+      "ExposeHeaders": [
+        "ETag",
+        "x-amz-server-side-encryption"
+      ],
+      "MaxAgeSeconds": 3000
+    }
+  ]
+}
