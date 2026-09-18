@@ -9809,7 +9809,17 @@ document.addEventListener('DOMContentLoaded', () => {
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js').then((reg) => {
-        console.log('[FrevAI] Service Worker registrado com sucesso:', reg.scope);
+        reg.update();
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          if (newWorker) {
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                console.log('[FrevAI] Nova versão detectada. Atualizando cache...');
+              }
+            });
+          }
+        });
       }).catch((err) => {
         console.warn('[FrevAI] Falha ao registrar Service Worker:', err);
       });
