@@ -646,3 +646,11 @@ class AwsService {
 
 window.awsService = new AwsService();
 
+// ==============================================================================
+// COMPATIBILIDADE RETROATIVA: REDIRECIONAMENTO DE LEGADO PARA AWS CLOUD
+// Garante que qualquer chamada remanescente ou de versão anterior em cache do
+// navegador use exclusivamente a infraestrutura oficial da Amazon AWS.
+// ==============================================================================
+window.supabaseService = window.awsService;
+window.supabase = window.awsService;
+
