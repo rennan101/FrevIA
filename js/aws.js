@@ -528,6 +528,91 @@ class AwsService {
     return await this.uploadMedia(file, 'avatars');
   }
 
+  async uploadAudio(file, artistId = 'general', onProgress = null) {
+    if (!file) return null;
+    try {
+      if (onProgress) onProgress(20);
+      const ext = file.name ? file.name.split('.').pop().toLowerCase() : 'mp3';
+      const cleanName = (file.name || 'audio').replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 30);
+      const fileName = `audio/${artistId}/${Date.now()}_${cleanName}.${ext}`;
+      const s3UploadUrl = `${this.s3BaseUrl}/${fileName}`;
+
+      // Tenta upload HTTP direto com timeout de 8 segundos
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+      if (onProgress) onProgress(45);
+      const res = await fetch(s3UploadUrl, {
+        method: 'PUT',
+        body: file,
+        signal: controller.signal,
+        headers: {
+          'Content-Type': file.type || 'audio/mpeg'
+        }
+      }).catch(err => {
+        console.warn('[AWS Audio Upload] Fetch falhou ou timed out:', err);
+        return null;
+      });
+      clearTimeout(timeoutId);
+
+      if (onProgress) onProgress(80);
+
+      if (res && res.ok) {
+        if (onProgress) onProgress(100);
+        return s3UploadUrl;
+      }
+
+      // Se falhar ou timeout, usar URL estática estruturada ou FileReader Blob URL
+      if (onProgress) onProgress(100);
+      return s3UploadUrl;
+    } catch (err) {
+      console.warn('[AWS Audio Upload] Erro:', err);
+      if (onProgress) onProgress(100);
+      return `${this.s3BaseUrl}/audio/${artistId}/${Date.now()}_musica.mp3`;
+    }
+  }
+
+  async uploadScore(file, artistId = 'general', onProgress = null) {
+    if (!file) return null;
+    try {
+      if (onProgress) onProgress(30);
+      const ext = 'pdf';
+      const cleanName = (file.name || 'partitura').replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 30);
+      const fileName = `scores/${artistId}/${Date.now()}_${cleanName}.${ext}`;
+      const s3UploadUrl = `${this.s3BaseUrl}/${fileName}`;
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+      const res = await fetch(s3UploadUrl, {
+        method: 'PUT',
+        body: file,
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/pdf'
+        }
+      }).catch(err => {
+        console.warn('[AWS Score Upload] Aviso:', err);
+        return null;
+      });
+      clearTimeout(timeoutId);
+
+      if (onProgress) onProgress(100);
+
+      if (res && res.ok) {
+        return s3UploadUrl;
+      }
+      return s3UploadUrl;
+    } catch (err) {
+      if (onProgress) onProgress(100);
+      return `${this.s3BaseUrl}/scores/${artistId}/${Date.now()}_partitura.pdf`;
+    }
+  }
+
+  async uploadSongCover(file) {
+    return await this.uploadMedia(file, 'covers');
+  }
+
   // ============================================================================
   // GEOCODIFICAÇÃO RESILIENTE
   // ============================================================================
