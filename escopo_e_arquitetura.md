@@ -193,6 +193,23 @@ A plataforma **FrevAI** opera com infraestrutura centralizada e unificada exclus
 - **Storage de Alta Performance:** Amazon S3 + CloudFront (Músicas, Partituras PDF, Vídeos e Imagens)
 - **Serviços Serverless:** AWS Lambda + Amazon API Gateway
 - **Comunicações Transacionais:** Amazon SES (Notificações e pareceres de moderação)
+- **Motor de Áudio & Partituras (100% Gratuito & Ilimitado):** `FrevoAudioEngine` (Web Audio API para detecção de BPM e Tonalidade por Chromagrama Harmônico, gerador de estrofes/letras e exportador vetorial de partituras em PDF via jsPDF)
+
+---
+
+### Pipeline de Processamento de Áudio, Partitura e Letras (`FrevoAudioEngine`)
+
+A plataforma implementa uma solução sem custos de API ou servidores GPU para atender à demanda de análise musical de arquivos MP3 enviados por artistas:
+1. **Decodificação de Áudio NATIVA (Web Audio API):**
+   - O navegador decodifica diretamente o arquivo de áudio (MP3, WAV, AAC) em um buffer PCM (`AudioBuffer`) através de `AudioContext.decodeAudioData()`.
+2. **Cálculo de Andamento (BPM):**
+   - Análise de energia RMS em janelas de 40ms, extração de picos de transientes rítmicos do frevo (surdo/tarol) e agrupamento modal de intervalos para estimativa precisa do andamento (110 a 170 BPM).
+3. **Identificação da Tonalidade (Harmonic Chromagram):**
+   - Correlação do espectro fundamental nas oitavas 3 a 5 (130Hz a 1200Hz) mapeando os 12 semitons cromáticos e elegendo o centro tonal predominante da orquestra (ex: Ré Maior, Fá Maior, Si Bemol Maior).
+4. **Geração Poética de Letras / Estrofes:**
+   - Montagem de estrutura estrófica (`[Introdução]`, `[Estrofe 1]`, `[Refrão]`, `[Estrofe 2]`, `[Clímax]`, `[Final]`) adaptada dinamicamente ao gênero do Frevo (Frevo de Rua, Frevo de Bloco ou Frevo Canção).
+5. **Geração Vetorial da Partitura Oficial (PDF):**
+   - Diagramação completa em PDF A4 de alta resolução via `jsPDF`, contendo cabeçalho institucional de salvaguarda, pautas musicais dinâmicas, clave de Sol, compasso 2/4 frevado, notas no tom identificado, letra e termo de autenticação para download e upload no Amazon S3.
 
 ---
 

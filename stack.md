@@ -7,7 +7,8 @@
 - Tailwind CSS (CDN & Design System)
 - PWA Nativo (Service Worker, Web App Manifest)
 - SVG customizado para ícones (Padrão Oficial Zero Emojis)
-- jsPDF para geração de documentos e partituras
+- Web Audio API (Processamento de áudio client-side, detecção de BPM e análise harmônica por chromagrama)
+- jsPDF para geração de documentos, partituras vetoriais e pautas oficiais A4
 
 ### Backend & Nuvem (Amazon Web Services — AWS)
 - **Hosting**: AWS Amplify Hosting (`amplify.yml`, domínio `d4g55spy61el0.amplifyapp.com`)
