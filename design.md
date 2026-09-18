@@ -658,7 +658,7 @@ Nunca deixar tela vazia sem explicação.
 - **Notificação e Transparência:** Todas as ações de moderação (como a recusa de solicitações) devem fornecer feedback claro ao usuário, tanto via notificação na plataforma (`DB.notifications`) quanto por e-mail formal de orientação.
 
 ### Uploads de Mídia no CMS (Posts, Passos e História)
-- Componente de upload unificado com dropzone de arquivo (`handleAdminMediaUpload`), suporte a imagens e vídeos (MP4, WEBM), preview interativo imediato e integração ao Supabase Storage.
+- Componente de upload unificado com dropzone de arquivo (`handleAdminMediaUpload`), suporte a imagens e vídeos (MP4, WEBM), preview interativo imediato e integração ao Amazon S3.
 - Card de exibição dinâmico: renderiza `<video controls>` caso a mídia seja um vídeo ou `<img>` em formato imersivo.
 
 ### Busca e Confirmação de Endereço no Google Maps

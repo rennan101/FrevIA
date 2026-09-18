@@ -2,11 +2,11 @@
 
 > **Salvaguarda, Memória e Conexão da Cultura do Frevo de Pernambuco**
 
-FrevIA é uma Progressive Web App (PWA) e Single Page Application (SPA) standalone, projetada para conectar artistas, mestres, foliões e pesquisadores do Frevo, integrada ao banco de dados e Storage do **Supabase**.
+FrevIA é uma Progressive Web App (PWA) e Single Page Application (SPA) standalone, projetada para conectar artistas, mestres, foliões e pesquisadores do Frevo, integrada aos serviços em nuvem da **Amazon Web Services (AWS)**.
 
 ---
 
-## 🌟 Funcionalidades
+## Funcionalidades
 
 - **Feed Cultural Imersivo:** Publicações, novidades, histórias em carrossel e comentários.
 - **Hub Explorar o Frevo:** Acesso rápido ao Mapa Cultural, Passos de Dança Tradicionais e Linha do Tempo Histórica.
@@ -23,7 +23,7 @@ FrevIA é uma Progressive Web App (PWA) e Single Page Application (SPA) standalo
 
 ---
 
-## ⚡ Infraestrutura e Serviços em Nuvem (AWS)
+## Infraestrutura e Serviços em Nuvem (AWS)
 
 A aplicação FrevAI opera de forma nativa e unificada na infraestrutura da **Amazon Web Services (AWS)** (Região `sa-east-1` - São Paulo):
 
@@ -35,7 +35,7 @@ A aplicação FrevAI opera de forma nativa e unificada na infraestrutura da **Am
 
 ---
 
-## 🚀 Como Executar Localmente
+## Como Executar Localmente
 
 Como o projeto é uma SPA standalone, você pode abrir diretamente com qualquer servidor estático ou Live Server:
 

@@ -521,4 +521,4 @@ class AwsService {
 }
 
 window.awsService = new AwsService();
-window.supabaseService = window.awsService; // Aliasing total para compatibilidade com app.js
+

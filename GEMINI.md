@@ -31,7 +31,7 @@ Todos os modais, janelas suspensas e diálogos devem seguir o Design System ofic
 ## 3. Consulta e Atualização Contínua da Documentação
 - Antes de implementar qualquer botão, funcionalidade, modal ou rota:
   - **Sempre consultar os arquivos de documentação** (`design.md`, `stack.md`, `README.md`, etc.) para localizar botões, sessões, funções, scripts, arquivos e regras de arquitetura com rapidez e precisão.
-  - **Manter a documentação atualizada**: Ao criar novas rotas, tabelas no Supabase, funções globais ou componentes reutilizáveis, documente-os imediatamente nos arquivos pertinentes para manter a base de conhecimento sincronizada.
+  - **Manter a documentação atualizada**: Ao criar novas rotas, tabelas no AWS / Aurora PostgreSQL, funções globais ou componentes reutilizáveis, documente-os imediatamente nos arquivos pertinentes para manter a base de conhecimento sincronizada.
 
 ---
 

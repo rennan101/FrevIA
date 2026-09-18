@@ -94,11 +94,11 @@ O projeto foi planejado sob metodologia ágil, com entregas contínuas e marcos 
 
 | Fase                                            | Escopo de Entrega                                                                                                            | Entregáveis Principais                                                               |
 | :---------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------- |
-| **Fase 1: Concepção, Arquitetura e Modelagem**  | Levantamento de requisitos, arquitetura de software, design tokens e modelagem relacional do banco de dados com RLS.         | Diagramas de entidade-relacionamento, setup do Supabase e repositório Git.           |
+| **Fase 1: Concepção, Arquitetura e Modelagem**  | Levantamento de requisitos, arquitetura de software, design tokens e modelagem relacional do banco de dados com RLS.         | Diagramas de entidade-relacionamento, setup do AWS e repositório Git.           |
 | **Fase 2: UI/UX Design System e Identidade**    | Criação do Design System exclusivo para web/mobile, paleta de cores patrimoniais e eliminação total de emojis por SVGs.      | Guia de estilos (`design.md`), componentes base e interfaces responsivas.            |
-| **Fase 3: Core Backend e Autenticação**         | Implementação de autenticação (email/senha, recuperação de senha), gatilhos de criação de perfil e Row Level Security (RLS). | Migrations SQL (`001` a `007`), regras de segurança e integração do Supabase Client. |
+| **Fase 3: Core Backend e Autenticação**         | Implementação de autenticação (email/senha, recuperação de senha), gatilhos de criação de perfil e Row Level Security (RLS). | Migrations SQL (`001` a `007`), regras de segurança e integração do AWS Client. |
 | **Fase 4: Frontend e Módulos Públicos**         | Construção das interfaces do Feed, Artistas, Partituras, Passos, História e Mapa Cultural com renderização otimizada.        | Aplicação SPA/PWA funcional, reprodutor de vídeo nativo e integração do mapa.        |
-| **Fase 5: Upload de Mídia e Painel CMS**        | Gestão de uploads diretos de vídeo/foto no Supabase Storage, geocodificação de endereços e sistema de moderação.             | Modais administrativos com validação em tempo real e upload assíncrono.              |
+| **Fase 5: Upload de Mídia e Painel CMS**        | Gestão de uploads diretos de vídeo/foto no Amazon S3, geocodificação de endereços e sistema de moderação.             | Modais administrativos com validação em tempo real e upload assíncrono.              |
 | **Fase 6: Notificações, E-mails e Homologação** | Notificações internas, disparo de e-mails transacionais (aprovação/recusa) e testes de usabilidade e performance.            | Plataforma auditada, documentada e pronta para deploy de produção.                   |
 
 ---
@@ -111,7 +111,7 @@ A infraestrutura foi dimensionada para garantir **alta escalabilidade, seguranç
 
 ### Opção 1: Arquitetura Unificada AWS (Amazon Web Services) — *Recomendada para Centralização*
 
-Nesta abordagem, a **AWS substitui a Vercel e o Supabase em um único provedor**, consolidando hospedagem frontend, autenticação, banco de dados, storage de mídias e e-mails sob uma única conta, console e fatura unificada através do **AWS Amplify (Gen 2)**:
+Nesta abordagem, a **AWS substitui a Vercel e o AWS em um único provedor**, consolidando hospedagem frontend, autenticação, banco de dados, storage de mídias e e-mails sob uma única conta, console e fatura unificada através do **AWS Amplify (Gen 2)**:
 
 ```text
 GitHub (Controle de Versão)
@@ -130,14 +130,14 @@ APIs Complementares (Google Maps Embed / OpenStreetMap)
 
 #### Detalhamento dos Componentes AWS e Custos (Plano Pago Básico)
 
-| Serviço AWS                                   | Função na Plataforma                                                                                                    | Equivalente Vercel/Supabase | Modelo de Cobrança / Custo Estimado (Mensal)                             |
+| Serviço AWS                                   | Função na Plataforma                                                                                                    | Equivalente Vercel/AWS | Modelo de Cobrança / Custo Estimado (Mensal)                             |
 | :-------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------- | :-------------------------- | :----------------------------------------------------------------------- |
 | **AWS Amplify Hosting**                       | Hospedagem do frontend, deploy contínuo (CI/CD via Git), certificado SSL gratuito e distribuição global via CloudFront. | Vercel Pro                  | **~ US$ 5,00 a 10,00 / mês** *(Builds + transferências de dados)*        |
-| **Amazon Cognito**                            | Autenticação completa de usuários e artistas, login social, JWT e fluxo de recuperação de senha por e-mail.             | Supabase Auth               | **R$ 0,00** *(Gratuito até 50.000 usuários ativos mensais no Free Tier)* |
-| **Amplify Data (DynamoDB / Aurora)**          | Banco de dados para perfis, artistas, posts, curtidas, comentários, passos históricos e mapa.                           | Supabase PostgreSQL         | **~ US$ 10,00 a 15,00 / mês** *(Pay-as-you-go sob demanda)*              |
-| **Amazon S3 + CloudFront**                    | Armazenamento seguro de fotos, partituras em PDF e reprodutor de vídeos de alta definição com streaming rápido.         | Supabase Storage            | **~ US$ 3,00 a 6,00 / mês** *(US$ 0,023/GB armazenado + tráfego)*        |
+| **Amazon Cognito**                            | Autenticação completa de usuários e artistas, login social, JWT e fluxo de recuperação de senha por e-mail.             | Amazon Cognito               | **R$ 0,00** *(Gratuito até 50.000 usuários ativos mensais no Free Tier)* |
+| **Amplify Data (DynamoDB / Aurora)**          | Banco de dados para perfis, artistas, posts, curtidas, comentários, passos históricos e mapa.                           | Amazon Aurora PostgreSQL Serverless v2         | **~ US$ 10,00 a 15,00 / mês** *(Pay-as-you-go sob demanda)*              |
+| **Amazon S3 + CloudFront**                    | Armazenamento seguro de fotos, partituras em PDF e reprodutor de vídeos de alta definição com streaming rápido.         | Amazon S3            | **~ US$ 3,00 a 6,00 / mês** *(US$ 0,023/GB armazenado + tráfego)*        |
 | **Amazon SES (Simple Email)**                 | Disparo de e-mails transacionais (aprovação/recusa de artistas, recuperação de senhas e comunicados).                   | Resend / SendGrid           | **~ US$ 1,00 a 2,00 / mês** *(Apenas US$ 0,10 a cada 1.000 e-mails)*     |
-| **AWS Lambda**                                | Processamento de regras de negócios, webhooks e APIs privilegiadas sem servidor.                                        | Supabase Edge Functions     | **R$ 0,00** *(Incluso no milhão de requisições gratuitas/mês)*           |
+| **AWS Lambda**                                | Processamento de regras de negócios, webhooks e APIs privilegiadas sem servidor.                                        | AWS Edge Functions     | **R$ 0,00** *(Incluso no milhão de requisições gratuitas/mês)*           |
 | **Domínio Oficial (.com.br / .art.br / .ai)** | Registro anual do domínio oficial do projeto.                                                                           | Registro.br                 | **R$ 40,00 / ano** *(~ R$ 3,33 / mês)*                                   |
 
 - **Custo Médio Mensal AWS:** ~ **US$ 20,00 a US$ 35,00 / mês** *(~ R$ 115,00 a R$ 200,00 / mês)*.
@@ -166,9 +166,9 @@ A plataforma **FrevAI** opera com infraestrutura centralizada e unificada exclus
 
 ### Comparativo Resumido das Soluções
 
-| Critério | Opção 1: 100% AWS (Amplify + S3 + SES) | Opção 2: Vercel + Supabase |
+| Critério | Opção 1: 100% AWS (Amplify + S3 + SES) | Opção 2: Vercel + AWS |
 | :--- | :--- | :--- |
-| **Faturamento** | Fatura e conta única (apenas AWS). | Múltiplas faturas (Vercel, Supabase, Resend). |
+| **Faturamento** | Fatura e conta única (apenas AWS). | Múltiplas faturas (Vercel, AWS, Resend). |
 | **Custo Mensal Básico** | **Mais econômico (~ R$ 120 a R$ 200 / mês)** por ser modelo sob demanda. | **Fixo inicial mais alto (~ R$ 350 a R$ 390 / mês)** devido aos planos Pro mínimos. |
 | **Escalabilidade de Mídia** | Praticamente ilimitada via Amazon S3 + CloudFront. | Até 100 GB no plano Pro (expansível via add-ons). |
 | **Gestão do Banco de Dados** | Console AWS / GraphQL / NoSQL ou Aurora. | Painel PostgreSQL nativo visual amigável (estilo planilha). |

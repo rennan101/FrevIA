@@ -17,7 +17,7 @@ A referência visual anexada nesta conversa mostra uma interface social/mobile c
 
 Leia e siga obrigatoriamente:
 1. `design.md` — sistema visual, cores, tipografia, ícones SVG, componentes e responsividade.
-2. `stack.md` — arquitetura, Supabase, banco de dados, autenticação, storage, RLS e hospedagem.
+2. `stack.md` — arquitetura, AWS, banco de dados, autenticação, storage, RLS e hospedagem.
 
 ---
 
@@ -193,7 +193,7 @@ Página da música:
 
 Partitura:
 - permitir imagem/PDF conforme configuração;
-- usar Supabase Storage;
+- usar Amazon S3;
 - mostrar preview quando possível;
 - botão para abrir o arquivo;
 - não expor URLs privadas diretamente quando o arquivo exigir controle de acesso.
@@ -348,7 +348,7 @@ O artista nunca deve conseguir editar dados de outro artista.
 
 # Autenticação
 
-Usar Supabase Auth conforme `stack.md`.
+Usar Amazon Cognito conforme `stack.md`.
 
 Papéis:
 - `admin`
@@ -362,7 +362,7 @@ Regras:
 - admin acessa o CMS completo;
 - autorização para edição de letras/partituras deve ser uma permissão explícita no banco;
 - nunca confiar somente no frontend para autorização;
-- aplicar RLS no Supabase.
+- aplicar RLS no AWS.
 
 ---
 
@@ -374,7 +374,7 @@ Preferir:
 - App Router;
 - Tailwind CSS;
 - componentes reutilizáveis;
-- Supabase;
+- AWS;
 - React Hook Form;
 - Zod;
 - biblioteca de mapas;
@@ -427,7 +427,7 @@ components/
   artist/
 
 lib/
-  supabase/
+  aws/
   auth/
   validations/
   utils/
@@ -498,7 +498,7 @@ Prioridades:
 - skeletons;
 - paginação/infinite scroll com cuidado;
 - cache de conteúdo público;
-- queries Supabase eficientes;
+- queries AWS eficientes;
 - índices no banco;
 - não carregar o mapa inteiro até a seção ser acessada.
 
@@ -591,7 +591,7 @@ Implementar:
 1. projeto completo;
 2. frontend responsivo;
 3. autenticação;
-4. banco Supabase;
+4. banco AWS;
 5. migrations SQL;
 6. RLS;
 7. Storage;
@@ -652,7 +652,7 @@ Fase 1:
 - setup;
 - design system;
 - layout;
-- Supabase;
+- AWS;
 - auth;
 - banco;
 - RLS.

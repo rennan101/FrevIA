@@ -84,7 +84,7 @@ Firebase é uma alternativa válida caso o projeto priorize:
 - Firebase Authentication;
 - infraestrutura serverless Google.
 
-Para este produto, a modelagem relacional favorece PostgreSQL/Supabase.
+Para este produto, a modelagem relacional favorece PostgreSQL/AWS.
 
 ---
 
@@ -533,7 +533,7 @@ validar MIME
 ↓
 preview
 ↓
-upload Supabase Storage
+upload Amazon S3
 ↓
 salvar path no PostgreSQL
 ```
@@ -593,7 +593,7 @@ map_points.longitude
 
 ## Opção principal
 
-**Vercel + Supabase + GitHub**
+**Vercel + AWS + GitHub**
 
 Fluxo:
 
@@ -683,9 +683,9 @@ production
 Variáveis:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
+AWS_API_GATEWAY_URL=
+AWS_COGNITO_CLIENT_ID=
+AWS_COGNITO_USER_POOL_ID=
 ```
 
 A service role:
@@ -763,7 +763,7 @@ Estratégia:
 
 ```text
 MVP
-→ Supabase
+→ AWS
 → Vercel
 → domínio .br
 ```
@@ -789,7 +789,7 @@ frevo-platform/
 ├── public/
 │   ├── icons/
 │   └── brand/
-├── supabase/
+├── aws/
 │   ├── migrations/
 │   ├── seed.sql
 │   └── functions/

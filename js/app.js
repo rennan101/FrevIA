@@ -811,9 +811,9 @@ async function isHandleTaken(handle, excludeUserId = null) {
   }
   const lower = clean.toLowerCase();
 
-  // 1. Checar no Supabase se conectado
-  if (window.supabaseService && window.supabaseService.isConnected()) {
-    const isAvailable = await window.supabaseService.checkHandleAvailable(clean, excludeUserId);
+  // 1. Checar no AWS se conectado
+  if (window.awsService && window.awsService.isConnected()) {
+    const isAvailable = await window.awsService.checkHandleAvailable(clean, excludeUserId);
     if (!isAvailable) {
       return { taken: true, reason: `O nome de usuário ${clean} já está em uso por outro folião. Por favor, escolha outro.` };
     }
@@ -950,13 +950,13 @@ function switchTestRole(role, silent = false) {
 
   if (!silent) {
     if (role === 'guest') {
-      alert('Conta desconectada com sucesso.');
+      showAlertModal('Conta desconectada com sucesso.');
     }
   }
 }
 
 // ==============================================================================
-// MODAL UNIFICADO DE SESSÃO / LOGIN / CADASTRO (SUPABASE & GOOGLE)
+// MODAL UNIFICADO DE SESSÃO / LOGIN / CADASTRO (AWS & GOOGLE)
 // ==============================================================================
 let currentAuthTab = 'login';
 let currentSignupRole = 'fan'; // 'fan' ou 'artist'
@@ -1292,8 +1292,8 @@ async function handleForgotPasswordSubmit(e) {
     submitBtn.innerText = 'Enviando instruções...';
   }
 
-  if (window.supabaseService && window.supabaseService.isConnected()) {
-    const res = await window.supabaseService.resetPasswordForEmail(email);
+  if (window.awsService && window.awsService.isConnected()) {
+    const res = await window.awsService.resetPasswordForEmail(email);
     if (res?.error) {
       if (errorMsg) {
         errorMsg.innerText = res.error.message || 'Não foi possível enviar o e-mail de recuperação. Verifique o endereço digitado.';
@@ -1321,7 +1321,7 @@ async function loginWithGoogle() {
     try {
       window.awsService.signInWithGoogle();
     } catch (err) {
-      alert('Falha na comunicação com o Amazon Cognito / Google OAuth: ' + err.message);
+      showAlertModal('Falha na comunicação com o Amazon Cognito / Google OAuth: ' + err.message);
     }
   } else {
     switchTestRole('user');
@@ -1340,8 +1340,8 @@ async function handleEmailLogin(e) {
 
   if (!email || !password) return;
 
-  if (window.supabaseService && window.supabaseService.isConnected()) {
-    const { data, error } = await window.supabaseService.signInWithEmail(email, password);
+  if (window.awsService && window.awsService.isConnected()) {
+    const { data, error } = await window.awsService.signInWithEmail(email, password);
     if (error) {
       if (errEl) {
         let msg = error.message;
@@ -1356,15 +1356,15 @@ async function handleEmailLogin(e) {
         errEl.innerText = msg;
         errEl.classList.remove('hidden');
       } else {
-        alert('Erro no login Supabase: ' + error.message);
+        showAlertModal('Erro no login AWS: ' + error.message);
       }
       return;
     }
 
-    // Carregar perfil real no Supabase
-    let dbProfile = await window.supabaseService.getProfile(data.user.id);
+    // Carregar perfil real no AWS
+    let dbProfile = await window.awsService.getProfile(data.user.id);
     if (!dbProfile) {
-      dbProfile = await window.supabaseService.upsertProfile(data.user);
+      dbProfile = await window.awsService.upsertProfile(data.user);
     }
 
     // Regra de Ouro: artist_id só é vinculado se role === 'artist' E aprovado pelo admin
@@ -1385,7 +1385,7 @@ async function handleEmailLogin(e) {
     };
 
     // Sincronizar estado social (likes, salvos, favoritos)
-    const social = await window.supabaseService.getUserSocialState(data.user.id);
+    const social = await window.awsService.getUserSocialState(data.user.id);
     if (social) {
       currentUserSession.favorites = social.favoriteArtistIds || [];
       DB.posts.forEach(p => {
@@ -1441,7 +1441,7 @@ async function handleEmailSignUp(e) {
       errEl.innerText = 'O nome de usuário (@) deve conter pelo menos 3 caracteres (letras, números ou sublinhados).';
       errEl.classList.remove('hidden');
     } else {
-      alert('O nome de usuário (@) deve conter pelo menos 3 caracteres após o @.');
+      showAlertModal('O nome de usuário (@) deve conter pelo menos 3 caracteres após o @.');
     }
     document.getElementById('signup-handle')?.focus();
     return;
@@ -1454,7 +1454,7 @@ async function handleEmailSignUp(e) {
       errEl.innerText = handleCheck.reason;
       errEl.classList.remove('hidden');
     } else {
-      alert(handleCheck.reason);
+      showAlertModal(handleCheck.reason);
     }
     document.getElementById('signup-handle')?.focus();
     return;
@@ -1467,9 +1467,9 @@ async function handleEmailSignUp(e) {
   const genre = (genreSelect === 'Outro' && customGenre) ? customGenre : genreSelect;
   const whatsapp = document.getElementById('signup-artist-whatsapp')?.value || '';
 
-  if (window.supabaseService && window.supabaseService.isConnected()) {
+  if (window.awsService && window.awsService.isConnected()) {
     // Cadastra com o @handle escolhido e role inicial 'user'
-    const { data, error } = await window.supabaseService.signUpWithEmail(email, password, {
+    const { data, error } = await window.awsService.signUpWithEmail(email, password, {
       display_name: name,
       name: name,
       handle: handle,
@@ -1485,7 +1485,7 @@ async function handleEmailSignUp(e) {
         let msg = error.message;
         const lower = msg.toLowerCase();
         if (lower.includes('database error saving new user')) {
-          msg = 'Erro interno no banco do Supabase ao salvar usuário. Execute a migração 005_unique_handles_and_artist_requests.sql no SQL Editor do Supabase.';
+          msg = 'Erro interno no banco do AWS ao salvar usuário. Execute a migração 005_unique_handles_and_artist_requests.sql no SQL Editor do AWS.';
         } else if (lower.includes('user already registered') || lower.includes('already exists')) {
           msg = 'Este e-mail já está cadastrado. Alterne para a aba "Entrar" para acessar sua conta.';
         } else if (lower.includes('password should be at least')) {
@@ -1498,18 +1498,18 @@ async function handleEmailSignUp(e) {
         errEl.innerText = msg;
         errEl.classList.remove('hidden');
       } else {
-        alert('Erro no cadastro Supabase: ' + error.message);
+        showAlertModal('Erro no cadastro AWS: ' + error.message);
       }
       return;
     }
 
-    // Se escolheu ser artista, registra a solicitação no Supabase e no DB local
+    // Se escolheu ser artista, registra a solicitação no AWS e no DB local
     if (isArtistChoice) {
       const reqId = 'req-' + Date.now();
       const targetUserId = data?.user?.id || ('user-' + Date.now());
 
       if (data?.user) {
-        await window.supabaseService.requestArtistRole(data.user.id, {
+        await window.awsService.requestArtistRole(data.user.id, {
           requested_name: artistName,
           genre: genre,
           whatsapp: whatsapp
@@ -1612,9 +1612,9 @@ async function handleEmailSignUp(e) {
       saveNotificationsLocal();
       updateNotificationBadge();
 
-      alert('Conta criada com sucesso!\n\nSua solicitação para se tornar Artista foi enviada para aprovação da moderação.\n\nEnquanto o administrador analisa seu projeto, você já pode navegar e aproveitar o FrevAI como fã!');
+      showAlertModal('Conta criada com sucesso!\n\nSua solicitação para se tornar Artista foi enviada para aprovação da moderação.\n\nEnquanto o administrador analisa seu projeto, você já pode navegar e aproveitar o FrevAI como fã!');
     } else {
-      alert('Conta criada com sucesso! Seja bem-vindo ao FrevAI!');
+      showAlertModal('Conta criada com sucesso! Seja bem-vindo ao FrevAI!');
     }
 
     closeModal();
@@ -1629,7 +1629,7 @@ function openArtistRequestModal() {
     return;
   }
   if (currentUserSession.role === 'artist') {
-    alert('Você já possui um perfil de artista verificado no FrevAI!');
+    showAlertModal('Você já possui um perfil de artista verificado no FrevAI!');
     return;
   }
 
@@ -1712,8 +1712,8 @@ async function handleArtistRequestSubmit(e) {
   if (!name) return;
 
   const reqId = 'req-' + Date.now();
-  if (window.supabaseService && window.supabaseService.isConnected()) {
-    const { error } = await window.supabaseService.requestArtistRole(currentUserSession.id, {
+  if (window.awsService && window.awsService.isConnected()) {
+    const { error } = await window.awsService.requestArtistRole(currentUserSession.id, {
       requested_name: name,
       genre: genre,
       bio: bio,
@@ -1721,7 +1721,7 @@ async function handleArtistRequestSubmit(e) {
       whatsapp: whatsapp
     });
     if (error) {
-      console.warn('[Supabase] Aviso ao enviar solicitação:', error.message);
+      console.warn('[AWS] Aviso ao enviar solicitação:', error.message);
     }
   }
 
@@ -1767,17 +1767,17 @@ async function handleArtistRequestSubmit(e) {
 
   closeModal();
   updateProfileUI();
-  alert('Sua solicitação de perfil artístico foi enviada com sucesso!\n\nNossa curadoria analisará as informações. Você continua com acesso normal de folião.');
+  showAlertModal('Sua solicitação de perfil artístico foi enviada com sucesso!\n\nNossa curadoria analisará as informações. Você continua com acesso normal de folião.');
 }
 
 function logoutSession() {
-  if (window.supabaseService && window.supabaseService.isConnected()) {
-    window.supabaseService.signOut();
+  if (window.awsService && window.awsService.isConnected()) {
+    window.awsService.signOut();
   }
   switchTestRole('guest');
 }
 
-// Upload de foto do usuário com compressão canvas e Supabase Storage
+// Upload de foto do usuário com compressão canvas e AWS Storage
 async function handleUserAvatarUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -1823,11 +1823,11 @@ async function handleUserAvatarUpload(event) {
       saveCurrentSession();
       updateProfileUI();
 
-      // Upload para o Supabase Storage se conectado
-      if (window.supabaseService && window.supabaseService.isConnected()) {
+      // Upload para o AWS Storage se conectado
+      if (window.awsService && window.awsService.isConnected()) {
         canvas.toBlob(async (blob) => {
           if (blob) {
-            const uploadedUrl = await window.supabaseService.uploadAvatar(blob, currentUserSession.id);
+            const uploadedUrl = await window.awsService.uploadAvatar(blob, currentUserSession.id);
             if (uploadedUrl) {
               currentUserSession.avatar = uploadedUrl;
               currentUserProfile.avatar = uploadedUrl;
@@ -2097,7 +2097,7 @@ function switchView(viewName) {
   }
 
   if (viewName === 'admin-panel' && currentUserSession.role !== 'admin') {
-    alert('Acesso restrito: Apenas administradores autorizados podem acessar o painel de gestão.');
+    showAlertModal('Acesso restrito: Apenas administradores autorizados podem acessar o painel de gestão.');
     viewName = 'feed';
   }
 
@@ -2371,9 +2371,9 @@ async function submitInlineComment(event, postId) {
     input.value = '';
     updateCommentsDrawerUI(postId);
 
-    // Persistência com Supabase
-    if (window.supabaseService && window.supabaseService.isConnected() && currentUserSession.id) {
-      const saved = await window.supabaseService.addComment(postId, currentUserSession.id, text);
+    // Persistência com AWS
+    if (window.awsService && window.awsService.isConnected() && currentUserSession.id) {
+      const saved = await window.awsService.addComment(postId, currentUserSession.id, text);
       if (saved && saved.id) {
         newComment.id = saved.id;
       }
@@ -2431,8 +2431,8 @@ async function saveEditedComment(event, postId, commentId) {
     comment.time_ago = 'editado agora';
     updateCommentsDrawerUI(postId);
 
-    if (window.supabaseService && window.supabaseService.isConnected()) {
-      window.supabaseService.updateComment(commentId, newText);
+    if (window.awsService && window.awsService.isConnected()) {
+      window.awsService.updateComment(commentId, newText);
     }
   }
 }
@@ -2459,8 +2459,8 @@ async function deleteComment(postId, commentId) {
     post.comments = post.comments.filter(c => c.id !== commentId);
     updateCommentsDrawerUI(postId);
 
-    if (window.supabaseService && window.supabaseService.isConnected()) {
-      window.supabaseService.deleteComment(commentId);
+    if (window.awsService && window.awsService.isConnected()) {
+      window.awsService.deleteComment(commentId);
     }
   }
 }
@@ -2626,8 +2626,8 @@ function toggleLike(postId) {
   post.likes = (post.likes || 0) + (post.is_liked ? 1 : -1);
   if (post.likes < 0) post.likes = 0;
 
-  if (window.supabaseService && currentUserSession.id) {
-    window.supabaseService.togglePostLike(postId, currentUserSession.id);
+  if (window.awsService && currentUserSession.id) {
+    window.awsService.togglePostLike(postId, currentUserSession.id);
   }
 
   // Atualizar imediatamente qualquer botão e contador de curtidas no DOM
@@ -2660,8 +2660,8 @@ function toggleSave(postId) {
 
   post.is_saved = !post.is_saved;
 
-  if (window.supabaseService && currentUserSession.id) {
-    window.supabaseService.toggleSavedPost(postId, currentUserSession.id);
+  if (window.awsService && currentUserSession.id) {
+    window.awsService.toggleSavedPost(postId, currentUserSession.id);
   }
 
   // Atualizar imediatamente qualquer botão de salvar no DOM
@@ -2704,8 +2704,8 @@ function toggleFavoriteArtist(artistId) {
   const nowFav = !isFav;
   saveCurrentSession();
 
-  if (window.supabaseService && currentUserSession.id) {
-    window.supabaseService.toggleFavoriteArtist(artistId, currentUserSession.id);
+  if (window.awsService && currentUserSession.id) {
+    window.awsService.toggleFavoriteArtist(artistId, currentUserSession.id);
   }
 
   // Atualização direta e imediata de todos os botões de favoritar deste artista
@@ -2923,7 +2923,7 @@ function openArtistProfile(artistId) {
                     <span class="text-[10px] text-muted font-mono font-semibold">Horário: ${show.time} • ${day}/${month.toUpperCase()}/${year}</span>
                   </div>
                 </div>
-                <button onclick="alert('Informações e ingressos para ${show.title}!');" class="btn btn-primary text-[11px] px-3 py-1.5 rounded-xl font-bold whitespace-nowrap shadow-sm flex-shrink-0">
+                <button onclick="showAlertModal('Informações e ingressos para ${show.title}!');" class="btn btn-primary text-[11px] px-3 py-1.5 rounded-xl font-bold whitespace-nowrap shadow-sm flex-shrink-0">
                   Ingressos
                 </button>
               </div>
@@ -4054,6 +4054,10 @@ function toggleLyricsModal() {
   }
 }
 
+function openExpandedPlayer() {
+  toggleLyricsModal();
+}
+
 function updateLyricsModalContent() {
   const song = currentPlayingSong || DB.songs[0];
   if (!song) return;
@@ -4104,7 +4108,7 @@ function openEditLyricsModal(songId) {
   if (newLyrics !== null && newLyrics.trim() !== '') {
     song.lyrics = newLyrics;
     updateLyricsModalContent();
-    alert('Letra atualizada e salva com sucesso!');
+    showAlertModal('Letra atualizada e salva com sucesso!');
   }
 }
 
@@ -4253,7 +4257,7 @@ async function playFrevoAudioPreview(songIdOrTitle) {
 
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextClass) {
-      alert('Seu navegador não suporta a Web Audio API.');
+      showAlertModal('Seu navegador não suporta a Web Audio API.');
       return;
     }
 
@@ -5157,13 +5161,13 @@ async function renderAdminCMS() {
   if (!container) return;
 
   if (currentAdminTab === 'artists') {
-    // Buscar solicitações pendentes do Supabase e da fila local
+    // Buscar solicitações pendentes do AWS e da fila local
     let pendingRequests = [];
-    if (window.supabaseService && window.supabaseService.isConnected()) {
+    if (window.awsService && window.awsService.isConnected()) {
       try {
-        pendingRequests = await window.supabaseService.getPendingArtistRequests();
+        pendingRequests = await window.awsService.getPendingArtistRequests();
       } catch (err) {
-        console.warn('Erro ao obter solicitações do Supabase:', err);
+        console.warn('Erro ao obter solicitações do AWS:', err);
       }
     }
 
@@ -5420,12 +5424,12 @@ async function confirmApproveArtistRequest(requestId) {
     }
   }
 
-  if (window.supabaseService && window.supabaseService.isConnected()) {
-    const res = await window.supabaseService.approveArtistRequest(requestId, currentUserSession.id);
+  if (window.awsService && window.awsService.isConnected()) {
+    const res = await window.awsService.approveArtistRequest(requestId, currentUserSession.id);
     if (res && res.error) {
-      console.warn('Aviso Supabase ao aprovar:', res.error.message);
+      console.warn('Aviso AWS ao aprovar:', res.error.message);
     }
-    const freshArtists = await window.supabaseService.getArtists();
+    const freshArtists = await window.awsService.getArtists();
     if (freshArtists && freshArtists.length > 0) DB.artists = freshArtists;
   }
 
@@ -5444,7 +5448,7 @@ async function confirmApproveArtistRequest(requestId) {
   saveNotificationsLocal();
   updateNotificationBadge();
 
-  alert('Artista aprovado com sucesso! O perfil do usuário agora é "Artista" e suas ferramentas de publicação foram liberadas.');
+  showAlertModal('Artista aprovado com sucesso! O perfil do usuário agora é "Artista" e suas ferramentas de publicação foram liberadas.');
   renderAdminCMS();
   renderArtists();
 }
@@ -5589,12 +5593,12 @@ async function submitRejectArtistRequest(requestId) {
     saveCurrentSession();
   }
 
-  // Integração com Supabase
-  if (window.supabaseService && window.supabaseService.isConnected()) {
+  // Integração com AWS
+  if (window.awsService && window.awsService.isConnected()) {
     try {
-      await window.supabaseService.rejectArtistRequest(requestId, currentUserSession.id, reason);
+      await window.awsService.rejectArtistRequest(requestId, currentUserSession.id, reason);
     } catch (err) {
-      console.warn('[Supabase] Erro ao sincronizar recusa:', err.message);
+      console.warn('[AWS] Erro ao sincronizar recusa:', err.message);
     }
   }
 
@@ -5711,22 +5715,22 @@ function confirmArtistDecision(artistId, isApprove) {
   const artist = DB.artists.find(a => a.id === artistId);
   if (artist) {
     artist.is_approved = isApprove;
-    if (window.supabaseService && window.supabaseService.isConnected()) {
-      window.supabaseService.updateArtistApproval(artistId, isApprove);
+    if (window.awsService && window.awsService.isConnected()) {
+      window.awsService.updateArtistApproval(artistId, isApprove);
     }
   }
 
   closeModal();
   renderAdminCMS();
   renderArtists();
-  alert(`Decisão registrada com sucesso! Notificação enviada para: ${artist.email}`);
+  showAlertModal(`Decisão registrada com sucesso! Notificação enviada para: ${artist.email}`);
 }
 
 function deletePost(postId) {
   if (confirm('Deseja realmente excluir esta publicação do feed?')) {
     DB.posts = DB.posts.filter(p => p.id !== postId);
-    if (window.supabaseService && window.supabaseService.isConnected()) {
-      window.supabaseService.deletePost(postId);
+    if (window.awsService && window.awsService.isConnected()) {
+      window.awsService.deletePost(postId);
     }
     renderFeed();
     renderAdminCMS();
@@ -5736,8 +5740,8 @@ function deletePost(postId) {
 function deleteMapPoint(id) {
   if (confirm('Deseja realmente excluir este ponto do mapa?')) {
     DB.mapPoints = DB.mapPoints.filter(m => m.id !== id);
-    if (window.supabaseService && window.supabaseService.isConnected()) {
-      window.supabaseService.deleteMapPoint(id);
+    if (window.awsService && window.awsService.isConnected()) {
+      window.awsService.deleteMapPoint(id);
     }
     renderMap();
     renderAdminCMS();
@@ -5747,8 +5751,8 @@ function deleteMapPoint(id) {
 function deleteHistory(id) {
   if (confirm('Deseja realmente excluir este marco histórico da linha do tempo?')) {
     DB.history = DB.history.filter(h => h.id !== id);
-    if (window.supabaseService && window.supabaseService.isConnected()) {
-      window.supabaseService.deleteHistoryEntry?.(id);
+    if (window.awsService && window.awsService.isConnected()) {
+      window.awsService.deleteHistoryEntry?.(id);
     }
     renderHistory();
     renderAdminCMS();
@@ -5785,11 +5789,11 @@ async function handleAdminMediaUpload(inputElement, previewContainerId, hiddenUr
     `;
   }
 
-  // Se o Supabase estiver conectado, faz upload para o Storage
+  // Se o AWS estiver conectado, faz upload para o Storage
   let uploadedUrl = null;
-  if (window.supabaseService && window.supabaseService.isConnected()) {
+  if (window.awsService && window.awsService.isConnected()) {
     try {
-      uploadedUrl = await window.supabaseService.uploadMedia(file, folder);
+      uploadedUrl = await window.awsService.uploadMedia(file, folder);
     } catch (e) {
       console.warn('[Storage] Fallback para local preview:', e.message);
     }
@@ -5927,8 +5931,8 @@ function submitNewPost(e) {
   };
 
   DB.posts.unshift(newPost);
-  if (window.supabaseService && window.supabaseService.isConnected()) {
-    window.supabaseService.createPost(newPost);
+  if (window.awsService && window.awsService.isConnected()) {
+    window.awsService.createPost(newPost);
   }
 
   // Notificação Cultural In-App & Push
@@ -6046,8 +6050,8 @@ function saveEditPost(e, postId) {
     post.media_type = newMediaType;
     post.isVideo = newMediaType === 'video';
 
-    if (window.supabaseService && window.supabaseService.isConnected()) {
-      window.supabaseService.updatePost(postId, post);
+    if (window.awsService && window.awsService.isConnected()) {
+      window.awsService.updatePost(postId, post);
     }
   }
 
@@ -6181,8 +6185,8 @@ async function findAddressOnGoogleMaps() {
   }
 
   let geoResult = null;
-  if (window.supabaseService && window.supabaseService.geocodeAddress) {
-    geoResult = await window.supabaseService.geocodeAddress(query);
+  if (window.awsService && window.awsService.geocodeAddress) {
+    geoResult = await window.awsService.geocodeAddress(query);
   }
 
   if (btnFind) {
@@ -6280,8 +6284,8 @@ async function submitNewMapPoint(e) {
   };
 
   DB.mapPoints.push(newPt);
-  if (window.supabaseService && window.supabaseService.isConnected()) {
-    window.supabaseService.createMapPoint(newPt);
+  if (window.awsService && window.awsService.isConnected()) {
+    window.awsService.createMapPoint(newPt);
   }
 
   closeModal();
@@ -6381,8 +6385,8 @@ function submitNewHistory(e) {
   DB.history.push(newHist);
   sortHistoryTimeline();
 
-  if (window.supabaseService && window.supabaseService.isConnected()) {
-    window.supabaseService.createHistoryEntry?.(newHist);
+  if (window.awsService && window.awsService.isConnected()) {
+    window.awsService.createHistoryEntry?.(newHist);
   }
 
   closeModal();
@@ -6496,8 +6500,8 @@ function submitEditHistory(e, historyId) {
   // Reordena a linha do tempo cronologicamente
   sortHistoryTimeline();
 
-  if (window.supabaseService && window.supabaseService.isConnected()) {
-    window.supabaseService.updateHistoryEntry?.(historyId, item);
+  if (window.awsService && window.awsService.isConnected()) {
+    window.awsService.updateHistoryEntry?.(historyId, item);
   }
 
   closeModal();
@@ -6613,8 +6617,8 @@ function submitNewStep(e) {
   };
 
   DB.steps.push(newStep);
-  if (window.supabaseService && window.supabaseService.isConnected()) {
-    window.supabaseService.createStep(newStep);
+  if (window.awsService && window.awsService.isConnected()) {
+    window.awsService.createStep(newStep);
   }
 
   closeModal();
@@ -6761,8 +6765,8 @@ async function submitNewArtist(e) {
   }
 
   let artistRecord = null;
-  if (window.supabaseService && window.supabaseService.isConnected()) {
-    const res = await window.supabaseService.registerArtistByAdmin({
+  if (window.awsService && window.awsService.isConnected()) {
+    const res = await window.awsService.registerArtistByAdmin({
       ownerName,
       handle: cleanHandle,
       email,
@@ -6775,7 +6779,7 @@ async function submitNewArtist(e) {
 
     if (res?.error) {
       if (errorMsg) {
-        errorMsg.innerText = res.error.message || 'Erro ao cadastrar artista no Supabase.';
+        errorMsg.innerText = res.error.message || 'Erro ao cadastrar artista no AWS.';
         errorMsg.classList.remove('hidden');
       }
       if (submitBtn) {
@@ -6904,7 +6908,7 @@ function copyShareLink(url) {
 function copyToClipboard(text, message) {
   if (navigator.clipboard) {
     navigator.clipboard.writeText(text).then(() => {
-      alert(message || 'Copiado para a área de transferência!');
+      showAlertModal(message || 'Copiado para a área de transferência!');
     });
   }
 }
@@ -6976,8 +6980,8 @@ async function addComment(postId) {
     closeModal();
     updateCommentsDrawerUI(postId);
 
-    if (window.supabaseService && window.supabaseService.isConnected() && currentUserSession.id) {
-      const saved = await window.supabaseService.addComment(postId, currentUserSession.id, text);
+    if (window.awsService && window.awsService.isConnected() && currentUserSession.id) {
+      const saved = await window.awsService.addComment(postId, currentUserSession.id, text);
       if (saved && saved.id) {
         newComment.id = saved.id;
       }
@@ -6992,7 +6996,7 @@ async function addComment(postId) {
 function generateAndDownloadScorePdf(song) {
   try {
     if (!window.jspdf || !window.jspdf.jsPDF) {
-      alert('Biblioteca de PDF carregando... Por favor, tente novamente em alguns instantes.');
+      showAlertModal('Biblioteca de PDF carregando... Por favor, tente novamente em alguns instantes.');
       return false;
     }
     const { jsPDF } = window.jspdf;
@@ -7149,7 +7153,7 @@ function generateAndDownloadScorePdf(song) {
     return true;
   } catch (err) {
     console.error('[PDF] Erro ao gerar partitura em PDF:', err);
-    alert('Erro ao processar PDF da partitura: ' + err.message);
+    showAlertModal('Erro ao processar PDF da partitura: ' + err.message);
     return false;
   }
 }
@@ -7581,8 +7585,8 @@ function openAccountDropdownModal() {
 
 function confirmDeleteAccount() {
   if (confirm('Tem certeza de que deseja deletar sua conta? Esta ação é irreversível e removerá seus dados salvos do FrevAI.')) {
-    if (window.supabaseService && window.supabaseService.isConnected()) {
-      window.supabaseService.signOut();
+    if (window.awsService && window.awsService.isConnected()) {
+      window.awsService.signOut();
     }
     currentUserProfile = {
       name: 'Visitante',
@@ -7819,7 +7823,7 @@ async function saveProfileChanges(e) {
 
   // Validação do @handle
   if (!cleanHandle || cleanHandle.length < 4) {
-    alert('O nome de usuário (@) deve conter pelo menos 3 caracteres (letras, números ou sublinhados).');
+    showAlertModal('O nome de usuário (@) deve conter pelo menos 3 caracteres (letras, números ou sublinhados).');
     document.getElementById('edit-handle-input')?.focus();
     return;
   }
@@ -7828,7 +7832,7 @@ async function saveProfileChanges(e) {
   if (cleanHandle.toLowerCase() !== (currentUserSession.handle || '').toLowerCase()) {
     const handleCheck = await isHandleTaken(cleanHandle, currentUserSession.id);
     if (handleCheck.taken) {
-      alert(handleCheck.reason || `O nome de usuário ${cleanHandle} já está em uso por outro folião. Por favor, escolha outro.`);
+      showAlertModal(handleCheck.reason || `O nome de usuário ${cleanHandle} já está em uso por outro folião. Por favor, escolha outro.`);
       document.getElementById('edit-handle-input')?.focus();
       return;
     }
@@ -7888,9 +7892,9 @@ async function saveProfileChanges(e) {
   saveCurrentSession();
   updateProfileUI();
 
-  // Persistir no Supabase se conectado
-  if (window.supabaseService && window.supabaseService.isConnected() && currentUserSession.id) {
-    window.supabaseService.upsertProfile({
+  // Persistir no AWS se conectado
+  if (window.awsService && window.awsService.isConnected() && currentUserSession.id) {
+    window.awsService.upsertProfile({
       id: currentUserSession.id,
       email: currentUserSession.email,
       user_metadata: {
@@ -7905,7 +7909,7 @@ async function saveProfileChanges(e) {
       handle: cleanHandle,
       avatar_url: currentUserProfile.avatar
     });
-    window.supabaseService.updateProfileHandle(currentUserSession.id, cleanHandle);
+    window.awsService.updateProfileHandle(currentUserSession.id, cleanHandle);
   }
 
   const wasFirstLogin = isFirstLoginFlow;
@@ -7917,7 +7921,7 @@ async function saveProfileChanges(e) {
       openOnboardingModal();
     }, 250);
   } else {
-    alert('Perfil atualizado com sucesso!');
+    showAlertModal('Perfil atualizado com sucesso!');
   }
 }
 
@@ -8298,7 +8302,7 @@ function openContactModal() {
 
 function openSubmitSongModal() {
   if (currentUserSession.role !== 'artist' && currentUserSession.role !== 'admin') {
-    alert('Apenas Artistas Aprovados e Administradores podem cadastrar músicas e partituras.');
+    showAlertModal('Apenas Artistas Aprovados e Administradores podem cadastrar músicas e partituras.');
     return;
   }
 
@@ -8429,9 +8433,9 @@ async function submitNewSong(e) {
     const artistId = currentUserSession.artist_id || 'general';
 
     // 1. Upload de Áudio Real se arquivo foi selecionado
-    if (audioFileInput && audioFileInput.files && audioFileInput.files[0] && window.supabaseService) {
+    if (audioFileInput && audioFileInput.files && audioFileInput.files[0] && window.awsService) {
       if (statusEl) statusEl.innerText = 'Fazendo upload do áudio MP3...';
-      const uploadedAudio = await window.supabaseService.uploadAudio(audioFileInput.files[0], artistId);
+      const uploadedAudio = await window.awsService.uploadAudio(audioFileInput.files[0], artistId);
       if (uploadedAudio) audioUrl = uploadedAudio;
     }
     if (!audioUrl) {
@@ -8439,16 +8443,16 @@ async function submitNewSong(e) {
     }
 
     // 2. Upload de Partitura PDF se arquivo foi selecionado
-    if (scoreFileInput && scoreFileInput.files && scoreFileInput.files[0] && window.supabaseService) {
+    if (scoreFileInput && scoreFileInput.files && scoreFileInput.files[0] && window.awsService) {
       if (statusEl) statusEl.innerText = 'Fazendo upload da partitura PDF...';
-      const uploadedScore = await window.supabaseService.uploadScore(scoreFileInput.files[0], artistId);
+      const uploadedScore = await window.awsService.uploadScore(scoreFileInput.files[0], artistId);
       if (uploadedScore) scoreFileUrl = uploadedScore;
     }
 
     // 3. Upload de Capa se arquivo foi selecionado
-    if (coverFileInput && coverFileInput.files && coverFileInput.files[0] && window.supabaseService) {
+    if (coverFileInput && coverFileInput.files && coverFileInput.files[0] && window.awsService) {
       if (statusEl) statusEl.innerText = 'Fazendo upload da imagem de capa...';
-      const uploadedCover = await window.supabaseService.uploadSongCover(coverFileInput.files[0]);
+      const uploadedCover = await window.awsService.uploadSongCover(coverFileInput.files[0]);
       if (uploadedCover) coverUrl = uploadedCover;
     }
     if (!coverUrl) {
@@ -8479,9 +8483,9 @@ async function submitNewSong(e) {
 
     DB.songs.unshift(newSong);
 
-    // Persistir no Supabase
-    if (window.supabaseService && window.supabaseService.isConnected()) {
-      await window.supabaseService.createSong(newSong);
+    // Persistir no AWS
+    if (window.awsService && window.awsService.isConnected()) {
+      await window.awsService.createSong(newSong);
     }
 
     // Notificação Cultural In-App & Push
@@ -8503,10 +8507,10 @@ async function submitNewSong(e) {
     closeModal();
     renderSongs();
     renderProfileGallery();
-    alert(`Música "${newSong.title}" publicada com sucesso com áudio e partitura!`);
+    showAlertModal(`Música "${newSong.title}" publicada com sucesso com áudio e partitura!`);
   } catch (err) {
     console.error('Erro ao publicar música:', err);
-    alert('Erro ao enviar música: ' + err.message);
+    showAlertModal('Erro ao enviar música: ' + err.message);
     if (btnAction) {
       btnAction.disabled = false;
       btnAction.innerText = 'Publicar Música';
@@ -8582,21 +8586,21 @@ async function submitNewAlbum(e) {
   DB.albums = DB.albums || [];
   DB.albums.unshift(newAlbum);
 
-  if (window.supabaseService && window.supabaseService.isConnected()) {
-    const saved = await window.supabaseService.createAlbum(newAlbum);
+  if (window.awsService && window.awsService.isConnected()) {
+    const saved = await window.awsService.createAlbum(newAlbum);
     if (saved && saved.id) newAlbum.id = saved.id;
   }
 
   closeModal();
   renderProfileGallery();
-  alert('Álbum criado com sucesso! Agora você pode vincular faixas a ele.');
+  showAlertModal('Álbum criado com sucesso! Agora você pode vincular faixas a ele.');
 }
 
 async function deleteAlbum(albumId) {
   if (confirm('Deseja realmente excluir este álbum?')) {
     DB.albums = (DB.albums || []).filter(a => a.id !== albumId);
-    if (window.supabaseService && window.supabaseService.isConnected()) {
-      await window.supabaseService.deleteAlbum(albumId);
+    if (window.awsService && window.awsService.isConnected()) {
+      await window.awsService.deleteAlbum(albumId);
     }
     renderProfileGallery();
   }
@@ -8682,21 +8686,21 @@ async function submitNewShow(e) {
   DB.shows = DB.shows || [];
   DB.shows.unshift(newShow);
 
-  if (window.supabaseService && window.supabaseService.isConnected()) {
-    const saved = await window.supabaseService.createArtistEvent(newShow);
+  if (window.awsService && window.awsService.isConnected()) {
+    const saved = await window.awsService.createArtistEvent(newShow);
     if (saved && saved.id) newShow.id = saved.id;
   }
 
   closeModal();
   renderProfileGallery();
-  alert('Show agendado e publicado com sucesso!');
+  showAlertModal('Show agendado e publicado com sucesso!');
 }
 
 async function deleteShow(showId) {
   if (confirm('Deseja realmente excluir este show da sua agenda?')) {
     DB.shows = (DB.shows || []).filter(s => s.id !== showId);
-    if (window.supabaseService && window.supabaseService.isConnected()) {
-      await window.supabaseService.deleteArtistEvent(showId);
+    if (window.awsService && window.awsService.isConnected()) {
+      await window.awsService.deleteArtistEvent(showId);
     }
     renderProfileGallery();
   }
@@ -8794,60 +8798,60 @@ window.addEventListener('beforeinstallprompt', (e) => {
 });
 
 // ==============================================================================
-// SINCRONIZAÇÃO ASSÍNCRONA COM SUPABASE
+// SINCRONIZAÇÃO ASSÍNCRONA COM AWS
 // ==============================================================================
-async function syncAllWithSupabase() {
-  if (!window.supabaseService || !window.supabaseService.isConnected()) return;
+async function syncAllWithAWS() {
+  if (!window.awsService || !window.awsService.isConnected()) return;
 
   try {
-    const livePosts = await window.supabaseService.getPosts();
+    const livePosts = await window.awsService.getPosts();
     if (livePosts && livePosts.length > 0) {
       DB.posts = livePosts;
       renderFeed();
     }
 
-    const liveArtists = await window.supabaseService.getArtists();
+    const liveArtists = await window.awsService.getArtists();
     if (liveArtists && liveArtists.length > 0) {
       DB.artists = liveArtists;
       renderArtists();
     }
 
-    const liveAlbums = await window.supabaseService.getAlbums?.();
+    const liveAlbums = await window.awsService.getAlbums?.();
     if (liveAlbums && liveAlbums.length > 0) {
       DB.albums = liveAlbums;
     }
 
-    const liveShows = await window.supabaseService.getArtistEvents?.();
+    const liveShows = await window.awsService.getArtistEvents?.();
     if (liveShows && liveShows.length > 0) {
       DB.shows = liveShows;
     }
 
-    const liveSongs = await window.supabaseService.getSongs();
+    const liveSongs = await window.awsService.getSongs();
     if (liveSongs && liveSongs.length > 0) {
       DB.songs = liveSongs;
       renderSongs();
       renderProfileGallery();
     }
 
-    const liveMap = await window.supabaseService.getMapPoints();
+    const liveMap = await window.awsService.getMapPoints();
     if (liveMap && liveMap.length > 0) {
       DB.mapPoints = liveMap;
       renderMap();
     }
 
-    const liveSteps = await window.supabaseService.getSteps?.();
+    const liveSteps = await window.awsService.getSteps?.();
     if (liveSteps && liveSteps.length > 0) {
       DB.steps = liveSteps;
       renderSteps();
     }
 
-    const liveHistory = await window.supabaseService.getHistoryEntries?.();
+    const liveHistory = await window.awsService.getHistoryEntries?.();
     if (liveHistory && liveHistory.length > 0) {
       DB.history = liveHistory;
       renderHistory();
     }
   } catch (err) {
-    console.warn('[Supabase] Erro durante sincronização:', err);
+    console.warn('[AWS] Erro durante sincronização:', err);
   }
 }
 
@@ -8882,12 +8886,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (window.FREVIA_CONFIG && window.FREVIA_CONFIG.isConfigured()) {
-    syncAllWithSupabase();
+    syncAllWithAWS();
   }
 
   // Sincronizar estado social se usuário já estiver autenticado na inicialização
-  if (currentUserSession && currentUserSession.id && currentUserSession.role !== 'guest' && window.supabaseService) {
-    window.supabaseService.getUserSocialState(currentUserSession.id).then(social => {
+  if (currentUserSession && currentUserSession.id && currentUserSession.role !== 'guest' && window.awsService) {
+    window.awsService.getUserSocialState(currentUserSession.id).then(social => {
       if (social) {
         if (social.favoriteArtistIds) currentUserSession.favorites = social.favoriteArtistIds;
         if (DB && DB.posts) {
@@ -8904,14 +8908,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }).catch(e => console.warn('[FrevAI] Aviso ao sincronizar estado social inicial:', e));
   }
 
-  // Ouvinte de mudança de autenticação no Supabase
-  if (window.supabaseService) {
-    window.supabaseService.onAuthStateChange(async (event, session) => {
+  // Ouvinte de mudança de autenticação no AWS
+  if (window.awsService) {
+    window.awsService.onAuthStateChange(async (event, session) => {
       try {
         if (session && session.user) {
-          let dbProfile = await window.supabaseService.getProfile(session.user.id);
+          let dbProfile = await window.awsService.getProfile(session.user.id);
           if (!dbProfile) {
-            dbProfile = await window.supabaseService.upsertProfile(session.user);
+            dbProfile = await window.awsService.upsertProfile(session.user);
           }
 
           const googleAvatar = session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture;
@@ -8941,7 +8945,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (dbProfile?.bio) currentUserProfile.bio = dbProfile.bio;
 
           // Sincronizar estado social do usuário autenticado (likes, salvos, favoritos)
-          const social = await window.supabaseService.getUserSocialState(session.user.id);
+          const social = await window.awsService.getUserSocialState(session.user.id);
           if (social) {
             currentUserSession.favorites = social.favoriteArtistIds || [];
             DB.posts.forEach(p => {
