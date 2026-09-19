@@ -405,10 +405,11 @@ async function handleForgotPasswordSubmit(e) {
 }
 
 async function loginWithGoogle() {
-  const clientId = window.FREVIA_CONFIG?.GOOGLE_CLIENT_ID || '1088734918234-frevai-auth.apps.googleusercontent.com';
+  const clientId = window.FREVIA_CONFIG?.GOOGLE_CLIENT_ID;
+  const isRealGoogleClientId = clientId && !clientId.includes('frevai-auth') && clientId.includes('.apps.googleusercontent.com');
 
-  // 1. Tentar abrir o seletor nativo de contas do Google (Google Identity Services / OAuth2 Token Client)
-  if (window.google && window.google.accounts && window.google.accounts.oauth2) {
+  // 1. Se houver um Client ID real configurado no Google Cloud Console, abrir o seletor nativo
+  if (isRealGoogleClientId && window.google && window.google.accounts && window.google.accounts.oauth2) {
     try {
       const client = window.google.accounts.oauth2.initTokenClient({
         client_id: clientId,
@@ -417,7 +418,6 @@ async function loginWithGoogle() {
         callback: async (tokenResponse) => {
           if (tokenResponse && tokenResponse.access_token) {
             try {
-              // Obter dados reais da conta Google selecionada
               const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
                 headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
               });
@@ -449,18 +449,8 @@ async function loginWithGoogle() {
     }
   }
 
-  // 2. Se o SDK do Google ainda não carregou, tentar abrir janela popup oficial do Google
-  try {
-    const redirectUri = encodeURIComponent(window.location.origin + window.location.pathname);
-    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(clientId)}&redirect_uri=${redirectUri}&response_type=token%20id_token&scope=email%20profile%20openid&prompt=select_account&nonce=frevai_${Date.now()}`;
-    const popup = window.open(googleAuthUrl, 'GoogleSignIn', 'width=520,height=630,menubar=no,toolbar=no,location=no');
-    
-    if (!popup || popup.closed || typeof popup.closed === 'undefined') {
-      openGoogleAuthModal();
-    }
-  } catch (e) {
-    openGoogleAuthModal();
-  }
+  // 2. Se o Client ID ainda não estiver cadastrado no console do Google Cloud, abrir o modal de login seguro
+  openGoogleAuthModal();
 }
 
 async function authenticateWithGoogleProfile({ name, email, avatar, sub }) {

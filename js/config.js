@@ -11,20 +11,20 @@ window.FREVIA_AWS_CONFIG = {
   AMPLIFY_APP_ID: 'd4g55spy61el0',
   AMPLIFY_DOMAIN: 'd4g55spy61el0.amplifyapp.com',
   CUSTOM_DOMAIN: 'frevai.is-a.dev',
-  
+
   // Storage de Mídia (S3) para Áudios, Partituras PDF, Imagens e Vídeos
   S3_BUCKET: 'frevia-media-196156785860',
   S3_BASE_URL: 'https://frevia-media-196156785860.s3.sa-east-1.amazonaws.com',
-  
+
   // Autenticação (Amazon Cognito User Pools)
   COGNITO_USER_POOL_ID: 'sa-east-1_egnFYahtb',
   COGNITO_CLIENT_ID: '46t8rd0jlv6c3gmje9uj10s6c8',
   COGNITO_DOMAIN: 'frevia.auth.sa-east-1.amazoncognito.com',
-  
+
   // Backend Serverless & API REST em Produção
   API_GATEWAY_URL: 'https://q59vzihzm8.execute-api.sa-east-1.amazonaws.com/api',
   AURORA_ENDPOINT: 'frevai-aurora-cluster.cluster-c30usu6u25gn.sa-east-1.rds.amazonaws.com',
-  
+
   TABLES: {
     PROFILES: 'frevai_profiles',
     ARTISTS: 'frevai_artists',
@@ -43,7 +43,7 @@ window.FREVIA_AWS_CONFIG = {
 
 window.FREVIA_CONFIG = {
   AWS: window.FREVIA_AWS_CONFIG,
-  GOOGLE_CLIENT_ID: '1088734918234-frevai-auth.apps.googleusercontent.com',
+  GOOGLE_CLIENT_ID: '284268551462-or789et0kuo8bk8ebt5r3m70krmvbma4.apps.googleusercontent.com',
   GA4_MEASUREMENT_ID: 'G-FREVAI2026',
   DPO_CONTACT_EMAIL: 'privacidade@frevai.com.br',
 
