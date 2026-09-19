@@ -8727,14 +8727,22 @@ Quem vive essa terra não esquece jamais!`;
         doc.line(20, startY + (l * 2.2), 190, startY + (l * 2.2));
       }
 
-      // Clave de Sol
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(13);
-      doc.setTextColor(...ink);
-      doc.text('𝄞', 22, startY + 7);
+      // Clave de Sol Vetorial (Compatibilidade Universal de PDF e Renderização sem dependência de fontes)
+      doc.setDrawColor(23, 23, 23);
+      doc.setFillColor(23, 23, 23);
+      doc.setLineWidth(0.45);
+      // Haste central da Clave
+      doc.line(24, startY - 2, 24, startY + 11);
+      doc.circle(24, startY + 11.2, 0.6, 'F');
+      // Curvas da Clave de Sol
+      doc.setLineWidth(0.35);
+      doc.ellipse(24, startY + 6.6, 2.2, 1.8, 'S');
+      doc.ellipse(24, startY + 2.2, 1.6, 2.0, 'S');
 
       // Compasso 2/4
+      doc.setFont('helvetica', 'bold');
       doc.setFontSize(7);
+      doc.setTextColor(...ink);
       doc.text('2', 28, startY + 3.5);
       doc.text('4', 28, startY + 7.5);
 
