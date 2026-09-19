@@ -6,15 +6,33 @@
 // Placeholder neutro minimalista para avatares de usuários sem foto cadastrada
 const DEFAULT_AVATAR_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23F3F4F6'/%3E%3Cpath d='M50 48a16 16 0 1 0 0-32 16 16 0 0 0 0 32zm0 8c-14 0-32 7.5-32 18v6h64v-6c0-10.5-18-18-32-18z' fill='%239CA3AF'/%3E%3C/svg%3E";
 
+// Placeholder cinza neutro com ícone de imagem para posts, músicas e álbuns sem imagem cadastrada
+const DEFAULT_MEDIA_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' width='400' height='300'%3E%3Crect width='100%25' height='100%25' fill='%23E5E7EB'/%3E%3Cg transform='translate(176, 126)' stroke='%239CA3AF' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='42' height='42' rx='8'/%3E%3Ccircle cx='15' cy='15' r='4'/%3E%3Cpath d='m45 33-11-11-19 19'/%3E%3Cpath d='m31 25 7-7 7 7'/%3E%3C/g%3E%3C/svg%3E";
+const DEFAULT_COVER_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 300' width='300' height='300'%3E%3Crect width='100%25' height='100%25' fill='%23E5E7EB'/%3E%3Cg transform='translate(126, 126)' stroke='%239CA3AF' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='42' height='42' rx='8'/%3E%3Ccircle cx='15' cy='15' r='4'/%3E%3Cpath d='m45 33-11-11-19 19'/%3E%3Cpath d='m31 25 7-7 7 7'/%3E%3C/g%3E%3C/svg%3E";
+
 function hasCustomAvatar(url) {
   if (!url || typeof url !== 'string') return false;
   const clean = url.trim();
-  if (!clean) return false;
+  if (!clean || clean.includes('undefined') || clean.includes('null')) return false;
   return true;
 }
 
 function getUserAvatarUrl(url) {
   return hasCustomAvatar(url) ? url : DEFAULT_AVATAR_PLACEHOLDER;
+}
+
+function getMediaUrl(url) {
+  if (!url || typeof url !== 'string') return DEFAULT_MEDIA_PLACEHOLDER;
+  const clean = url.trim();
+  if (!clean || clean.includes('undefined') || clean.includes('null')) return DEFAULT_MEDIA_PLACEHOLDER;
+  return clean;
+}
+
+function getCoverUrl(url) {
+  if (!url || typeof url !== 'string') return DEFAULT_COVER_PLACEHOLDER;
+  const clean = url.trim();
+  if (!clean || clean.includes('undefined') || clean.includes('null')) return DEFAULT_COVER_PLACEHOLDER;
+  return clean;
 }
 
 let currentUserSession = {
@@ -733,7 +751,7 @@ function renderProfileGallery() {
       <div class="space-y-3">
         ${savedPosts.map(p => `
           <div onclick="switchView('feed')" class="p-3 bg-white rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3 hover:border-frevo-orange transition-colors cursor-pointer">
-            <img src="${p.image || p.media_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&q=80'}" alt="${p.title || 'Post'}" class="w-14 h-14 rounded-xl object-cover flex-shrink-0" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&q=80'" />
+            <img src="${getMediaUrl(p.image || p.media_url)}" alt="${p.title || 'Post'}" class="w-14 h-14 rounded-xl object-cover flex-shrink-0" onerror="this.onerror=null; this.src='${DEFAULT_MEDIA_PLACEHOLDER}'" />
             <div class="flex-1 min-w-0">
               <h4 class="text-xs font-bold text-ink truncate">${p.author || 'FrevAI'}</h4>
               <p class="text-[11px] text-ink-soft truncate">${p.title || p.content || ''}</p>
@@ -812,7 +830,7 @@ function renderProfileGallery() {
           <div class="grid grid-cols-2 gap-3">
             ${albums.map(a => `
               <div onclick="openAlbumDetails('${a.id}')" class="p-3 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group">
-                <img src="${a.cover_url || a.cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=500&q=80'}" alt="${a.title}" class="w-full aspect-square rounded-xl object-cover mb-2" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=500&q=80'" />
+                <img src="${getCoverUrl(a.cover_url || a.cover)}" alt="${a.title}" class="w-full aspect-square rounded-xl object-cover mb-2" onerror="this.onerror=null; this.src='${DEFAULT_COVER_PLACEHOLDER}'" />
                 <h4 class="font-display font-bold text-xs text-ink truncate">${a.title}</h4>
                 <p class="text-[10px] text-muted truncate">${a.release_year || a.year || '2024'} · ${a.tracks_count || (a.tracks || []).length || 10} faixas</p>
               </div>
@@ -1104,8 +1122,13 @@ function renderAuthUI() {
 // Exportações Globais
 window.currentUserSession = currentUserSession;
 window.currentUserProfile = currentUserSession;
+window.DEFAULT_AVATAR_PLACEHOLDER = DEFAULT_AVATAR_PLACEHOLDER;
+window.DEFAULT_MEDIA_PLACEHOLDER = DEFAULT_MEDIA_PLACEHOLDER;
+window.DEFAULT_COVER_PLACEHOLDER = DEFAULT_COVER_PLACEHOLDER;
 window.hasCustomAvatar = hasCustomAvatar;
 window.getUserAvatarUrl = getUserAvatarUrl;
+window.getMediaUrl = getMediaUrl;
+window.getCoverUrl = getCoverUrl;
 window.saveCurrentSession = saveCurrentSession;
 window.updateSessionUI = updateSessionUI;
 window.switchTestRole = switchTestRole;

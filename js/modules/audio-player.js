@@ -324,7 +324,9 @@ function updateAudioPlayerUI() {
   const pauseIcon = document.getElementById('player-pause-icon');
   const lyricsBtn = document.getElementById('player-lyrics-toggle-btn');
 
-  if (coverEl) coverEl.src = currentPlayingSong.cover_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&q=80';
+  if (coverEl) {
+    coverEl.src = getCoverUrl(currentPlayingSong.cover_url || currentPlayingSong.cover);
+  }
   
   const titleText = currentPlayingSong.title || 'Música do Frevo';
   if (titleEl) {
@@ -435,7 +437,7 @@ function updateLyricsModalContent() {
 
   if (titleEl) titleEl.innerText = song.title;
   if (artistEl) artistEl.innerText = `${song.artist} • ${song.genre}`;
-  if (coverEl) coverEl.src = song.cover_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=200&q=80';
+  if (coverEl) coverEl.src = getCoverUrl(song.cover_url || song.cover);
 
   if (contentEl) {
     const rawLyrics = song.lyrics || `(Instrumental — Arranjo de Metais e Clarins)\nLá vem o frevo descendo a ladeira\nCom sombrinha colorida e alegria brasileira!`;

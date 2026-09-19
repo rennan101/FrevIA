@@ -511,12 +511,12 @@ function openAlbumDetails(albumId) {
   modalBody.innerHTML = `
     <div class="space-y-4 text-left max-h-[85vh] overflow-y-auto pr-1">
       <div class="flex items-start gap-3.5 pb-3 border-b border-gray-100 pr-8">
-        <img src="${album.cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&q=80'}" alt="${album.title}" class="w-20 h-20 rounded-2xl object-cover border border-gray-100 shadow-sm flex-shrink-0" />
+        <img src="${getCoverUrl(album.cover || album.cover_url)}" alt="${album.title}" class="w-20 h-20 rounded-2xl object-cover border border-gray-100 shadow-sm flex-shrink-0" onerror="this.onerror=null; this.src='${DEFAULT_COVER_PLACEHOLDER}'" />
         <div class="min-w-0 flex-1">
           <span class="badge bg-frevo-purple/15 text-frevo-purple text-[10px] font-bold">${album.genre || 'Frevo'}</span>
           <h3 class="font-display font-extrabold text-lg text-ink leading-tight mt-1 truncate">${album.title}</h3>
           <p class="text-xs font-bold text-frevo-orange truncate">${album.artist || 'Artista'}</p>
-          <p class="text-[11px] text-muted mt-0.5">${album.year || ''} · ${tracks.length} faixas</p>
+          <p class="text-[11px] text-muted mt-0.5">${album.year || album.release_year || ''} · ${tracks.length} faixas</p>
         </div>
       </div>
 

@@ -112,6 +112,7 @@ function renderPostCommentsHtml(post) {
 
 function renderFeedPostHtml(post) {
   const commentsList = (post.comments || []).map(c => renderCommentItemHtml(c, post.id)).join('');
+  const postMedia = getMediaUrl(post.image || post.media_url);
 
   return `
     <article class="feed-card-immersive infinite-scroll-item" id="post-card-${post.id}">
@@ -119,7 +120,7 @@ function renderFeedPostHtml(post) {
         ${(post.media_type === 'video' || post.isVideo || (post.image && post.image.match(/\.(mp4|webm|mov)(\?.*)?$/i))) ? `
           <video src="${post.media_url || post.image}" poster="${post.cover_url || ''}" controls playsinline preload="metadata" class="w-full h-full object-cover" style="max-height: 480px;"></video>
         ` : `
-          <img src="${post.image || post.media_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=80'}" alt="${post.title}" loading="lazy" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=80'" />
+          <img src="${postMedia}" alt="${post.title}" loading="lazy" onerror="this.onerror=null; this.src='${DEFAULT_MEDIA_PLACEHOLDER}'" />
         `}
 
         <!-- Top-Left Floating Author Pill -->

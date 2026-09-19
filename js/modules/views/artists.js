@@ -158,7 +158,7 @@ function openArtistProfile(artistId) {
                     ` : `${index + 1}`}
                   </span>
                   
-                  <img src="${song.cover_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=200&q=80'}" alt="${song.title}" class="w-10 h-10 rounded-xl object-cover flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=200&q=80'" />
+                  <img src="${getCoverUrl(song.cover_url)}" alt="${song.title}" class="w-10 h-10 rounded-xl object-cover flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform" onerror="this.onerror=null; this.src='${DEFAULT_COVER_PLACEHOLDER}'" />
                   
                   <div class="min-w-0 flex-1">
                     <h5 class="font-bold text-xs text-ink truncate group-hover:text-frevo-orange transition-colors">${song.title}</h5>
@@ -210,7 +210,7 @@ function openArtistProfile(artistId) {
           <div id="artist-albums-carousel" class="albums-carousel-track">
             ${artistAlbums.map(album => `
               <div class="album-card-item" onclick="openAlbumDetails('${album.id}')">
-                <img src="${album.cover_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=500&q=80'}" alt="${album.title}" class="album-card-cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=500&q=80'" />
+                <img src="${getCoverUrl(album.cover_url || album.cover)}" alt="${album.title}" class="album-card-cover" onerror="this.onerror=null; this.src='${DEFAULT_COVER_PLACEHOLDER}'" />
                 <div class="mt-2 text-left">
                   <h5 class="font-bold text-xs text-ink truncate">${album.title}</h5>
                   <p class="text-[10px] text-muted font-mono">${album.release_year} • ${album.tracks_count} faixas</p>
