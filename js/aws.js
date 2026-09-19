@@ -422,6 +422,445 @@ class AwsService {
   }
 
   // ============================================================================
+  // MÚSICAS & PARTITURAS (CRUD NO BACKEND AWS)
+  // ============================================================================
+  async getSongs() {
+    if (!this.apiGatewayUrl) return null;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/songs`);
+      if (res.ok) {
+        const data = await res.json();
+        return Array.isArray(data) ? data : null;
+      }
+      return null;
+    } catch (err) {
+      console.warn('[AWS Songs] Falha ao buscar músicas:', err);
+      return null;
+    }
+  }
+
+  async createSong(song) {
+    if (!song) return null;
+    if (!this.apiGatewayUrl) return song;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/songs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(song)
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+      return song;
+    } catch (err) {
+      console.warn('[AWS Songs] Falha ao criar música:', err);
+      return song;
+    }
+  }
+
+  // ============================================================================
+  // ÁLBUNS & DISCOGRAFIA (CRUD NO BACKEND AWS)
+  // ============================================================================
+  async getAlbums() {
+    if (!this.apiGatewayUrl) return null;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/albums`);
+      if (res.ok) {
+        const data = await res.json();
+        return Array.isArray(data) ? data : null;
+      }
+      return null;
+    } catch (err) {
+      console.warn('[AWS Albums] Falha ao buscar álbuns:', err);
+      return null;
+    }
+  }
+
+  async createAlbum(album) {
+    if (!album) return null;
+    if (!this.apiGatewayUrl) return album;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/albums`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(album)
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+      return album;
+    } catch (err) {
+      console.warn('[AWS Albums] Falha ao criar álbum:', err);
+      return album;
+    }
+  }
+
+  async deleteAlbum(id) {
+    if (!id || !this.apiGatewayUrl) return true;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/albums/${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
+      return res.ok;
+    } catch (err) {
+      console.warn('[AWS Albums] Falha ao excluir álbum:', err);
+      return false;
+    }
+  }
+
+  // ============================================================================
+  // SHOWS & EVENTOS DE ARTISTAS (CRUD NO BACKEND AWS)
+  // ============================================================================
+  async getArtistEvents() {
+    if (!this.apiGatewayUrl) return null;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/shows`);
+      if (res.ok) {
+        const data = await res.json();
+        return Array.isArray(data) ? data : null;
+      }
+      return null;
+    } catch (err) {
+      console.warn('[AWS Shows] Falha ao buscar shows:', err);
+      return null;
+    }
+  }
+
+  async createArtistEvent(event) {
+    if (!event) return null;
+    if (!this.apiGatewayUrl) return event;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/shows`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(event)
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+      return event;
+    } catch (err) {
+      console.warn('[AWS Shows] Falha ao criar show:', err);
+      return event;
+    }
+  }
+
+  async deleteArtistEvent(id) {
+    if (!id || !this.apiGatewayUrl) return true;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/shows/${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
+      return res.ok;
+    } catch (err) {
+      console.warn('[AWS Shows] Falha ao excluir show:', err);
+      return false;
+    }
+  }
+
+  // ============================================================================
+  // POSTS & FEED CULTURAL (CRUD NO BACKEND AWS)
+  // ============================================================================
+  async getPosts() {
+    if (!this.apiGatewayUrl) return null;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/posts`);
+      if (res.ok) {
+        const data = await res.json();
+        return Array.isArray(data) ? data : null;
+      }
+      return null;
+    } catch (err) {
+      console.warn('[AWS Posts] Falha ao buscar posts:', err);
+      return null;
+    }
+  }
+
+  async createPost(post) {
+    if (!post) return null;
+    if (!this.apiGatewayUrl) return post;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/posts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(post)
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+      return post;
+    } catch (err) {
+      console.warn('[AWS Posts] Falha ao criar post:', err);
+      return post;
+    }
+  }
+
+  async updatePost(id, post) {
+    if (!id || !post || !this.apiGatewayUrl) return post;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/posts/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(post)
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+      return post;
+    } catch (err) {
+      console.warn('[AWS Posts] Falha ao atualizar post:', err);
+      return post;
+    }
+  }
+
+  async deletePost(id) {
+    if (!id || !this.apiGatewayUrl) return true;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/posts/${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
+      return res.ok;
+    } catch (err) {
+      console.warn('[AWS Posts] Falha ao excluir post:', err);
+      return false;
+    }
+  }
+
+  // ============================================================================
+  // COMENTÁRIOS DO FEED (CRUD NO BACKEND AWS)
+  // ============================================================================
+  async addComment(postId, userId, text) {
+    if (!postId || !userId || !text) return null;
+    const payload = {
+      id: `c_${Date.now()}`,
+      postId,
+      userId,
+      text,
+      createdAt: new Date().toISOString()
+    };
+    if (!this.apiGatewayUrl) return payload;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+      return payload;
+    } catch (err) {
+      console.warn('[AWS Comments] Falha ao adicionar comentário:', err);
+      return payload;
+    }
+  }
+
+  async updateComment(commentId, newText) {
+    if (!commentId || !newText || !this.apiGatewayUrl) return null;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/comments/${encodeURIComponent(commentId)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: newText })
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+      return null;
+    } catch (err) {
+      console.warn('[AWS Comments] Falha ao atualizar comentário:', err);
+      return null;
+    }
+  }
+
+  async deleteComment(commentId) {
+    if (!commentId || !this.apiGatewayUrl) return true;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/comments/${encodeURIComponent(commentId)}`, {
+        method: 'DELETE'
+      });
+      return res.ok;
+    } catch (err) {
+      console.warn('[AWS Comments] Falha ao excluir comentário:', err);
+      return false;
+    }
+  }
+
+  // ============================================================================
+  // ARTISTAS & SOLICITAÇÕES
+  // ============================================================================
+  async getArtists() {
+    if (!this.apiGatewayUrl) return null;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/artists`);
+      if (res.ok) {
+        const data = await res.json();
+        return Array.isArray(data) ? data : null;
+      }
+      return null;
+    } catch (err) {
+      console.warn('[AWS Artists] Falha ao buscar artistas:', err);
+      return null;
+    }
+  }
+
+  async getPendingArtistRequests() {
+    if (!this.apiGatewayUrl) return [];
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/artist_requests?status=pending`);
+      if (res.ok) {
+        const data = await res.json();
+        return Array.isArray(data) ? data : [];
+      }
+      return [];
+    } catch (err) {
+      console.warn('[AWS Artist Requests] Falha ao buscar solicitações:', err);
+      return [];
+    }
+  }
+
+  async registerArtistByAdmin(artistData) {
+    if (!artistData) return null;
+    if (!this.apiGatewayUrl) return artistData;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/artists`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(artistData)
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+      return artistData;
+    } catch (err) {
+      console.warn('[AWS Artists] Falha ao registrar artista:', err);
+      return artistData;
+    }
+  }
+
+  async updateArtistApproval(artistId, isApproved) {
+    if (!artistId || !this.apiGatewayUrl) return true;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/artists/${encodeURIComponent(artistId)}/approval`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_authorized_editor: isApproved })
+      });
+      return res.ok;
+    } catch (err) {
+      console.warn('[AWS Artists] Falha ao atualizar aprovação de artista:', err);
+      return false;
+    }
+  }
+
+  // ============================================================================
+  // UTILITÁRIOS DE PERFIL (@HANDLE)
+  // ============================================================================
+  async checkHandleAvailable(handle, excludeUserId = null) {
+    if (!handle || !this.apiGatewayUrl) return true;
+    try {
+      const url = `${this.apiGatewayUrl}/profiles/check-handle?handle=${encodeURIComponent(handle)}${excludeUserId ? `&excludeUserId=${encodeURIComponent(excludeUserId)}` : ''}`;
+      const res = await fetch(url);
+      if (res.ok) {
+        const body = await res.json();
+        return body.available !== false;
+      }
+      return true;
+    } catch (err) {
+      return true;
+    }
+  }
+
+  async updateProfileHandle(userId, newHandle) {
+    if (!userId || !newHandle) return null;
+    return await this.upsertProfile({ id: userId }, { handle: newHandle });
+  }
+
+  // ============================================================================
+  // MAPA CULTURAL & PASSOS DO FREVO
+  // ============================================================================
+  async getMapPoints() {
+    if (!this.apiGatewayUrl) return null;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/map_points`);
+      if (res.ok) {
+        const data = await res.json();
+        return Array.isArray(data) ? data : null;
+      }
+      return null;
+    } catch (err) {
+      console.warn('[AWS Map] Falha ao buscar pontos do mapa:', err);
+      return null;
+    }
+  }
+
+  async createMapPoint(point) {
+    if (!point) return null;
+    if (!this.apiGatewayUrl) return point;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/map_points`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(point)
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+      return point;
+    } catch (err) {
+      console.warn('[AWS Map] Falha ao criar ponto:', err);
+      return point;
+    }
+  }
+
+  async deleteMapPoint(id) {
+    if (!id || !this.apiGatewayUrl) return true;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/map_points/${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
+      return res.ok;
+    } catch (err) {
+      console.warn('[AWS Map] Falha ao excluir ponto do mapa:', err);
+      return false;
+    }
+  }
+
+  async getSteps() {
+    if (!this.apiGatewayUrl) return null;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/steps`);
+      if (res.ok) {
+        const data = await res.json();
+        return Array.isArray(data) ? data : null;
+      }
+      return null;
+    } catch (err) {
+      console.warn('[AWS Steps] Falha ao buscar passos:', err);
+      return null;
+    }
+  }
+
+  async createStep(step) {
+    if (!step) return null;
+    if (!this.apiGatewayUrl) return step;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/steps`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(step)
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+      return step;
+    } catch (err) {
+      console.warn('[AWS Steps] Falha ao criar passo:', err);
+      return step;
+    }
+  }
+
+  // ============================================================================
   // HISTÓRIA DO FREVO (CRUD COM CRONOLOGIA AUTOMÁTICA)
   // ============================================================================
   async getHistoryEntries() {
