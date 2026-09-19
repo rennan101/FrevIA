@@ -50,7 +50,7 @@ function openSubmitAlbumModal() {
           <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Imagem de Capa do Álbum</label>
           <div class="p-2.5 bg-surface-soft border border-gray-200 rounded-xl space-y-1.5">
             <input type="file" id="album-cover-file" accept="image/*" class="text-xs text-muted file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-gray-200 file:text-ink hover:file:bg-gray-300 cursor-pointer w-full" />
-            <input type="url" id="album-cover-input" placeholder="Ou URL da imagem (https://images.unsplash.com/...)" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none" />
+            <input type="url" id="album-cover-input" placeholder="Ou URL da imagem (https://...)" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none" />
           </div>
         </div>
 
@@ -260,7 +260,7 @@ async function submitNewAlbum(e) {
       if (uploadedCover) cover_url = uploadedCover;
     }
     if (!cover_url) {
-      cover_url = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=500&q=80';
+      cover_url = '';
     }
 
     const newAlbumId = `alb-${Date.now()}`;
@@ -273,24 +273,17 @@ async function submitNewAlbum(e) {
       title,
       cover_url,
       release_year,
-      tracks_count: currentAlbumDraftTracks.length
+      tracks_count: currentAlbumDraftTracks.length,
+      tracks: []
     };
-
-    DB.albums = DB.albums || [];
-    DB.albums.unshift(newAlbum);
-    if (typeof saveAlbumsLocal === 'function') saveAlbumsLocal();
-
-    if (window.awsService && window.awsService.isConnected()) {
-      setProgress(30, 'Registrando álbum no acervo...');
-      const saved = await window.awsService.createAlbum(newAlbum);
-      if (saved && saved.id) newAlbum.id = saved.id;
-    }
 
     // 2. Upload e criação das faixas adicionadas ao álbum
     const totalTracks = currentAlbumDraftTracks.length;
+    const createdTracks = [];
+
     for (let i = 0; i < totalTracks; i++) {
       const track = currentAlbumDraftTracks[i];
-      const trackProgress = Math.floor(30 + ((i / (totalTracks || 1)) * 65));
+      const trackProgress = Math.floor(20 + ((i / (totalTracks || 1)) * 65));
       setProgress(trackProgress, `Processando faixa ${i + 1} de ${totalTracks}: "${track.title}"...`);
 
       let audioUrl = 'https://assets.mixkit.co/music/preview/mixkit-brazilian-carnival-brass-band-1120.mp3';
@@ -320,9 +313,9 @@ async function submitNewAlbum(e) {
         artist: currentUserSession.name || currentUserProfile.name || 'Artista do Frevo',
         genre: genre,
         description: `Faixa integrante do álbum "${newAlbum.title}".`,
-        lyrics: `Instrumental — Arranjo da faixa ${track.title}.`,
-        score_file: 'partitura-oficial.pdf',
-        score_path: 'partitura-oficial.pdf',
+        lyrics: '',
+        score_file: null,
+        score_path: null,
         audio_url: audioUrl,
         cover_url: newAlbum.cover_url,
         duration_seconds: trackDuration,
@@ -338,10 +331,27 @@ async function submitNewAlbum(e) {
         submitted_by: currentUserSession.id || null
       };
 
+      DB.songs = DB.songs || [];
       DB.songs.unshift(songObj);
+      createdTracks.push(songObj);
+
       if (window.awsService && window.awsService.isConnected()) {
         await window.awsService.createSong(songObj);
       }
+    }
+
+    newAlbum.tracks = createdTracks;
+    newAlbum.tracks_count = createdTracks.length;
+
+    DB.albums = DB.albums || [];
+    DB.albums.unshift(newAlbum);
+    if (typeof saveAlbumsLocal === 'function') saveAlbumsLocal();
+    if (typeof saveSongsLocal === 'function') saveSongsLocal();
+
+    if (window.awsService && window.awsService.isConnected()) {
+      setProgress(90, 'Registrando álbum no acervo...');
+      const saved = await window.awsService.createAlbum(newAlbum);
+      if (saved && saved.id) newAlbum.id = saved.id;
     }
 
     setProgress(100, 'Álbum publicado com sucesso!');
@@ -512,7 +522,43 @@ function openAlbumDetails(albumId) {
   if (!modal || !modalBody) return;
 
   const hasHistory = window.modalHistoryStack && window.modalHistoryStack.length > 0;
-  const tracks = album.tracks || [];
+  
+  // Obter faixas do álbum tanto do array interno de tracks quanto de DB.songs via album_id
+  const dbAlbumSongs = (DB.songs || []).filter(s => s.album_id === album.id);
+  let resolvedTracks = [];
+  
+  if (album.tracks && Array.isArray(album.tracks) && album.tracks.length > 0) {
+    resolvedTracks = album.tracks.map(t => {
+      if (typeof t === 'string') {
+        const found = (DB.songs || []).find(s => s.id === t);
+        return found || { id: t, title: t, artist: album.artist, audio_url: '', allow_download: true };
+      }
+      return t;
+    });
+  } else if (dbAlbumSongs.length > 0) {
+    resolvedTracks = dbAlbumSongs;
+  }
+
+  // Montar playlist de músicas prontas para o player
+  const albumPlaylist = resolvedTracks.map((t, idx) => {
+    const trackId = typeof t === 'string' ? t : (t.id || `track-${idx}`);
+    const foundSong = (DB.songs || []).find(s => s.id === trackId);
+    if (foundSong) return foundSong;
+    return {
+      id: trackId,
+      title: typeof t === 'string' ? t : (t.title || `Faixa ${idx + 1}`),
+      artist: album.artist || 'Artista do Frevo',
+      genre: album.genre || 'Frevo',
+      audio_url: t.audio_url || 'https://assets.mixkit.co/music/preview/mixkit-brazilian-carnival-brass-band-1120.mp3',
+      cover_url: album.cover_url || album.cover || '',
+      duration_seconds: t.duration_seconds || 180,
+      plays_count: 1,
+      allow_download: typeof t === 'object' ? t.allow_download !== false : true
+    };
+  });
+
+  // Guardar referência global temporária da playlist do álbum
+  window._currentAlbumPlaylist = albumPlaylist;
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left max-h-[85vh] overflow-y-auto pr-1">
@@ -522,32 +568,44 @@ function openAlbumDetails(albumId) {
           <span class="badge bg-frevo-purple/15 text-frevo-purple text-[10px] font-bold">${album.genre || 'Frevo'}</span>
           <h3 class="font-display font-extrabold text-lg text-ink leading-tight mt-1 truncate">${album.title}</h3>
           <p class="text-xs font-bold text-frevo-orange truncate">${album.artist || 'Artista'}</p>
-          <p class="text-[11px] text-muted mt-0.5">${album.year || album.release_year || ''} · ${tracks.length} faixas</p>
+          <p class="text-[11px] text-muted mt-0.5">${album.year || album.release_year || ''} · ${albumPlaylist.length} faixas</p>
         </div>
       </div>
 
       <!-- Lista de Faixas -->
       <div class="space-y-2">
-        <h4 class="text-xs font-bold text-ink uppercase tracking-wider">Faixas do Disco</h4>
-        ${tracks.length === 0 ? `
-          <div class="p-4 border border-dashed border-gray-200 rounded-xl text-center text-xs text-muted">
-            Nenhuma faixa cadastrada neste álbum.
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs font-bold text-ink uppercase tracking-wider">Faixas do Disco</h4>
+          ${albumPlaylist.length > 0 ? `
+            <button onclick="playSong('${albumPlaylist[0].id}', window._currentAlbumPlaylist)" class="text-[11px] font-bold text-frevo-purple hover:underline flex items-center gap-1">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              Tocar Álbum
+            </button>
+          ` : ''}
+        </div>
+        ${albumPlaylist.length === 0 ? `
+          <div class="p-6 border border-dashed border-gray-200 rounded-2xl text-center text-xs text-muted flex flex-col items-center justify-center gap-2">
+            <svg class="w-8 h-8 text-gray-300 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"></circle>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            <span>Nenhuma faixa cadastrada neste álbum.</span>
           </div>
-        ` : tracks.map((t, idx) => {
-          const trackTitle = typeof t === 'string' ? t : (t.title || `Faixa ${idx + 1}`);
-          const trackId = typeof t === 'string' ? t : (t.id || `track-${idx}`);
-          const allowDownload = typeof t === 'object' ? t.allow_download !== false : true;
+        ` : albumPlaylist.map((t, idx) => {
+          const trackTitle = t.title || `Faixa ${idx + 1}`;
+          const trackId = t.id;
+          const allowDownload = t.allow_download !== false;
 
           return `
             <div class="p-2.5 bg-surface-soft border border-gray-100 rounded-xl flex items-center justify-between gap-3 hover:border-frevo-purple/30 transition-all">
               <div class="flex items-center gap-3 min-w-0">
                 <span class="text-xs font-mono font-bold text-muted w-4 text-center">${idx + 1}</span>
-                <button onclick="playSong('${trackId}')" class="w-8 h-8 rounded-full bg-frevo-purple/10 hover:bg-frevo-purple text-frevo-purple hover:text-white flex items-center justify-center flex-shrink-0 transition-all shadow-sm">
+                <button onclick="playSong('${trackId}', window._currentAlbumPlaylist)" class="w-8 h-8 rounded-full bg-frevo-purple/10 hover:bg-frevo-purple text-frevo-purple hover:text-white flex items-center justify-center flex-shrink-0 transition-all shadow-sm" title="Reproduzir faixa">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                 </button>
                 <div class="min-w-0">
                   <h5 class="text-xs font-bold text-ink truncate">${trackTitle}</h5>
-                  <p class="text-[10px] text-muted">${album.artist || ''}</p>
+                  <p class="text-[10px] text-muted">${t.artist || album.artist || ''}</p>
                 </div>
               </div>
 

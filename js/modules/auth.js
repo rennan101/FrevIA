@@ -6,9 +6,10 @@
 // Placeholder neutro minimalista para avatares de usuários sem foto cadastrada
 const DEFAULT_AVATAR_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23F3F4F6'/%3E%3Cpath d='M50 48a16 16 0 1 0 0-32 16 16 0 0 0 0 32zm0 8c-14 0-32 7.5-32 18v6h64v-6c0-10.5-18-18-32-18z' fill='%239CA3AF'/%3E%3C/svg%3E";
 
-// Placeholder cinza neutro com ícone de imagem para posts, músicas e álbuns sem imagem cadastrada
+// Placeholder cinza neutro com ícone de imagem para posts e mídias sem imagem cadastrada
 const DEFAULT_MEDIA_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' width='400' height='300'%3E%3Crect width='100%25' height='100%25' fill='%23E5E7EB'/%3E%3Cg transform='translate(176, 126)' stroke='%239CA3AF' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='42' height='42' rx='8'/%3E%3Ccircle cx='15' cy='15' r='4'/%3E%3Cpath d='m45 33-11-11-19 19'/%3E%3Cpath d='m31 25 7-7 7 7'/%3E%3C/g%3E%3C/svg%3E";
-const DEFAULT_COVER_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 300' width='300' height='300'%3E%3Crect width='100%25' height='100%25' fill='%23E5E7EB'/%3E%3Cg transform='translate(126, 126)' stroke='%239CA3AF' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='42' height='42' rx='8'/%3E%3Ccircle cx='15' cy='15' r='4'/%3E%3Cpath d='m45 33-11-11-19 19'/%3E%3Cpath d='m31 25 7-7 7 7'/%3E%3C/g%3E%3C/svg%3E";
+// Placeholder cinza neutro com ícone SVG de disco de vinil / álbum para capas de discos e músicas
+const DEFAULT_COVER_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 300' width='300' height='300'%3E%3Crect width='100%25' height='100%25' fill='%23E5E7EB'/%3E%3Cg transform='translate(100, 100)' stroke='%239CA3AF' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='50' cy='50' r='44' fill='%23D1D5DB' stroke='%239CA3AF' stroke-width='3'/%3E%3Ccircle cx='50' cy='50' r='30' stroke='%239CA3AF' stroke-dasharray='4 3'/%3E%3Ccircle cx='50' cy='50' r='16' fill='%239CA3AF' stroke='%236B7280'/%3E%3Ccircle cx='50' cy='50' r='5' fill='%23E5E7EB' stroke='none'/%3E%3C/g%3E%3C/svg%3E";
 
 function hasCustomAvatar(url) {
   if (!url || typeof url !== 'string') return false;
@@ -1036,12 +1037,11 @@ function renderProfileGallery() {
                 <p class="text-[11px] text-ink-soft truncate">${sh.location || sh.venue || sh.venue_name || 'Recife - PE'}</p>
               </div>
               <div class="flex items-center gap-2 flex-shrink-0">
-                <a ${targetAction} class="btn btn-primary text-xs px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 shadow-sm whitespace-nowrap">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <a ${targetAction} class="w-8 h-8 rounded-full bg-frevo-purple/10 hover:bg-frevo-purple text-frevo-purple hover:text-white flex items-center justify-center flex-shrink-0 transition-all shadow-sm" title="Ingressos / Bilheteria" aria-label="Ingressos">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"></path>
                     <path d="M9 12h6"></path>
                   </svg>
-                  Ingressos
                 </a>
               </div>
             </div>

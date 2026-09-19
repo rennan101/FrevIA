@@ -471,7 +471,7 @@ function openScoreModal(title, artist, songId) {
         <div class="pt-3 border-t border-stone-300">
           <h4 class="font-serif font-bold text-xs uppercase tracking-wider text-stone-800 mb-1.5">Letra Oficial &amp; Diretrizes de Regência</h4>
           <div class="bg-white/80 p-3 rounded-xl border border-stone-200 text-xs font-serif text-stone-800 whitespace-pre-line leading-relaxed">
-            ${song.lyrics || 'Instrumental — Frevo com arranjo para saxofones, trompetes, trombones de vara, tuba e percussão de surdo e tarol.'}
+            ${(song.lyrics && song.lyrics.trim()) ? song.lyrics : '<span class="text-stone-400 italic">Nenhuma letra cadastrada para esta obra.</span>'}
           </div>
         </div>
       </div>

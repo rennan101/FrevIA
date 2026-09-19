@@ -259,12 +259,11 @@ function openArtistProfile(artistId) {
                     <span class="text-[10px] text-muted font-mono font-semibold">Horário: ${show.time || show.event_time} • ${day}/${month.toUpperCase()}/${year}</span>
                   </div>
                 </div>
-                <a ${targetAction} class="btn btn-primary text-[11px] px-3 py-1.5 rounded-xl font-bold whitespace-nowrap shadow-sm flex items-center gap-1.5 flex-shrink-0">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <a ${targetAction} class="w-8 h-8 rounded-full bg-frevo-purple/10 hover:bg-frevo-purple text-frevo-purple hover:text-white flex items-center justify-center flex-shrink-0 transition-all shadow-sm" title="Ingressos / Bilheteria" aria-label="Ingressos">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"></path>
                     <path d="M9 12h6"></path>
                   </svg>
-                  Ingressos
                 </a>
               </div>
             `;

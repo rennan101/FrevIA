@@ -70,7 +70,7 @@ function openSubmitSongModal() {
           <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Imagem de Capa da Faixa</label>
           <div class="p-2.5 bg-surface-soft border border-gray-200 rounded-xl space-y-1.5">
             <input type="file" id="song-cover-file" accept="image/*" class="text-xs text-muted file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-gray-200 file:text-ink hover:file:bg-gray-300 cursor-pointer w-full" />
-            <input type="url" id="song-cover-input" placeholder="Ou URL da imagem (https://images.unsplash.com/...)" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none" />
+            <input type="url" id="song-cover-input" placeholder="Ou URL da imagem (https://...)" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none" />
           </div>
         </div>
 
@@ -233,7 +233,7 @@ async function submitNewSong(e) {
       if (uploadedCover) coverUrl = uploadedCover;
     }
     if (!coverUrl) {
-      coverUrl = 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&q=80';
+      coverUrl = '';
     }
 
     setUploadProgress(95, 'Salvando na base do acervo...');
@@ -245,8 +245,8 @@ async function submitNewSong(e) {
       genre,
       description: 'Obra autêntica cadastrada no acervo oficial.',
       lyrics: lyrics ? lyrics.trim() : '',
-      score_file: scoreFileUrl || 'partitura-oficial.pdf',
-      score_path: scoreFileUrl || 'partitura-oficial.pdf',
+      score_file: scoreFileUrl || null,
+      score_path: scoreFileUrl || null,
       audio_url: audioUrl,
       cover_url: coverUrl,
       duration_seconds: durationSeconds,

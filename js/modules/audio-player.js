@@ -444,21 +444,26 @@ function updateLyricsModalContent() {
   if (coverEl) coverEl.src = getCoverUrl(song.cover_url || song.cover);
 
   if (contentEl) {
-    const rawLyrics = song.lyrics || `(Instrumental — Arranjo de Metais e Clarins)\nLá vem o frevo descendo a ladeira\nCom sombrinha colorida e alegria brasileira!`;
-    const lines = rawLyrics.split('\n');
+    const rawLyrics = (song.lyrics && song.lyrics.trim()) ? song.lyrics.trim() : '';
+    const hasLyrics = rawLyrics.length > 0;
+    const lines = hasLyrics ? rawLyrics.split('\n') : [];
 
     contentEl.innerHTML = `
       <div class="mb-4 p-3 bg-white/10 rounded-2xl border border-white/15 flex items-center justify-between">
         <div>
           <span class="text-[10px] uppercase tracking-wider text-frevo-orange font-bold">Revisão do Artista</span>
-          <p class="text-xs text-white/80">Letra oficial validada pela Salvaguarda</p>
+          <p class="text-xs text-white/80">${hasLyrics ? 'Letra cadastrada pelo artista' : 'Obra sem letra cadastrada'}</p>
         </div>
         <button onclick="openEditLyricsModal('${song.id}')" class="btn bg-white/15 hover:bg-white/25 text-white text-[11px] px-3 py-1 rounded-xl font-bold border border-white/20">
-          Revisar Letra
+          ${hasLyrics ? 'Revisar Letra' : 'Adicionar Letra'}
         </button>
       </div>
       <div class="space-y-3">
-        ${lines.map((line, idx) => {
+        ${!hasLyrics ? `
+          <div class="p-8 text-center text-white/60 text-sm">
+            Nenhuma letra cadastrada para esta obra musical.
+          </div>
+        ` : lines.map((line, idx) => {
           if (!line.trim()) return '<div class="h-3"></div>';
           const isNote = line.trim().startsWith('(') && line.trim().endsWith(')');
           return `
