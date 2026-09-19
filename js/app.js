@@ -8552,15 +8552,65 @@ const FrevoAudioEngine = {
     }
   },
 
-  // Motor Híbrido de Transcrição de Voz e Fala (Speech-to-Text 100% Gratuito e Ilimitado)
+  // Instância singleton do pipeline Whisper AI no navegador
+  whisperPipelineInstance: null,
+
+  // Motor Oficial Whisper AI Client-Side (100% Gratuito, Local e Ilimitado)
   async transcribeAudioSpeech(file, audioBuffer = null, onProgress = null) {
     if (!file) return null;
-    
-    // Tentativa 1: Web Speech Recognition nativo via decodificação de áudio
+
+    // Etapa 1: Tentar carregar e rodar a Rede Neural Whisper AI via Transformers.js (WebAssembly)
+    if (window.WhisperEngine && window.WhisperEngine.pipeline) {
+      try {
+        if (onProgress) onProgress(35, 'Iniciando modelo Whisper AI no navegador...');
+
+        if (!this.whisperPipelineInstance) {
+          if (onProgress) onProgress(45, 'Carregando pesos neurais do Whisper...');
+          this.whisperPipelineInstance = await window.WhisperEngine.pipeline(
+            'automatic-speech-recognition',
+            'Xenova/whisper-tiny',
+            { quantized: true }
+          );
+        }
+
+        if (onProgress) onProgress(65, 'Ouvindo faixas vocais e transcrevendo com Whisper...');
+
+        // Preparar áudio em mono Float32Array reamostrado para 16kHz (requisito do Whisper)
+        let audioDataForWhisper = null;
+        if (audioBuffer) {
+          audioDataForWhisper = this.resampleAudioTo16kMono(audioBuffer);
+        } else {
+          const tempBuffer = await this.decodeAudioFile(file);
+          audioDataForWhisper = this.resampleAudioTo16kMono(tempBuffer);
+        }
+
+        if (audioDataForWhisper && audioDataForWhisper.length > 0) {
+          const output = await this.whisperPipelineInstance(audioDataForWhisper, {
+            language: 'portuguese',
+            task: 'transcribe',
+            chunk_length_s: 30,
+            stride_length_s: 5
+          });
+
+          if (output && output.text && output.text.trim().length > 5) {
+            if (onProgress) onProgress(90, 'Letra completa transcrita pelo Whisper!');
+            // Formatar linhas para estrofes limpas
+            const clean = output.text.trim()
+              .replace(/([.!?])\s+/g, '$1\n')
+              .replace(/\s{2,}/g, ' ');
+            return clean;
+          }
+        }
+      } catch (errWhisper) {
+        console.warn('[Whisper AI WebAssembly] Aviso:', errWhisper);
+      }
+    }
+
+    // Etapa 2: Fallback rápido via Web Speech Recognition com reprodução de áudio
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       try {
-        if (onProgress) onProgress(40, 'Decodificando ondas vocais do cantor...');
+        if (onProgress) onProgress(60, 'Decodificando ondas vocais do cantor...');
         
         const recognizedText = await new Promise((resolve) => {
           const recognition = new SpeechRecognition();
@@ -8586,26 +8636,20 @@ const FrevoAudioEngine = {
             }
           };
 
-          recognition.onerror = () => {
-            finish();
-          };
-
-          recognition.onend = () => {
-            finish();
-          };
+          recognition.onerror = () => { finish(); };
+          recognition.onend = () => { finish(); };
 
           try {
             recognition.start();
-            // Reproduz breve trecho pelo elemento de áudio temporário para captação do microfone virtual
             const tempAudio = new Audio(URL.createObjectURL(file));
             tempAudio.muted = false;
-            tempAudio.volume = 0.8;
+            tempAudio.volume = 0.9;
             tempAudio.play().catch(() => {});
             
             timer = setTimeout(() => {
               try { tempAudio.pause(); } catch(e) {}
               finish();
-            }, 6000);
+            }, 8000);
           } catch (e) {
             finish();
           }
@@ -8619,16 +8663,15 @@ const FrevoAudioEngine = {
       }
     }
 
-    // Tentativa 2: Extração e Transcrição Fonética estruturada por segmentos de voz
+    // Etapa 3: Verificação de Instrumental
     if (audioBuffer) {
       try {
-        if (onProgress) onProgress(75, 'Transcrevendo versos cantados da faixa...');
+        if (onProgress) onProgress(80, 'Verificando presença de voz na gravação...');
         const channelData = audioBuffer.getChannelData(0);
         const sampleRate = audioBuffer.sampleRate;
         
-        // Detectar segmentos de presença vocal (300Hz - 3400Hz)
         const vocalSegments = [];
-        const chunkSize = Math.floor(sampleRate * 2.0); // blocos de 2 segundos
+        const chunkSize = Math.floor(sampleRate * 2.0);
         for (let i = 0; i < channelData.length; i += chunkSize) {
           let energy = 0;
           const end = Math.min(i + chunkSize, channelData.length);
@@ -8641,16 +8684,56 @@ const FrevoAudioEngine = {
           }
         }
 
-        // Se o áudio for instrumental puro (baixa variação de envelope de formantes vocais)
         if (vocalSegments.length < 3) {
           return `(Faixa Instrumental de Frevo — Execução Orquestral sem Linha Vocal Gravada)`;
         }
       } catch (e) {
-        console.warn('[Audio Analysis] Detecção de formantes:', e);
+        console.warn('[Audio Analysis] Formantes:', e);
       }
     }
 
     return null;
+  },
+
+  // Utilitário de reamostragem de áudio para 16kHz mono (Float32Array) para o Whisper
+  resampleAudioTo16kMono(audioBuffer) {
+    try {
+      const targetSampleRate = 16000;
+      const numChannels = audioBuffer.numberOfChannels;
+      const length = audioBuffer.length;
+      const origSampleRate = audioBuffer.sampleRate;
+      
+      // Downmix para mono
+      const mono = new Float32Array(length);
+      for (let c = 0; c < numChannels; c++) {
+        const channel = audioBuffer.getChannelData(c);
+        for (let i = 0; i < length; i++) {
+          mono[i] += channel[i] / numChannels;
+        }
+      }
+
+      if (origSampleRate === targetSampleRate) {
+        return mono;
+      }
+
+      // Interpolação linear simples para 16000 Hz
+      const targetLength = Math.round(length * (targetSampleRate / origSampleRate));
+      const result = new Float32Array(targetLength);
+      const ratio = (length - 1) / (targetLength - 1);
+
+      for (let i = 0; i < targetLength; i++) {
+        const origPos = i * ratio;
+        const low = Math.floor(origPos);
+        const high = Math.ceil(origPos);
+        const weight = origPos - low;
+        result[i] = mono[low] * (1 - weight) + mono[high] * weight;
+      }
+
+      return result;
+    } catch (e) {
+      console.warn('[Resample Whisper] Fallback mono:', e);
+      return audioBuffer.getChannelData(0);
+    }
   },
 
   // Gerador Inteligente de Letra e Estrutura Poética do Frevo

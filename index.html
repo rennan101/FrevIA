@@ -732,8 +732,15 @@
 
   <!-- Bibliotecas Externas & Serviços AWS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" charset="UTF-8"></script>
-  <script src="js/config.js?v=8" charset="UTF-8"></script>
-  <script src="js/aws.js?v=8" charset="UTF-8"></script>
-  <script src="js/app.js?v=8" charset="UTF-8"></script>
+  <!-- Motor de IA Whisper Client-Side (Transformers.js / WebAssembly) -->
+  <script type="module">
+    import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
+    // Permitir cache local dos pesos da rede neural no navegador do usuário
+    env.allowLocalModels = false;
+    window.WhisperEngine = { pipeline, env };
+  </script>
+  <script src="js/config.js?v=9" charset="UTF-8"></script>
+  <script src="js/aws.js?v=9" charset="UTF-8"></script>
+  <script src="js/app.js?v=9" charset="UTF-8"></script>
 </body>
 </html>
