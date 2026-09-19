@@ -49,14 +49,155 @@ function saveCurrentSession() {
 }
 
 // -----------------------------------------------------------------------------
-// PERSISTÊNCIA LOCAL DE SOLICITAÇÕES DE ARTISTAS & NOTIFICAÇÕES
+// PERSISTÊNCIA LOCAL DE SOLICITAÇÕES DE ARTISTAS, ARTISTAS & FOLIÕES & NOTIFICAÇÕES
 // -----------------------------------------------------------------------------
+const DEFAULT_INITIAL_ARTIST_REQUESTS = [
+  {
+    id: 'req-seed-1',
+    user_id: 'foliao-lucas-1',
+    requested_name: 'Orquestra Revelação do Frevo',
+    genre: 'Frevo de Rua',
+    whatsapp: '+55 (81) 98844-1234',
+    instagram_url: 'https://instagram.com/orquestrabomba',
+    bio: 'Orquestra com mais de 25 músicos jovens e experientes, resgatando composições raras do frevo pernambucano e atuando nos polos do Carnaval de Olinda e Recife Antigo.',
+    status: 'pending',
+    created_at: new Date(Date.now() - 3600000 * 24).toISOString(),
+    user: {
+      display_name: 'Lucas Ferreira',
+      handle: '@lucas_trompete',
+      avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      email: 'lucas.orquestra@gmail.com'
+    }
+  },
+  {
+    id: 'req-seed-2',
+    user_id: 'foliao-helena-2',
+    requested_name: 'Coral Edite Paulino & Bloco das Flores',
+    genre: 'Frevo de Bloco',
+    whatsapp: '+55 (81) 99122-5678',
+    instagram_url: 'https://instagram.com/coraleditepaulino',
+    bio: 'Grupo vocal e instrumental dedicado ao lirismo e às marchas de bloco tradicionais do Recife, fundado em 2012 e participante assíduo dos acertos de marcha no Paço do Frevo.',
+    status: 'pending',
+    created_at: new Date(Date.now() - 3600000 * 48).toISOString(),
+    user: {
+      display_name: 'Dona Helena Vasconcelos',
+      handle: '@helena_lirica',
+      avatar_url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80',
+      email: 'helena.bloco@cultura.pe.gov.br'
+    }
+  }
+];
+
+const DEFAULT_INITIAL_USERS = [
+  {
+    id: 'user-admin-1',
+    name: 'Administrador FrevAI',
+    handle: '@admin_cultura',
+    email: 'admin@cultura.pe.gov.br',
+    phone: '+55 (81) 3355-0001',
+    city: 'Recife, PE',
+    role: 'admin',
+    avatar: null,
+    bio: 'Gestão institucional e curadoria técnica da plataforma de salvaguarda do Frevo.',
+    status: 'ativo',
+    created_at: '2024-01-01T08:00:00Z',
+    favorites_count: 3
+  },
+  {
+    id: 'user-forro-2',
+    name: 'Maestro Forró',
+    handle: '@maestroforro',
+    email: 'forro@cultura.pe.gov.br',
+    phone: '+55 (81) 99888-1010',
+    city: 'Bomba do Hemetério, Recife',
+    role: 'artist',
+    avatar: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80',
+    bio: 'Maestro, compositor e fundador da Orquestra Popular da Bomba do Hemetério.',
+    status: 'ativo',
+    created_at: '2024-01-15T10:00:00Z',
+    favorites_count: 5
+  },
+  {
+    id: 'user-foliao-3',
+    name: 'Folião do Passo',
+    handle: '@foliao_recife',
+    email: 'foliao@gmail.com',
+    phone: '+55 (81) 98765-4321',
+    city: 'Recife, PE',
+    role: 'user',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
+    bio: 'Folião apaixonado pelo Galo da Madrugada e passista amador nos polos do Recife Antigo.',
+    status: 'ativo',
+    created_at: '2024-02-10T14:30:00Z',
+    favorites_count: 8
+  },
+  {
+    id: 'foliao-lucas-1',
+    name: 'Lucas Ferreira',
+    handle: '@lucas_trompete',
+    email: 'lucas.orquestra@gmail.com',
+    phone: '+55 (81) 98844-1234',
+    city: 'Olinda, PE',
+    role: 'user',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+    bio: 'Trompetista de frevo e pesquisador de partituras pernambucanas tradicionais.',
+    status: 'pendente_artista',
+    created_at: '2024-03-01T11:20:00Z',
+    favorites_count: 4
+  },
+  {
+    id: 'foliao-helena-2',
+    name: 'Dona Helena Vasconcelos',
+    handle: '@helena_lirica',
+    email: 'helena.bloco@cultura.pe.gov.br',
+    phone: '+55 (81) 99122-5678',
+    city: 'Recife, PE',
+    role: 'user',
+    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80',
+    bio: 'Integrante veterana de blocos líricos e amante das marchas de bloco tradicionais.',
+    status: 'pendente_artista',
+    created_at: '2024-03-05T16:45:00Z',
+    favorites_count: 12
+  },
+  {
+    id: 'user-mariana-6',
+    name: 'Mariana Freire',
+    handle: '@mari_frevo',
+    email: 'mariana.passo@outlook.com',
+    phone: '+55 (81) 99233-4455',
+    city: 'Recife, PE',
+    role: 'user',
+    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80',
+    bio: 'Passista profissional, professora de frevo e produtora cultural independente.',
+    status: 'ativo',
+    created_at: '2024-03-12T09:15:00Z',
+    favorites_count: 15
+  },
+  {
+    id: 'user-carlos-7',
+    name: 'Carlos Eduardo Recife',
+    handle: '@carlinhos_frevo',
+    email: 'carlos.eduardo@frevope.org',
+    phone: '+55 (81) 98111-2233',
+    city: 'Jaboatão dos Guararapes, PE',
+    role: 'user',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80',
+    bio: 'Colecionador de discos de vinil de frevo das décadas de 1950 a 1980.',
+    status: 'ativo',
+    created_at: '2024-03-18T18:00:00Z',
+    favorites_count: 22
+  }
+];
+
 function loadArtistRequestsLocal() {
   try {
     const saved = localStorage.getItem('frevia_artist_requests');
     if (saved) {
       const parsed = JSON.parse(saved);
       if (Array.isArray(parsed)) DB.artistRequests = parsed;
+    } else {
+      DB.artistRequests = JSON.parse(JSON.stringify(DEFAULT_INITIAL_ARTIST_REQUESTS));
+      saveArtistRequestsLocal();
     }
   } catch (e) {
     DB.artistRequests = DB.artistRequests || [];
@@ -66,6 +207,54 @@ function loadArtistRequestsLocal() {
 function saveArtistRequestsLocal() {
   try {
     localStorage.setItem('frevia_artist_requests', JSON.stringify(DB.artistRequests || []));
+  } catch (e) {}
+}
+
+function loadArtistsLocal() {
+  try {
+    const saved = localStorage.getItem('frevai_custom_artists');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const existingIds = new Set((DB.artists || []).map(a => a.id));
+        const existingNames = new Set((DB.artists || []).map(a => (a.name || '').toLowerCase()));
+        for (const item of parsed) {
+          if (!existingIds.has(item.id) && !existingNames.has((item.name || '').toLowerCase())) {
+            DB.artists.unshift(item);
+          }
+        }
+      }
+    }
+  } catch (e) {}
+}
+
+function saveArtistsLocal() {
+  try {
+    localStorage.setItem('frevai_custom_artists', JSON.stringify(DB.artists || []));
+  } catch (e) {}
+}
+
+function loadUsersLocal() {
+  try {
+    const saved = localStorage.getItem('frevia_local_users');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (e) {}
+  
+  const initial = JSON.parse(JSON.stringify(DEFAULT_INITIAL_USERS));
+  try {
+    localStorage.setItem('frevia_local_users', JSON.stringify(initial));
+  } catch (e) {}
+  return initial;
+}
+
+function saveUsersLocal(users) {
+  try {
+    localStorage.setItem('frevia_local_users', JSON.stringify(users || []));
   } catch (e) {}
 }
 
@@ -87,7 +276,32 @@ function loadNotificationsLocal() {
   } catch (e) {}
 }
 
+function loadShowsLocal() {
+  try {
+    const saved = localStorage.getItem('frevai_custom_shows');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const existingIds = new Set((DB.shows || []).map(s => s.id));
+        for (const item of parsed) {
+          if (!existingIds.has(item.id)) {
+            DB.shows.unshift(item);
+          }
+        }
+      }
+    }
+  } catch (e) {}
+}
+
+function saveShowsLocal() {
+  try {
+    localStorage.setItem('frevai_custom_shows', JSON.stringify(DB.shows || []));
+  } catch (e) {}
+}
+
 loadArtistRequestsLocal();
+loadArtistsLocal();
+loadShowsLocal();
 loadNotificationsLocal();
 
 // -----------------------------------------------------------------------------
@@ -610,6 +824,7 @@ function renderProfileGallery() {
     `;
   } else if (currentProfileTab === 'shows') {
     const isArtist = currentUserSession.role === 'artist' || currentUserSession.role === 'admin';
+    if (typeof loadShowsLocal === 'function') loadShowsLocal();
     const shows = (DB.shows || []);
 
     container.innerHTML = `
@@ -627,21 +842,35 @@ function renderProfileGallery() {
             </div>
             <p class="text-xs font-bold text-ink">Nenhum show na agenda no momento</p>
           </div>
-        ` : shows.map(sh => `
-          <div class="p-3 bg-white rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between gap-3">
-            <div>
-              <div class="flex items-center gap-1.5 text-frevo-orange text-[10px] font-bold uppercase">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                ${sh.date || 'Em breve'} · ${sh.time || '20:00'}
+        ` : shows.map(sh => {
+          const rawLink = sh.ticket_url || sh.link || '';
+          const hasValidLink = rawLink && rawLink !== '#' && (rawLink.startsWith('http://') || rawLink.startsWith('https://'));
+          const targetAction = hasValidLink 
+            ? `href="${rawLink}" target="_blank" rel="noopener noreferrer"` 
+            : `href="javascript:void(0)" onclick="showAlertModal('Ingressos disponíveis em breve no canal oficial do artista ou bilheteria do evento.', { title: 'Ingressos', type: 'info' })"`;
+
+          return `
+            <div class="p-3 bg-white rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between gap-3">
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-1.5 text-frevo-orange text-[10px] font-bold uppercase">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  ${sh.date || sh.event_date || 'Em breve'} · ${sh.time || sh.event_time || '20:00'}
+                </div>
+                <h4 class="font-display font-bold text-xs text-ink mt-0.5 truncate">${sh.title || sh.name || sh.event_name}</h4>
+                <p class="text-[11px] text-ink-soft truncate">${sh.location || sh.venue || sh.venue_name || 'Recife - PE'}</p>
               </div>
-              <h4 class="font-display font-bold text-xs text-ink mt-0.5">${sh.title || sh.name}</h4>
-              <p class="text-[11px] text-ink-soft">${sh.location || sh.venue}</p>
+              <div class="flex items-center gap-2 flex-shrink-0">
+                <a ${targetAction} class="btn btn-primary text-xs px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 shadow-sm whitespace-nowrap">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"></path>
+                    <path d="M9 12h6"></path>
+                  </svg>
+                  Ingressos
+                </a>
+              </div>
             </div>
-            <a href="${sh.link || '#'}" target="_blank" class="btn btn-outline text-xs px-3 py-1.5 rounded-xl font-bold">
-              Ver Local
-            </a>
-          </div>
-        `).join('')}
+          `;
+        }).join('')}
       </div>
     `;
   }
@@ -892,5 +1121,13 @@ window.updateProfileUI = updateProfileUI;
 window.renderProfileGallery = renderProfileGallery;
 window.initAuth = initAuth;
 window.renderAuthUI = renderAuthUI;
+window.loadUsersLocal = loadUsersLocal;
+window.saveUsersLocal = saveUsersLocal;
+window.loadArtistsLocal = loadArtistsLocal;
+window.saveArtistsLocal = saveArtistsLocal;
+window.loadArtistRequestsLocal = loadArtistRequestsLocal;
+window.saveArtistRequestsLocal = saveArtistRequestsLocal;
+window.loadShowsLocal = loadShowsLocal;
+window.saveShowsLocal = saveShowsLocal;
 
 

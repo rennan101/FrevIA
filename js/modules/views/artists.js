@@ -70,6 +70,7 @@ function openArtistProfile(artistId) {
   const container = document.getElementById('artist-public-content');
   if (!container) return;
 
+  if (typeof loadShowsLocal === 'function') loadShowsLocal();
   const artistSongs = (DB.songs || []).filter(s => s.author_id === artist.id || (s.artist && s.artist.toLowerCase().includes(artist.name.toLowerCase())));
   const popularSongs = [...artistSongs].sort((a, b) => (b.plays_count || 0) - (a.plays_count || 0));
   const artistAlbums = (DB.albums || []).filter(alb => alb.artist_id === artist.id);
@@ -234,6 +235,12 @@ function openArtistProfile(artistId) {
             const day = dateObj.getDate().toString().padStart(2, '0');
             const month = dateObj.toLocaleString('pt-BR', { month: 'short' }).replace('.', '');
             const year = dateObj.getFullYear();
+            const rawLink = show.ticket_url || show.link || '';
+            const hasValidLink = rawLink && rawLink !== '#' && (rawLink.startsWith('http://') || rawLink.startsWith('https://'));
+            const targetAction = hasValidLink 
+              ? `href="${rawLink}" target="_blank" rel="noopener noreferrer"` 
+              : `href="javascript:void(0)" onclick="showAlertModal('Informações e ingressos para ${show.title || show.event_name} estarão disponíveis em breve na bilheteria oficial.', { title: 'Ingressos', type: 'info' })"`;
+
             return `
               <div class="show-item-card">
                 <div class="flex items-center gap-3 min-w-0">
@@ -250,9 +257,13 @@ function openArtistProfile(artistId) {
                     <span class="text-[10px] text-muted font-mono font-semibold">Horário: ${show.time || show.event_time} • ${day}/${month.toUpperCase()}/${year}</span>
                   </div>
                 </div>
-                <button onclick="showAlertModal('Informações e ingressos para ${show.title || show.event_name}!');" class="btn btn-primary text-[11px] px-3 py-1.5 rounded-xl font-bold whitespace-nowrap shadow-sm flex-shrink-0">
+                <a ${targetAction} class="btn btn-primary text-[11px] px-3 py-1.5 rounded-xl font-bold whitespace-nowrap shadow-sm flex items-center gap-1.5 flex-shrink-0">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"></path>
+                    <path d="M9 12h6"></path>
+                  </svg>
                   Ingressos
-                </button>
+                </a>
               </div>
             `;
           }).join('') : `
@@ -315,6 +326,8 @@ function renderArtistCardHtml(artist) {
 function renderArtists(filterQuery = '', forceRerender = false) {
   const container = document.getElementById('artists-grid');
   if (!container) return;
+
+  if (typeof loadArtistsLocal === 'function') loadArtistsLocal();
 
   if (forceRerender) {
     container.innerHTML = '';

@@ -513,7 +513,7 @@ Viva Pernambuco e sua gente!`,
       city: 'Recife - PE',
       date: '2027-02-08',
       time: '20:00',
-      ticket_url: '#'
+      ticket_url: 'https://sympla.com.br/spokfrevo-festival-2026'
     },
     {
       id: 'sh2',
@@ -523,7 +523,7 @@ Viva Pernambuco e sua gente!`,
       city: 'Recife - PE',
       date: '2026-10-18',
       time: '21:00',
-      ticket_url: '#'
+      ticket_url: 'https://bileto.sympla.com.br/event/teatro-santa-isabel-spokfrevo'
     },
     {
       id: 'sh3',
@@ -533,7 +533,7 @@ Viva Pernambuco e sua gente!`,
       city: 'Porto - Portugal',
       date: '2026-11-14',
       time: '20:30',
-      ticket_url: '#'
+      ticket_url: 'https://casadamusica.com/eventos/spokfrevo'
     },
     // Maestro Duda (a2)
     {
@@ -544,7 +544,7 @@ Viva Pernambuco e sua gente!`,
       city: 'Recife - PE',
       date: '2026-09-30',
       time: '19:00',
-      ticket_url: '#'
+      ticket_url: 'https://sympla.com.br/tributo-maestro-duda'
     },
     {
       id: 'sh5',
@@ -554,7 +554,7 @@ Viva Pernambuco e sua gente!`,
       city: 'Recife - PE',
       date: '2026-10-25',
       time: '17:00',
-      ticket_url: '#'
+      ticket_url: 'https://cultura.pe.gov.br/eventos/patio-sao-pedro-maestro-duda'
     },
     // Claudionor Germano (a3)
     {
@@ -565,7 +565,7 @@ Viva Pernambuco e sua gente!`,
       city: 'Recife - PE',
       date: '2026-11-08',
       time: '18:30',
-      ticket_url: '#'
+      ticket_url: 'https://sympla.com.br/claudionor-germano-70-anos'
     },
     {
       id: 'sh7',
@@ -575,7 +575,7 @@ Viva Pernambuco e sua gente!`,
       city: 'Olinda - PE',
       date: '2027-02-28',
       time: '16:00',
-      ticket_url: '#'
+      ticket_url: 'https://carnavaldeolinda.pe.gov.br'
     }
   ],
 

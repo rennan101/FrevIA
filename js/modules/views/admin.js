@@ -18,22 +18,23 @@ async function renderAdminCMS() {
   const container = document.getElementById('admin-cms-content');
   if (!container) return;
 
+  if (typeof loadArtistRequestsLocal === 'function') loadArtistRequestsLocal();
+  if (typeof loadArtistsLocal === 'function') loadArtistsLocal();
+
   if (currentAdminTab === 'artists') {
-    let pendingRequests = [];
+    let pendingRequests = (DB.artistRequests || []).filter(r => r.status === 'pending');
+
     if (window.awsService && window.awsService.isConnected()) {
       try {
-        pendingRequests = await window.awsService.getPendingArtistRequests();
+        const awsPending = await window.awsService.getPendingArtistRequests();
+        const existingIds = new Set(pendingRequests.map(r => r.id));
+        for (const ap of (awsPending || [])) {
+          if (!existingIds.has(ap.id) && ap.status === 'pending') {
+            pendingRequests.push(ap);
+          }
+        }
       } catch (err) {
         console.warn('Erro ao obter solicitações do AWS:', err);
-      }
-    }
-
-    loadArtistRequestsLocal();
-    const localPending = (DB.artistRequests || []).filter(r => r.status === 'pending');
-    const existingIds = new Set(pendingRequests.map(r => r.id));
-    for (const lr of localPending) {
-      if (!existingIds.has(lr.id)) {
-        pendingRequests.push(lr);
       }
     }
 
@@ -102,7 +103,7 @@ async function renderAdminCMS() {
             ${(DB.artists || []).map(artist => `
               <div class="p-2.5 bg-surface-soft rounded-2xl border border-gray-100 flex items-center justify-between gap-3">
                 <div class="flex items-center gap-2.5 min-w-0">
-                  <img src="${artist.avatar_url}" alt="${artist.name}" class="w-9 h-9 rounded-full object-cover flex-shrink-0" />
+                  <img src="${getUserAvatarUrl(artist.avatar_url)}" alt="${artist.name}" class="w-9 h-9 rounded-full object-cover flex-shrink-0" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR_PLACEHOLDER}'" />
                   <div class="min-w-0">
                     <strong class="text-ink text-xs block truncate">${artist.name}</strong>
                     <span class="text-[10px] text-muted block">${artist.genre || 'Frevo de Rua'}</span>
@@ -119,6 +120,145 @@ async function renderAdminCMS() {
         </div>
       </div>
     `;
+  } else if (currentAdminTab === 'users') {
+    const users = (typeof loadUsersLocal === 'function') ? loadUsersLocal() : [];
+    const filterRole = window.adminUsersRoleFilter || 'all';
+    const searchQuery = (window.adminUsersSearchQuery || '').toLowerCase().trim();
+
+    const filteredUsers = users.filter(u => {
+      if (filterRole !== 'all' && u.role !== filterRole) return false;
+      if (searchQuery) {
+        const nameMatch = (u.name || '').toLowerCase().includes(searchQuery);
+        const handleMatch = (u.handle || '').toLowerCase().includes(searchQuery);
+        const emailMatch = (u.email || '').toLowerCase().includes(searchQuery);
+        const cityMatch = (u.city || '').toLowerCase().includes(searchQuery);
+        return nameMatch || handleMatch || emailMatch || cityMatch;
+      }
+      return true;
+    });
+
+    const totalFoliões = users.filter(u => u.role === 'user' || !u.role).length;
+    const totalArtistas = users.filter(u => u.role === 'artist').length;
+    const totalAdmins = users.filter(u => u.role === 'admin').length;
+
+    container.innerHTML = `
+      <div class="bg-white border border-gray-200 rounded-2xl p-4 space-y-4 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-gray-100">
+          <div>
+            <h3 class="font-display font-bold text-sm text-ink flex items-center gap-2">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-frevo-red">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+              <span>Foliões e Usuários Cadastrados</span>
+              <span class="badge bg-frevo-red/10 text-frevo-red text-[11px] font-bold px-2 py-0.5 rounded-full">
+                ${users.length} cadastrados
+              </span>
+            </h3>
+            <p class="text-[11px] text-muted">Acompanhe e gerencie a base de foliões, artistas e administradores da rede FrevAI</p>
+          </div>
+          
+          <div class="flex items-center gap-1.5 text-[11px] flex-wrap">
+            <span class="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg font-bold">${totalFoliões} Foliões</span>
+            <span class="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg font-bold">${totalArtistas} Artistas</span>
+            <span class="px-2 py-0.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-lg font-bold">${totalAdmins} Admins</span>
+          </div>
+        </div>
+
+        <!-- Filtros e Busca -->
+        <div class="flex flex-col sm:flex-row gap-2">
+          <div class="relative flex-1">
+            <svg class="absolute left-3 top-2.5 w-4 h-4 text-muted pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input 
+              type="text" 
+              id="admin-users-search" 
+              placeholder="Buscar por nome, @handle, e-mail ou cidade..." 
+              value="${window.adminUsersSearchQuery || ''}"
+              oninput="handleAdminUsersSearch(this.value)"
+              class="w-full pl-9 pr-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:border-frevo-red transition"
+            />
+          </div>
+
+          <div class="flex items-center gap-1 bg-surface-soft p-1 rounded-xl border border-gray-200 text-xs">
+            <button onclick="setAdminUsersFilter('all')" class="px-2.5 py-1 rounded-lg font-bold transition ${filterRole === 'all' ? 'bg-white shadow-xs text-ink' : 'text-muted hover:text-ink'}">
+              Todos
+            </button>
+            <button onclick="setAdminUsersFilter('user')" class="px-2.5 py-1 rounded-lg font-bold transition ${filterRole === 'user' ? 'bg-white shadow-xs text-ink' : 'text-muted hover:text-ink'}">
+              Foliões
+            </button>
+            <button onclick="setAdminUsersFilter('artist')" class="px-2.5 py-1 rounded-lg font-bold transition ${filterRole === 'artist' ? 'bg-white shadow-xs text-ink' : 'text-muted hover:text-ink'}">
+              Artistas
+            </button>
+            <button onclick="setAdminUsersFilter('admin')" class="px-2.5 py-1 rounded-lg font-bold transition ${filterRole === 'admin' ? 'bg-white shadow-xs text-ink' : 'text-muted hover:text-ink'}">
+              Admins
+            </button>
+          </div>
+        </div>
+
+        <!-- Lista de Foliões -->
+        <div class="space-y-2">
+          ${filteredUsers.length > 0 ? filteredUsers.map(user => {
+            const roleBadge = user.role === 'admin' 
+              ? `<span class="badge bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-bold px-2 py-0.5 rounded-full">Administrador</span>`
+              : user.role === 'artist'
+              ? `<span class="badge bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold px-2 py-0.5 rounded-full">Artista Oficial</span>`
+              : `<span class="badge bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold px-2 py-0.5 rounded-full">Folião</span>`;
+            
+            const joinedDate = user.created_at ? new Date(user.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Recente';
+
+            return `
+              <div class="p-3 bg-surface-soft hover:bg-gray-50/80 transition rounded-2xl border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                  <img 
+                    src="${getUserAvatarUrl(user.avatar)}" 
+                    alt="${user.name}" 
+                    class="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-gray-200 shadow-xs"
+                    onerror="this.onerror=null; this.src='${DEFAULT_AVATAR_PLACEHOLDER}'"
+                  />
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <strong class="text-ink text-xs font-bold truncate">${user.name}</strong>
+                      <span class="text-[11px] text-muted font-mono">${user.handle || '@foliao'}</span>
+                      ${roleBadge}
+                    </div>
+                    <div class="flex items-center gap-3 text-[11px] text-muted mt-0.5 flex-wrap">
+                      ${user.email ? `<span class="truncate">${user.email}</span>` : ''}
+                      ${user.city ? `<span>• ${user.city}</span>` : ''}
+                      <span>• Cadastrado em ${joinedDate}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2 flex-shrink-0">
+                  <button onclick="openUserDetailsModal('${user.id}')" class="btn btn-outline text-xs px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    Ver Detalhes
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('') : `
+            <div class="p-6 text-center text-xs text-muted bg-surface-soft rounded-2xl border border-gray-100 space-y-1">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-gray-400">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <p class="font-bold text-ink">Nenhum folião encontrado</p>
+              <p>Tente ajustar os termos de busca ou remover os filtros aplicados.</p>
+            </div>
+          `}
+        </div>
+      </div>
+    `;
+
   } else if (currentAdminTab === 'posts') {
     const sortedPosts = [...(DB.posts || [])].sort((a, b) => new Date(b.created_at || Date.now()) - new Date(a.created_at || Date.now()));
 
@@ -329,27 +469,48 @@ function resolveTakedownReport(reportId, action = 'resolved') {
 async function confirmApproveArtistRequest(requestId) {
   if (!confirm('Deseja realmente aprovar esta solicitação e promover o usuário a Artista Oficial do FrevAI?')) return;
 
-  loadArtistRequestsLocal();
+  if (typeof loadArtistRequestsLocal === 'function') loadArtistRequestsLocal();
+  if (typeof loadArtistsLocal === 'function') loadArtistsLocal();
+
   const req = (DB.artistRequests || []).find(r => r.id === requestId);
   if (req) {
     req.status = 'approved';
-    saveArtistRequestsLocal();
+    req.reviewed_at = new Date().toISOString();
+    req.reviewed_by = currentUserSession.id || 'admin';
+    if (typeof saveArtistRequestsLocal === 'function') saveArtistRequestsLocal();
 
-    const alreadyArtist = (DB.artists || []).some(a => a.name.toLowerCase() === req.requested_name.toLowerCase());
+    const alreadyArtist = (DB.artists || []).some(a => 
+      (a.id && a.id === req.id) || 
+      (a.name && a.name.toLowerCase() === req.requested_name.toLowerCase())
+    );
+
     if (!alreadyArtist) {
-      DB.artists.unshift({
-        id: 'artist-' + Date.now(),
+      const newArtistObj = {
+        id: req.artist_id || ('artist-' + Date.now()),
         name: req.requested_name,
         handle: req.user?.handle || ('@' + req.requested_name.toLowerCase().replace(/[^a-z0-9_]/g, '')),
         genre: req.genre || 'Frevo de Rua',
         bio: req.bio || 'Artista oficial da comunidade FrevAI.',
-        avatar_url: req.user?.avatar_url || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80',
+        avatar_url: getUserAvatarUrl(req.user?.avatar_url) || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80',
         cover_url: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=1200&q=80',
-        email: '',
+        email: req.user?.email || req.email || '',
         phone: req.whatsapp || '',
         is_approved: true,
         has_story: false
-      });
+      };
+      DB.artists.unshift(newArtistObj);
+      if (typeof saveArtistsLocal === 'function') saveArtistsLocal();
+    }
+
+    // Atualizar na base local de usuários
+    if (typeof loadUsersLocal === 'function' && typeof saveUsersLocal === 'function') {
+      const users = loadUsersLocal();
+      const targetUser = users.find(u => u.id === req.user_id || u.handle === req.user?.handle);
+      if (targetUser) {
+        targetUser.role = 'artist';
+        targetUser.artist_request_status = 'approved';
+        saveUsersLocal(users);
+      }
     }
 
     if (currentUserSession.id === req.user_id) {
@@ -365,7 +526,10 @@ async function confirmApproveArtistRequest(requestId) {
       console.warn('Aviso AWS ao aprovar:', res.error.message);
     }
     const freshArtists = await window.awsService.getArtists();
-    if (freshArtists && freshArtists.length > 0) DB.artists = freshArtists;
+    if (freshArtists && freshArtists.length > 0) {
+      DB.artists = freshArtists;
+      if (typeof saveArtistsLocal === 'function') saveArtistsLocal();
+    }
   }
 
   loadNotificationsLocal();
@@ -513,7 +677,18 @@ async function submitRejectArtistRequest(requestId) {
     req.status = 'rejected';
     req.review_notes = reason;
     req.reviewed_at = new Date().toISOString();
-    saveArtistRequestsLocal();
+    req.reviewed_by = currentUserSession.id || 'admin';
+    if (typeof saveArtistRequestsLocal === 'function') saveArtistRequestsLocal();
+  }
+
+  // Atualizar na base local de usuários
+  if (typeof loadUsersLocal === 'function' && typeof saveUsersLocal === 'function') {
+    const users = loadUsersLocal();
+    const targetUser = users.find(u => u.id === targetUserId || (req && u.handle === req.user?.handle));
+    if (targetUser) {
+      targetUser.artist_request_status = 'rejected';
+      saveUsersLocal(users);
+    }
   }
 
   if (targetUserId && currentUserSession.id === targetUserId) {
@@ -1656,6 +1831,7 @@ async function submitNewArtist(e) {
   };
 
   DB.artists.unshift(newArt);
+  if (typeof saveArtistsLocal === 'function') saveArtistsLocal();
 
   closeModal();
   if (typeof renderArtists === 'function') renderArtists();
@@ -1667,12 +1843,110 @@ async function submitNewArtist(e) {
   );
 }
 
+function handleAdminUsersSearch(query) {
+  window.adminUsersSearchQuery = query;
+  renderAdminCMS();
+}
+
+function setAdminUsersFilter(role) {
+  window.adminUsersRoleFilter = role;
+  renderAdminCMS();
+}
+
+function openUserDetailsModal(userId) {
+  const users = (typeof loadUsersLocal === 'function') ? loadUsersLocal() : [];
+  const user = users.find(u => u.id === userId) || {
+    id: userId,
+    name: 'Folião',
+    handle: '@foliao',
+    email: '',
+    phone: '',
+    city: 'Recife, PE',
+    role: 'user',
+    avatar: null,
+    bio: 'Folião entusiasta da cultura do frevo pernambucano.',
+    status: 'ativo',
+    created_at: new Date().toISOString(),
+    favorites_count: 0
+  };
+
+  const roleBadge = user.role === 'admin' 
+    ? '<span class="badge bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Administrador</span>'
+    : user.role === 'artist'
+    ? '<span class="badge bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Artista Oficial</span>'
+    : '<span class="badge bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Folião</span>';
+
+  const joinedDate = user.created_at ? new Date(user.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }) : 'Recente';
+
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+  if (!modal || !modalBody) return;
+
+  modalBody.innerHTML = `
+    <div class="space-y-4 text-left">
+      <div class="flex items-start gap-3.5 pb-3 border-b border-gray-100 pr-8">
+        <img 
+          src="${getUserAvatarUrl(user.avatar)}" 
+          alt="${user.name}" 
+          class="w-14 h-14 rounded-2xl object-cover border border-gray-200 shadow-sm flex-shrink-0"
+          onerror="this.onerror=null; this.src='${DEFAULT_AVATAR_PLACEHOLDER}'"
+        />
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2 flex-wrap">
+            <h3 class="font-display font-bold text-base text-ink truncate">${user.name}</h3>
+            ${roleBadge}
+          </div>
+          <span class="text-xs text-muted font-mono block mt-0.5">${user.handle || '@foliao'}</span>
+          <span class="text-[11px] text-gray-500 block mt-0.5">Cadastrado em ${joinedDate}</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+        <div class="p-2.5 bg-surface-soft rounded-xl border border-gray-100 space-y-0.5">
+          <span class="text-[10px] font-bold text-muted uppercase tracking-wider block">E-mail</span>
+          <span class="text-ink font-mono font-medium block truncate">${user.email || 'Não informado'}</span>
+        </div>
+        <div class="p-2.5 bg-surface-soft rounded-xl border border-gray-100 space-y-0.5">
+          <span class="text-[10px] font-bold text-muted uppercase tracking-wider block">Telefone / WhatsApp</span>
+          <span class="text-ink font-mono font-medium block truncate">${user.phone || 'Não informado'}</span>
+        </div>
+        <div class="p-2.5 bg-surface-soft rounded-xl border border-gray-100 space-y-0.5">
+          <span class="text-[10px] font-bold text-muted uppercase tracking-wider block">Localização</span>
+          <span class="text-ink font-medium block truncate">${user.city || 'Recife, PE'}</span>
+        </div>
+        <div class="p-2.5 bg-surface-soft rounded-xl border border-gray-100 space-y-0.5">
+          <span class="text-[10px] font-bold text-muted uppercase tracking-wider block">Status da Conta</span>
+          <span class="text-green-700 font-bold block capitalize">${user.status || 'Ativo'}</span>
+        </div>
+      </div>
+
+      <div class="space-y-1">
+        <span class="text-[10px] font-bold text-muted uppercase tracking-wider block">Biografia Cultural</span>
+        <div class="p-3 bg-surface-soft rounded-xl border border-gray-100 text-xs text-ink leading-relaxed">
+          ${user.bio || 'Nenhuma biografia fornecida pelo usuário.'}
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-2 border-t border-gray-100">
+        <button type="button" onclick="closeModal()" class="btn btn-outline w-full text-xs rounded-xl py-2.5 font-bold">
+          Fechar
+        </button>
+      </div>
+    </div>
+  `;
+
+  modal.classList.add('open');
+}
+
 window.switchAdminTab = switchAdminTab;
 window.renderAdminCMS = renderAdminCMS;
 window.confirmApproveArtistRequest = confirmApproveArtistRequest;
 window.openRejectArtistModal = openRejectArtistModal;
 window.setRejectReasonPreset = setRejectReasonPreset;
 window.submitRejectArtistRequest = submitRejectArtistRequest;
+window.handleAdminUsersSearch = handleAdminUsersSearch;
+window.setAdminUsersFilter = setAdminUsersFilter;
+window.openUserDetailsModal = openUserDetailsModal;
 window.deletePost = deletePost;
 window.deleteMapPoint = deleteMapPoint;
 window.handleAdminMediaUpload = handleAdminMediaUpload;
@@ -1694,4 +1968,5 @@ window.submitNewStep = submitNewStep;
 window.openNewArtistModal = openNewArtistModal;
 window.submitNewArtist = submitNewArtist;
 window.resolveTakedownReport = resolveTakedownReport;
+
 

@@ -54,7 +54,8 @@ A plataforma está organizada em 7 módulos funcionais integrados:
 - **Geocodificação e Confirmação no Google Maps**: Validação inteligente de endereços digitados com preview em iframe e confirmação prévia para evitar localizações imprecisas.
 
 ### Módulo 7: Painel Administrativo e Gestão de Conteúdo (CMS)
-- **Moderação Completa**: Aprovação de novos perfis artísticos, recusa fundamentada com parecer curatorial, disparo de e-mail formal e notificação interna direcionada exclusivamente ao solicitante.
+- **Moderação Completa de Artistas**: Aprovação de novos perfis artísticos (migração instantânea para o Acervo Oficial), recusa fundamentada com parecer curatorial, disparo de e-mail formal e notificação interna direcionada exclusivamente ao solicitante.
+- **Gestão de Foliões Cadastrados**: Visualização completa da base de foliões, artistas e administradores, com busca dinâmica por texto, filtragem por papel (Folião / Artista / Admin), listagem de contatos e modal detalhado de perfil.
 - **Cadastramento Centralizado**: Ferramentas simplificadas para upload de mídias de posts, passos, marcos históricos e pontos do mapa.
 - **Segurança e Controle de Acesso**: Gerenciamento rigoroso de permissões com base em papéis (`admin`, `artist`, `user`, `guest`) e auditoria de ações.
 

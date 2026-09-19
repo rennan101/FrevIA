@@ -412,6 +412,20 @@ function openSubmitShowModal() {
           <input type="text" id="show-city-input" value="Recife - PE" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-red" />
         </div>
 
+        <div>
+          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Link para Ingressos / Bilheteria</label>
+          <div class="relative">
+            <span class="absolute left-3 top-2.5 text-muted pointer-events-none">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"></path>
+                <path d="M9 12h6"></path>
+              </svg>
+            </span>
+            <input type="url" id="show-ticket-url-input" placeholder="https://sympla.com.br/... ou https://bileto.sympla.com.br/..." class="w-full pl-9 pr-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-red font-mono" />
+          </div>
+          <p class="text-[10px] text-muted mt-1">Cole o link da bilheteria oficial para outros usuários acessarem diretamente pelo ícone de ingresso.</p>
+        </div>
+
         <div class="flex gap-2 pt-2">
           <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl">Cancelar</button>
           <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl shadow-md font-bold">Publicar Show</button>
@@ -425,31 +439,40 @@ function openSubmitShowModal() {
 
 async function submitNewShow(e) {
   e.preventDefault();
-  const event_name = document.getElementById('show-title-input')?.value;
+  const event_name = document.getElementById('show-title-input')?.value?.trim();
   const event_date = document.getElementById('show-date-input')?.value;
   const event_time = document.getElementById('show-time-input')?.value;
-  const venue_name = document.getElementById('show-venue-input')?.value;
-  const city = document.getElementById('show-city-input')?.value;
+  const venue_name = document.getElementById('show-venue-input')?.value?.trim();
+  const city = document.getElementById('show-city-input')?.value?.trim() || 'Recife - PE';
+  let ticket_url = document.getElementById('show-ticket-url-input')?.value?.trim() || '';
 
   if (!event_name || !event_date) return;
+
+  if (ticket_url && !ticket_url.startsWith('http://') && !ticket_url.startsWith('https://') && !ticket_url.startsWith('#')) {
+    ticket_url = 'https://' + ticket_url;
+  }
 
   const newShow = {
     id: `sh-${Date.now()}`,
     artist_id: currentUserSession.artist_id || 'a1',
     event_name,
     title: event_name,
+    name: event_name,
     event_date,
     date: event_date,
     event_time,
     time: event_time,
     venue_name,
     venue: venue_name,
+    location: `${venue_name} (${city})`,
     city,
-    ticket_url: '#'
+    ticket_url: ticket_url || '#',
+    link: ticket_url || '#'
   };
 
   DB.shows = DB.shows || [];
   DB.shows.unshift(newShow);
+  if (typeof saveShowsLocal === 'function') saveShowsLocal();
 
   if (window.awsService && window.awsService.isConnected()) {
     const saved = await window.awsService.createArtistEvent(newShow);
@@ -464,6 +487,7 @@ async function submitNewShow(e) {
 async function deleteShow(showId) {
   if (confirm('Deseja realmente excluir este show da sua agenda?')) {
     DB.shows = (DB.shows || []).filter(s => s.id !== showId);
+    if (typeof saveShowsLocal === 'function') saveShowsLocal();
     if (window.awsService && window.awsService.isConnected()) {
       await window.awsService.deleteArtistEvent(showId);
     }
