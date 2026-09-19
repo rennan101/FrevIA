@@ -322,10 +322,51 @@ function updateAudioPlayerUI() {
   const artistEl = document.getElementById('player-track-artist');
   const playIcon = document.getElementById('player-play-icon');
   const pauseIcon = document.getElementById('player-pause-icon');
+  const lyricsBtn = document.getElementById('player-lyrics-toggle-btn');
 
   if (coverEl) coverEl.src = currentPlayingSong.cover_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&q=80';
-  if (titleEl) titleEl.innerText = currentPlayingSong.title || 'Música do Frevo';
-  if (artistEl) artistEl.innerText = currentPlayingSong.artist || 'Artista Pernambucano';
+  
+  const titleText = currentPlayingSong.title || 'Música do Frevo';
+  if (titleEl) {
+    titleEl.innerText = titleText;
+    titleEl.title = titleText;
+  }
+
+  // Localizar Nome do Álbum correspondente para exibição completa
+  let albumTitle = '';
+  if (currentPlayingSong.album_id && window.DB?.albums) {
+    const matchedAlbum = window.DB.albums.find(a => a.id === currentPlayingSong.album_id);
+    if (matchedAlbum && matchedAlbum.title) {
+      albumTitle = ` • ${matchedAlbum.title}`;
+    }
+  } else if (currentPlayingSong.genre) {
+    albumTitle = ` • ${currentPlayingSong.genre}`;
+  }
+
+  const artistFullText = `${currentPlayingSong.artist || 'Artista Pernambucano'}${albumTitle}`;
+  if (artistEl) {
+    artistEl.innerText = artistFullText;
+    artistEl.title = artistFullText;
+  }
+
+  // Gerenciamento Condicional do Botão de Letras:
+  // Se a música não tiver letra cadastrada ou for puramente instrumental, ocultar o botão de letra
+  const rawLyrics = currentPlayingSong.lyrics ? currentPlayingSong.lyrics.trim() : '';
+  const isInstrumental = rawLyrics.startsWith('(Instrumental') || rawLyrics.toLowerCase() === 'sem letra';
+  const hasLyrics = rawLyrics.length > 0 && !isInstrumental;
+
+  if (lyricsBtn) {
+    if (hasLyrics) {
+      lyricsBtn.classList.remove('hidden');
+    } else {
+      lyricsBtn.classList.add('hidden');
+      // Se o modal de letras estiver aberto para uma música sem letra, fechá-lo
+      const lyricsModal = document.getElementById('apple-lyrics-modal');
+      if (lyricsModal && !lyricsModal.classList.contains('hidden')) {
+        lyricsModal.classList.add('hidden');
+      }
+    }
+  }
 
   if (playIcon && pauseIcon) {
     if (isAudioPlaying || isSynthPlaying) {

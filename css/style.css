@@ -1740,7 +1740,7 @@ body {
     left: calc(76px + 24px);
     right: 24px;
     bottom: 20px;
-    max-width: 780px;
+    max-width: 840px;
   }
 }
 
@@ -1748,7 +1748,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 14px;
 }
 
 .apple-player-track-info {
@@ -1756,9 +1756,9 @@ body {
   align-items: center;
   gap: 10px;
   cursor: pointer;
-  min-width: 140px;
-  max-width: 220px;
-  flex: 1;
+  min-width: 150px;
+  max-width: 250px;
+  flex: 1.2;
 }
 
 .apple-player-cover {
@@ -1777,20 +1777,28 @@ body {
 
 .apple-player-meta {
   min-width: 0;
+  flex: 1;
+  overflow: hidden;
 }
 
 .apple-player-title {
   font-size: 0.8125rem;
   font-weight: 700;
   color: #FFFFFF;
-  line-height: 1.2;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .apple-player-artist {
   font-size: 0.6875rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.75);
   line-height: 1.2;
   margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .apple-player-controls-container {
@@ -1861,8 +1869,8 @@ body {
 }
 
 .apple-player-btn-main {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   background: #FFFFFF;
   color: #171717;
@@ -1872,13 +1880,18 @@ body {
   justify-content: center;
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(255, 255, 255, 0.25);
-  transition: transform 0.15s ease, background 0.15s ease;
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), background 0.15s ease, box-shadow 0.15s ease;
 }
 
 .apple-player-btn-main:hover {
   transform: scale(1.08);
   background: #FFF5EB;
   color: #FF8A00;
+  box-shadow: 0 6px 18px rgba(255, 138, 0, 0.35);
+}
+
+.apple-player-btn-main svg {
+  display: block;
 }
 
 .apple-player-extra-actions {
@@ -1886,14 +1899,24 @@ body {
   align-items: center;
   gap: 10px;
   justify-content: flex-end;
-  flex: 1;
-  min-width: 120px;
+  flex: 1.2;
+  min-width: 140px;
 }
 
 .apple-player-volume-wrap {
   display: none;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.apple-player-volume-wrap:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 @media (min-width: 640px) {
@@ -1903,30 +1926,75 @@ body {
 }
 
 .apple-volume-range {
-  width: 70px;
-  accent-color: #FF8A00;
+  -webkit-appearance: none;
+  appearance: none;
+  width: 72px;
   height: 4px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  outline: none;
   cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.apple-volume-range:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.apple-volume-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #FF8A00;
+  cursor: pointer;
+  box-shadow: 0 0 6px rgba(255, 138, 0, 0.6);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.apple-volume-range::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+  background: #FFA033;
+}
+
+.apple-volume-range::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #FF8A00;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 0 6px rgba(255, 138, 0, 0.6);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.apple-volume-range::-moz-range-thumb:hover {
+  transform: scale(1.25);
+  background: #FFA033;
 }
 
 .apple-player-lyrics-btn {
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.18);
   color: #FFFFFF;
-  padding: 6px 10px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 700;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 50%;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 6px;
-  transition: all 0.2s ease;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
 }
 
 .apple-player-lyrics-btn:hover {
-  background: rgba(255, 138, 0, 0.3);
+  background: rgba(255, 138, 0, 0.25);
   border-color: #FF8A00;
+  color: #FF8A00;
+  transform: scale(1.08);
 }
 
 /* ==========================================================================

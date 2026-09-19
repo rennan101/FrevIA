@@ -244,7 +244,7 @@ async function submitNewSong(e) {
       artist: currentUserSession.name || currentUserProfile.name || 'Artista do Frevo',
       genre,
       description: 'Obra autêntica cadastrada no acervo oficial.',
-      lyrics: lyrics || `Lá vem ${title} no compasso do ${genre}!`,
+      lyrics: lyrics ? lyrics.trim() : '',
       score_file: scoreFileUrl || 'partitura-oficial.pdf',
       score_path: scoreFileUrl || 'partitura-oficial.pdf',
       audio_url: audioUrl,
