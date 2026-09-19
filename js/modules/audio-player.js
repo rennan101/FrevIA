@@ -110,6 +110,178 @@ function stopFrevoAudioPlayback() {
   }
 }
 
+let isRepeatMode = 'off'; // 'off' | 'all' | 'one'
+let isShuffleMode = false;
+let isQueuePanelOpen = false;
+
+function toggleRepeatMode() {
+  const repeatBtn = document.getElementById('player-repeat-btn');
+  const iconAll = document.getElementById('player-repeat-icon-all');
+  const iconOne = document.getElementById('player-repeat-icon-one');
+
+  if (isRepeatMode === 'off') {
+    isRepeatMode = 'all';
+  } else if (isRepeatMode === 'all') {
+    isRepeatMode = 'one';
+  } else {
+    isRepeatMode = 'off';
+  }
+
+  if (repeatBtn) {
+    if (isRepeatMode === 'off') {
+      repeatBtn.classList.remove('active');
+      repeatBtn.title = 'Repetir (Desativado)';
+      if (iconAll) iconAll.classList.remove('hidden');
+      if (iconOne) iconOne.classList.add('hidden');
+    } else if (isRepeatMode === 'all') {
+      repeatBtn.classList.add('active');
+      repeatBtn.title = 'Repetir Playlist (Ativado)';
+      if (iconAll) iconAll.classList.remove('hidden');
+      if (iconOne) iconOne.classList.add('hidden');
+    } else if (isRepeatMode === 'one') {
+      repeatBtn.classList.add('active');
+      repeatBtn.title = 'Repetir Faixa Atual (1)';
+      if (iconAll) iconAll.classList.add('hidden');
+      if (iconOne) iconOne.classList.remove('hidden');
+    }
+  }
+}
+
+function toggleShuffle() {
+  isShuffleMode = !isShuffleMode;
+  const shuffleBtn = document.getElementById('player-shuffle-btn');
+  if (shuffleBtn) {
+    if (isShuffleMode) {
+      shuffleBtn.classList.add('active');
+      shuffleBtn.title = 'Aleatório (Ativado)';
+    } else {
+      shuffleBtn.classList.remove('active');
+      shuffleBtn.title = 'Aleatório (Desativado)';
+    }
+  }
+}
+
+function toggleQueuePanel() {
+  isQueuePanelOpen = !isQueuePanelOpen;
+  const queuePanel = document.getElementById('player-queue-panel');
+  const queueBtn = document.getElementById('player-queue-toggle-btn');
+
+  if (queuePanel) {
+    if (isQueuePanelOpen) {
+      renderPlayerQueueList();
+      queuePanel.classList.remove('hidden');
+      if (queueBtn) queueBtn.classList.add('active');
+    } else {
+      queuePanel.classList.add('hidden');
+      if (queueBtn) queueBtn.classList.remove('active');
+    }
+  }
+}
+
+function renderPlayerQueueList() {
+  const container = document.getElementById('player-queue-list');
+  const countEl = document.getElementById('queue-tracks-count');
+  if (!container) return;
+
+  const playlist = currentPlaylist && currentPlaylist.length > 0 ? currentPlaylist : (window.DB?.songs || []);
+  if (countEl) countEl.innerText = `${playlist.length} faixas`;
+
+  if (playlist.length === 0) {
+    container.innerHTML = `
+      <div class="p-6 text-center text-xs text-white/50 border border-dashed border-white/10 rounded-2xl">
+        Nenhuma faixa na playlist no momento.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = playlist.map((s, idx) => {
+    const isCurrent = currentPlayingSong && s.id === currentPlayingSong.id;
+    return `
+      <div class="queue-track-item ${isCurrent ? 'is-current' : ''}" draggable="true" ondragstart="handleQueueDragStart(event, ${idx})" ondragover="handleQueueDragOver(event)" ondrop="handleQueueDrop(event, ${idx})" onclick="playSong('${s.id}')">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-7 h-7 rounded-lg overflow-hidden flex-shrink-0 bg-white/10 border border-white/10 flex items-center justify-center">
+            ${isCurrent && (isAudioPlaying || isSynthPlaying) ? `
+              <span class="w-2.5 h-2.5 rounded-full bg-frevo-orange animate-ping"></span>
+            ` : `
+              <img src="${getCoverUrl(s.cover_url || s.cover)}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${DEFAULT_COVER_PLACEHOLDER}'" />
+            `}
+          </div>
+          <div class="min-w-0">
+            <h5 class="queue-track-title text-xs text-white truncate">${s.title}</h5>
+            <p class="text-[10px] text-white/60 truncate">${s.artist} · ${formatAudioTime(s.duration_seconds || 180)}</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 flex-shrink-0" onclick="event.stopPropagation()">
+          <button onclick="moveQueueItem(${idx}, -1)" class="p-1 text-white/50 hover:text-white rounded transition-colors" title="Subir na fila">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"></polyline></svg>
+          </button>
+          <button onclick="moveQueueItem(${idx}, 1)" class="p-1 text-white/50 hover:text-white rounded transition-colors" title="Descer na fila">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <button onclick="removeFromQueue(${idx})" class="p-1 text-white/40 hover:text-red-400 rounded transition-colors" title="Remover da fila">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+let draggedQueueIndex = null;
+function handleQueueDragStart(e, index) {
+  draggedQueueIndex = index;
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function handleQueueDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+}
+
+function handleQueueDrop(e, targetIndex) {
+  e.preventDefault();
+  if (draggedQueueIndex === null || draggedQueueIndex === targetIndex) return;
+
+  const item = currentPlaylist.splice(draggedQueueIndex, 1)[0];
+  currentPlaylist.splice(targetIndex, 0, item);
+  
+  if (currentPlayingSong) {
+    currentPlaylistIndex = currentPlaylist.findIndex(s => s.id === currentPlayingSong.id);
+  }
+
+  draggedQueueIndex = null;
+  renderPlayerQueueList();
+}
+
+function moveQueueItem(index, direction) {
+  const target = index + direction;
+  if (target < 0 || target >= currentPlaylist.length) return;
+
+  const item = currentPlaylist.splice(index, 1)[0];
+  currentPlaylist.splice(target, 0, item);
+
+  if (currentPlayingSong) {
+    currentPlaylistIndex = currentPlaylist.findIndex(s => s.id === currentPlayingSong.id);
+  }
+  renderPlayerQueueList();
+}
+
+function removeFromQueue(index) {
+  if (currentPlaylist.length <= 1) {
+    showAlertModal('A playlist precisa ter pelo menos uma faixa.');
+    return;
+  }
+  const removed = currentPlaylist.splice(index, 1)[0];
+  if (currentPlayingSong && removed.id === currentPlayingSong.id) {
+    nextTrack();
+  } else if (currentPlayingSong) {
+    currentPlaylistIndex = currentPlaylist.findIndex(s => s.id === currentPlayingSong.id);
+  }
+  renderPlayerQueueList();
+}
+
 // Inicialização dos Listeners do Elemento <audio> Nativo
 function initFrevoAudioEngine() {
   const audioEl = document.getElementById('frevia-audio-element');
@@ -141,11 +313,35 @@ function initFrevoAudioEngine() {
   audioEl.addEventListener('playing', handlePlayState);
   audioEl.addEventListener('pause', handlePauseState);
 
+  // Manipulação do fim da faixa (Autoplay, Repetir 1, Repetir Tudo ou Aleatório)
   audioEl.addEventListener('ended', () => {
     isAudioPlaying = false;
     stopPlayerProgressTicker();
     updatePlayerProgressUI(0, currentPlayingSong?.duration_seconds || 180);
-    nextTrack();
+
+    if (isRepeatMode === 'one') {
+      if (currentPlayingSong) {
+        audioEl.currentTime = 0;
+        audioEl.play().then(() => {
+          isAudioPlaying = true;
+          startPlayerProgressTicker();
+          updateAudioPlayerUI();
+        }).catch(() => {
+          playSong(currentPlayingSong.id, currentPlaylist);
+        });
+      }
+    } else if (isRepeatMode === 'all') {
+      nextTrack(true);
+    } else {
+      // isRepeatMode === 'off'
+      if (currentPlaylistIndex < (currentPlaylist.length - 1) || isShuffleMode) {
+        nextTrack(false);
+      } else {
+        // Chegou ao fim da playlist sem repetição
+        isAudioPlaying = false;
+        updateAudioPlayerUI();
+      }
+    }
   });
 
   audioEl.addEventListener('timeupdate', syncTime);
@@ -216,6 +412,7 @@ function playSong(songId, playlist = null) {
 
   updateAudioPlayerUI();
   updateLyricsModalContent();
+  if (isQueuePanelOpen) renderPlayerQueueList();
 
   if (window.FrevAIAnalytics) {
     window.FrevAIAnalytics.trackSongPlay(song);
@@ -263,11 +460,26 @@ function togglePlayAudio() {
   }
 }
 
-function nextTrack() {
+function nextTrack(forceLoop = true) {
   if (!currentPlaylist || currentPlaylist.length === 0) {
     currentPlaylist = window.DB?.songs || [];
   }
-  currentPlaylistIndex = (currentPlaylistIndex + 1) % (currentPlaylist.length || 1);
+  if (currentPlaylist.length === 0) return;
+
+  if (isShuffleMode && currentPlaylist.length > 1) {
+    let nextIdx = Math.floor(Math.random() * currentPlaylist.length);
+    if (nextIdx === currentPlaylistIndex) {
+      nextIdx = (currentPlaylistIndex + 1) % currentPlaylist.length;
+    }
+    currentPlaylistIndex = nextIdx;
+  } else {
+    if (currentPlaylistIndex >= currentPlaylist.length - 1 && !forceLoop && isRepeatMode === 'off') {
+      // Fim da lista sem repetição
+      return;
+    }
+    currentPlaylistIndex = (currentPlaylistIndex + 1) % currentPlaylist.length;
+  }
+
   const nextSong = currentPlaylist[currentPlaylistIndex];
   if (nextSong) {
     playSong(nextSong.id, currentPlaylist);
@@ -278,7 +490,17 @@ function prevTrack() {
   if (!currentPlaylist || currentPlaylist.length === 0) {
     currentPlaylist = window.DB?.songs || [];
   }
-  currentPlaylistIndex = (currentPlaylistIndex - 1 + currentPlaylist.length) % (currentPlaylist.length || 1);
+  if (currentPlaylist.length === 0) return;
+
+  const audioEl = document.getElementById('frevia-audio-element');
+  if (audioEl && audioEl.currentTime > 3) {
+    // Se tocou mais de 3s, volta para o início da mesma faixa (padrão Apple Music/Spotify)
+    audioEl.currentTime = 0;
+    updatePlayerProgressUI(0, currentPlayingSong?.duration_seconds || 180);
+    return;
+  }
+
+  currentPlaylistIndex = (currentPlaylistIndex - 1 + currentPlaylist.length) % currentPlaylist.length;
   const prevSong = currentPlaylist[currentPlaylistIndex];
   if (prevSong) {
     playSong(prevSong.id, currentPlaylist);
@@ -761,6 +983,15 @@ const FrevoAudioEngine = {
   }
 };
 
+window.toggleRepeatMode = toggleRepeatMode;
+window.toggleShuffle = toggleShuffle;
+window.toggleQueuePanel = toggleQueuePanel;
+window.renderPlayerQueueList = renderPlayerQueueList;
+window.handleQueueDragStart = handleQueueDragStart;
+window.handleQueueDragOver = handleQueueDragOver;
+window.handleQueueDrop = handleQueueDrop;
+window.moveQueueItem = moveQueueItem;
+window.removeFromQueue = removeFromQueue;
 window.currentPlayingSong = currentPlayingSong;
 window.isAudioPlaying = isAudioPlaying;
 window.initFrevoAudioEngine = initFrevoAudioEngine;

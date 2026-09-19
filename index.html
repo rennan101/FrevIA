@@ -609,21 +609,62 @@
         </div>
 
         <div class="apple-player-buttons">
+          <!-- Botão Aleatório / Shuffle -->
+          <button id="player-shuffle-btn" onclick="toggleShuffle()" class="apple-player-btn-secondary" aria-label="Modo Aleatório" title="Aleatório (Desativado)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="16 3 21 3 21 8"></polyline>
+              <line x1="4" y1="20" x2="21" y2="3"></line>
+              <polyline points="21 16 21 21 16 21"></polyline>
+              <line x1="15" y1="15" x2="21" y2="21"></line>
+              <line x1="4" y1="4" x2="9" y2="9"></line>
+            </svg>
+          </button>
+
+          <!-- Botão Faixa Anterior -->
           <button onclick="prevTrack()" class="apple-player-btn" aria-label="Faixa Anterior" title="Anterior">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2.5"></line></svg>
           </button>
+
+          <!-- Botão Play / Pause Principal -->
           <button id="player-play-btn" onclick="togglePlayAudio()" class="apple-player-btn-main" aria-label="Play/Pause" title="Tocar ou Pausar">
             <svg id="player-play-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="transform: translateX(1.5px);"><polygon points="6 4 19 12 6 20 6 4"></polygon></svg>
             <svg id="player-pause-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" class="hidden"><rect x="6" y="4" width="4" height="16" rx="1"></rect><rect x="14" y="4" width="4" height="16" rx="1"></rect></svg>
           </button>
+
+          <!-- Botão Próxima Faixa -->
           <button onclick="nextTrack()" class="apple-player-btn" aria-label="Próxima Faixa" title="Próxima">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2.5"></line></svg>
+          </button>
+
+          <!-- Botão Repetir (Off -> All -> One) -->
+          <button id="player-repeat-btn" onclick="toggleRepeatMode()" class="apple-player-btn-secondary" aria-label="Modo de Repetição" title="Repetir (Desativado)">
+            <!-- Ícone Repetir Geral -->
+            <svg id="player-repeat-icon-all" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="17 1 21 5 17 9"></polyline>
+              <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+              <polyline points="7 23 3 19 7 15"></polyline>
+              <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+            </svg>
+            <!-- Ícone Repetir Uma Faixa -->
+            <span id="player-repeat-icon-one" class="hidden text-[10px] font-mono font-bold leading-none">1</span>
           </button>
         </div>
       </div>
 
-      <!-- Ações Extras: Volume, Letras & Fechar Player -->
+      <!-- Ações Extras: Fila/Playlist, Volume, Letras & Fechar Player -->
       <div class="apple-player-extra-actions">
+        <!-- Botão Abrir Fila & Playlist (A Seguir) -->
+        <button id="player-queue-toggle-btn" onclick="toggleQueuePanel()" class="apple-player-btn-secondary" aria-label="Fila de Reprodução e Playlist" title="Fila de Reprodução">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="8" y1="6" x2="21" y2="6"></line>
+            <line x1="8" y1="12" x2="21" y2="12"></line>
+            <line x1="8" y1="18" x2="21" y2="18"></line>
+            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+          </svg>
+        </button>
+
         <!-- Controle de Volume -->
         <div class="apple-player-volume-wrap">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-white/70 flex-shrink-0"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
@@ -643,6 +684,32 @@
           </svg>
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- Painel Flutuante de Fila & Playlist Estilo Apple Music (A Seguir / Reorganização de Faixas) -->
+  <div id="player-queue-panel" class="player-queue-panel hidden" role="region" aria-label="Fila de Reprodução">
+    <div class="flex items-center justify-between pb-2.5 mb-2.5 border-b border-white/15">
+      <div class="flex items-center gap-2">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FF8A00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="8" y1="6" x2="21" y2="6"></line>
+          <line x1="8" y1="12" x2="21" y2="12"></line>
+          <line x1="8" y1="18" x2="21" y2="18"></line>
+          <line x1="3" y1="6" x2="3.01" y2="6"></line>
+          <line x1="3" y1="12" x2="3.01" y2="12"></line>
+          <line x1="3" y1="18" x2="3.01" y2="18"></line>
+        </svg>
+        <h4 class="text-xs font-bold text-white uppercase tracking-wider">A Seguir · Playlist</h4>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <span id="queue-tracks-count" class="text-[10px] font-mono text-white/60">0 faixas</span>
+        <button onclick="toggleQueuePanel()" class="w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white flex items-center justify-center text-xs transition-colors" aria-label="Fechar Fila">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+    <div id="player-queue-list" class="overflow-y-auto space-y-1.5 flex-1 pr-1" style="max-height: 380px;">
+      <!-- Itens da Playlist renderizados dinamicamente com suporte a Drag & Drop -->
     </div>
   </div>
 
