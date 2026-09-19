@@ -317,6 +317,32 @@ async function deleteSong(songId) {
   }
 }
 
+function toggleSaveScore(songId) {
+  if (currentUserSession.role === 'guest') {
+    showAlertModal('Você precisa estar logado para salvar partituras no seu perfil.');
+    if (typeof openSessionModal === 'function') openSessionModal();
+    return;
+  }
+
+  currentUserSession.saved_scores = currentUserSession.saved_scores || [];
+  const index = currentUserSession.saved_scores.indexOf(songId);
+  const isSaved = index !== -1;
+
+  if (isSaved) {
+    currentUserSession.saved_scores.splice(index, 1);
+    showAlertModal('Partitura removida dos seus itens salvos.');
+  } else {
+    currentUserSession.saved_scores.push(songId);
+    showAlertModal('Partitura salva com sucesso no seu perfil!', { type: 'success' });
+  }
+
+  saveCurrentSession();
+  renderSongs();
+  if (window.innerWidth >= 992) {
+    renderSongsDesktopViewer(songId);
+  }
+}
+
 window.addEventListener('click', () => {
   closeAllSongActionMenus();
 });
@@ -325,9 +351,12 @@ window.selectSongForDesktopViewer = selectSongForDesktopViewer;
 window.renderSongCardHtml = renderSongCardHtml;
 window.renderSongsDesktopViewer = renderSongsDesktopViewer;
 window.renderSongs = renderSongs;
+window.renderSongsList = renderSongs;
 window.appendMoreSongs = appendMoreSongs;
 window.handleSongsSearch = handleSongsSearch;
 window.toggleSongActionMenu = toggleSongActionMenu;
 window.closeAllSongActionMenus = closeAllSongActionMenus;
 window.downloadSongAction = downloadSongAction;
 window.deleteSong = deleteSong;
+window.toggleSaveScore = toggleSaveScore;
+

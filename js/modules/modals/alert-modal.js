@@ -52,7 +52,7 @@ function showAlertModal(message, options = {}) {
       } else if (type === 'warning') {
         iconContainer.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
       } else {
-        iconContainer.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
+        iconContainer.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="8"></line></svg>`;
       }
     }
 
@@ -99,8 +99,38 @@ function showPlatformAlert(message, title = 'Aviso') {
   return showAlertModal(message, { title });
 }
 
+// Fechamento Universal do Modal Global
+function closeModal() {
+  const modalEl = document.getElementById('global-modal');
+  if (modalEl) {
+    modalEl.classList.remove('open');
+    modalEl.classList.remove('active');
+  }
+}
+
+// Fechar com tecla ESC ou clique fora do conteúdo
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeModal();
+    closeAlertModal(false);
+  }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const globalModal = document.getElementById('global-modal');
+  if (globalModal) {
+    globalModal.addEventListener('click', (e) => {
+      if (e.target === globalModal) {
+        closeModal();
+      }
+    });
+  }
+});
+
+// Exportações Globais
 window.showAlertModal = showAlertModal;
 window.closeAlertModal = closeAlertModal;
 window.showConfirmModal = showConfirmModal;
 window.showPlatformAlert = showPlatformAlert;
 window.stripAllEmojis = stripAllEmojis;
+window.closeModal = closeModal;

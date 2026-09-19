@@ -3,6 +3,74 @@
 // Gerenciamento de login, cadastro, esqueci minha senha e solicitação de artista
 // ==========================================
 
+let currentAuthTab = 'login';
+let signupRoleSelected = 'fan';
+
+function switchAuthTab(tab) {
+  currentAuthTab = tab;
+  openSessionModal();
+}
+
+function setSignupRole(role) {
+  signupRoleSelected = role;
+  const fanBtn = document.getElementById('signup-role-fan-btn');
+  const artistBtn = document.getElementById('signup-role-artist-btn');
+  const artistFields = document.getElementById('signup-artist-fields');
+
+  if (role === 'artist') {
+    if (fanBtn) {
+      fanBtn.className = 'flex-1 p-2.5 rounded-xl border border-gray-200 bg-surface-soft text-left transition-all opacity-60';
+    }
+    if (artistBtn) {
+      artistBtn.className = 'flex-1 p-2.5 rounded-xl border-2 border-frevo-orange bg-frevo-orange/10 text-left transition-all';
+    }
+    if (artistFields) artistFields.classList.remove('hidden');
+  } else {
+    if (fanBtn) {
+      fanBtn.className = 'flex-1 p-2.5 rounded-xl border-2 border-frevo-cyan bg-frevo-cyan/10 text-left transition-all';
+    }
+    if (artistBtn) {
+      artistBtn.className = 'flex-1 p-2.5 rounded-xl border border-gray-200 bg-surface-soft text-left transition-all opacity-60';
+    }
+    if (artistFields) artistFields.classList.add('hidden');
+  }
+}
+
+function togglePasswordVisibility(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const isPass = input.type === 'password';
+  input.type = isPass ? 'text' : 'password';
+  if (btn) {
+    btn.innerHTML = isPass
+      ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`
+      : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="7" r="3"></circle></svg>`;
+  }
+}
+
+function handleGenreSelectChange(selectId, containerId) {
+  const select = document.getElementById(selectId);
+  const container = document.getElementById(containerId);
+  if (!select || !container) return;
+  if (select.value === 'Outro' || select.value === 'Outro...') {
+    container.classList.remove('hidden');
+  } else {
+    container.classList.add('hidden');
+  }
+}
+
+function formatSignupHandleInput(input) {
+  const errEl = document.getElementById('signup-error-msg');
+  if (errEl) errEl.classList.add('hidden');
+  let val = input.value;
+  if (!val) return;
+  if (!val.startsWith('@')) {
+    val = '@' + val;
+  }
+  const body = val.substring(1).toLowerCase().replace(/[^a-z0-9_]/g, '');
+  input.value = '@' + body;
+}
+
 function openSessionModal() {
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
@@ -763,6 +831,11 @@ function logoutSession() {
 
 // Anexar ao escopo global para compatibilidade com inline event handlers
 window.openSessionModal = openSessionModal;
+window.switchAuthTab = switchAuthTab;
+window.setSignupRole = setSignupRole;
+window.togglePasswordVisibility = togglePasswordVisibility;
+window.handleGenreSelectChange = handleGenreSelectChange;
+window.formatSignupHandleInput = formatSignupHandleInput;
 window.openForgotPasswordModal = openForgotPasswordModal;
 window.handleForgotPasswordSubmit = handleForgotPasswordSubmit;
 window.loginWithGoogle = loginWithGoogle;
@@ -771,3 +844,4 @@ window.handleEmailSignUp = handleEmailSignUp;
 window.openArtistRequestModal = openArtistRequestModal;
 window.handleArtistRequestSubmit = handleArtistRequestSubmit;
 window.logoutSession = logoutSession;
+

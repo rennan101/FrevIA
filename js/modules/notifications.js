@@ -207,9 +207,35 @@ function openNotificationsModal() {
   modal.classList.add('open');
 }
 
+async function togglePushNotifications() {
+  if (!('Notification' in window)) {
+    if (typeof showAlertModal === 'function') showAlertModal('Notificações não são suportadas por este navegador.');
+    return;
+  }
+
+  if (Notification.permission === 'granted') {
+    if (typeof showAlertModal === 'function') showAlertModal('Notificações já estão ativadas para o FrevAI!', { type: 'success' });
+    return;
+  }
+
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+      if (typeof showAlertModal === 'function') showAlertModal('Notificações ativadas com sucesso! Você receberá avisos de novos frevos e lançamentos.', { type: 'success' });
+    } else {
+      if (typeof showAlertModal === 'function') showAlertModal('Permissão de notificações não concedida no navegador.');
+    }
+  } catch (err) {
+    if (typeof showAlertModal === 'function') showAlertModal('Não foi possível solicitar permissão no momento.');
+  }
+}
+
 window.getVisibleNotificationsForCurrentSession = getVisibleNotificationsForCurrentSession;
 window.updateNotificationBadge = updateNotificationBadge;
+window.renderNotificationsBadge = updateNotificationBadge;
 window.sendCulturalPushNotification = sendCulturalPushNotification;
 window.markAllNotificationsAsRead = markAllNotificationsAsRead;
 window.handleNotificationClick = handleNotificationClick;
 window.openNotificationsModal = openNotificationsModal;
+window.togglePushNotifications = togglePushNotifications;
+

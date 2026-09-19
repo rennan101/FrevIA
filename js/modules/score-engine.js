@@ -513,9 +513,20 @@ function downloadScore(songId) {
   }
 }
 
+function downloadCurrentSongScorePDF() {
+  const songId = window.currentlyPlayingSongId || (window.currentPlayingSong ? window.currentPlayingSong.id : 's1');
+  if (songId) {
+    downloadScore(songId);
+  } else {
+    if (typeof showAlertModal === 'function') showAlertModal('Nenhuma partitura selecionada no momento.');
+  }
+}
+
 window.FREVO_SONG_PROFILES = FREVO_SONG_PROFILES;
 window.getSongMusicalProfile = getSongMusicalProfile;
 window.renderStaveSvgHtml = renderStaveSvgHtml;
 window.generateAndDownloadScorePdf = generateAndDownloadScorePdf;
 window.openScoreModal = openScoreModal;
 window.downloadScore = downloadScore;
+window.downloadCurrentSongScorePDF = downloadCurrentSongScorePDF;
+

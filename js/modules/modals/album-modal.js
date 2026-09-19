@@ -456,7 +456,83 @@ async function deleteShow(showId) {
   }
 }
 
+function openAlbumDetails(albumId) {
+  const album = (DB.albums || []).find(a => a.id === albumId);
+  if (!album) return;
+
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+  if (!modal || !modalBody) return;
+
+  const tracks = album.tracks || [];
+
+  modalBody.innerHTML = `
+    <div class="space-y-4 text-left max-h-[85vh] overflow-y-auto pr-1">
+      <div class="flex items-start gap-3.5 pb-3 border-b border-gray-100 pr-8">
+        <img src="${album.cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&q=80'}" alt="${album.title}" class="w-20 h-20 rounded-2xl object-cover border border-gray-100 shadow-sm flex-shrink-0" />
+        <div class="min-w-0 flex-1">
+          <span class="badge bg-frevo-purple/15 text-frevo-purple text-[10px] font-bold">${album.genre || 'Frevo'}</span>
+          <h3 class="font-display font-extrabold text-lg text-ink leading-tight mt-1 truncate">${album.title}</h3>
+          <p class="text-xs font-bold text-frevo-orange truncate">${album.artist || 'Artista'}</p>
+          <p class="text-[11px] text-muted mt-0.5">${album.year || ''} · ${tracks.length} faixas</p>
+        </div>
+      </div>
+
+      <!-- Lista de Faixas -->
+      <div class="space-y-2">
+        <h4 class="text-xs font-bold text-ink uppercase tracking-wider">Faixas do Disco</h4>
+        ${tracks.length === 0 ? `
+          <div class="p-4 border border-dashed border-gray-200 rounded-xl text-center text-xs text-muted">
+            Nenhuma faixa cadastrada neste álbum.
+          </div>
+        ` : tracks.map((t, idx) => {
+          const trackTitle = typeof t === 'string' ? t : (t.title || `Faixa ${idx + 1}`);
+          const trackId = typeof t === 'string' ? t : (t.id || `track-${idx}`);
+          const allowDownload = typeof t === 'object' ? t.allow_download !== false : true;
+
+          return `
+            <div class="p-2.5 bg-surface-soft border border-gray-100 rounded-xl flex items-center justify-between gap-3 hover:border-frevo-purple/30 transition-all">
+              <div class="flex items-center gap-3 min-w-0">
+                <span class="text-xs font-mono font-bold text-muted w-4 text-center">${idx + 1}</span>
+                <button onclick="playSong('${trackId}')" class="w-8 h-8 rounded-full bg-frevo-purple/10 hover:bg-frevo-purple text-frevo-purple hover:text-white flex items-center justify-center flex-shrink-0 transition-all shadow-sm">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                </button>
+                <div class="min-w-0">
+                  <h5 class="text-xs font-bold text-ink truncate">${trackTitle}</h5>
+                  <p class="text-[10px] text-muted">${album.artist || ''}</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-1.5 flex-shrink-0">
+                ${allowDownload ? `
+                  <button onclick="downloadScore('${trackId}')" class="p-1.5 text-frevo-cyan hover:bg-cyan-50 rounded-lg transition-colors" title="Baixar Partitura/Áudio">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  </button>
+                ` : `
+                  <span class="p-1.5 text-gray-300" title="Download restrito">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                  </span>
+                `}
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+
+      <div class="pt-2">
+        <button type="button" onclick="closeModal()" class="btn btn-outline w-full text-xs rounded-xl py-2.5 font-bold">
+          Fechar
+        </button>
+      </div>
+    </div>
+  `;
+
+  modal.classList.add('open');
+}
+
 window.openSubmitAlbumModal = openSubmitAlbumModal;
+window.openCreateAlbumModal = openSubmitAlbumModal;
+window.openAlbumDetails = openAlbumDetails;
 window.handleAddAlbumDraftFiles = handleAddAlbumDraftFiles;
 window.renderAlbumDraftTracks = renderAlbumDraftTracks;
 window.updateAlbumDraftTrackTitle = updateAlbumDraftTrackTitle;
@@ -466,5 +542,7 @@ window.removeAlbumDraftTrack = removeAlbumDraftTrack;
 window.submitNewAlbum = submitNewAlbum;
 window.deleteAlbum = deleteAlbum;
 window.openSubmitShowModal = openSubmitShowModal;
+window.openCreateShowModal = openSubmitShowModal;
 window.submitNewShow = submitNewShow;
 window.deleteShow = deleteShow;
+
