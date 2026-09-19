@@ -34,6 +34,7 @@ window.FREVIA_AWS_CONFIG = {
     HISTORY: 'frevai_history',
     MAP_POINTS: 'frevai_map_points',
     ARTIST_REQUESTS: 'frevai_artist_requests',
+    TAKEDOWN_REPORTS: 'frevai_takedown_reports',
     NOTIFICATIONS: 'frevai_notifications',
     COMMENTS: 'frevai_post_comments',
     LIKES: 'frevai_post_likes'
@@ -42,6 +43,8 @@ window.FREVIA_AWS_CONFIG = {
 
 window.FREVIA_CONFIG = {
   AWS: window.FREVIA_AWS_CONFIG,
+  GA4_MEASUREMENT_ID: 'G-FREVAI2026',
+  DPO_CONTACT_EMAIL: 'privacidade@frevai.com.br',
 
   // Adapter para serviços REST da AWS
   getApiUrl(table) {
@@ -53,3 +56,4 @@ window.FREVIA_CONFIG = {
     return Boolean(this.AWS && this.AWS.API_GATEWAY_URL);
   }
 };
+

@@ -195,7 +195,20 @@ function openSessionModal() {
               <div>
                 <label class="block text-[10px] font-bold text-ink uppercase mb-0.5">WhatsApp / Contato</label>
                 <input type="text" id="signup-artist-whatsapp" placeholder="(81) 99999-9999" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+              <div class="pt-1">
+                <label class="flex items-start gap-2 cursor-pointer text-[11px] text-ink-soft select-none">
+                  <input type="checkbox" id="signup-terms-consent-artist" required checked class="mt-0.5 w-3.5 h-3.5 rounded text-frevo-orange focus:ring-frevo-orange border-gray-300" />
+                  <span>Declaro ser titular legítimo ou ter autorização para os materiais artísticos, concordando com o <button type="button" onclick="openCopyrightModal()" class="text-frevo-orange font-bold hover:underline inline">Licenciamento Autoral</button>.</span>
+                </label>
               </div>
+            </div>
+
+            <!-- Consentimento de Termos de Uso & LGPD -->
+            <div class="pt-1">
+              <label class="flex items-start gap-2 cursor-pointer text-[11px] text-ink-soft select-none">
+                <input type="checkbox" id="signup-terms-consent" required checked class="mt-0.5 w-3.5 h-3.5 rounded text-frevo-orange focus:ring-frevo-orange border-gray-300" />
+                <span>Li e concordo com os <button type="button" onclick="openTermsModal()" class="text-frevo-orange font-bold hover:underline inline">Termos de Uso</button> e a <button type="button" onclick="openPrivacyModal()" class="text-frevo-orange font-bold hover:underline inline">Política de Privacidade (LGPD)</button>.</span>
+              </label>
             </div>
 
             <button type="submit" class="btn btn-primary w-full text-xs rounded-xl py-2.5 font-bold shadow-md">
@@ -516,6 +529,28 @@ async function handleEmailSignUp(e) {
   }
 
   const isArtistChoice = signupRoleSelected === 'artist';
+  const termsConsent = document.getElementById('signup-terms-consent')?.checked;
+  const artistConsent = document.getElementById('signup-terms-consent-artist')?.checked;
+
+  if (!termsConsent) {
+    if (errEl) {
+      errEl.innerText = 'É necessário concordar com os Termos de Uso e a Política de Privacidade (LGPD) para prosseguir.';
+      errEl.classList.remove('hidden');
+    } else {
+      showAlertModal('É necessário aceitar os Termos de Uso e a Política de Privacidade (LGPD).');
+    }
+    return;
+  }
+
+  if (isArtistChoice && !artistConsent) {
+    if (errEl) {
+      errEl.innerText = 'É necessário declarar a titularidade autoral para cadastrar o perfil de artista.';
+      errEl.classList.remove('hidden');
+    } else {
+      showAlertModal('É necessário aceitar o Termo de Licenciamento Autoral.');
+    }
+    return;
+  }
   const artistName = document.getElementById('signup-artist-name')?.value || name;
   const genreSelect = document.getElementById('signup-artist-genre')?.value || 'Frevo de Rua';
   const customGenre = document.getElementById('signup-custom-genre')?.value?.trim();

@@ -240,7 +240,90 @@ async function renderAdminCMS() {
         </div>
       </div>
     `;
+  } else if (currentAdminTab === 'takedowns') {
+    if (typeof loadTakedownsLocal === 'function') loadTakedownsLocal();
+    const reports = window.DB?.takedownReports || [];
+    const pendingReports = reports.filter(r => r.status === 'pending');
+
+    container.innerHTML = `
+      <div class="bg-white border border-gray-200 rounded-2xl p-4 space-y-3 shadow-sm">
+        <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+          <div>
+            <h3 class="font-display font-bold text-sm text-ink flex items-center gap-2">
+              <span>Denúncias &amp; Takedowns</span>
+              <span class="badge ${pendingReports.length > 0 ? 'bg-rose-600 text-white' : 'bg-gray-100 text-muted'} text-[10px] font-bold px-2 py-0.5 rounded-full">
+                ${pendingReports.length} pendente${pendingReports.length === 1 ? '' : 's'}
+              </span>
+            </h3>
+            <p class="text-[11px] text-muted">Análise de direitos autorais e conformidade jurídica</p>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          ${reports.length > 0 ? reports.map(rep => {
+            const isPending = rep.status === 'pending';
+            return `
+              <div class="p-3.5 rounded-2xl border ${isPending ? 'bg-rose-50/70 border-rose-200' : 'bg-surface-soft border-gray-200 opacity-75'} space-y-2 text-xs">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                      <span class="badge ${isPending ? 'bg-rose-600 text-white' : 'bg-gray-200 text-gray-700'} text-[10px] font-bold">
+                        ${isPending ? 'Aguardando Análise' : 'Resolvido'}
+                      </span>
+                      <span class="badge bg-white text-ink border border-gray-200 text-[10px] font-semibold">${rep.reason}</span>
+                    </div>
+                    <div class="mt-1">
+                      <strong class="text-ink font-bold block">Reclamante: ${rep.reporter_name}</strong>
+                      <a href="mailto:${rep.reporter_email}" class="text-[11px] text-frevo-orange font-mono hover:underline">${rep.reporter_email}</a>
+                    </div>
+                  </div>
+                  
+                  ${isPending ? `
+                    <div class="flex gap-1.5 flex-shrink-0">
+                      <button onclick="resolveTakedownReport('${rep.id}', 'resolved')" class="btn btn-green text-[11px] px-2.5 py-1 rounded-xl font-bold shadow-sm">
+                        Resolver
+                      </button>
+                      <button onclick="resolveTakedownReport('${rep.id}', 'dismissed')" class="btn btn-outline text-[11px] px-2 py-1 rounded-xl font-bold">
+                        Descartar
+                      </button>
+                    </div>
+                  ` : ''}
+                </div>
+
+                <div class="p-2.5 bg-white rounded-xl border border-gray-200/80 text-ink-soft leading-relaxed whitespace-pre-line">
+                  ${rep.details}
+                </div>
+                
+                <div class="flex items-center justify-between text-[10px] text-muted pt-1">
+                  <span>Alvo ID: ${rep.target_id || 'Geral'} (${rep.target_type || 'Geral'})</span>
+                  <span>${new Date(rep.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+              </div>
+            `;
+          }).join('') : `
+            <div class="p-6 text-center text-xs text-muted bg-surface-soft rounded-xl border border-gray-100">
+              Nenhuma denúncia ou solicitação de remoção registrada até o momento.
+            </div>
+          `}
+        </div>
+      </div>
+    `;
   }
+}
+
+function resolveTakedownReport(reportId, action = 'resolved') {
+  if (typeof loadTakedownsLocal === 'function') loadTakedownsLocal();
+  const report = (window.DB?.takedownReports || []).find(r => r.id === reportId);
+  if (!report) return;
+
+  report.status = action;
+  report.resolved_at = new Date().toISOString();
+  report.resolved_by = currentUserSession.id || 'admin';
+
+  if (typeof saveTakedownsLocal === 'function') saveTakedownsLocal();
+  renderAdminCMS();
+
+  showAlertModal(`Notificação marcada como ${action === 'resolved' ? 'resolvida' : 'descartada'}.`, { type: 'success' });
 }
 
 async function confirmApproveArtistRequest(requestId) {
@@ -1610,3 +1693,5 @@ window.openNewStepModal = openNewStepModal;
 window.submitNewStep = submitNewStep;
 window.openNewArtistModal = openNewArtistModal;
 window.submitNewArtist = submitNewArtist;
+window.resolveTakedownReport = resolveTakedownReport;
+

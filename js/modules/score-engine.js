@@ -507,6 +507,9 @@ function downloadScore(songId) {
   const success = generateAndDownloadScorePdf(song);
   if (success !== false) {
     song.downloads_count = (song.downloads_count || 120) + 1;
+    if (window.FrevAIAnalytics) {
+      window.FrevAIAnalytics.trackScoreDownload(song);
+    }
     if (typeof renderSongs === 'function') renderSongs();
     if (typeof renderProfileGallery === 'function') renderProfileGallery();
     if (typeof closeModal === 'function') closeModal();

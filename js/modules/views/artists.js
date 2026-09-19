@@ -27,6 +27,10 @@ function toggleFavoriteArtist(artistId) {
     window.awsService.toggleFavoriteArtist(artistId, currentUserSession.id);
   }
 
+  if (window.FrevAIAnalytics) {
+    window.FrevAIAnalytics.trackArtistFavorite(artistId, nowFav);
+  }
+
   // Atualização direta e imediata de todos os botões de favoritar deste artista
   document.querySelectorAll(`button[onclick*="toggleFavoriteArtist('${artistId}')"]`).forEach(btn => {
     if (btn.classList.contains('btn-fav-artist')) {
@@ -54,6 +58,14 @@ function openArtistProfile(artistId) {
 
   const titleEl = document.getElementById('artist-public-title');
   if (titleEl) titleEl.innerText = artist.name;
+
+  if (typeof window.updateDynamicMetaTags === 'function') {
+    window.updateDynamicMetaTags({
+      title: `${artist.name} (${artist.genre || 'Frevo'})`,
+      description: `${artist.name} no FrevAI: ${artist.bio ? artist.bio.substring(0, 140) + '...' : 'Perfil oficial e acervo de frevo.'}`,
+      image: artist.avatar_url
+    });
+  }
 
   const container = document.getElementById('artist-public-content');
   if (!container) return;
@@ -424,7 +436,10 @@ function handleArtistSearch(event) {
   clearTimeout(artistSearchDebounceTimer);
   artistSearchDebounceTimer = setTimeout(() => {
     renderArtists(query);
-  }, 90);
+    if (window.FrevAIAnalytics && query && query.length >= 2) {
+      window.FrevAIAnalytics.trackSearch(query, 'artists');
+    }
+  }, 120);
 }
 
 function appendMoreArtists() {

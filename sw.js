@@ -1,5 +1,5 @@
 // Service Worker do FrevAI — Suporte PWA Offline-First
-const CACHE_NAME = 'frevai-v12';
+const CACHE_NAME = 'frevai-v13';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -16,6 +16,9 @@ const ASSETS_TO_CACHE = [
   './js/modules/modals/session-modal.js',
   './js/modules/modals/song-modal.js',
   './js/modules/modals/album-modal.js',
+  './js/modules/legal.js',
+  './js/modules/analytics.js',
+  './js/modules/seo.js',
   './js/modules/views/feed.js',
   './js/modules/views/artists.js',
   './js/modules/views/songs.js',

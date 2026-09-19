@@ -134,6 +134,17 @@ function playSong(songId, playlist = null) {
 
   updateAudioPlayerUI();
   updateLyricsModalContent();
+
+  if (window.FrevAIAnalytics) {
+    window.FrevAIAnalytics.trackSongPlay(song);
+  }
+
+  if (typeof window.updateDynamicMetaTags === 'function') {
+    window.updateDynamicMetaTags({
+      title: `${song.title} (${song.artist})`,
+      description: `Ouça "${song.title}" de ${song.artist} no acervo digital de Frevo do FrevAI.`
+    });
+  }
 }
 
 function togglePlayAudio() {

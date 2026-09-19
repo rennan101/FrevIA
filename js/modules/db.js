@@ -695,10 +695,14 @@ Viva Pernambuco e sua gente!`,
       read: true
     }
   ],
-  artistRequests: []
+  artistRequests: [],
+  takedownReports: []
 };
 
 function initDB() {
+  if (typeof loadTakedownsLocal === 'function') {
+    loadTakedownsLocal();
+  }
   return DB;
 }
 

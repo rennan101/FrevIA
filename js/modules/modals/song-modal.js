@@ -89,6 +89,14 @@ function openSubmitSongModal() {
           <textarea id="song-lyrics-input" rows="4" placeholder="Insira a letra da música aqui (opcional)..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange font-mono"></textarea>
         </div>
 
+        <!-- Declaração de Titularidade Autoral -->
+        <div class="pt-1">
+          <label class="flex items-start gap-2 cursor-pointer text-[11px] text-ink-soft select-none">
+            <input type="checkbox" id="song-copyright-consent" required checked class="mt-0.5 w-3.5 h-3.5 rounded text-frevo-orange focus:ring-frevo-orange border-gray-300" />
+            <span>Declaro ser o autor desta obra/arranjo ou possuir autorização legal, concordando com o <button type="button" onclick="openCopyrightModal()" class="text-frevo-orange font-bold hover:underline inline">Licenciamento Autoral</button>.</span>
+          </label>
+        </div>
+
         <!-- Indicador de Upload & Barra de Progresso no Envio Final -->
         <div id="submit-song-status" class="hidden p-3 bg-amber-50 rounded-xl border border-amber-200 text-left space-y-1.5">
           <div class="flex items-center justify-between text-xs font-bold text-amber-900">
@@ -146,6 +154,12 @@ async function submitNewSong(e) {
   let scoreFileUrl = null;
 
   if (!title) return;
+
+  const copyrightConsent = document.getElementById('song-copyright-consent')?.checked;
+  if (!copyrightConsent) {
+    showAlertModal('É necessário confirmar a declaração de direitos autorais para cadastrar a música.');
+    return;
+  }
 
   const statusEl = document.getElementById('submit-song-status');
   const statusLabel = document.getElementById('submit-song-status-label');

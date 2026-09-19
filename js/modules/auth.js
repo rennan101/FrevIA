@@ -780,6 +780,25 @@ function openSettingsModal() {
           </button>
         </div>
 
+        <!-- Links Jurídicos, LGPD & Denúncia de Conteúdo -->
+        <div class="p-3 bg-surface-soft rounded-2xl border border-gray-100 space-y-2">
+          <label class="block text-[11px] font-bold text-ink uppercase">Conformidade & Jurídico</label>
+          <div class="grid grid-cols-2 gap-1.5 text-[11px]">
+            <button type="button" onclick="closeModal(); openTermsModal();" class="p-2 bg-white rounded-xl border border-gray-200 text-ink font-semibold hover:border-frevo-orange text-left transition">
+              Termos de Uso
+            </button>
+            <button type="button" onclick="closeModal(); openPrivacyModal();" class="p-2 bg-white rounded-xl border border-gray-200 text-ink font-semibold hover:border-frevo-orange text-left transition">
+              Privacidade (LGPD)
+            </button>
+            <button type="button" onclick="closeModal(); openCopyrightModal();" class="p-2 bg-white rounded-xl border border-gray-200 text-ink font-semibold hover:border-frevo-orange text-left transition">
+              Direitos Autorais
+            </button>
+            <button type="button" onclick="closeModal(); openTakedownModal();" class="p-2 bg-white rounded-xl border border-gray-200 text-rose-600 font-semibold hover:border-rose-400 text-left transition">
+              Denúncia / Takedown
+            </button>
+          </div>
+        </div>
+
         <!-- Sair da Conta -->
         <div class="pt-2">
           <button onclick="logoutSession(); closeModal();" class="btn btn-destructive w-full text-xs rounded-xl py-2.5 font-bold flex items-center justify-center gap-2">

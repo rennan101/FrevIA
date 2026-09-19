@@ -258,9 +258,16 @@ function appendMoreSongs() {
   }
 }
 
+let songSearchDebounceTimer = null;
 function handleSongsSearch(event) {
   const query = event.target.value;
   renderSongs(query);
+  clearTimeout(songSearchDebounceTimer);
+  songSearchDebounceTimer = setTimeout(() => {
+    if (window.FrevAIAnalytics && query && query.length >= 2) {
+      window.FrevAIAnalytics.trackSearch(query, 'songs');
+    }
+  }, 150);
 }
 
 function toggleSongActionMenu(songId, event) {

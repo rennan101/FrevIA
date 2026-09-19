@@ -51,6 +51,30 @@ function switchView(viewName) {
   // Scroll para o topo suave
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
+  // SEO & Open Graph Dinâmico por View
+  const viewTitles = {
+    'feed': 'Início — A Rede Cultural do Frevo',
+    'explore': 'Explorar o Universo do Frevo',
+    'artists': 'Mestres & Agremiações do Frevo',
+    'songs': 'Acervo de Letras & Partituras em PDF',
+    'steps': 'Guia Pedagógico de Passos de Frevo',
+    'history': 'História e Memória do Frevo de Pernambuco',
+    'map': 'Mapa Cultural — Polos e Agremiações',
+    'artist-panel': 'Meu Perfil Cultural',
+    'admin-panel': 'Painel de Gestão & Moderação Curatorial'
+  };
+
+  if (typeof window.updateDynamicMetaTags === 'function') {
+    window.updateDynamicMetaTags({
+      title: viewTitles[viewName] || 'FrevAI',
+      description: `Explore ${viewTitles[viewName] || 'o Frevo de Pernambuco'} no FrevAI — a plataforma de salvaguarda cultural.`
+    });
+  }
+
+  if (window.FrevAIAnalytics && typeof window.FrevAIAnalytics.trackViewChange === 'function') {
+    window.FrevAIAnalytics.trackViewChange(viewName);
+  }
+
   // Renderizar o conteúdo da view correspondente
   switch (viewName) {
     case 'feed':
@@ -225,9 +249,12 @@ async function syncAllWithAWS() {
 // INICIALIZAÇÃO DA APLICAÇÃO (BOOTSTRAP)
 // ==========================================
 document.addEventListener('DOMContentLoaded', async () => {
-  // 1. Inicializar DB, Autenticação e Infinite Scroll
+  // 1. Inicializar DB, Autenticação, Analytics e Infinite Scroll
   if (typeof window.initDB === 'function') window.initDB();
   if (typeof window.initAuth === 'function') window.initAuth();
+  if (window.FrevAIAnalytics && typeof window.FrevAIAnalytics.init === 'function') {
+    window.FrevAIAnalytics.init();
+  }
   if (window.InfiniteScrollManager && typeof window.InfiniteScrollManager.init === 'function') {
     window.InfiniteScrollManager.init();
   }
