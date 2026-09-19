@@ -698,4 +698,11 @@ Viva Pernambuco e sua gente!`,
   artistRequests: []
 };
 
+function initDB() {
+  return DB;
+}
+
 window.DB = DB;
+window.initDB = initDB;
+
+

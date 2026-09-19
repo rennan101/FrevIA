@@ -337,6 +337,8 @@ async function handleUserAvatarUpload(event) {
     };
     img.src = e.target.result;
   };
+  reader.readAsDataURL(file);
+}
 // -----------------------------------------------------------------------------
 // GESTÃO DO PERFIL DO USUÁRIO & ABAS
 // -----------------------------------------------------------------------------
@@ -854,6 +856,7 @@ function renderAuthUI() {
 
 // Exportações Globais
 window.currentUserSession = currentUserSession;
+window.currentUserProfile = currentUserSession;
 window.hasCustomAvatar = hasCustomAvatar;
 window.getUserAvatarUrl = getUserAvatarUrl;
 window.saveCurrentSession = saveCurrentSession;
@@ -870,4 +873,5 @@ window.updateProfileUI = updateProfileUI;
 window.renderProfileGallery = renderProfileGallery;
 window.initAuth = initAuth;
 window.renderAuthUI = renderAuthUI;
+
 

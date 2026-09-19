@@ -464,9 +464,11 @@ async function handleEmailLogin(e) {
       artist_request_status: email.includes('artista') ? 'pending' : 'none',
       favorites: []
     };
-    currentUserProfile.name = currentUserSession.name;
-    currentUserProfile.handle = currentUserSession.handle;
-    currentUserProfile.email = email;
+    if (typeof currentUserProfile !== 'undefined') {
+      currentUserProfile.name = currentUserSession.name;
+      currentUserProfile.handle = currentUserSession.handle;
+      currentUserProfile.email = email;
+    }
     saveCurrentSession();
     updateProfileUI();
     closeModal();
@@ -513,7 +515,7 @@ async function handleEmailSignUp(e) {
     return;
   }
 
-  const isArtistChoice = currentSignupRole === 'artist';
+  const isArtistChoice = signupRoleSelected === 'artist';
   const artistName = document.getElementById('signup-artist-name')?.value || name;
   const genreSelect = document.getElementById('signup-artist-genre')?.value || 'Frevo de Rua';
   const customGenre = document.getElementById('signup-custom-genre')?.value?.trim();

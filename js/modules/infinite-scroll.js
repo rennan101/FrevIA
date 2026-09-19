@@ -28,6 +28,9 @@ const InfiniteScrollManager = {
   },
 
   observe(element) {
+    if (!this.observer) {
+      this.init();
+    }
     if (this.observer && element) {
       this.observer.observe(element);
     }

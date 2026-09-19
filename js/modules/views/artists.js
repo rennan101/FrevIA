@@ -448,8 +448,11 @@ function appendMoreArtists() {
 
 window.toggleFavoriteArtist = toggleFavoriteArtist;
 window.openArtistProfile = openArtistProfile;
+window.openArtistProfileModal = openArtistProfile;
 window.openArtistProfileByAuthor = openArtistProfileByAuthor;
 window.renderArtistCardHtml = renderArtistCardHtml;
 window.renderArtists = renderArtists;
+window.renderArtistsGrid = renderArtists;
 window.handleArtistSearch = handleArtistSearch;
 window.appendMoreArtists = appendMoreArtists;
+

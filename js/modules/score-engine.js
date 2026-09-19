@@ -522,6 +522,15 @@ function downloadCurrentSongScorePDF() {
   }
 }
 
+function canDownloadSong(song) {
+  if (!song) return false;
+  if (song.allow_download === false || song.downloadable === false || song.allowDownload === false) {
+    return false;
+  }
+  return true;
+}
+
+window.canDownloadSong = canDownloadSong;
 window.FREVO_SONG_PROFILES = FREVO_SONG_PROFILES;
 window.getSongMusicalProfile = getSongMusicalProfile;
 window.renderStaveSvgHtml = renderStaveSvgHtml;
@@ -529,4 +538,5 @@ window.generateAndDownloadScorePdf = generateAndDownloadScorePdf;
 window.openScoreModal = openScoreModal;
 window.downloadScore = downloadScore;
 window.downloadCurrentSongScorePDF = downloadCurrentSongScorePDF;
+
 
