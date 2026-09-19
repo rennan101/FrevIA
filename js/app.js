@@ -290,37 +290,36 @@ function initNetworkMonitor() {
 // ==========================================
 // INICIALIZAÇÃO DA APLICAÇÃO (BOOTSTRAP)
 // ==========================================
-document.addEventListener('DOMContentLoaded', async () => {
-  // 1. Inicializar IndexedDB e hidratar estado
-  if (window.FrevAIStorage && typeof window.FrevAIStorage.hydrateGlobalDB === 'function') {
-    await window.FrevAIStorage.hydrateGlobalDB();
-  }
-
-  // 2. Inicializar DB, Autenticação, Analytics e Infinite Scroll
+document.addEventListener('DOMContentLoaded', () => {
+  // 1. Inicializar DB síncrono em memória e Autenticação
   if (typeof window.initDB === 'function') window.initDB();
   if (typeof window.initAuth === 'function') window.initAuth();
   initNetworkMonitor();
 
+  // 2. Inicializar Analytics, Infinite Scroll & Audio Player
   if (window.FrevAIAnalytics && typeof window.FrevAIAnalytics.init === 'function') {
-    window.FrevAIAnalytics.init();
-    window.FrevAIAnalytics.track('page_view', { path: window.location.pathname, title: document.title });
+    try {
+      window.FrevAIAnalytics.init();
+      window.FrevAIAnalytics.track('page_view', { path: window.location.pathname, title: document.title });
+    } catch (e) {}
   }
   if (window.InfiniteScrollManager && typeof window.InfiniteScrollManager.init === 'function') {
-    window.InfiniteScrollManager.init();
+    try {
+      window.InfiniteScrollManager.init();
+    } catch (e) {}
   }
-  if (typeof window.initFrevoAudioEngine === 'function') window.initFrevoAudioEngine();
+  if (typeof window.initFrevoAudioEngine === 'function') {
+    try {
+      window.initFrevoAudioEngine();
+    } catch (e) {}
+  }
 
-  // 3. Renderizar UI de Autenticação e Notificações
+  // 3. Renderizar UI de Autenticação e Badges de Notificação
   if (typeof window.renderAuthUI === 'function') window.renderAuthUI();
   if (typeof window.renderNotificationsBadge === 'function') window.renderNotificationsBadge();
+  if (typeof window.updateNotificationBadge === 'function') window.updateNotificationBadge();
 
-  // 4. Sincronização em segundo plano com AWS se disponível
-  if (window.FrevAIAWS) {
-    syncAllWithAWS();
-  }
-  await processOfflineMutationQueue();
-
-  // 5. Configurar listeners de navegação (.nav-item e links com [data-view])
+  // 4. Configurar listeners de navegação (.nav-item e links com [data-view]) IMEDIATAMENTE
   document.querySelectorAll('.nav-item, [data-view]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -331,7 +330,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // 6. Tratar Deep Links / Parâmetros de URL
+  // 5. Tratar Deep Links / Parâmetros de URL e renderizar a View Ativa IMEDIATAMENTE (0ms delay)
   const urlParams = new URLSearchParams(window.location.search);
   const viewParam = urlParams.get('view');
   const artistParam = urlParams.get('artist');
@@ -349,14 +348,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     switchView('feed');
   }
 
-  // 7. Registrar Service Worker para suporte PWA offline
+  // 6. Hidratar dados persistentes do IndexedDB em segundo plano (não bloqueia a UI)
+  if (window.FrevAIStorage && typeof window.FrevAIStorage.hydrateGlobalDB === 'function') {
+    window.FrevAIStorage.hydrateGlobalDB().then(() => {
+      // Re-renderiza a view atual com dados atualizados do IndexedDB
+      if (typeof window.renderNotificationsBadge === 'function') window.renderNotificationsBadge();
+      if (typeof window.updateNotificationBadge === 'function') window.updateNotificationBadge();
+      if (currentView === 'feed' && typeof window.renderFeed === 'function') {
+        window.renderFeed();
+      } else if (currentView === 'songs' && typeof window.renderSongsList === 'function') {
+        window.renderSongsList();
+      }
+    }).catch(err => console.warn('[FrevAI Storage] Erro na hidratação:', err));
+  }
+
+  // 7. Sincronização em segundo plano com AWS se disponível
+  if (window.FrevAIAWS) {
+    syncAllWithAWS().catch(() => {});
+  }
+  processOfflineMutationQueue().catch(() => {});
+
+  // 8. Registrar Service Worker para suporte PWA offline
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(err => {
       console.warn('SW registration info:', err);
     });
   }
 
-  // 8. Verificar instalação PWA
+  // 9. Verificar instalação PWA
   checkPwaPrompt();
 });
 

@@ -21,42 +21,75 @@ const STORES = [
 class FrevAIStorage {
   constructor() {
     this.db = null;
+    this.isReady = false;
     this.initPromise = this.init();
   }
 
   async init() {
-    if (!window.indexedDB) {
-      console.warn('[FrevAI Storage] IndexedDB não suportado. Usando fallback de memória.');
+    if (typeof window === 'undefined' || !window.indexedDB) {
+      console.warn('[FrevAI Storage] IndexedDB não suportado neste ambiente.');
+      this.isReady = true;
       return null;
     }
 
     return new Promise((resolve) => {
-      const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-      request.onupgradeneeded = (event) => {
-        const db = event.target.result;
-        STORES.forEach(storeName => {
-          if (!db.objectStoreNames.contains(storeName)) {
-            const keyPath = storeName === 'user_state' ? 'key' : 'id';
-            db.createObjectStore(storeName, { keyPath });
-          }
-        });
+      let resolved = false;
+      const safeResolve = (val) => {
+        if (!resolved) {
+          resolved = true;
+          this.isReady = true;
+          resolve(val);
+        }
       };
 
-      request.onsuccess = async (event) => {
-        this.db = event.target.result;
-        await this.migrateFromLocalStorage();
-        resolve(this.db);
-      };
+      // Fallback de timeout caso o navegador demore ou fique pendente
+      setTimeout(() => {
+        if (!resolved) {
+          console.warn('[FrevAI Storage] Timeout na inicialização do IndexedDB.');
+          safeResolve(null);
+        }
+      }, 1200);
 
-      request.onerror = (event) => {
-        console.error('[FrevAI Storage] Erro ao abrir IndexedDB:', event.target.error);
-        resolve(null);
-      };
+      try {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+        request.onupgradeneeded = (event) => {
+          const db = event.target.result;
+          STORES.forEach(storeName => {
+            if (!db.objectStoreNames.contains(storeName)) {
+              const keyPath = storeName === 'user_state' ? 'key' : 'id';
+              db.createObjectStore(storeName, { keyPath });
+            }
+          });
+        };
+
+        request.onsuccess = (event) => {
+          this.db = event.target.result;
+          safeResolve(this.db);
+          // Executa migração suave em background sem travar a thread
+          setTimeout(() => {
+            this.migrateFromLocalStorage().catch(() => {});
+          }, 50);
+        };
+
+        request.onblocked = () => {
+          console.warn('[FrevAI Storage] Abertura do IndexedDB bloqueada por outra aba/conexão.');
+          safeResolve(null);
+        };
+
+        request.onerror = (event) => {
+          console.warn('[FrevAI Storage] Erro ao abrir IndexedDB:', event.target?.error);
+          safeResolve(null);
+        };
+      } catch (err) {
+        console.warn('[FrevAI Storage] Exceção no IndexedDB:', err);
+        safeResolve(null);
+      }
     });
   }
 
   async ready() {
+    if (this.isReady) return this.db;
     return this.initPromise;
   }
 
@@ -114,7 +147,7 @@ class FrevAIStorage {
 
         request.onsuccess = () => resolve(item);
         request.onerror = (e) => {
-          console.warn(`[FrevAI Storage] Erro set ${storeName}:`, e.target.error);
+          console.warn(`[FrevAI Storage] Erro set ${storeName}:`, e.target?.error);
           resolve(null);
         };
       } catch (err) {
@@ -258,7 +291,6 @@ class FrevAIStorage {
   // ============================================================================
 
   async hydrateGlobalDB() {
-    await this.ready();
     try {
       const [storedSongs, storedAlbums, storedShows, storedPosts] = await Promise.all([
         this.getAll('songs'),
@@ -268,28 +300,28 @@ class FrevAIStorage {
       ]);
 
       if (typeof DB !== 'undefined') {
-        if (storedSongs.length > 0) {
+        if (storedSongs && storedSongs.length > 0) {
           const map = new Map();
           (DB.songs || []).forEach(s => s && map.set(s.id, s));
           storedSongs.forEach(s => s && map.set(s.id, s));
           DB.songs = Array.from(map.values());
         }
 
-        if (storedAlbums.length > 0) {
+        if (storedAlbums && storedAlbums.length > 0) {
           const map = new Map();
           (DB.albums || []).forEach(a => a && map.set(a.id, a));
           storedAlbums.forEach(a => a && map.set(a.id, a));
           DB.albums = Array.from(map.values());
         }
 
-        if (storedShows.length > 0) {
+        if (storedShows && storedShows.length > 0) {
           const map = new Map();
           (DB.shows || []).forEach(sh => sh && map.set(sh.id, sh));
           storedShows.forEach(sh => sh && map.set(sh.id, sh));
           DB.shows = Array.from(map.values());
         }
 
-        if (storedPosts.length > 0) {
+        if (storedPosts && storedPosts.length > 0) {
           const map = new Map();
           (DB.posts || []).forEach(p => p && map.set(p.id, p));
           storedPosts.forEach(p => p && map.set(p.id, p));
