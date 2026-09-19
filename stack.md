@@ -14,7 +14,7 @@
 - **Hosting**: AWS Amplify Hosting (`amplify.yml`, domínio `d4g55spy61el0.amplifyapp.com`)
 - **Autenticação**: Amazon Cognito User Pools (`sa-east-1_egnFYahtb` com suporte a Email/Senha e Google OAuth)
 - **Banco de Dados Relacional**: Amazon Aurora PostgreSQL Serverless v2 (escalabilidade dinâmica 0.5 a 1 ACU na região `sa-east-1`)
-- **API & Camada de Serviços**: Amazon API Gateway + AWS Lambda / Aurora Data API (PostgreSQL REST endpoints)
+- **API & Camada de Serviços**: Amazon API Gateway + AWS Lambda (Runtime oficial: **Node.js 22.x LTS** em `sa-east-1`) / Aurora Data API (PostgreSQL REST endpoints)
 - **Storage de Mídia**: Amazon S3 Bucket (`frevia-media-196156785860` em `sa-east-1`) com CloudFront para streaming de áudio (MP3/WAV), imagens e download seguro de partituras (PDF)
 
 ### Mapas
