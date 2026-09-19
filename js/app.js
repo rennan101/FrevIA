@@ -254,6 +254,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (typeof window.initAuth === 'function') window.initAuth();
   if (window.FrevAIAnalytics && typeof window.FrevAIAnalytics.init === 'function') {
     window.FrevAIAnalytics.init();
+    window.FrevAIAnalytics.track('page_view', { path: window.location.pathname, title: document.title });
   }
   if (window.InfiniteScrollManager && typeof window.InfiniteScrollManager.init === 'function') {
     window.InfiniteScrollManager.init();
