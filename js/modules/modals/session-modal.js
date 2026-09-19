@@ -231,8 +231,9 @@ function openSessionModal() {
           <div class="flex-1 border-t border-gray-200"></div>
         </div>
 
-        <!-- Botão Google OAuth Oficial -->
-        <button onclick="loginWithGoogle()" class="btn btn-outline w-full py-2.5 rounded-2xl flex items-center justify-center gap-2.5 text-xs font-bold shadow-sm hover:bg-gray-50 transition-all">
+        <!-- Container do Botão Google GSI Oficial & Botão Fallback -->
+        <div id="gsi-login-button-container" class="w-full flex justify-center mb-1"></div>
+        <button id="gsi-custom-google-btn" onclick="loginWithGoogle()" class="btn btn-outline w-full py-2.5 rounded-2xl flex items-center justify-center gap-2.5 text-xs font-bold shadow-sm hover:bg-gray-50 transition-all">
           <svg width="18" height="18" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -311,6 +312,62 @@ function openSessionModal() {
   `;
 
   modal.classList.add('open');
+  initGoogleGsiIfAvailable();
+}
+
+function decodeJwtResponse(token) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    return null;
+  }
+}
+
+function initGoogleGsiIfAvailable() {
+  const clientId = window.FREVIA_CONFIG?.GOOGLE_CLIENT_ID;
+  if (!clientId || clientId.includes('frevai-auth')) return;
+
+  const btnContainer = document.getElementById('gsi-login-button-container');
+  const customBtn = document.getElementById('gsi-custom-google-btn');
+
+  if (window.google && window.google.accounts && window.google.accounts.id && btnContainer) {
+    try {
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: async (response) => {
+          if (response && response.credential) {
+            const payload = decodeJwtResponse(response.credential);
+            if (payload) {
+              await authenticateWithGoogleProfile({
+                name: payload.name || payload.given_name || payload.email.split('@')[0],
+                email: payload.email,
+                avatar: payload.picture || null,
+                sub: payload.sub || null
+              });
+            }
+          }
+        }
+      });
+
+      window.google.accounts.id.renderButton(btnContainer, {
+        theme: 'outline',
+        size: 'large',
+        type: 'standard',
+        text: 'continue_with',
+        shape: 'pill',
+        logo_alignment: 'center',
+        width: 320
+      });
+
+      if (customBtn) customBtn.classList.add('hidden');
+    } catch (e) {
+      console.warn('[GSI] Falha ao renderizar botão oficial Google:', e);
+      if (customBtn) customBtn.classList.remove('hidden');
+    }
+  }
 }
 
 // Modal de Recuperação de Senha (Esqueci minha senha)
