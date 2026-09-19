@@ -43,7 +43,9 @@ let currentUserSession = {
   email: '',
   artist_id: null,
   favorites: ['a1'], // IDs dos artistas favoritados
-  saved_scores: ['s1', 's3'] // IDs das partituras salvas
+  saved_scores: ['s1', 's3'], // IDs das partituras salvas
+  saved_posts: ['p1', 'p2'], // IDs dos posts salvos
+  liked_posts: ['p1'] // IDs dos posts curtidos
 };
 
 // Carregar sessão salva do LocalStorage se houver
@@ -54,8 +56,17 @@ if (savedSession) {
     if (!hasCustomAvatar(currentUserSession.avatar)) {
       currentUserSession.avatar = null;
     }
-    if (!currentUserSession.saved_scores) {
+    if (!Array.isArray(currentUserSession.saved_scores)) {
       currentUserSession.saved_scores = ['s1', 's3'];
+    }
+    if (!Array.isArray(currentUserSession.saved_posts)) {
+      currentUserSession.saved_posts = [];
+    }
+    if (!Array.isArray(currentUserSession.liked_posts)) {
+      currentUserSession.liked_posts = [];
+    }
+    if (!Array.isArray(currentUserSession.favorites)) {
+      currentUserSession.favorites = [];
     }
   } catch (e) {}
 }
@@ -362,11 +373,54 @@ function saveSongsLocal() {
   } catch (e) {}
 }
 
+function loadPostsLocal() {
+  try {
+    const saved = localStorage.getItem('frevai_custom_posts');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const savedPostsMap = new Map();
+        parsed.forEach(p => savedPostsMap.set(p.id, p));
+
+        // Atualizar posts existentes (comentários, likes, edits)
+        (DB.posts || []).forEach(p => {
+          if (savedPostsMap.has(p.id)) {
+            const savedItem = savedPostsMap.get(p.id);
+            if (savedItem.comments) p.comments = savedItem.comments;
+            if (typeof savedItem.likes === 'number') p.likes = savedItem.likes;
+            if (typeof savedItem.is_liked === 'boolean') p.is_liked = savedItem.is_liked;
+            if (typeof savedItem.is_saved === 'boolean') p.is_saved = savedItem.is_saved;
+            if (savedItem.title) p.title = savedItem.title;
+            if (savedItem.content) p.content = savedItem.content;
+            if (savedItem.image) p.image = savedItem.image;
+            if (savedItem.media_url) p.media_url = savedItem.media_url;
+            if (savedItem.media_type) p.media_type = savedItem.media_type;
+            if (typeof savedItem.isVideo === 'boolean') p.isVideo = savedItem.isVideo;
+            savedPostsMap.delete(p.id);
+          }
+        });
+
+        // Adicionar novos posts customizados que foram criados e não estavam no seed inicial
+        for (const item of savedPostsMap.values()) {
+          DB.posts.unshift(item);
+        }
+      }
+    }
+  } catch (e) {}
+}
+
+function savePostsLocal() {
+  try {
+    localStorage.setItem('frevai_custom_posts', JSON.stringify(DB.posts || []));
+  } catch (e) {}
+}
+
 loadArtistRequestsLocal();
 loadArtistsLocal();
 loadShowsLocal();
 loadAlbumsLocal();
 loadSongsLocal();
+loadPostsLocal();
 loadNotificationsLocal();
 
 // -----------------------------------------------------------------------------
@@ -485,6 +539,10 @@ function updateSessionUI() {
 }
 
 function switchTestRole(role, silent = false) {
+  const currentSavedScores = Array.isArray(currentUserSession.saved_scores) ? currentUserSession.saved_scores : ['s1', 's3'];
+  const currentSavedPosts = Array.isArray(currentUserSession.saved_posts) ? currentUserSession.saved_posts : ['p1', 'p2'];
+  const currentLikedPosts = Array.isArray(currentUserSession.liked_posts) ? currentUserSession.liked_posts : ['p1'];
+
   if (role === 'admin') {
     currentUserSession = {
       role: 'admin',
@@ -493,7 +551,10 @@ function switchTestRole(role, silent = false) {
       avatar: null,
       email: 'admin@cultura.pe.gov.br',
       artist_id: null,
-      favorites: ['a1', 'a2', 'a3']
+      favorites: ['a1', 'a2', 'a3'],
+      saved_scores: currentSavedScores,
+      saved_posts: currentSavedPosts,
+      liked_posts: currentLikedPosts
     };
   } else if (role === 'artist') {
     currentUserSession = {
@@ -503,7 +564,10 @@ function switchTestRole(role, silent = false) {
       avatar: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80',
       email: 'forro@cultura.pe.gov.br',
       artist_id: 'a1',
-      favorites: ['a2']
+      favorites: ['a2'],
+      saved_scores: currentSavedScores,
+      saved_posts: currentSavedPosts,
+      liked_posts: currentLikedPosts
     };
   } else if (role === 'user') {
     currentUserSession = {
@@ -513,7 +577,10 @@ function switchTestRole(role, silent = false) {
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
       email: 'foliao@gmail.com',
       artist_id: null,
-      favorites: ['a1']
+      favorites: ['a1'],
+      saved_scores: currentSavedScores,
+      saved_posts: currentSavedPosts,
+      liked_posts: currentLikedPosts
     };
   } else {
     currentUserSession = {
@@ -523,7 +590,10 @@ function switchTestRole(role, silent = false) {
       avatar: null,
       email: '',
       artist_id: null,
-      favorites: []
+      favorites: [],
+      saved_scores: [],
+      saved_posts: [],
+      liked_posts: []
     };
   }
 
@@ -1244,5 +1314,7 @@ window.loadAlbumsLocal = loadAlbumsLocal;
 window.saveAlbumsLocal = saveAlbumsLocal;
 window.loadSongsLocal = loadSongsLocal;
 window.saveSongsLocal = saveSongsLocal;
+window.loadPostsLocal = loadPostsLocal;
+window.savePostsLocal = savePostsLocal;
 
 

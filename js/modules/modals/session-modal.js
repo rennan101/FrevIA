@@ -453,16 +453,21 @@ async function handleEmailLogin(e) {
       email: email,
       artist_id: artistId,
       artist_request_status: dbProfile?.artist_request_status || 'none',
-      favorites: []
+      favorites: [],
+      saved_scores: ['s1', 's3'],
+      saved_posts: ['p1', 'p2'],
+      liked_posts: ['p1']
     };
 
     // Sincronizar estado social (likes, salvos, favoritos)
     const social = await window.awsService.getUserSocialState(data.user.id);
     if (social) {
       currentUserSession.favorites = social.favoriteArtistIds || [];
+      currentUserSession.liked_posts = social.likedPostIds || [];
+      currentUserSession.saved_posts = social.savedPostIds || [];
       DB.posts.forEach(p => {
-        p.is_liked = social.likedPostIds.includes(p.id);
-        p.is_saved = social.savedPostIds.includes(p.id);
+        p.is_liked = (currentUserSession.liked_posts || []).includes(p.id);
+        p.is_saved = (currentUserSession.saved_posts || []).includes(p.id);
       });
     }
 
@@ -481,7 +486,10 @@ async function handleEmailLogin(e) {
       email: email,
       artist_id: null,
       artist_request_status: email.includes('artista') ? 'pending' : 'none',
-      favorites: []
+      favorites: ['a1'],
+      saved_scores: ['s1', 's3'],
+      saved_posts: ['p1', 'p2'],
+      liked_posts: ['p1']
     };
     if (typeof currentUserProfile !== 'undefined') {
       currentUserProfile.name = currentUserSession.name;

@@ -113,6 +113,8 @@ function renderPostCommentsHtml(post) {
 function renderFeedPostHtml(post) {
   const commentsList = (post.comments || []).map(c => renderCommentItemHtml(c, post.id)).join('');
   const postMedia = getMediaUrl(post.image || post.media_url);
+  const isLiked = (currentUserSession.liked_posts || []).includes(post.id) || !!post.is_liked;
+  const isSaved = (currentUserSession.saved_posts || []).includes(post.id) || !!post.is_saved;
 
   return `
     <article class="feed-card-immersive infinite-scroll-item" id="post-card-${post.id}">
@@ -136,8 +138,8 @@ function renderFeedPostHtml(post) {
         </div>
 
         <!-- Top-Right Floating Bookmark Button -->
-        <button onclick="toggleSave('${post.id}')" class="floating-save-btn ${post.is_saved ? 'is-saved' : ''}" aria-label="Salvar Publicação">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="${post.is_saved ? '#FF8A00' : 'none'}" stroke="${post.is_saved ? '#FF8A00' : 'currentColor'}" stroke-width="2.2">
+        <button onclick="toggleSave('${post.id}')" class="floating-save-btn ${isSaved ? 'is-saved' : ''}" aria-label="Salvar Publicação">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="${isSaved ? '#FF8A00' : 'none'}" stroke="${isSaved ? '#FF8A00' : 'currentColor'}" stroke-width="2.2">
             <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
           </svg>
         </button>
@@ -158,8 +160,8 @@ function renderFeedPostHtml(post) {
             </button>
           </div>
 
-          <button onclick="toggleLike('${post.id}')" class="floating-like-btn" aria-label="Curtir">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="${post.is_liked ? '#F0442E' : 'none'}" stroke="#F0442E" stroke-width="2">
+          <button onclick="toggleLike('${post.id}')" class="floating-like-btn ${isLiked ? 'liked' : ''}" aria-label="Curtir">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="${isLiked ? '#F0442E' : 'none'}" stroke="#F0442E" stroke-width="2">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
             </svg>
             <span class="text-xs font-bold text-ink">${post.likes || 0}</span>
@@ -259,6 +261,7 @@ async function submitInlineComment(event, postId) {
 
     post.comments.push(newComment);
     input.value = '';
+    if (typeof savePostsLocal === 'function') savePostsLocal();
     updateCommentsDrawerUI(postId);
 
     // Persistência com AWS
@@ -266,6 +269,7 @@ async function submitInlineComment(event, postId) {
       const saved = await window.awsService.addComment(postId, currentUserSession.id, text);
       if (saved && saved.id) {
         newComment.id = saved.id;
+        if (typeof savePostsLocal === 'function') savePostsLocal();
       }
     }
   }
@@ -317,6 +321,7 @@ async function saveEditedComment(event, postId, commentId) {
   if (comment) {
     comment.text = newText;
     comment.time_ago = 'editado agora';
+    if (typeof savePostsLocal === 'function') savePostsLocal();
     updateCommentsDrawerUI(postId);
 
     if (window.awsService && window.awsService.isConnected()) {
@@ -343,6 +348,7 @@ async function deleteComment(postId, commentId) {
 
   if (confirm(confirmMsg)) {
     post.comments = post.comments.filter(c => c.id !== commentId);
+    if (typeof savePostsLocal === 'function') savePostsLocal();
     updateCommentsDrawerUI(postId);
 
     if (window.awsService && window.awsService.isConnected()) {
@@ -502,9 +508,23 @@ function toggleLike(postId) {
   const post = (DB.posts || []).find(p => p.id === postId);
   if (!post) return;
 
-  post.is_liked = !post.is_liked;
-  post.likes = (post.likes || 0) + (post.is_liked ? 1 : -1);
-  if (post.likes < 0) post.likes = 0;
+  if (!Array.isArray(currentUserSession.liked_posts)) {
+    currentUserSession.liked_posts = [];
+  }
+
+  const alreadyLiked = currentUserSession.liked_posts.includes(postId);
+  if (alreadyLiked) {
+    currentUserSession.liked_posts = currentUserSession.liked_posts.filter(id => id !== postId);
+    post.is_liked = false;
+    post.likes = Math.max(0, (post.likes || 1) - 1);
+  } else {
+    currentUserSession.liked_posts.push(postId);
+    post.is_liked = true;
+    post.likes = (post.likes || 0) + 1;
+  }
+
+  saveCurrentSession();
+  if (typeof savePostsLocal === 'function') savePostsLocal();
 
   if (window.awsService && currentUserSession.id) {
     window.awsService.togglePostLike(postId, currentUserSession.id);
@@ -536,7 +556,21 @@ function toggleSave(postId) {
   const post = (DB.posts || []).find(p => p.id === postId);
   if (!post) return;
 
-  post.is_saved = !post.is_saved;
+  if (!Array.isArray(currentUserSession.saved_posts)) {
+    currentUserSession.saved_posts = [];
+  }
+
+  const alreadySaved = currentUserSession.saved_posts.includes(postId);
+  if (alreadySaved) {
+    currentUserSession.saved_posts = currentUserSession.saved_posts.filter(id => id !== postId);
+    post.is_saved = false;
+  } else {
+    currentUserSession.saved_posts.push(postId);
+    post.is_saved = true;
+  }
+
+  saveCurrentSession();
+  if (typeof savePostsLocal === 'function') savePostsLocal();
 
   if (window.awsService && currentUserSession.id) {
     window.awsService.toggleSavedPost(postId, currentUserSession.id);
@@ -719,6 +753,7 @@ async function addComment(postId) {
     };
 
     post.comments.push(newComment);
+    if (typeof savePostsLocal === 'function') savePostsLocal();
     closeModal();
     updateCommentsDrawerUI(postId);
 
@@ -726,6 +761,7 @@ async function addComment(postId) {
       const saved = await window.awsService.addComment(postId, currentUserSession.id, text);
       if (saved && saved.id) {
         newComment.id = saved.id;
+        if (typeof savePostsLocal === 'function') savePostsLocal();
       }
     }
   }

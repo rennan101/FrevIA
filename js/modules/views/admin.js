@@ -758,6 +758,7 @@ function deletePost(postId) {
   }
   if (confirm('Deseja realmente excluir esta publicação do feed?')) {
     DB.posts = (DB.posts || []).filter(p => p.id !== postId);
+    if (typeof savePostsLocal === 'function') savePostsLocal();
     if (window.awsService && window.awsService.isConnected()) {
       window.awsService.deletePost(postId);
     }
@@ -951,6 +952,7 @@ function submitNewPost(e) {
   };
 
   DB.posts.unshift(newPost);
+  if (typeof savePostsLocal === 'function') savePostsLocal();
   if (window.awsService && window.awsService.isConnected()) {
     window.awsService.createPost(newPost);
   }
@@ -1072,6 +1074,7 @@ function saveEditPost(e, postId) {
     post.media_type = newMediaType;
     post.isVideo = newMediaType === 'video';
 
+    if (typeof savePostsLocal === 'function') savePostsLocal();
     if (window.awsService && window.awsService.isConnected()) {
       window.awsService.updatePost(postId, post);
     }
