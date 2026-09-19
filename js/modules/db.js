@@ -661,38 +661,100 @@ Viva Pernambuco e sua gente!`,
   ],
 
   notifications: [
+    // 1. Notificações para Administradores (forRole: 'admin')
     {
-      id: 'notif-1',
-      type: 'score',
-      targetId: 's1',
-      title: 'Nova Partitura Disponível!',
-      message: 'Maestro Forró publicou o arranjo de "Último Regresso".',
-      author: 'Maestro Forró',
-      author_avatar: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80',
-      time_ago: 'Há 2 horas',
-      read: false
+      id: 'notif-admin-1',
+      type: 'artist_request',
+      targetId: 'req-seed-1',
+      forRole: 'admin',
+      title: 'Solicitação de Artista Pendente',
+      message: 'Orquestra Revelação do Frevo solicitou análise curatorial de perfil.',
+      author: 'Comitê Gestor',
+      author_avatar: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=400&q=80',
+      time_ago: 'Há 1 hora',
+      read: false,
+      readBy: []
     },
     {
-      id: 'notif-2',
+      id: 'notif-admin-2',
       type: 'post',
       targetId: 'p1',
-      title: 'Comunicado Cultural',
-      message: 'Edital do Festival Nacional do Frevo 2026 bate recorde de inscrições!',
-      author: 'FrevAI Notícias',
-      author_avatar: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=200&q=80',
-      time_ago: 'Há 5 horas',
-      read: false
+      forRole: 'admin',
+      title: 'Métricas Diárias Consolidadas',
+      message: 'O relatório diário de engajamento e acessos às 00:00 foi consolidado com sucesso.',
+      author: 'FrevAI Analytics',
+      author_avatar: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=200&q=80',
+      time_ago: 'Hoje',
+      read: true,
+      readBy: ['user-admin-1']
+    },
+    // 2. Notificações para Maestro Forró (forUserId: 'user-forro-2')
+    {
+      id: 'notif-artist-1',
+      type: 'score',
+      targetId: 's1',
+      forUserId: 'user-forro-2',
+      title: 'Sua Obra é Destaque no Acervo!',
+      message: 'A partitura "Passo da Fervura" atingiu a marca de 500 execuções e downloads.',
+      author: 'Acervo FrevAI',
+      author_avatar: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80',
+      time_ago: 'Há 2 horas',
+      read: false,
+      readBy: []
     },
     {
-      id: 'notif-3',
+      id: 'notif-artist-2',
+      type: 'post',
+      targetId: 'p2',
+      forUserId: 'user-forro-2',
+      title: 'Novo Comentário em sua Notícia',
+      message: 'Orquestra Olinda comentou na publicação do seu novo arranjo.',
+      author: 'Orquestra Olinda',
+      author_avatar: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=400&q=80',
+      time_ago: 'Há 4 horas',
+      read: false,
+      readBy: []
+    },
+    // 3. Notificações para Folião do Passo (forUserId: 'user-foliao-3')
+    {
+      id: 'notif-foliao-1',
       type: 'score',
       targetId: 's2',
-      title: 'Novo Frevo Instrumental!',
-      message: 'SpokFrevo lançou a partitura de "Moraes é Frevo".',
+      forUserId: 'user-foliao-3',
+      title: 'Lançamento de Artista Favorito',
+      message: 'SpokFrevo disponibilizou a partitura de "Moraes é Frevo". Confira no acervo!',
       author: 'SpokFrevo',
       author_avatar: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=400&q=80',
+      time_ago: 'Há 3 horas',
+      read: false,
+      readBy: []
+    },
+    {
+      id: 'notif-foliao-2',
+      type: 'post',
+      targetId: 'p1',
+      forUserId: 'user-foliao-3',
+      title: 'Ensaio Aberto Confirmado',
+      message: 'Acerto de Marcha confirmado na Praça do Arsenal neste domingo!',
+      author: 'Paço do Frevo',
+      author_avatar: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=200&q=80',
       time_ago: 'Ontem',
-      read: true
+      read: true,
+      readBy: ['user-foliao-3']
+    },
+    // 4. Notificações para Visitante (forRole: 'guest')
+    {
+      id: 'notif-guest-1',
+      type: 'post',
+      targetId: 'p1',
+      forRole: 'guest',
+      title: 'Bem-vindo ao FrevAI!',
+      message: 'Cadastre-se gratuitamente para salvar partituras e seguir seus mestres favoritos.',
+      author: 'FrevAI',
+      author_avatar: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=200&q=80',
+      time_ago: 'Recentemente',
+      read: false,
+      readBy: []
     }
   ],
   artistRequests: [],

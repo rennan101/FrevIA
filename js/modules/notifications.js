@@ -1,27 +1,63 @@
 // ==============================================================================
-// FREVAI - SISTEMA DE NOTIFICAÇÕES & PUSH COM DEEP LINKING
+// FREVAI - SISTEMA DE NOTIFICAÇÕES & PUSH COM ISOLAMENTO ESTRITO POR USUÁRIO
+// Cada conta (Admin, Maestro, Folião, Visitante) possui sua própria caixa e badges
 // ==============================================================================
+
+function isNotificationReadForSession(notif, currentUserId) {
+  if (!notif) return true;
+  if (Array.isArray(notif.readBy) && currentUserId) {
+    if (notif.readBy.includes(currentUserId)) return true;
+  }
+  if (notif.forUserId && currentUserId && notif.forUserId === currentUserId) {
+    return Boolean(notif.read);
+  }
+  return Boolean(notif.read);
+}
 
 function getVisibleNotificationsForCurrentSession() {
   if (typeof loadNotificationsLocal === 'function') loadNotificationsLocal();
   const session = window.currentUserSession || {};
   const currentUserId = session.id;
   const userRole = session.role || 'guest';
+  const userArtistId = session.artist_id;
+  const userFavorites = Array.isArray(session.favorites) ? session.favorites : [];
   const isAdmin = userRole === 'admin';
+  const isArtist = userRole === 'artist';
 
-  return (window.DB?.notifications || []).filter(n => {
-    // 1. Notificação explicitamente direcionada a um usuário específico (ex: recusa/aprovação individual)
+  const filtered = (window.DB?.notifications || []).filter(n => {
+    // 1. Destinada especificamente a este ID de usuário
     if (n.forUserId) {
-      return n.forUserId === currentUserId;
+      return n.forUserId === currentUserId || (userArtistId && n.forUserId === userArtistId);
     }
-    // 2. Notificação direcionada a um cargo específico (ex: 'admin' para moderação compartilhada)
+
+    // 2. Destinada a um cargo específico
     if (n.forRole) {
       if (n.forRole === 'admin') return isAdmin;
+      if (n.forRole === 'artist') return isArtist || isAdmin;
+      if (n.forRole === 'user') return userRole === 'user';
+      if (n.forRole === 'guest') return userRole === 'guest';
       return n.forRole === userRole;
     }
-    // 3. Notificação global de difusão (broadcast) para a comunidade
-    return true;
+
+    // 3. Notificação disparada para fãs que favoritaram um artista
+    if (n.forFavoritesOfArtist) {
+      return userFavorites.includes(n.forFavoritesOfArtist);
+    }
+
+    // 4. Se for visitante, não exibe notificações de sistema fechadas
+    if (userRole === 'guest') {
+      return n.type === 'welcome' || n.forRole === 'guest';
+    }
+
+    // 5. Notificação de transmissão geral explícita
+    return Boolean(n.broadcast);
   });
+
+  // Mapeia cada notificação com o status de leitura individualizado
+  return filtered.map(n => ({
+    ...n,
+    read: isNotificationReadForSession(n, currentUserId)
+  }));
 }
 
 function updateNotificationBadge() {
@@ -32,9 +68,15 @@ function updateNotificationBadge() {
   badge.style.display = unreadCount > 0 ? 'block' : 'none';
 }
 
-function sendCulturalPushNotification({ title, message, url, type, targetId }) {
-  if (!('Notification' in window)) return;
+function sendCulturalPushNotification({ title, message, url, type, targetId, forUserId, forRole }) {
+  const session = window.currentUserSession || {};
+  const currentUserId = session.id;
 
+  // Se a notificação for direcionada a outro usuário, não exibe push local
+  if (forUserId && forUserId !== currentUserId) return;
+  if (forRole && forRole !== session.role && session.role !== 'admin') return;
+
+  if (!('Notification' in window)) return;
   const notifUrl = url || (type === 'post' ? `/#feed?post=${targetId}` : `/#songs?score=${targetId}`);
 
   if (Notification.permission === 'granted') {
@@ -45,11 +87,7 @@ function sendCulturalPushNotification({ title, message, url, type, targetId }) {
           icon: 'assets/icons/icon-192x192.png',
           badge: 'assets/icons/icon-192x192.png',
           vibrate: [100, 50, 100],
-          data: {
-            url: notifUrl,
-            type,
-            targetId
-          }
+          data: { url: notifUrl, type, targetId }
         });
       }).catch(err => {
         console.warn('SW push notification fallback:', err);
@@ -72,22 +110,43 @@ function sendCulturalPushNotification({ title, message, url, type, targetId }) {
 }
 
 function markAllNotificationsAsRead() {
+  const session = window.currentUserSession || {};
+  const currentUserId = session.id;
   const visible = getVisibleNotificationsForCurrentSession();
   const visibleIds = new Set(visible.map(n => n.id));
+
   (window.DB?.notifications || []).forEach(n => {
     if (visibleIds.has(n.id)) {
-      n.read = true;
+      if (n.forUserId === currentUserId) {
+        n.read = true;
+      }
+      n.readBy = Array.isArray(n.readBy) ? n.readBy : [];
+      if (currentUserId && !n.readBy.includes(currentUserId)) {
+        n.readBy.push(currentUserId);
+      }
     }
   });
+
   if (typeof saveNotificationsLocal === 'function') saveNotificationsLocal();
   updateNotificationBadge();
   openNotificationsModal();
 }
 
 function handleNotificationClick(notifId, type, targetId) {
+  const session = window.currentUserSession || {};
+  const currentUserId = session.id;
+
   if (notifId) {
     const notif = (window.DB?.notifications || []).find(n => n.id === notifId);
-    if (notif) notif.read = true;
+    if (notif) {
+      if (notif.forUserId === currentUserId) {
+        notif.read = true;
+      }
+      notif.readBy = Array.isArray(notif.readBy) ? notif.readBy : [];
+      if (currentUserId && !notif.readBy.includes(currentUserId)) {
+        notif.readBy.push(currentUserId);
+      }
+    }
     if (typeof saveNotificationsLocal === 'function') saveNotificationsLocal();
   }
   updateNotificationBadge();
@@ -150,7 +209,7 @@ function openNotificationsModal() {
     <div class="space-y-4 text-left">
       <div class="flex items-center justify-between pb-3 border-b border-gray-100 pr-8">
         <div>
-          <h3 class="font-display font-bold text-lg text-ink">Notificações Culturais</h3>
+          <h3 class="font-display font-bold text-lg text-ink">Notificações</h3>
           <p class="text-xs text-muted">${unreadCount > 0 ? `${unreadCount} não lida(s)` : 'Tudo em dia!'}</p>
         </div>
         ${unreadCount > 0 ? `
@@ -164,7 +223,7 @@ function openNotificationsModal() {
         ${notifications.length > 0 ? notifications.map(notif => `
           <div onclick="handleNotificationClick('${notif.id}', '${notif.type}', '${notif.targetId}')" class="notification-item p-3.5 ${notif.read ? 'bg-white border border-gray-100 opacity-80' : 'bg-surface-soft border border-frevo-orange/30 shadow-sm'} rounded-2xl flex items-start gap-3 cursor-pointer hover:border-frevo-orange transition-all">
             <div class="relative flex-shrink-0">
-              <img src="${notif.author_avatar || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80'}" alt="${notif.author || 'FrevAI'}" class="w-10 h-10 rounded-full object-cover border border-gray-200" />
+              <img src="${notif.author_avatar || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80'}" alt="${notif.author || 'FrevAI'}" class="w-10 h-10 rounded-full object-cover border border-gray-200" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 100 100\\'%3E%3Crect width=\\'100\\%\\' height=\\'100\\%\\' fill=\\'%23E5E7EB\\'/ %3E%3C/svg%3E'" />
               <div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-white ${notif.type === 'score' ? 'bg-frevo-cyan' : notif.type === 'artist_request' ? 'bg-frevo-green' : notif.type === 'artist_rejected' ? 'bg-rose-500' : notif.type === 'artist_approved' ? 'bg-emerald-500' : 'bg-frevo-orange'}">
                 ${notif.type === 'score' 
                   ? '<svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>' 
@@ -193,7 +252,7 @@ function openNotificationsModal() {
           </div>
         `).join('') : `
           <div class="p-6 text-center bg-surface-soft rounded-2xl border border-gray-100">
-            <p class="text-xs text-muted">Nenhuma notificação recebida ainda.</p>
+            <p class="text-xs text-muted">Nenhuma notificação na sua caixa de entrada.</p>
           </div>
         `}
       </div>
@@ -238,4 +297,3 @@ window.markAllNotificationsAsRead = markAllNotificationsAsRead;
 window.handleNotificationClick = handleNotificationClick;
 window.openNotificationsModal = openNotificationsModal;
 window.togglePushNotifications = togglePushNotifications;
-

@@ -622,6 +622,7 @@ function switchTestRole(role, silent = false) {
   if (typeof renderProfileGallery === 'function') renderProfileGallery();
   if (typeof renderSteps === 'function') renderSteps();
   if (typeof renderAdminCMS === 'function') renderAdminCMS();
+  if (typeof updateNotificationBadge === 'function') updateNotificationBadge();
 
   if (!silent) {
     if (role === 'guest') {

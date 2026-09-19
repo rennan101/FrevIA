@@ -292,20 +292,25 @@ async function submitNewSong(e) {
 
     setUploadProgress(100, 'Publicação concluída!');
 
-    // Notificação Cultural In-App & Push
+    // Notificação Cultural In-App direcionada a foliões que seguem/favoritaram o artista
+    const targetArtistId = newSong.artist_id || currentUserSession.artist_id || 'a1';
     const newNotif = {
       id: `notif-${Date.now()}`,
       type: 'score',
       targetId: newSong.id,
-      title: 'Nova Música Cadastrada!',
+      forFavoritesOfArtist: targetArtistId,
+      artist_id: targetArtistId,
+      title: 'Novo Lançamento no Acervo!',
       message: `${newSong.artist} lançou a faixa "${newSong.title}". Ouça agora no player!`,
       author: newSong.artist,
       author_avatar: currentUserSession.avatar,
-      time_ago: 'Agora',
-      read: false
+      time_ago: 'Agora mesmo',
+      read: false,
+      readBy: []
     };
     DB.notifications = DB.notifications || [];
     DB.notifications.unshift(newNotif);
+    if (typeof saveNotificationsLocal === 'function') saveNotificationsLocal();
     updateNotificationBadge();
 
     closeModal();
