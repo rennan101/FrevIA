@@ -267,6 +267,9 @@ async function submitNewAlbum(e) {
     const newAlbum = {
       id: newAlbumId,
       artist_id: artistId,
+      author_id: artistId,
+      artist: currentUserSession.name || 'Artista do Frevo',
+      submitted_by: currentUserSession.id || null,
       title,
       cover_url,
       release_year,
@@ -275,6 +278,7 @@ async function submitNewAlbum(e) {
 
     DB.albums = DB.albums || [];
     DB.albums.unshift(newAlbum);
+    if (typeof saveAlbumsLocal === 'function') saveAlbumsLocal();
 
     if (window.awsService && window.awsService.isConnected()) {
       setProgress(30, 'Registrando álbum no acervo...');
@@ -343,6 +347,7 @@ async function submitNewAlbum(e) {
     setProgress(100, 'Álbum publicado com sucesso!');
     closeModal();
     if (typeof renderSongs === 'function') renderSongs();
+    if (typeof renderArtists === 'function') renderArtists();
     if (typeof renderProfileGallery === 'function') renderProfileGallery();
     showAlertModal(`Álbum "${newAlbum.title}" criado com ${totalTracks} faixas vinculadas!`);
   } catch (err) {
@@ -362,6 +367,7 @@ async function deleteAlbum(albumId) {
   }
   if (confirm('Deseja realmente excluir este álbum?')) {
     DB.albums = (DB.albums || []).filter(a => a.id !== albumId);
+    if (typeof saveAlbumsLocal === 'function') saveAlbumsLocal();
     if (window.awsService && window.awsService.isConnected()) {
       await window.awsService.deleteAlbum(albumId);
     }

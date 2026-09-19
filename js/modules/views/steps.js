@@ -6,7 +6,7 @@
 function renderStepCardHtml(step) {
   const canManage = currentUserSession.role === 'admin';
   return `
-    <div class="bg-white border border-line-strong rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-sm relative infinite-scroll-item">
+    <div class="step-card-item bg-white border border-line-strong rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-sm relative infinite-scroll-item">
       <div>
         <div class="flex items-center justify-between mb-1.5">
           <span class="badge bg-frevo-green/20 text-ink text-xs font-bold">${step.difficulty}</span>
@@ -25,7 +25,7 @@ function renderStepCardHtml(step) {
             ${(step.media_type === 'video' || step.media_url.match(/\.(mp4|webm|mov)(\?.*)?$/i)) ? `
               <video src="${step.media_url}" controls playsinline preload="metadata" class="w-full h-44 object-cover rounded-xl"></video>
             ` : `
-              <img src="${step.media_url}" alt="Demonstração do Passo ${step.name}" class="w-full h-44 object-cover rounded-xl" loading="lazy" />
+              <img src="${step.media_url}" alt="Demonstração do Passo ${step.name}" class="w-full h-44 object-cover rounded-xl" loading="lazy" decoding="async" />
             `}
           </div>
         ` : ''}

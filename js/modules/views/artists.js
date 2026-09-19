@@ -309,7 +309,7 @@ function renderArtistCardHtml(artist) {
       </button>
 
       <div class="story-ring p-1 mb-2">
-        <img src="${getUserAvatarUrl(artist.avatar_url)}" alt="${artist.name}" loading="lazy" class="w-16 h-16 rounded-full object-cover border-2 border-white" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR_PLACEHOLDER}'" />
+        <img src="${getUserAvatarUrl(artist.avatar_url)}" alt="${artist.name}" loading="lazy" decoding="async" class="w-16 h-16 rounded-full object-cover border-2 border-white" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR_PLACEHOLDER}'" />
       </div>
       <div>
         <h3 class="font-display font-bold text-sm text-ink">${artist.name}</h3>

@@ -1894,6 +1894,11 @@ body {
   display: block;
 }
 
+.apple-player-btn-main svg.hidden,
+.apple-player-btn-main svg[hidden] {
+  display: none !important;
+}
+
 .apple-player-extra-actions {
   display: flex;
   align-items: center;
@@ -2156,5 +2161,39 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-top: 2px;
+}
+
+/* ==========================================================================
+   PERFORMANCE & INFINITE SCROLL MEMORY OPTIMIZATION (INSTAGRAM/TWITTER STYLE)
+   - content-visibility: auto com contain-intrinsic-size
+   - Reduz overhead de CPU, GPU e memória ao renderizar listas longas no DOM
+   ========================================================================== */
+.feed-card-immersive {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 540px;
+}
+
+.artist-card-item {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 260px;
+}
+
+.song-card-item {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 190px;
+}
+
+.history-card-item {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 240px;
+}
+
+.step-card-item {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 300px;
+}
+
+.infinite-scroll-item {
+  transform: translateZ(0); /* Promove camada de GPU isolada sem repaints */
 }
 

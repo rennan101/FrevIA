@@ -55,17 +55,18 @@ function sortHistoryTimeline() {
 }
 
 function renderHistoryItemHtml(item) {
-  const isAdmin = currentUserSession.role === 'admin';
-
+  const canManage = currentUserSession.role === 'admin';
   return `
-    <div class="relative pl-6 pb-6 border-l-2 border-frevo-yellow last:border-l-0 infinite-scroll-item">
-      <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-frevo-yellow border-2 border-paper shadow-sm"></div>
-      <div class="bg-white border border-line-strong rounded-2xl p-4 space-y-2 shadow-sm transition hover:shadow-md">
-        <div class="flex items-center justify-between gap-2">
-          <span class="badge bg-frevo-yellow/40 text-ink text-[11px] font-bold">${item.period}</span>
-          ${isAdmin ? `
+    <div class="history-card-item history-timeline-card relative pl-8 pb-8 border-l-2 border-frevo-orange/30 last:border-l-0 last:pb-0 infinite-scroll-item">
+      <div class="history-timeline-dot"></div>
+      
+      <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm space-y-2 relative">
+        <div class="flex items-center justify-between">
+          <span class="badge bg-frevo-orange/15 text-frevo-orange text-[10px] font-bold uppercase tracking-wider">${item.period}</span>
+          
+          ${canManage ? `
             <div class="flex items-center gap-1">
-              <button onclick="openEditHistoryModal('${item.id}')" class="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Editar Marco">
+              <button onclick="openEditHistoryModal('${item.id}')" class="p-1.5 text-gray-500 hover:text-frevo-orange hover:bg-orange-50 rounded-lg transition" title="Editar Marco">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                   <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
@@ -87,7 +88,7 @@ function renderHistoryItemHtml(item) {
             ${(item.media_type === 'video' || (item.media_url && item.media_url.match(/\.(mp4|webm|mov)(\?.*)?$/i))) ? `
               <video src="${item.media_url}" controls playsinline preload="metadata" class="w-full h-44 object-cover rounded-xl"></video>
             ` : `
-              <img src="${item.media_url || item.image_url}" alt="${item.title}" class="w-full h-44 object-cover rounded-xl" loading="lazy" />
+              <img src="${item.media_url || item.image_url}" alt="${item.title}" class="w-full h-44 object-cover rounded-xl" loading="lazy" decoding="async" />
             `}
           </div>
         ` : ''}

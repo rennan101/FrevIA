@@ -311,6 +311,7 @@ async function deleteSong(songId) {
   }
   if (confirm(`Deseja realmente excluir a música "${song.title}" permanentemente?`)) {
     DB.songs = (DB.songs || []).filter(s => s.id !== songId);
+    if (typeof saveSongsLocal === 'function') saveSongsLocal();
     if (window.awsService && window.awsService.isConnected()) {
       try {
         await window.awsService.deleteSong(songId);

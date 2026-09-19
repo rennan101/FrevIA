@@ -316,9 +316,57 @@ function saveShowsLocal() {
   } catch (e) {}
 }
 
+function loadAlbumsLocal() {
+  try {
+    const saved = localStorage.getItem('frevai_custom_albums');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const existingIds = new Set((DB.albums || []).map(a => a.id));
+        for (const item of parsed) {
+          if (!existingIds.has(item.id)) {
+            DB.albums.unshift(item);
+          }
+        }
+      }
+    }
+  } catch (e) {}
+}
+
+function saveAlbumsLocal() {
+  try {
+    localStorage.setItem('frevai_custom_albums', JSON.stringify(DB.albums || []));
+  } catch (e) {}
+}
+
+function loadSongsLocal() {
+  try {
+    const saved = localStorage.getItem('frevai_custom_songs');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const existingIds = new Set((DB.songs || []).map(s => s.id));
+        for (const item of parsed) {
+          if (!existingIds.has(item.id)) {
+            DB.songs.unshift(item);
+          }
+        }
+      }
+    }
+  } catch (e) {}
+}
+
+function saveSongsLocal() {
+  try {
+    localStorage.setItem('frevai_custom_songs', JSON.stringify(DB.songs || []));
+  } catch (e) {}
+}
+
 loadArtistRequestsLocal();
 loadArtistsLocal();
 loadShowsLocal();
+loadAlbumsLocal();
+loadSongsLocal();
 loadNotificationsLocal();
 
 // -----------------------------------------------------------------------------
@@ -763,9 +811,28 @@ function renderProfileGallery() {
     `;
   } else if (currentProfileTab === 'scores') {
     const isArtist = currentUserSession.role === 'artist' || currentUserSession.role === 'admin';
+    if (typeof loadSongsLocal === 'function') loadSongsLocal();
+
+    const currentId = currentUserSession.artist_id || currentUserSession.id || '';
+    const currentName = (currentUserSession.name || '').toLowerCase().trim();
+    const currentHandle = (currentUserSession.handle || '').replace('@', '').toLowerCase().trim();
+
+    // Localizar artista correspondente na base
+    const matchedArtist = (DB.artists || []).find(a => 
+      (currentId && a.id === currentId) ||
+      (currentName && (a.name || '').toLowerCase().trim() === currentName) ||
+      (currentHandle && (a.handle || '').replace('@', '').toLowerCase().trim() === currentHandle)
+    );
+    const matchedArtistId = matchedArtist ? matchedArtist.id : null;
+
     const songs = (DB.songs || []).filter(s => {
       if (isArtist) {
-        return s.artist_id === currentUserSession.artist_id || s.artist === currentUserSession.name;
+        return (currentId && s.artist_id === currentId) ||
+               (matchedArtistId && s.artist_id === matchedArtistId) ||
+               (currentId && s.author_id === currentId) ||
+               (matchedArtistId && s.author_id === matchedArtistId) ||
+               (s.submitted_by && s.submitted_by === currentUserSession.id) ||
+               (s.artist && currentName && s.artist.toLowerCase().trim() === currentName);
       }
       return (currentUserSession.saved_scores || []).includes(s.id);
     });
@@ -807,9 +874,27 @@ function renderProfileGallery() {
     `;
   } else if (currentProfileTab === 'albums') {
     const isArtist = currentUserSession.role === 'artist' || currentUserSession.role === 'admin';
+    if (typeof loadAlbumsLocal === 'function') loadAlbumsLocal();
+
+    const currentId = currentUserSession.artist_id || currentUserSession.id || '';
+    const currentName = (currentUserSession.name || '').toLowerCase().trim();
+    const currentHandle = (currentUserSession.handle || '').replace('@', '').toLowerCase().trim();
+
+    // Localizar artista correspondente na base
+    const matchedArtist = (DB.artists || []).find(a => 
+      (currentId && a.id === currentId) ||
+      (currentName && (a.name || '').toLowerCase().trim() === currentName) ||
+      (currentHandle && (a.handle || '').replace('@', '').toLowerCase().trim() === currentHandle)
+    );
+    const matchedArtistId = matchedArtist ? matchedArtist.id : null;
+
     const albums = (DB.albums || []).filter(a => {
       if (isArtist) {
-        return a.artist_id === currentUserSession.artist_id || a.artist === currentUserSession.name;
+        return (currentId && a.artist_id === currentId) ||
+               (matchedArtistId && a.artist_id === matchedArtistId) ||
+               (a.submitted_by && a.submitted_by === currentUserSession.id) ||
+               (a.author_id && a.author_id === currentId) ||
+               (a.artist && currentName && a.artist.toLowerCase().trim() === currentName);
       }
       return true;
     });
@@ -824,7 +909,11 @@ function renderProfileGallery() {
         ` : ''}
         ${albums.length === 0 ? `
           <div class="py-10 text-center text-muted">
-            <p class="text-xs font-bold text-ink">Nenhum álbum disponível</p>
+            <div class="w-12 h-12 mx-auto mb-2 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-400">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
+            </div>
+            <p class="text-xs font-bold text-ink">Nenhum álbum cadastrado ainda</p>
+            <p class="text-[11px] text-ink-soft mt-0.5">Clique em "Criar Novo Álbum" para publicar sua discografia com faixas.</p>
           </div>
         ` : `
           <div class="grid grid-cols-2 gap-3">
@@ -1151,5 +1240,9 @@ window.loadArtistRequestsLocal = loadArtistRequestsLocal;
 window.saveArtistRequestsLocal = saveArtistRequestsLocal;
 window.loadShowsLocal = loadShowsLocal;
 window.saveShowsLocal = saveShowsLocal;
+window.loadAlbumsLocal = loadAlbumsLocal;
+window.saveAlbumsLocal = saveAlbumsLocal;
+window.loadSongsLocal = loadSongsLocal;
+window.saveSongsLocal = saveSongsLocal;
 
 

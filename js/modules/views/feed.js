@@ -120,12 +120,12 @@ function renderFeedPostHtml(post) {
         ${(post.media_type === 'video' || post.isVideo || (post.image && post.image.match(/\.(mp4|webm|mov)(\?.*)?$/i))) ? `
           <video src="${post.media_url || post.image}" poster="${post.cover_url || ''}" controls playsinline preload="metadata" class="w-full h-full object-cover" style="max-height: 480px;"></video>
         ` : `
-          <img src="${postMedia}" alt="${post.title}" loading="lazy" onerror="this.onerror=null; this.src='${DEFAULT_MEDIA_PLACEHOLDER}'" />
+          <img src="${postMedia}" alt="${post.title}" loading="lazy" decoding="async" fetchpriority="low" onerror="this.onerror=null; this.src='${DEFAULT_MEDIA_PLACEHOLDER}'" />
         `}
 
         <!-- Top-Left Floating Author Pill -->
         <div class="floating-author-pill" onclick="openArtistProfileByAuthor('${post.author}')" title="Ver perfil de ${post.author}">
-          <img src="${getUserAvatarUrl(post.avatar)}" alt="${post.author}" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR_PLACEHOLDER}'" />
+          <img src="${getUserAvatarUrl(post.avatar)}" alt="${post.author}" decoding="async" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR_PLACEHOLDER}'" />
           <div class="floating-author-info">
             <div class="flex items-center gap-1.5">
               <span class="name">${post.author}</span>

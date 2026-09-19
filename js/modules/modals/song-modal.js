@@ -262,6 +262,7 @@ async function submitNewSong(e) {
     };
 
     DB.songs.unshift(newSong);
+    if (typeof saveSongsLocal === 'function') saveSongsLocal();
 
     // Persistir no AWS
     if (window.awsService && window.awsService.isConnected()) {

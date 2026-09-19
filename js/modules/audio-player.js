@@ -373,10 +373,14 @@ function updateAudioPlayerUI() {
   if (playIcon && pauseIcon) {
     if (isAudioPlaying || isSynthPlaying) {
       playIcon.classList.add('hidden');
+      playIcon.style.display = 'none';
       pauseIcon.classList.remove('hidden');
+      pauseIcon.style.display = 'block';
     } else {
       playIcon.classList.remove('hidden');
+      playIcon.style.display = 'block';
       pauseIcon.classList.add('hidden');
+      pauseIcon.style.display = 'none';
     }
   }
 }
