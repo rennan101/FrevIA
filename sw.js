@@ -1,10 +1,14 @@
 // Service Worker do FrevAI — Suporte PWA Offline-First
-const CACHE_NAME = 'frevai-v13';
+const CACHE_NAME = 'frevai-v14';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './css/style.css',
   './js/config.js',
+  './js/modules/storage.js',
+  './js/modules/media-optimizer.js',
+  './js/modules/validator.js',
+  './js/modules/ui-feedback.js',
   './js/aws.js',
   './js/modules/db.js',
   './js/modules/auth.js',

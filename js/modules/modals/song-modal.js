@@ -139,6 +139,11 @@ function handleAudioUploadSelection(input) {
 
 async function submitNewSong(e) {
   e.preventDefault();
+  const form = document.getElementById('new-song-form');
+  if (window.ValidatorEngine && form) {
+    window.ValidatorEngine.clearFormErrors(form);
+  }
+
   const title = document.getElementById('song-title-input')?.value;
   const genre = document.getElementById('song-genre-input')?.value || 'Frevo de Rua';
   const albumId = document.getElementById('song-album-input')?.value || null;
@@ -153,11 +158,27 @@ async function submitNewSong(e) {
   let coverUrl = document.getElementById('song-cover-input')?.value || '';
   let scoreFileUrl = null;
 
-  if (!title) return;
+  if (window.ValidatorEngine) {
+    const valResult = window.ValidatorEngine.validate({
+      title,
+      genre,
+      author: currentUserSession?.name || 'Artista'
+    }, 'song');
+
+    if (!valResult.isValid) {
+      if (valResult.errors.title) window.ValidatorEngine.showFieldError('song-title-input', valResult.errors.title);
+      if (window.showToast) window.showToast('Por favor, preencha os campos obrigatórios corretamente.', 'warning');
+      return;
+    }
+  }
 
   const copyrightConsent = document.getElementById('song-copyright-consent')?.checked;
   if (!copyrightConsent) {
-    showAlertModal('É necessário confirmar a declaração de direitos autorais para cadastrar a música.');
+    if (window.showToast) {
+      window.showToast('Confirme a declaração de direitos autorais para continuar.', 'warning');
+    } else {
+      showAlertModal('É necessário confirmar a declaração de direitos autorais para cadastrar a música.');
+    }
     return;
   }
 

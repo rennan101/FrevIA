@@ -1,6 +1,6 @@
 // ==============================================================================
-// FREVAI - GERENCIADOR DE INFINITE SCROLL & OTIMIZAÇÃO DE MEMÓRIA (MOBILE-FIRST)
-// Técnicas: IntersectionObserver, Video Auto-Pause/Buffer Cleanup, decoding="async"
+// FREVAI - GERENCIADOR DE INFINITE SCROLL & VIRTUAL WINDOWING (MOBILE-FIRST)
+// Técnicas: IntersectionObserver, CSS content-visibility: auto, Memory GC
 // ==============================================================================
 
 const InfiniteScrollManager = {
@@ -25,10 +25,11 @@ const InfiniteScrollManager = {
         }
       });
     }, {
-      rootMargin: '300px' // Dispara 300px antes do final para scroll imperceptível
+      rootMargin: '350px' // Dispara 350px antes do final para scroll imperceptível
     });
 
     this.initMediaObserver();
+    this.applyVirtualContentOptimization();
   },
 
   // Observador de mídias offscreen (estilo Instagram/TikTok):
@@ -59,6 +60,23 @@ const InfiniteScrollManager = {
     if (!this.mediaObserver) return;
     const videos = document.querySelectorAll('video');
     videos.forEach(v => this.mediaObserver.observe(v));
+    this.applyVirtualContentOptimization();
+  },
+
+  // Otimização de renderização virtual via CSS Containment & Content Visibility
+  // Permite renderizar 500+ itens sem lag ou engasgo de layout no mobile
+  applyVirtualContentOptimization() {
+    const feedCards = document.querySelectorAll('#feed-list > div');
+    feedCards.forEach(card => {
+      card.style.contentVisibility = 'auto';
+      card.style.containIntrinsicSize = '0 400px';
+    });
+
+    const songCards = document.querySelectorAll('#songs-list > div, .song-card-item');
+    songCards.forEach(card => {
+      card.style.contentVisibility = 'auto';
+      card.style.containIntrinsicSize = '0 90px';
+    });
   },
 
   observe(element) {

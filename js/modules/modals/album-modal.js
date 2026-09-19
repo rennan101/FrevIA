@@ -216,13 +216,40 @@ function removeAlbumDraftTrack(index) {
 
 async function submitNewAlbum(e) {
   e.preventDefault();
-  const title = document.getElementById('album-title-input')?.value;
+  const form = document.getElementById('new-album-form');
+  if (window.ValidatorEngine && form) {
+    window.ValidatorEngine.clearFormErrors(form);
+  }
+
+  const title = document.getElementById('album-title-input')?.value?.trim();
   const release_year = parseInt(document.getElementById('album-year-input')?.value) || new Date().getFullYear();
   const genre = document.getElementById('album-genre-input')?.value || 'Frevo de Rua';
   const coverFileInput = document.getElementById('album-cover-file');
   let cover_url = document.getElementById('album-cover-input')?.value || '';
 
-  if (!title) return;
+  if (window.ValidatorEngine) {
+    const valResult = window.ValidatorEngine.validate({
+      title,
+      year: release_year,
+      genre
+    }, 'album');
+
+    if (!valResult.isValid) {
+      if (valResult.errors.title) window.ValidatorEngine.showFieldError('album-title-input', valResult.errors.title);
+      if (valResult.errors.year) window.ValidatorEngine.showFieldError('album-year-input', valResult.errors.year);
+      if (window.showToast) window.showToast('Por favor, preencha os dados do álbum corretamente.', 'warning');
+      return;
+    }
+  }
+
+  if (currentAlbumDraftTracks.length === 0) {
+    if (window.showToast) {
+      window.showToast('Adicione pelo menos 1 faixa (áudio) para criar o álbum.', 'warning');
+    } else {
+      showAlertModal('Adicione pelo menos uma faixa de áudio para publicar o álbum.');
+    }
+    return;
+  }
 
   const statusEl = document.getElementById('submit-album-status');
   const statusLabel = document.getElementById('submit-album-status-label');
@@ -471,6 +498,11 @@ function openSubmitShowModal() {
 
 async function submitNewShow(e) {
   e.preventDefault();
+  const form = e.target;
+  if (window.ValidatorEngine && form) {
+    window.ValidatorEngine.clearFormErrors(form);
+  }
+
   const event_name = document.getElementById('show-title-input')?.value?.trim();
   const event_date = document.getElementById('show-date-input')?.value;
   const event_time = document.getElementById('show-time-input')?.value;
@@ -478,7 +510,25 @@ async function submitNewShow(e) {
   const city = document.getElementById('show-city-input')?.value?.trim() || 'Recife - PE';
   let ticket_url = document.getElementById('show-ticket-url-input')?.value?.trim() || '';
 
-  if (!event_name || !event_date) return;
+  if (window.ValidatorEngine) {
+    const valResult = window.ValidatorEngine.validate({
+      title: event_name,
+      date: event_date,
+      time: event_time,
+      venue: venue_name,
+      ticket_url
+    }, 'show');
+
+    if (!valResult.isValid) {
+      if (valResult.errors.title) window.ValidatorEngine.showFieldError('show-title-input', valResult.errors.title);
+      if (valResult.errors.date) window.ValidatorEngine.showFieldError('show-date-input', valResult.errors.date);
+      if (valResult.errors.time) window.ValidatorEngine.showFieldError('show-time-input', valResult.errors.time);
+      if (valResult.errors.venue) window.ValidatorEngine.showFieldError('show-venue-input', valResult.errors.venue);
+      if (valResult.errors.ticket_url) window.ValidatorEngine.showFieldError('show-ticket-url-input', valResult.errors.ticket_url);
+      if (window.showToast) window.showToast('Preencha as informações do show corretamente.', 'warning');
+      return;
+    }
+  }
 
   if (ticket_url && !ticket_url.startsWith('http://') && !ticket_url.startsWith('https://') && !ticket_url.startsWith('#')) {
     ticket_url = 'https://' + ticket_url;

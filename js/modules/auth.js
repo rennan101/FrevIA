@@ -74,7 +74,12 @@ if (savedSession) {
 }
 
 function saveCurrentSession() {
-  localStorage.setItem('frevai_user_session', JSON.stringify(currentUserSession));
+  try {
+    localStorage.setItem('frevai_user_session', JSON.stringify(currentUserSession));
+  } catch (e) {}
+  if (window.FrevAIStorage) {
+    window.FrevAIStorage.set('user_state', { key: 'session', ...currentUserSession }).catch(() => {});
+  }
   updateSessionUI();
 }
 
@@ -327,6 +332,9 @@ function saveShowsLocal() {
   try {
     localStorage.setItem('frevai_custom_shows', JSON.stringify(DB.shows || []));
   } catch (e) {}
+  if (window.FrevAIStorage) {
+    window.FrevAIStorage.putMany('shows', DB.shows || []).catch(() => {});
+  }
 }
 
 function loadAlbumsLocal() {
@@ -347,6 +355,9 @@ function saveAlbumsLocal() {
   try {
     localStorage.setItem('frevai_custom_albums', JSON.stringify(DB.albums || []));
   } catch (e) {}
+  if (window.FrevAIStorage) {
+    window.FrevAIStorage.putMany('albums', DB.albums || []).catch(() => {});
+  }
 }
 
 function loadSongsLocal() {
@@ -367,6 +378,9 @@ function saveSongsLocal() {
   try {
     localStorage.setItem('frevai_custom_songs', JSON.stringify(DB.songs || []));
   } catch (e) {}
+  if (window.FrevAIStorage) {
+    window.FrevAIStorage.putMany('songs', DB.songs || []).catch(() => {});
+  }
 }
 
 function loadPostsLocal() {
@@ -409,6 +423,9 @@ function savePostsLocal() {
   try {
     localStorage.setItem('frevai_custom_posts', JSON.stringify(DB.posts || []));
   } catch (e) {}
+  if (window.FrevAIStorage) {
+    window.FrevAIStorage.putMany('posts', DB.posts || []).catch(() => {});
+  }
 }
 
 loadArtistRequestsLocal();

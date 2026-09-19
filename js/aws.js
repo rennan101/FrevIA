@@ -6,7 +6,42 @@ class AwsService {
   constructor() {
     this.config = window.FREVIA_AWS_CONFIG || {};
     this.authListeners = [];
+    this.tokens = this.loadStoredTokens();
     this.init();
+  }
+
+  loadStoredTokens() {
+    try {
+      const t = localStorage.getItem('frevai_aws_tokens');
+      return t ? JSON.parse(t) : { idToken: null, accessToken: null, refreshToken: null };
+    } catch {
+      return { idToken: null, accessToken: null, refreshToken: null };
+    }
+  }
+
+  saveStoredTokens(tokens) {
+    this.tokens = { ...this.tokens, ...tokens };
+    try {
+      localStorage.setItem('frevai_aws_tokens', JSON.stringify(this.tokens));
+    } catch {}
+  }
+
+  clearStoredTokens() {
+    this.tokens = { idToken: null, accessToken: null, refreshToken: null };
+    try {
+      localStorage.removeItem('frevai_aws_tokens');
+    } catch {}
+  }
+
+  getAuthHeaders(customHeaders = {}) {
+    const headers = {
+      'Content-Type': 'application/json',
+      ...customHeaders
+    };
+    if (this.tokens && this.tokens.idToken) {
+      headers['Authorization'] = `Bearer ${this.tokens.idToken}`;
+    }
+    return headers;
   }
 
   init() {
@@ -941,21 +976,62 @@ class AwsService {
   }
 
   // ============================================================================
-  // UPLOAD DE MÍDIA UNIVERSAL (AMAZON S3 DIRETO)
+  // UPLOAD DE MÍDIA UNIVERSAL (AMAZON S3 COM PRESIGNED URLS & WEBP)
   // ============================================================================
+  async getPresignedUploadUrl(fileName, contentType, folder = 'general') {
+    if (!this.apiGatewayUrl) return null;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/storage/presigned-url`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ fileName: `${folder}/${fileName}`, contentType })
+      });
+      if (res.ok) {
+        return await res.json(); // { uploadUrl, fileUrl }
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
   async uploadMedia(file, folder = 'general') {
     if (!file) return null;
     try {
-      const ext = file.name ? file.name.split('.').pop().toLowerCase() : 'jpg';
-      const cleanName = (file.name || 'media').replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 30);
-      const fileName = `${folder}/${Date.now()}_${cleanName}.${ext}`;
-      const s3UploadUrl = `${this.s3BaseUrl}/${fileName}`;
+      // Otimização automática: converter imagens para WebP antes do upload
+      let fileToUpload = file;
+      if (window.MediaOptimizer && file.type && file.type.startsWith('image/')) {
+        try {
+          fileToUpload = await window.MediaOptimizer.compressAndConvertToWebP(file);
+        } catch (e) {
+          console.warn('[MediaOptimizer] Fallback para imagem original:', e);
+        }
+      }
 
+      const ext = fileToUpload.name ? fileToUpload.name.split('.').pop().toLowerCase() : 'webp';
+      const cleanName = (fileToUpload.name || 'media').replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 30);
+      const fileName = `${Date.now()}_${cleanName}.${ext}`;
+
+      // 1. Tentar Presigned URL
+      const presigned = await this.getPresignedUploadUrl(fileName, fileToUpload.type || 'application/octet-stream', folder);
+      if (presigned && presigned.uploadUrl) {
+        const putRes = await fetch(presigned.uploadUrl, {
+          method: 'PUT',
+          body: fileToUpload,
+          headers: { 'Content-Type': fileToUpload.type || 'application/octet-stream' }
+        });
+        if (putRes.ok) {
+          return presigned.fileUrl || `${this.s3BaseUrl}/${folder}/${fileName}`;
+        }
+      }
+
+      // 2. Direct S3 PUT
+      const s3UploadUrl = `${this.s3BaseUrl}/${folder}/${fileName}`;
       const res = await fetch(s3UploadUrl, {
         method: 'PUT',
-        body: file,
+        body: fileToUpload,
         headers: {
-          'Content-Type': file.type || 'application/octet-stream'
+          'Content-Type': fileToUpload.type || 'application/octet-stream'
         }
       });
 
@@ -968,7 +1044,7 @@ class AwsService {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result);
         reader.onerror = () => resolve(s3UploadUrl);
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(fileToUpload);
       });
     } catch (err) {
       console.warn('[AWS S3 Upload] Aviso:', err);
@@ -983,18 +1059,43 @@ class AwsService {
   async uploadAudio(file, artistId = 'general', onProgress = null) {
     if (!file) return null;
     try {
-      if (onProgress) onProgress(20);
+      if (onProgress) onProgress(15);
+      if (window.MediaOptimizer) {
+        const check = await window.MediaOptimizer.inspectAudioFile(file);
+        if (!check.isValid && window.showToast) {
+          window.showToast(check.error, 'warning');
+        }
+      }
+
       const ext = file.name ? file.name.split('.').pop().toLowerCase() : 'mp3';
       const cleanName = (file.name || 'audio').replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 30);
-      const fileName = `audio/${artistId}/${Date.now()}_${cleanName}.${ext}`;
-      const s3UploadUrl = `${this.s3BaseUrl}/${fileName}`;
+      const fileName = `${Date.now()}_${cleanName}.${ext}`;
+      const folder = `audio/${artistId}`;
 
-      // Se houver conexão AWS ativa, tenta PUT S3
+      if (onProgress) onProgress(35);
+
+      // 1. Tentar Presigned URL
+      const presigned = await this.getPresignedUploadUrl(fileName, file.type || 'audio/mpeg', folder);
+      if (presigned && presigned.uploadUrl) {
+        if (onProgress) onProgress(60);
+        const putRes = await fetch(presigned.uploadUrl, {
+          method: 'PUT',
+          body: file,
+          headers: { 'Content-Type': file.type || 'audio/mpeg' }
+        });
+        if (putRes.ok) {
+          if (onProgress) onProgress(100);
+          return presigned.fileUrl || `${this.s3BaseUrl}/${folder}/${fileName}`;
+        }
+      }
+
+      // 2. Direct S3 PUT
+      const s3UploadUrl = `${this.s3BaseUrl}/${folder}/${fileName}`;
       if (this.isConnected()) {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 6000);
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-        if (onProgress) onProgress(45);
+        if (onProgress) onProgress(65);
         const res = await fetch(s3UploadUrl, {
           method: 'PUT',
           body: file,
@@ -1014,8 +1115,8 @@ class AwsService {
         }
       }
 
-      // Se offline / ambiente local ou falha no S3: converter para Data URL garantindo que o som seja 100% autêntico
-      if (onProgress) onProgress(75);
+      // 3. Fallback seguro
+      if (onProgress) onProgress(85);
       const dataUrl = await new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result);
@@ -1052,14 +1153,40 @@ class AwsService {
   async uploadScore(file, artistId = 'general', onProgress = null) {
     if (!file) return null;
     try {
-      if (onProgress) onProgress(30);
+      if (onProgress) onProgress(20);
+      if (window.MediaOptimizer) {
+        const check = window.MediaOptimizer.inspectPdfFile(file);
+        if (!check.isValid && window.showToast) {
+          window.showToast(check.error, 'warning');
+        }
+      }
+
       const ext = 'pdf';
       const cleanName = (file.name || 'partitura').replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 30);
-      const fileName = `scores/${artistId}/${Date.now()}_${cleanName}.${ext}`;
-      const s3UploadUrl = `${this.s3BaseUrl}/${fileName}`;
+      const fileName = `${Date.now()}_${cleanName}.${ext}`;
+      const folder = `scores/${artistId}`;
 
+      if (onProgress) onProgress(45);
+
+      // 1. Tentar Presigned URL
+      const presigned = await this.getPresignedUploadUrl(fileName, 'application/pdf', folder);
+      if (presigned && presigned.uploadUrl) {
+        if (onProgress) onProgress(70);
+        const putRes = await fetch(presigned.uploadUrl, {
+          method: 'PUT',
+          body: file,
+          headers: { 'Content-Type': 'application/pdf' }
+        });
+        if (putRes.ok) {
+          if (onProgress) onProgress(100);
+          return presigned.fileUrl || `${this.s3BaseUrl}/${folder}/${fileName}`;
+        }
+      }
+
+      // 2. Direct S3 PUT
+      const s3UploadUrl = `${this.s3BaseUrl}/${folder}/${fileName}`;
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 6000);
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
 
       const res = await fetch(s3UploadUrl, {
         method: 'PUT',
