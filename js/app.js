@@ -8559,83 +8559,93 @@ const FrevoAudioEngine = {
     const cleanGenre = (genre || 'Frevo de Rua').trim();
 
     if (cleanGenre.toLowerCase().includes('rua') || cleanGenre.toLowerCase().includes('livre')) {
-      return `[Introdução Orquestral — ${bpm || 148} BPM • Tom: ${key || 'Ré Maior (D)'}]
-(Ataque fulminante de clarins, trompetes e trombones de vara)
-(Tuba e percussão de surdo e tarol marcam o passo rasgado e acelerado)
+      return `Lá vem o frevo rasgando a ladeira
+No passo ligeiro do nosso clarim
+Segura a sombrinha de ponta a primeira
+Que a nossa folia não tem mais fim!
 
-[Tema Principal — Primeira Parte]
-(Execução brilhante da melodia pelos saxofones altos e tenores)
-(Contraponto sincopado de trombones rasgando as ladeiras)
+Refrão:
+Ferve o Recife, faísca Olinda
+No compasso quente da multidão
+A troça mais nobre e a dança mais linda
+${cleanTitle} estremece o chão!
 
-[Ponte & Preparação]
-(Crescendo orquestral em dinâmica fortíssimo — ff)
-(Tarol repica com precisão acrobática no compasso 2/4)
+Entra trombone, responde o clarinete
+Nosso dobrado não vai parar
+${cleanArtist} comanda o banquete
+Vem pro meio do passo vibrar!
 
-[Clímax & Refrão Orquestral]
-(Toda a orquestra em uníssono vibrante: metais no topo)
-(Evoé! O passo ferve e a multidão se abre na avenida!)
+Refrão:
+Ferve o Recife, faísca Olinda
+No compasso quente da multidão
+A troça mais nobre e a dança mais linda
+${cleanTitle} estremece o chão!
 
-[Solo de Clarinete / Saxofone]
-(Variações virtuosísticas sobre o tema de ${cleanTitle})
-
-[Coda & Final Apoteótico]
-(Acorde final sustentado em ${key || 'Ré Maior (D)'} com apito do regente e explosão de alegria!)`;
+Metais nas alturas, tarol no compasso
+O povo em delírio a comemorar
+Ninguém segura a força desse passo
+E até quarta-feira vamos frevar!`;
     }
 
     if (cleanGenre.toLowerCase().includes('bloco')) {
-      return `[Introdução Lírica — ${bpm || 128} BPM • Tom: ${key || 'Ré Maior (D)'}]
-(Solo delicado de flauta e violão de 7 cordas)
-(O coral de pastoras prepara o cortejo da saudade)
-
-[Estrofe 1]
-Lá vem a troça descendo a ladeira
+      return `Lá vem a troça descendo a ladeira
 Com sua bandeira bordada em cetim
 No ritmo doce da flauta ligeira
 ${cleanTitle} floresce no meu jardim.
 
-[Refrão]
+Refrão:
 Olinda e Recife num só coração
 Quem tem saudades não pode chorar
 O Frevo de Bloco acende a paixão
 E até quarta-feira vamos festejar!
 
-[Estrofe 2]
 O coral feminino entoa a canção
 Trazendo lembranças de antigos carnavais
 ${cleanArtist} comanda esta emoção
 Que ecoa no peito e não finda jamais.
 
-[Coda / Final]
-(As flautas sustentam a melodia enquanto a orquestra de pau e corda silencia com emoção)`;
+Refrão:
+Olinda e Recife num só coração
+Quem tem saudades não pode chorar
+O Frevo de Bloco acende a paixão
+E até quarta-feira vamos festejar!
+
+Pastoras entoam versos da saudade
+Violões afinados na luz do luar
+Eterna beleza da nossa cidade
+O frevo que nunca vai se apagar.`;
     }
 
     // Frevo Canção / Frevo Contemporâneo
-    return `[Introdução de Metais — ${bpm || 144} BPM • Tom: ${key || 'Ré Maior (D)'}]
-(Trompetes e trombones em chamada vigorosa)
-
-[Estrofe 1]
-Quando o clarim anuncia o momento
+    return `Quando o clarim anuncia o momento
 O frevo invade a alma e o pensar
 ${cleanTitle} chegou no compasso do vento
 Não há quem consiga ficar sem pular!
 
-[Refrão]
+Refrão:
 Segura o passo, levanta a sombrinha
 No passo do frevo ninguém fica só
 A nossa folia é pura e rainha
 Do Marco Zero ao Alto da Sé em xodó!
 
-[Estrofe 2]
 ${cleanArtist} puxa o canto da gente
 A orquestra incendeia toda a multidão
 O frevo é eterno, é arte valente
 Patrimônio vivo da nossa nação!
 
-[Final / Apoteose]
-(Encerramento vibrante com ataque de metais e aplauso do povo)`;
+Refrão:
+Segura o passo, levanta a sombrinha
+No passo do frevo ninguém fica só
+A nossa folia é pura e rainha
+Do Marco Zero ao Alto da Sé em xodó!
+
+Brilha o estandarte de ouro e cetim
+No peito a cadência que o frevo nos traz
+Uma festa sem freio, um riso sem fim
+Quem vive essa terra não esquece jamais!`;
   },
 
-  // Gerador de Partitura Oficial em PDF com Pauta Vetorial Dinâmica
+  // Gerador de Partitura Oficial em PDF com Pauta Vetorial Dinâmica Completa
   generateScorePdfBlob({ title, artist, genre, key, bpm, lyrics }) {
     if (!window.jspdf || !window.jspdf.jsPDF) {
       throw new Error('Biblioteca jsPDF não carregada.');
@@ -8678,103 +8688,102 @@ Patrimônio vivo da nossa nação!
 
     // Título da Obra
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(17);
+    doc.setFontSize(16);
     doc.setTextColor(...ink);
-    doc.text((title || 'PARTITURA DO FREVO').toUpperCase(), 105, 42, { align: 'center' });
+    doc.text((title || 'PARTITURA DO FREVO').toUpperCase(), 105, 41, { align: 'center' });
 
     // Informações Técnicas
-    doc.setFontSize(9);
+    doc.setFontSize(8.5);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...red);
-    doc.text(`GÊNERO: ${(genre || 'Frevo de Rua').toUpperCase()} • TOM IDENTIFICADO: ${(key || 'Fá Maior').toUpperCase()}`, 20, 50);
+    doc.text(`GÊNERO: ${(genre || 'Frevo de Rua').toUpperCase()} • TOM: ${(key || 'Fá Maior').toUpperCase()} • ANDAMENTO: ${bpm || 148} BPM (2/4 FREVADO)`, 20, 48);
 
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...ink);
-    doc.text(`Compositor / Arranjador: ${artist || 'Artista do Frevo'}`, 20, 56);
-    doc.text(`Andamento: Allegro Frevado (${bpm || 148} BPM) • Compasso: 2/4 Frevado`, 20, 62);
-    doc.text(`Instrumentação: Orquestra de Frevo (Sopros, Metais, Percussão Tradicional e Harmonia)`, 20, 68);
+    doc.text(`Compositor / Arranjador: ${artist || 'Artista do Frevo'}`, 20, 53.5);
+    doc.text(`Instrumentação: Orquestra de Frevo (Sopros, Metais de Base, Percussão e Harmonia)`, 20, 58.5);
 
     // Divisória
     doc.setDrawColor(220, 220, 220);
-    doc.setLineWidth(0.5);
-    doc.line(20, 72, 190, 72);
+    doc.setLineWidth(0.4);
+    doc.line(20, 62, 190, 62);
 
     // Pautas Musicais Vetoriais
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9);
+    doc.setFontSize(8.5);
     doc.setTextColor(...orange);
-    doc.text('PAUTA MUSICAL & GRADE DE ARRANJO (COMPASSO 2/4)', 20, 78);
+    doc.text('PAUTA MUSICAL & GRADE DE ARRANJO (COMPASSO 2/4)', 20, 67);
 
     const drawStaff = (startY, label, offset = 0) => {
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(7.5);
+      doc.setFontSize(7);
       doc.setTextColor(...gray);
-      doc.text(label, 20, startY - 2);
+      doc.text(label, 20, startY - 1.8);
 
       // 5 Linhas da Pauta
       doc.setDrawColor(120, 120, 120);
       doc.setLineWidth(0.3);
       for (let l = 0; l < 5; l++) {
-        doc.line(20, startY + (l * 2.5), 190, startY + (l * 2.5));
+        doc.line(20, startY + (l * 2.2), 190, startY + (l * 2.2));
       }
 
       // Clave de Sol
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(14);
+      doc.setFontSize(13);
       doc.setTextColor(...ink);
-      doc.text('𝄞', 22, startY + 8);
+      doc.text('𝄞', 22, startY + 7);
 
       // Compasso 2/4
-      doc.setFontSize(7.5);
-      doc.text('2', 28, startY + 4);
-      doc.text('4', 28, startY + 8.5);
+      doc.setFontSize(7);
+      doc.text('2', 28, startY + 3.5);
+      doc.text('4', 28, startY + 7.5);
 
       // Barras de Compasso
       doc.setDrawColor(80, 80, 80);
-      doc.setLineWidth(0.4);
-      doc.line(68, startY, 68, startY + 10);
-      doc.line(108, startY, 108, startY + 10);
-      doc.line(148, startY, 148, startY + 10);
-      doc.line(190, startY, 190, startY + 10);
-      doc.line(190.8, startY, 190.8, startY + 10);
+      doc.setLineWidth(0.35);
+      doc.line(68, startY, 68, startY + 8.8);
+      doc.line(108, startY, 108, startY + 8.8);
+      doc.line(148, startY, 148, startY + 8.8);
+      doc.line(190, startY, 190, startY + 8.8);
+      doc.line(190.8, startY, 190.8, startY + 8.8);
 
       // Notas musicais ilustrativas geradas no tom
       const notePositions = [
-        { x: 38, y: 7.5, dur: 'eighth', stem: 'up' },
-        { x: 46, y: 5.0, dur: 'eighth', stem: 'up' },
-        { x: 54, y: 2.5, dur: 'quarter', stem: 'down' },
-        { x: 78, y: 5.0, dur: 'eighth', stem: 'up' },
-        { x: 86, y: 7.5, dur: 'eighth', stem: 'up' },
+        { x: 38, y: 6.6, dur: 'eighth', stem: 'up' },
+        { x: 46, y: 4.4, dur: 'eighth', stem: 'up' },
+        { x: 54, y: 2.2, dur: 'quarter', stem: 'down' },
+        { x: 78, y: 4.4, dur: 'eighth', stem: 'up' },
+        { x: 86, y: 6.6, dur: 'eighth', stem: 'up' },
         { x: 96, y: 0.0, dur: 'quarter', stem: 'down' },
-        { x: 118, y: 2.5, dur: 'eighth', stem: 'down' },
-        { x: 126, y: 5.0, dur: 'eighth', stem: 'up' },
-        { x: 136, y: 7.5, dur: 'quarter', stem: 'up' },
-        { x: 158, y: 5.0, dur: 'eighth', stem: 'up' },
-        { x: 168, y: 2.5, dur: 'eighth', stem: 'down' },
+        { x: 118, y: 2.2, dur: 'eighth', stem: 'down' },
+        { x: 126, y: 4.4, dur: 'eighth', stem: 'up' },
+        { x: 136, y: 6.6, dur: 'quarter', stem: 'up' },
+        { x: 158, y: 4.4, dur: 'eighth', stem: 'up' },
+        { x: 168, y: 2.2, dur: 'eighth', stem: 'down' },
         { x: 178, y: 0.0, dur: 'quarter', stem: 'down' }
       ];
 
       doc.setFillColor(23, 23, 23);
       doc.setDrawColor(23, 23, 23);
-      doc.setLineWidth(0.4);
+      doc.setLineWidth(0.35);
 
       notePositions.forEach(n => {
-        const ny = startY + n.y + (offset % 2.5);
-        doc.circle(n.x, ny, 1.1, 'F');
+        const ny = startY + n.y + (offset % 2.2);
+        doc.circle(n.x, ny, 1.0, 'F');
         const stemDown = n.stem === 'down';
-        const stemY2 = stemDown ? ny + 5 : ny - 5;
-        const stemX = stemDown ? n.x - 1 : n.x + 1;
+        const stemY2 = stemDown ? ny + 4.5 : ny - 4.5;
+        const stemX = stemDown ? n.x - 0.9 : n.x + 0.9;
         doc.line(stemX, ny, stemX, stemY2);
       });
     };
 
-    drawStaff(85, `Pauta 1 — Tema Principal e Solos em ${key || 'D'}`, 0);
-    drawStaff(106, `Pauta 2 — Contraponto de Trombones e Baixos`, 2);
+    drawStaff(74, `Pauta 1 — Tema Principal (Clarins & Saxofones Altos)`, 0);
+    drawStaff(92, `Pauta 2 — Contraponto Harmônico (Trombones & Trompetes)`, 2);
 
     // Letra Oficial & Diretrizes
-    const lyricsY = 128;
+    const lyricsY = 111;
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9);
+    doc.setFontSize(8.5);
     doc.setTextColor(...cyan);
     doc.text('LETRA OFICIAL & ESTRUTURA POÉTICA / DIRETRIZES DE ARRANJO', 20, lyricsY);
 
@@ -8782,8 +8791,38 @@ Patrimônio vivo da nossa nação!
     doc.setFontSize(8);
     doc.setTextColor(...ink);
 
-    const splitLyrics = doc.splitTextToSize(lyrics || 'Instrumental de Frevo.', 170);
-    doc.text(splitLyrics, 20, lyricsY + 6);
+    const cleanLyrics = (lyrics || 'Instrumental de Frevo.').trim();
+    const splitLyrics = doc.splitTextToSize(cleanLyrics, 170);
+    
+    // Suporte a paginação limpa se a letra exceder a primeira página
+    let cursorY = lyricsY + 5.5;
+    const lineHeight = 4.2;
+
+    for (let i = 0; i < splitLyrics.length; i++) {
+      if (cursorY > 268) {
+        // Rodapé da Página 1
+        doc.setDrawColor(220, 220, 220);
+        doc.line(20, 275, 190, 275);
+        doc.setFontSize(7);
+        doc.setTextColor(...gray);
+        doc.text(`FrevIA • ${title} • Licença de Salvaguarda Aberta`, 105, 281, { align: 'center' });
+
+        doc.addPage();
+        // Cabeçalho da Próxima Página
+        doc.setFillColor(244, 241, 234);
+        doc.rect(0, 0, 210, 18, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.setTextColor(...orange);
+        doc.text(`FREVIA — ${title.toUpperCase()} (CONTINUAÇÃO DA LETRA)`, 105, 11, { align: 'center' });
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(...ink);
+        cursorY = 28;
+      }
+      doc.text(splitLyrics[i], 20, cursorY);
+      cursorY += lineHeight;
+    }
 
     // Rodapé Institucional
     doc.setDrawColor(220, 220, 220);
@@ -8820,9 +8859,8 @@ function openSubmitSongModal() {
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left">
-      <div class="pb-2 border-b border-gray-100 pr-10">
-        <h3 class="font-display font-bold text-lg text-ink">Cadastrar Nova Música / Áudio</h3>
-        <p class="text-xs text-muted">Envie áudio real (MP3), gere automaticamente partitura e letra com análise musical</p>
+      <div class="pb-3 border-b border-gray-100 text-center">
+        <h3 class="font-display font-bold text-lg text-ink text-center">Cadastrar Nova Música / Áudio</h3>
       </div>
 
       <form id="new-song-form" onsubmit="submitNewSong(event)" class="space-y-3">
@@ -8887,17 +8925,6 @@ function openSubmitSongModal() {
               <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
                 <div id="audio-analysis-progress-bar" class="bg-frevo-orange h-2 rounded-full transition-all duration-300" style="width: 0%;"></div>
               </div>
-
-              <div id="audio-analysis-metrics" class="hidden grid grid-cols-2 gap-2 text-[11px] pt-1 border-t border-gray-100">
-                <div class="p-2 bg-surface-soft rounded-lg text-left">
-                  <div class="text-[10px] text-muted uppercase font-bold">Andamento</div>
-                  <div class="font-bold text-frevo-orange text-sm" id="detected-bpm-display">146 BPM</div>
-                </div>
-                <div class="p-2 bg-surface-soft rounded-lg text-left">
-                  <div class="text-[10px] text-muted uppercase font-bold">Tonalidade</div>
-                  <div class="font-bold text-frevo-cyan text-sm" id="detected-key-display">Ré Maior (D)</div>
-                </div>
-              </div>
             </div>
 
             <div class="text-[10px] text-muted">Ou informe uma URL externa de áudio:</div>
@@ -8918,9 +8945,9 @@ function openSubmitSongModal() {
             </button>
           </div>
           <div class="p-3 bg-surface-soft border border-gray-200 rounded-xl space-y-2">
-            <div id="auto-score-preview-box" class="hidden p-2.5 bg-white border border-emerald-200 rounded-lg flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+            <div id="auto-score-preview-box" class="hidden p-2.5 bg-white border border-emerald-200 rounded-xl flex items-center justify-between gap-3 shadow-sm">
+              <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                     <polyline points="14 2 14 8 20 8"></polyline>
@@ -8929,18 +8956,17 @@ function openSubmitSongModal() {
                     <polyline points="10 9 9 9 8 9"></polyline>
                   </svg>
                 </div>
-                <div>
-                  <div class="text-xs font-bold text-ink" id="auto-score-filename">partitura_gerada.pdf</div>
-                  <div class="text-[10px] text-emerald-600 font-bold">Partitura gerada com pauta e estrofes</div>
+                <div class="min-w-0 flex-1">
+                  <div class="text-xs font-bold text-ink truncate" id="auto-score-filename">partitura_gerada.pdf</div>
+                  <div class="text-[10px] text-emerald-600 font-bold truncate">Partitura diagramada pronta para download</div>
                 </div>
               </div>
-              <button type="button" onclick="previewOrDownloadGeneratedScore()" class="btn btn-outline text-[11px] px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 border-emerald-600 text-emerald-700 hover:bg-emerald-50">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <button type="button" onclick="previewOrDownloadGeneratedScore()" title="Baixar Partitura em PDF" aria-label="Baixar PDF" class="w-9 h-9 rounded-xl border border-emerald-600 text-emerald-700 hover:bg-emerald-50 flex items-center justify-center flex-shrink-0 transition shadow-sm">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                   <polyline points="7 10 12 15 17 10"></polyline>
                   <line x1="12" y1="15" x2="12" y2="3"></line>
                 </svg>
-                Baixar PDF
               </button>
             </div>
 
@@ -9068,10 +9094,6 @@ async function handleAudioUploadSelection(input) {
     currentAnalyzedMusicalProfile = { bpm, key: keyInfo.keyName };
 
     updateProgress(90, 'Gerando pautas e estrofes...');
-
-    if (bpmDisplay) bpmDisplay.innerText = `${bpm} BPM`;
-    if (keyDisplay) keyDisplay.innerText = keyInfo.keyName;
-    if (metrics) metrics.classList.remove('hidden');
 
     // Preencher letra e estrofes automaticamente
     autoGenerateLyricsPrompt(bpm, keyInfo.keyName);
