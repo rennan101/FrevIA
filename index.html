@@ -588,7 +588,7 @@
     <div class="apple-player-inner">
       <!-- Capa e Título da Faixa -->
       <div class="apple-player-track-info" onclick="toggleLyricsModal()" title="Clique para expandir o player e letras">
-        <img id="player-track-cover" src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&q=80" alt="Capa" class="apple-player-cover" />
+        <img id="player-track-cover" src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&q=80" alt="Capa" class="apple-player-cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&q=80'" />
         <div class="apple-player-meta min-w-0">
           <h4 id="player-track-title" class="apple-player-title font-bold text-white leading-tight">Passo da Fervura</h4>
           <p id="player-track-artist" class="apple-player-artist text-white/70 leading-snug">Maestro Forró</p>
@@ -648,7 +648,7 @@
     <div class="lyrics-modal-content">
       <div class="flex items-center justify-between pb-3 border-b border-white/15">
         <div class="flex items-center gap-3">
-          <img id="lyrics-track-cover" src="" alt="Capa" class="w-10 h-10 rounded-xl object-cover shadow-sm border border-white/20" />
+          <img id="lyrics-track-cover" src="" alt="Capa" class="w-10 h-10 rounded-xl object-cover shadow-sm border border-white/20" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=200&q=80'" />
           <div>
             <h3 id="lyrics-track-title" class="font-bold text-sm text-white leading-tight">Título da Música</h3>
             <p id="lyrics-track-artist" class="text-xs text-white/70">Nome do Artista</p>

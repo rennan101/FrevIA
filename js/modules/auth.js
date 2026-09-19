@@ -10,7 +10,6 @@ function hasCustomAvatar(url) {
   if (!url || typeof url !== 'string') return false;
   const clean = url.trim();
   if (!clean) return false;
-  if (clean.includes('photo-1534528741775-53994a69daeb')) return false;
   return true;
 }
 
@@ -706,8 +705,8 @@ function renderProfileGallery() {
     container.innerHTML = `
       <div class="grid grid-cols-2 gap-3">
         ${artists.map(a => `
-          <div onclick="openArtistProfileModal('${a.id}')" class="p-3 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group text-center">
-            <img src="${a.avatar}" alt="${a.name}" class="w-16 h-16 rounded-full mx-auto object-cover border border-gray-100 group-hover:scale-105 transition-transform" />
+          <div onclick="openArtistProfile('${a.id}')" class="p-3 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group text-center">
+            <img src="${getUserAvatarUrl(a.avatar_url || a.avatar)}" alt="${a.name}" class="w-16 h-16 rounded-full mx-auto object-cover border border-gray-100 group-hover:scale-105 transition-transform" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR_PLACEHOLDER}'" />
             <h4 class="font-display font-bold text-xs text-ink mt-2 truncate">${a.name}</h4>
             <p class="text-[10px] text-frevo-orange font-semibold truncate">${a.genre || 'Frevo'}</p>
           </div>
@@ -733,12 +732,12 @@ function renderProfileGallery() {
     container.innerHTML = `
       <div class="space-y-3">
         ${savedPosts.map(p => `
-          <div class="p-3 bg-white rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3">
-            <img src="${p.media_url}" alt="Post" class="w-14 h-14 rounded-xl object-cover flex-shrink-0" />
+          <div onclick="switchView('feed')" class="p-3 bg-white rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3 hover:border-frevo-orange transition-colors cursor-pointer">
+            <img src="${p.image || p.media_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&q=80'}" alt="${p.title || 'Post'}" class="w-14 h-14 rounded-xl object-cover flex-shrink-0" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&q=80'" />
             <div class="flex-1 min-w-0">
-              <h4 class="text-xs font-bold text-ink truncate">${p.author_name}</h4>
-              <p class="text-[11px] text-ink-soft truncate">${p.caption}</p>
-              <span class="text-[10px] text-muted">${p.created_at || 'Salvo'}</span>
+              <h4 class="text-xs font-bold text-ink truncate">${p.author || 'FrevAI'}</h4>
+              <p class="text-[11px] text-ink-soft truncate">${p.title || p.content || ''}</p>
+              <span class="text-[10px] text-muted">${p.time_ago || 'Salvo'}</span>
             </div>
           </div>
         `).join('')}
@@ -780,7 +779,7 @@ function renderProfileGallery() {
               </div>
             </div>
             <div class="flex items-center gap-1.5 flex-shrink-0">
-              <button onclick="openScoreModal('${s.id}')" class="p-1.5 text-muted hover:text-ink rounded-lg bg-gray-50 hover:bg-gray-100" title="Ver Partitura">
+              <button onclick="openScoreModal('${s.title}', '${s.artist}', '${s.id}')" class="p-1.5 text-muted hover:text-ink rounded-lg bg-gray-50 hover:bg-gray-100" title="Ver Partitura">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
               </button>
             </div>
@@ -813,9 +812,9 @@ function renderProfileGallery() {
           <div class="grid grid-cols-2 gap-3">
             ${albums.map(a => `
               <div onclick="openAlbumDetails('${a.id}')" class="p-3 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group">
-                <img src="${a.cover}" alt="${a.title}" class="w-full aspect-square rounded-xl object-cover mb-2" />
+                <img src="${a.cover_url || a.cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=500&q=80'}" alt="${a.title}" class="w-full aspect-square rounded-xl object-cover mb-2" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=500&q=80'" />
                 <h4 class="font-display font-bold text-xs text-ink truncate">${a.title}</h4>
-                <p class="text-[10px] text-muted truncate">${a.year || ''} · ${(a.tracks || []).length} faixas</p>
+                <p class="text-[10px] text-muted truncate">${a.release_year || a.year || '2024'} · ${a.tracks_count || (a.tracks || []).length || 10} faixas</p>
               </div>
             `).join('')}
           </div>

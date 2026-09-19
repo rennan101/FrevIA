@@ -12,7 +12,7 @@ function renderStories() {
   container.innerHTML = (DB.artists || []).map(artist => `
     <div onclick="openStoryModal('${artist.name}', '${artist.avatar_url}', '${artist.genre}')" class="story-item">
       <div class="story-ring">
-        <img src="${artist.avatar_url}" alt="${artist.name}" class="story-avatar" />
+        <img src="${getUserAvatarUrl(artist.avatar_url)}" alt="${artist.name}" class="story-avatar" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR_PLACEHOLDER}'" />
       </div>
       <span class="story-label">${artist.name}</span>
     </div>
@@ -119,12 +119,12 @@ function renderFeedPostHtml(post) {
         ${(post.media_type === 'video' || post.isVideo || (post.image && post.image.match(/\.(mp4|webm|mov)(\?.*)?$/i))) ? `
           <video src="${post.media_url || post.image}" poster="${post.cover_url || ''}" controls playsinline preload="metadata" class="w-full h-full object-cover" style="max-height: 480px;"></video>
         ` : `
-          <img src="${post.image || post.media_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=80'}" alt="${post.title}" loading="lazy" />
+          <img src="${post.image || post.media_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=80'}" alt="${post.title}" loading="lazy" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=80'" />
         `}
 
         <!-- Top-Left Floating Author Pill -->
         <div class="floating-author-pill" onclick="openArtistProfileByAuthor('${post.author}')" title="Ver perfil de ${post.author}">
-          <img src="${post.avatar}" alt="${post.author}" />
+          <img src="${getUserAvatarUrl(post.avatar)}" alt="${post.author}" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR_PLACEHOLDER}'" />
           <div class="floating-author-info">
             <div class="flex items-center gap-1.5">
               <span class="name">${post.author}</span>
@@ -737,7 +737,7 @@ function openStoryModal(name, avatar, subtitle) {
   modalBody.innerHTML = `
     <div class="text-center space-y-4">
       <div class="story-ring p-1.5 inline-block">
-        <img src="${avatar}" alt="${name}" class="w-24 h-24 rounded-full object-cover border-2 border-white" />
+        <img src="${getUserAvatarUrl(avatar)}" alt="${name}" class="w-24 h-24 rounded-full object-cover border-2 border-white" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR_PLACEHOLDER}'" />
       </div>
       <div class="pr-10">
         <h3 class="font-display font-bold text-xl text-ink">${name}</h3>

@@ -84,7 +84,7 @@ function openArtistProfile(artistId) {
         <div class="flex items-center justify-between gap-3">
           <div class="flex items-center gap-3.5">
             <div class="relative flex-shrink-0">
-              <img src="${artist.avatar_url}" alt="${artist.name}" class="w-16 h-16 rounded-full object-cover border-2 border-frevo-orange/30 shadow-md bg-white" />
+              <img src="${getUserAvatarUrl(artist.avatar_url)}" alt="${artist.name}" class="w-16 h-16 rounded-full object-cover border-2 border-frevo-orange/30 shadow-md bg-white" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR_PLACEHOLDER}'" />
               <span class="absolute bottom-0 right-0 w-5 h-5 bg-frevo-green text-white rounded-full flex items-center justify-center border-2 border-white font-bold" title="Artista Verificado">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
               </span>
@@ -158,7 +158,7 @@ function openArtistProfile(artistId) {
                     ` : `${index + 1}`}
                   </span>
                   
-                  <img src="${song.cover_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=200&q=80'}" alt="${song.title}" class="w-10 h-10 rounded-xl object-cover flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform" />
+                  <img src="${song.cover_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=200&q=80'}" alt="${song.title}" class="w-10 h-10 rounded-xl object-cover flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=200&q=80'" />
                   
                   <div class="min-w-0 flex-1">
                     <h5 class="font-bold text-xs text-ink truncate group-hover:text-frevo-orange transition-colors">${song.title}</h5>
@@ -178,9 +178,11 @@ function openArtistProfile(artistId) {
                   </button>
                   <button onclick="openScoreModal('${song.title}', '${song.artist}', '${song.id}')" class="btn btn-cyan p-2 rounded-xl font-bold flex-shrink-0" title="Ver Partitura / Baixar PDF" aria-label="Partitura">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                      <polyline points="7 10 12 15 17 10"></polyline>
-                      <line x1="12" y1="15" x2="12" y2="3"></line>
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                      <line x1="16" y1="13" x2="8" y2="13"></line>
+                      <line x1="16" y1="17" x2="8" y2="17"></line>
+                      <polyline points="10 9 9 9 8 9"></polyline>
                     </svg>
                   </button>
                 </div>
@@ -208,7 +210,7 @@ function openArtistProfile(artistId) {
           <div id="artist-albums-carousel" class="albums-carousel-track">
             ${artistAlbums.map(album => `
               <div class="album-card-item" onclick="openAlbumDetails('${album.id}')">
-                <img src="${album.cover_url}" alt="${album.title}" class="album-card-cover" />
+                <img src="${album.cover_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=500&q=80'}" alt="${album.title}" class="album-card-cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=500&q=80'" />
                 <div class="mt-2 text-left">
                   <h5 class="font-bold text-xs text-ink truncate">${album.title}</h5>
                   <p class="text-[10px] text-muted font-mono">${album.release_year} • ${album.tracks_count} faixas</p>
@@ -307,7 +309,7 @@ function renderArtistCardHtml(artist) {
       </button>
 
       <div class="story-ring p-1 mb-2">
-        <img src="${artist.avatar_url}" alt="${artist.name}" loading="lazy" class="w-16 h-16 rounded-full object-cover border-2 border-white" />
+        <img src="${getUserAvatarUrl(artist.avatar_url)}" alt="${artist.name}" loading="lazy" class="w-16 h-16 rounded-full object-cover border-2 border-white" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR_PLACEHOLDER}'" />
       </div>
       <div>
         <h3 class="font-display font-bold text-sm text-ink">${artist.name}</h3>
