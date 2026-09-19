@@ -43,6 +43,7 @@ window.FREVIA_AWS_CONFIG = {
 
 window.FREVIA_CONFIG = {
   AWS: window.FREVIA_AWS_CONFIG,
+  GOOGLE_CLIENT_ID: '1088734918234-frevai-auth.apps.googleusercontent.com',
   GA4_MEASUREMENT_ID: 'G-FREVAI2026',
   DPO_CONTACT_EMAIL: 'privacidade@frevai.com.br',
 

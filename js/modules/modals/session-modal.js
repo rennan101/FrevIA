@@ -405,7 +405,147 @@ async function handleForgotPasswordSubmit(e) {
 }
 
 async function loginWithGoogle() {
-  openGoogleAuthModal();
+  const clientId = window.FREVIA_CONFIG?.GOOGLE_CLIENT_ID || '1088734918234-frevai-auth.apps.googleusercontent.com';
+
+  // 1. Tentar abrir o seletor nativo de contas do Google (Google Identity Services / OAuth2 Token Client)
+  if (window.google && window.google.accounts && window.google.accounts.oauth2) {
+    try {
+      const client = window.google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: 'email profile openid',
+        prompt: 'select_account',
+        callback: async (tokenResponse) => {
+          if (tokenResponse && tokenResponse.access_token) {
+            try {
+              // Obter dados reais da conta Google selecionada
+              const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
+              });
+              if (res.ok) {
+                const googleUser = await res.json();
+                await authenticateWithGoogleProfile({
+                  name: googleUser.name || googleUser.given_name || googleUser.email.split('@')[0],
+                  email: googleUser.email,
+                  avatar: googleUser.picture || null,
+                  sub: googleUser.sub || null
+                });
+                return;
+              }
+            } catch (err) {
+              console.warn('[Google OAuth] Erro ao obter perfil Google:', err);
+            }
+          }
+        },
+        error_callback: (err) => {
+          console.warn('[Google OAuth] Erro ou cancelamento:', err);
+          openGoogleAuthModal();
+        }
+      });
+
+      client.requestAccessToken({ prompt: 'select_account' });
+      return;
+    } catch (err) {
+      console.warn('[Google OAuth] Falha ao invocar Google Token Client:', err);
+    }
+  }
+
+  // 2. Se o SDK do Google ainda não carregou, tentar abrir janela popup oficial do Google
+  try {
+    const redirectUri = encodeURIComponent(window.location.origin + window.location.pathname);
+    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(clientId)}&redirect_uri=${redirectUri}&response_type=token%20id_token&scope=email%20profile%20openid&prompt=select_account&nonce=frevai_${Date.now()}`;
+    const popup = window.open(googleAuthUrl, 'GoogleSignIn', 'width=520,height=630,menubar=no,toolbar=no,location=no');
+    
+    if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+      openGoogleAuthModal();
+    }
+  } catch (e) {
+    openGoogleAuthModal();
+  }
+}
+
+async function authenticateWithGoogleProfile({ name, email, avatar, sub }) {
+  if (!email) return;
+
+  const cleanName = name || email.split('@')[0];
+  const handle = '@' + email.split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g, '');
+  const googleId = sub ? `google_${sub}` : ('google_' + btoa(email).replace(/[^a-zA-Z0-9]/g, '').slice(0, 16));
+  const userAvatar = avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanName)}&background=4285F4&color=fff&rounded=true`;
+
+  if (window.awsService && window.awsService.isConnected()) {
+    try {
+      let dbProfile = await window.awsService.getProfile(googleId);
+      if (!dbProfile) {
+        dbProfile = await window.awsService.upsertProfile({
+          id: googleId,
+          email: email,
+          display_name: cleanName,
+          name: cleanName,
+          handle: handle,
+          role: 'user',
+          avatar_url: userAvatar
+        });
+      }
+
+      const isApprovedArtist = dbProfile?.role === 'artist' && dbProfile?.artist_id;
+      const userRole = dbProfile?.role === 'admin' ? 'admin' : isApprovedArtist ? 'artist' : 'user';
+
+      currentUserSession = {
+        id: googleId,
+        role: userRole,
+        name: dbProfile?.display_name || cleanName,
+        handle: dbProfile?.handle || handle,
+        avatar: dbProfile?.avatar_url || userAvatar,
+        email: email,
+        artist_id: isApprovedArtist ? dbProfile.artist_id : null,
+        artist_request_status: dbProfile?.artist_request_status || 'none',
+        favorites: [],
+        saved_scores: ['s1', 's3'],
+        saved_posts: ['p1', 'p2'],
+        liked_posts: ['p1']
+      };
+
+      const social = await window.awsService.getUserSocialState(googleId);
+      if (social) {
+        currentUserSession.favorites = social.favoriteArtistIds || [];
+      }
+    } catch (err) {
+      console.warn('[Google Auth] Erro ao sincronizar AWS:', err);
+    }
+  }
+
+  if (!currentUserSession || currentUserSession.role === 'guest') {
+    currentUserSession = {
+      id: googleId,
+      role: 'user',
+      name: cleanName,
+      handle: handle,
+      avatar: userAvatar,
+      email: email,
+      artist_id: null,
+      artist_request_status: 'none',
+      favorites: ['a1'],
+      saved_scores: ['s1', 's3'],
+      saved_posts: ['p1', 'p2'],
+      liked_posts: ['p1']
+    };
+  }
+
+  if (typeof currentUserProfile !== 'undefined') {
+    currentUserProfile.name = currentUserSession.name;
+    currentUserProfile.handle = currentUserSession.handle;
+    currentUserProfile.email = email;
+    currentUserProfile.avatar = currentUserSession.avatar;
+  }
+
+  saveCurrentSession();
+  updateProfileUI();
+  closeModal();
+
+  if (typeof showPlatformAlert === 'function') {
+    showPlatformAlert(`Conta Google conectada com sucesso!\n\nBem-vindo ao FrevAI, ${cleanName}!`, 'Login Google');
+  } else if (typeof showAlertModal === 'function') {
+    showAlertModal(`Conta Google conectada com sucesso!\n\nBem-vindo ao FrevAI, ${cleanName}!`);
+  }
 }
 
 function openGoogleAuthModal() {
@@ -463,85 +603,11 @@ async function handleGoogleAuthSubmit(e) {
   const nameInput = document.getElementById('google-auth-name')?.value?.trim();
   if (!email) return;
 
-  const name = nameInput || email.split('@')[0];
-  const handle = '@' + email.split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g, '');
-  const googleId = 'google_' + btoa(email).replace(/[^a-zA-Z0-9]/g, '').slice(0, 16);
-
-  if (window.awsService && window.awsService.isConnected()) {
-    try {
-      let dbProfile = await window.awsService.getProfile(googleId);
-      if (!dbProfile) {
-        dbProfile = await window.awsService.upsertProfile({
-          id: googleId,
-          email: email,
-          display_name: name,
-          name: name,
-          handle: handle,
-          role: 'user',
-          avatar_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4285F4&color=fff&rounded=true`
-        });
-      }
-
-      const isApprovedArtist = dbProfile?.role === 'artist' && dbProfile?.artist_id;
-      const userRole = dbProfile?.role === 'admin' ? 'admin' : isApprovedArtist ? 'artist' : 'user';
-
-      currentUserSession = {
-        id: googleId,
-        role: userRole,
-        name: dbProfile?.display_name || name,
-        handle: dbProfile?.handle || handle,
-        avatar: dbProfile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4285F4&color=fff&rounded=true`,
-        email: email,
-        artist_id: isApprovedArtist ? dbProfile.artist_id : null,
-        artist_request_status: dbProfile?.artist_request_status || 'none',
-        favorites: [],
-        saved_scores: ['s1', 's3'],
-        saved_posts: ['p1', 'p2'],
-        liked_posts: ['p1']
-      };
-
-      const social = await window.awsService.getUserSocialState(googleId);
-      if (social) {
-        currentUserSession.favorites = social.favoriteArtistIds || [];
-      }
-    } catch (err) {
-      console.warn('[Google Auth] Erro ao sincronizar AWS:', err);
-    }
-  }
-
-  if (!currentUserSession || currentUserSession.role === 'guest') {
-    currentUserSession = {
-      id: googleId,
-      role: 'user',
-      name: name,
-      handle: handle,
-      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4285F4&color=fff&rounded=true`,
-      email: email,
-      artist_id: null,
-      artist_request_status: 'none',
-      favorites: ['a1'],
-      saved_scores: ['s1', 's3'],
-      saved_posts: ['p1', 'p2'],
-      liked_posts: ['p1']
-    };
-  }
-
-  if (typeof currentUserProfile !== 'undefined') {
-    currentUserProfile.name = currentUserSession.name;
-    currentUserProfile.handle = currentUserSession.handle;
-    currentUserProfile.email = email;
-    currentUserProfile.avatar = currentUserSession.avatar;
-  }
-
-  saveCurrentSession();
-  updateProfileUI();
-  closeModal();
-
-  if (typeof showPlatformAlert === 'function') {
-    showPlatformAlert(`Conta Google conectada com sucesso!\n\nBem-vindo ao FrevAI, ${name}!`, 'Login Google');
-  } else if (typeof showAlertModal === 'function') {
-    showAlertModal(`Conta Google conectada com sucesso!\n\nBem-vindo ao FrevAI, ${name}!`);
-  }
+  await authenticateWithGoogleProfile({
+    name: nameInput || email.split('@')[0],
+    email: email,
+    avatar: null
+  });
 }
 
 async function handleEmailLogin(e) {
