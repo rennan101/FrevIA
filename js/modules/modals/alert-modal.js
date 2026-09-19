@@ -1,8 +1,9 @@
 // ==============================================================================
-// FREVAI - SISTEMA DE ALERTAS & CONFIRMAÇÕES (ZERO EMOJIS, DESIGN REFINADO)
+// FREVAI - SISTEMA DE ALERTAS, CONFIRMAÇÕES & HISTÓRICO DE MODAIS (ZERO EMOJIS)
 // ==============================================================================
 
 let alertModalResolve = null;
+window.modalHistoryStack = [];
 
 function stripAllEmojis(text) {
   if (typeof text !== 'string') return text;
@@ -99,12 +100,110 @@ function showPlatformAlert(message, title = 'Aviso') {
   return showAlertModal(message, { title });
 }
 
+// -----------------------------------------------------------------------------
+// HISTÓRICO & NAVEGAÇÃO DE MODAIS (PILHA INTELIGENTE COM PRESERVAÇÃO DE DADOS)
+// -----------------------------------------------------------------------------
+
+function updateModalBackBtn() {
+  const backBtn = document.getElementById('global-modal-back-btn');
+  if (!backBtn) return;
+  if (window.modalHistoryStack && window.modalHistoryStack.length > 0) {
+    backBtn.classList.remove('hidden');
+  } else {
+    backBtn.classList.add('hidden');
+  }
+}
+
+function captureCurrentModalState(renderFn = null) {
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+  if (!modal || !modalBody || !modal.classList.contains('open') || !modalBody.innerHTML.trim()) {
+    return null;
+  }
+
+  // Capturar todos os valores de formulário
+  const formValues = {};
+  const inputs = modalBody.querySelectorAll('input, select, textarea');
+  inputs.forEach((input, idx) => {
+    const key = input.id || input.name || `field_${idx}`;
+    if (input.type === 'checkbox' || input.type === 'radio') {
+      formValues[key] = input.checked;
+    } else {
+      formValues[key] = input.value;
+    }
+  });
+
+  return {
+    html: modalBody.innerHTML,
+    formValues: formValues,
+    scrollTop: modalBody.scrollTop || 0,
+    renderFn: renderFn
+  };
+}
+
+function pushModalHistory(renderFn = null) {
+  const state = captureCurrentModalState(renderFn);
+  if (state) {
+    window.modalHistoryStack = window.modalHistoryStack || [];
+    window.modalHistoryStack.push(state);
+    updateModalBackBtn();
+  }
+}
+
+function goBackModal() {
+  if (!window.modalHistoryStack || window.modalHistoryStack.length === 0) {
+    closeModal();
+    return;
+  }
+
+  const previousState = window.modalHistoryStack.pop();
+  updateModalBackBtn();
+
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+  if (!modal || !modalBody) return;
+
+  if (previousState) {
+    if (typeof previousState.renderFn === 'function') {
+      previousState.renderFn();
+    } else if (previousState.html) {
+      modalBody.innerHTML = previousState.html;
+      
+      // Restaurar valores dos campos
+      if (previousState.formValues) {
+        const inputs = modalBody.querySelectorAll('input, select, textarea');
+        inputs.forEach((input, idx) => {
+          const key = input.id || input.name || `field_${idx}`;
+          if (previousState.formValues.hasOwnProperty(key)) {
+            if (input.type === 'checkbox' || input.type === 'radio') {
+              input.checked = !!previousState.formValues[key];
+            } else {
+              input.value = previousState.formValues[key];
+            }
+          }
+        });
+      }
+
+      if (previousState.scrollTop) {
+        modalBody.scrollTop = previousState.scrollTop;
+      }
+    }
+    modal.classList.add('open');
+  } else {
+    closeModal();
+  }
+}
+
 // Fechamento Universal do Modal Global
-function closeModal() {
+function closeModal(clearHistory = true) {
   const modalEl = document.getElementById('global-modal');
   if (modalEl) {
     modalEl.classList.remove('open');
     modalEl.classList.remove('active');
+  }
+  if (clearHistory) {
+    window.modalHistoryStack = [];
+    updateModalBackBtn();
   }
 }
 
@@ -134,3 +233,7 @@ window.showConfirmModal = showConfirmModal;
 window.showPlatformAlert = showPlatformAlert;
 window.stripAllEmojis = stripAllEmojis;
 window.closeModal = closeModal;
+window.pushModalHistory = pushModalHistory;
+window.goBackModal = goBackModal;
+window.updateModalBackBtn = updateModalBackBtn;
+

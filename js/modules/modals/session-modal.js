@@ -307,8 +307,13 @@ function openSessionModal() {
 
 // Modal de Recuperação de Senha (Esqueci minha senha)
 function openForgotPasswordModal() {
+  if (typeof pushModalHistory === 'function') pushModalHistory();
+
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
+  if (!modal || !modalBody) return;
+
+  const hasHistory = window.modalHistoryStack && window.modalHistoryStack.length > 0;
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left">
@@ -332,7 +337,8 @@ function openForgotPasswordModal() {
       </form>
 
       <div class="text-center pt-2 border-t border-gray-100">
-        <button type="button" onclick="openSessionModal(); switchAuthTab('login');" class="text-xs text-muted hover:text-ink font-semibold transition-colors">
+        <button type="button" onclick="${hasHistory ? 'goBackModal()' : 'openSessionModal(); switchAuthTab(\'login\');'}" class="text-xs text-muted hover:text-ink font-semibold transition-colors flex items-center justify-center gap-1.5 mx-auto">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
           Voltar para o Login
         </button>
       </div>
@@ -722,8 +728,13 @@ function openArtistRequestModal() {
     return;
   }
 
+  if (typeof pushModalHistory === 'function') pushModalHistory();
+
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
+  if (!modal || !modalBody) return;
+
+  const hasHistory = window.modalHistoryStack && window.modalHistoryStack.length > 0;
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left">
@@ -778,7 +789,9 @@ function openArtistRequestModal() {
         </div>
 
         <div class="flex gap-2 pt-2">
-          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl">Cancelar</button>
+          <button type="button" onclick="${hasHistory ? 'goBackModal()' : 'closeModal()'}" class="btn btn-outline flex-1 text-xs rounded-xl">
+            ${hasHistory ? 'Voltar' : 'Cancelar'}
+          </button>
           <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl shadow-md font-bold">Enviar para Curadoria</button>
         </div>
       </form>

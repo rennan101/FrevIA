@@ -290,9 +290,24 @@ async function submitNewAlbum(e) {
       setProgress(trackProgress, `Processando faixa ${i + 1} de ${totalTracks}: "${track.title}"...`);
 
       let audioUrl = 'https://assets.mixkit.co/music/preview/mixkit-brazilian-carnival-brass-band-1120.mp3';
-      if (track.file && window.awsService) {
-        const uploadedAudio = await window.awsService.uploadAudio(track.file, artistId);
-        if (uploadedAudio) audioUrl = uploadedAudio;
+      let trackDuration = 180;
+
+      if (track.file) {
+        try {
+          if (window.FrevoAudioEngine && typeof window.FrevoAudioEngine.decodeAudioFile === 'function') {
+            const audioBuffer = await window.FrevoAudioEngine.decodeAudioFile(track.file);
+            if (audioBuffer && audioBuffer.duration && !isNaN(audioBuffer.duration)) {
+              trackDuration = Math.max(10, Math.round(audioBuffer.duration));
+            }
+          }
+        } catch (e) {
+          console.warn('[Album Track Duration]:', e);
+        }
+
+        if (window.awsService) {
+          const uploadedAudio = await window.awsService.uploadAudio(track.file, artistId);
+          if (uploadedAudio) audioUrl = uploadedAudio;
+        }
       }
 
       const songObj = {
@@ -306,7 +321,7 @@ async function submitNewAlbum(e) {
         score_path: 'partitura-oficial.pdf',
         audio_url: audioUrl,
         cover_url: newAlbum.cover_url,
-        duration_seconds: 180,
+        duration_seconds: trackDuration,
         plays_count: 1,
         is_popular: true,
         album_id: newAlbum.id,
@@ -457,6 +472,8 @@ async function deleteShow(showId) {
 }
 
 function openAlbumDetails(albumId) {
+  if (typeof pushModalHistory === 'function') pushModalHistory();
+
   const album = (DB.albums || []).find(a => a.id === albumId);
   if (!album) return;
 
@@ -464,6 +481,7 @@ function openAlbumDetails(albumId) {
   const modalBody = document.getElementById('modal-body');
   if (!modal || !modalBody) return;
 
+  const hasHistory = window.modalHistoryStack && window.modalHistoryStack.length > 0;
   const tracks = album.tracks || [];
 
   modalBody.innerHTML = `
@@ -519,8 +537,14 @@ function openAlbumDetails(albumId) {
         }).join('')}
       </div>
 
-      <div class="pt-2">
-        <button type="button" onclick="closeModal()" class="btn btn-outline w-full text-xs rounded-xl py-2.5 font-bold">
+      <div class="pt-2 flex gap-2">
+        ${hasHistory ? `
+          <button type="button" onclick="goBackModal()" class="btn btn-outline flex-1 text-xs rounded-xl py-2.5 font-bold flex items-center justify-center gap-1.5">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            Voltar
+          </button>
+        ` : ''}
+        <button type="button" onclick="${hasHistory ? 'goBackModal()' : 'closeModal()'}" class="btn btn-outline flex-1 text-xs rounded-xl py-2.5 font-bold">
           Fechar
         </button>
       </div>

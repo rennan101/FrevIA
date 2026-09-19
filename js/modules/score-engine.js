@@ -414,10 +414,14 @@ function generateAndDownloadScorePdf(song) {
 }
 
 function openScoreModal(title, artist, songId) {
+  if (typeof pushModalHistory === 'function') pushModalHistory();
+
   const song = (window.DB?.songs || []).find(s => s.id === songId) || { id: songId, title, artist, genre: 'Frevo de Rua', downloads_count: 120 };
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
+  if (!modal || !modalBody) return;
 
+  const hasHistory = window.modalHistoryStack && window.modalHistoryStack.length > 0;
   const profile = getSongMusicalProfile(song);
   const isPlayingThis = (window.currentlyPlayingSongId === song.id);
 
@@ -472,24 +476,32 @@ function openScoreModal(title, artist, songId) {
         </div>
       </div>
 
-      ${canDownloadSong(song) ? `
-        <button onclick="downloadScore('${song.id}')" class="btn btn-cyan w-full text-xs rounded-xl shadow-md py-3 font-bold flex items-center justify-center gap-2">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7 10 12 15 17 10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-          </svg>
-          Baixar Partitura em PDF
-        </button>
-      ` : `
-        <div class="p-3 bg-gray-50 border border-gray-200 rounded-xl text-center text-xs text-muted flex items-center justify-center gap-2 font-medium">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-400">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-          </svg>
-          Download não habilitado pelo maestro desta obra
-        </div>
-      `}
+      <div class="flex items-center gap-2 pt-2 border-t border-gray-100">
+        ${hasHistory ? `
+          <button type="button" onclick="goBackModal()" class="btn btn-outline text-xs rounded-xl py-3 px-4 font-bold flex items-center justify-center gap-1.5 flex-shrink-0">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            Voltar
+          </button>
+        ` : ''}
+        ${canDownloadSong(song) ? `
+          <button onclick="downloadScore('${song.id}')" class="btn btn-cyan flex-1 text-xs rounded-xl shadow-md py-3 font-bold flex items-center justify-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Baixar Partitura em PDF
+          </button>
+        ` : `
+          <div class="flex-1 p-3 bg-gray-50 border border-gray-200 rounded-xl text-center text-xs text-muted flex items-center justify-center gap-2 font-medium">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-400">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            Download não habilitado pelo maestro
+          </div>
+        `}
+      </div>
     </div>
   `;
 

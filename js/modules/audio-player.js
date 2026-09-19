@@ -6,14 +6,73 @@ let currentPlayingSong = null;
 let currentPlaylist = [];
 let currentPlaylistIndex = 0;
 let isAudioPlaying = false;
-let audioSeekInterval = null;
+let playerProgressTickerId = null;
 
 let globalAudioCtx = null;
 let currentlyPlayingSongId = null;
 let activeOscillatorsList = [];
 let activeAudioTimeouts = [];
+let synthPlaybackStartTime = 0;
+let synthPlaybackDuration = 0;
+let isSynthPlaying = false;
+
+function formatAudioTime(sec) {
+  if (isNaN(sec) || sec === null || sec === undefined || sec < 0 || !isFinite(sec)) return '0:00';
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+function updatePlayerProgressUI(currentTime, totalDuration) {
+  const curTime = Math.max(0, isFinite(currentTime) ? currentTime : 0);
+  const durTime = Math.max(1, isFinite(totalDuration) && totalDuration > 0 ? totalDuration : (currentPlayingSong?.duration_seconds || 180));
+
+  const progressFill = document.getElementById('player-progress-fill');
+  const timeCurEl = document.getElementById('player-time-current');
+  const timeTotEl = document.getElementById('player-time-total');
+
+  if (progressFill) {
+    const pct = Math.min(100, Math.max(0, (curTime / durTime) * 100));
+    progressFill.style.width = `${pct}%`;
+  }
+
+  if (timeCurEl) timeCurEl.innerText = formatAudioTime(curTime);
+  if (timeTotEl) timeTotEl.innerText = formatAudioTime(durTime);
+}
+
+function startPlayerProgressTicker() {
+  stopPlayerProgressTicker();
+  playerProgressTickerId = setInterval(() => {
+    const audioEl = document.getElementById('frevia-audio-element');
+    if (audioEl && !audioEl.paused && isAudioPlaying) {
+      const cur = audioEl.currentTime || 0;
+      const dur = (audioEl.duration && isFinite(audioEl.duration) && audioEl.duration > 0)
+        ? audioEl.duration
+        : (currentPlayingSong?.duration_seconds || 180);
+      updatePlayerProgressUI(cur, dur);
+    } else if (isSynthPlaying && globalAudioCtx) {
+      const cur = Math.max(0, globalAudioCtx.currentTime - synthPlaybackStartTime);
+      const dur = synthPlaybackDuration || 15;
+      updatePlayerProgressUI(cur, dur);
+      if (cur >= dur) {
+        stopFrevoAudioPlayback();
+      }
+    }
+  }, 100);
+}
+
+function stopPlayerProgressTicker() {
+  if (playerProgressTickerId) {
+    clearInterval(playerProgressTickerId);
+    playerProgressTickerId = null;
+  }
+}
 
 function stopFrevoAudioPlayback() {
+  isSynthPlaying = false;
+  synthPlaybackStartTime = 0;
+  synthPlaybackDuration = 0;
+
   if (activeOscillatorsList && activeOscillatorsList.length > 0) {
     activeOscillatorsList.forEach(osc => {
       try {
@@ -42,13 +101,13 @@ function stopFrevoAudioPlayback() {
     }
     currentlyPlayingSongId = null;
   }
-}
 
-function formatAudioTime(sec) {
-  if (isNaN(sec) || sec < 0) return '0:00';
-  const m = Math.floor(sec / 60);
-  const s = Math.floor(sec % 60);
-  return `${m}:${s.toString().padStart(2, '0')}`;
+  const audioEl = document.getElementById('frevia-audio-element');
+  if (!audioEl || audioEl.paused) {
+    isAudioPlaying = false;
+    stopPlayerProgressTicker();
+    updateAudioPlayerUI();
+  }
 }
 
 // Inicialização dos Listeners do Elemento <audio> Nativo
@@ -56,39 +115,49 @@ function initFrevoAudioEngine() {
   const audioEl = document.getElementById('frevia-audio-element');
   if (!audioEl) return;
 
-  audioEl.addEventListener('play', () => {
+  const handlePlayState = () => {
     isAudioPlaying = true;
+    startPlayerProgressTicker();
     updateAudioPlayerUI();
-  });
+  };
 
-  audioEl.addEventListener('pause', () => {
-    isAudioPlaying = false;
+  const handlePauseState = () => {
+    if (!isSynthPlaying) {
+      isAudioPlaying = false;
+      stopPlayerProgressTicker();
+    }
     updateAudioPlayerUI();
-  });
+  };
+
+  const syncTime = () => {
+    const curTime = audioEl.currentTime || 0;
+    const durTime = (audioEl.duration && isFinite(audioEl.duration) && audioEl.duration > 0)
+      ? audioEl.duration
+      : (currentPlayingSong ? currentPlayingSong.duration_seconds : 180) || 180;
+    updatePlayerProgressUI(curTime, durTime);
+  };
+
+  audioEl.addEventListener('play', handlePlayState);
+  audioEl.addEventListener('playing', handlePlayState);
+  audioEl.addEventListener('pause', handlePauseState);
 
   audioEl.addEventListener('ended', () => {
+    isAudioPlaying = false;
+    stopPlayerProgressTicker();
+    updatePlayerProgressUI(0, currentPlayingSong?.duration_seconds || 180);
     nextTrack();
   });
 
-  audioEl.addEventListener('timeupdate', () => {
-    const curTime = audioEl.currentTime || 0;
-    const durTime = audioEl.duration || (currentPlayingSong ? currentPlayingSong.duration_seconds : 180) || 180;
-    
-    const progressFill = document.getElementById('player-progress-fill');
-    const timeCurEl = document.getElementById('player-time-current');
-    const timeTotEl = document.getElementById('player-time-total');
-
-    if (progressFill) {
-      const pct = (curTime / durTime) * 100;
-      progressFill.style.width = `${Math.min(pct, 100)}%`;
-    }
-
-    if (timeCurEl) timeCurEl.innerText = formatAudioTime(curTime);
-    if (timeTotEl) timeTotEl.innerText = formatAudioTime(durTime);
-  });
+  audioEl.addEventListener('timeupdate', syncTime);
+  audioEl.addEventListener('loadedmetadata', syncTime);
+  audioEl.addEventListener('durationchange', syncTime);
+  audioEl.addEventListener('canplay', syncTime);
 
   audioEl.addEventListener('error', (err) => {
-    console.warn('[FrevoAudio] Falha ao carregar arquivo de áudio remoto, usando sintetização:', err);
+    console.warn('[FrevoAudio] Falha ao carregar arquivo de áudio no elemento <audio>:', err);
+    if (currentPlayingSong && isAudioPlaying) {
+      playFrevoAudioPreview(currentPlayingSong.id);
+    }
   });
 }
 
@@ -123,10 +192,23 @@ function playSong(songId, playlist = null) {
   if (audioEl) {
     if (song.audio_url) {
       audioEl.src = song.audio_url;
-      audioEl.play().catch(e => {
-        console.log('[FrevoAudio] Autoplay restrito ou arquivo remoto, fallback sintetizador:', e);
-        playFrevoAudioPreview(song.id);
-      });
+      audioEl.currentTime = 0;
+      updatePlayerProgressUI(0, song.duration_seconds || 180);
+      
+      const playPromise = audioEl.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            isAudioPlaying = true;
+            startPlayerProgressTicker();
+            updateAudioPlayerUI();
+          })
+          .catch(e => {
+            console.log('[FrevoAudio] Autoplay restrito ou formato:', e);
+            isAudioPlaying = false;
+            updateAudioPlayerUI();
+          });
+      }
     } else {
       playFrevoAudioPreview(song.id);
     }
@@ -154,19 +236,31 @@ function togglePlayAudio() {
     return;
   }
 
-  if (audioEl) {
+  if (audioEl && audioEl.src) {
     if (audioEl.paused) {
-      audioEl.play().catch(e => console.warn(e));
-      isAudioPlaying = true;
+      audioEl.play()
+        .then(() => {
+          isAudioPlaying = true;
+          startPlayerProgressTicker();
+          updateAudioPlayerUI();
+        })
+        .catch(e => {
+          console.warn('[FrevoAudio] Play falhou:', e);
+          if (currentPlayingSong) playFrevoAudioPreview(currentPlayingSong.id);
+        });
     } else {
       audioEl.pause();
       isAudioPlaying = false;
+      stopPlayerProgressTicker();
+      updateAudioPlayerUI();
     }
-  } else {
-    isAudioPlaying = !isAudioPlaying;
+  } else if (isSynthPlaying) {
+    stopFrevoAudioPlayback();
+    isAudioPlaying = false;
+    updateAudioPlayerUI();
+  } else if (currentPlayingSong) {
+    playSong(currentPlayingSong.id);
   }
-
-  updateAudioPlayerUI();
 }
 
 function nextTrack() {
@@ -194,18 +288,23 @@ function prevTrack() {
 function seekAudio(e) {
   const progressBar = document.getElementById('player-progress-bar');
   const audioEl = document.getElementById('frevia-audio-element');
-  if (!progressBar || !audioEl) return;
+  if (!progressBar) return;
 
   const rect = progressBar.getBoundingClientRect();
   const clickX = e.clientX - rect.left;
-  const width = rect.width;
+  const width = rect.width || 1;
   const pct = Math.max(0, Math.min(1, clickX / width));
 
-  const targetTime = pct * (audioEl.duration || (currentPlayingSong ? currentPlayingSong.duration_seconds : 180) || 180);
-  audioEl.currentTime = targetTime;
+  const totalDur = (audioEl && audioEl.duration && isFinite(audioEl.duration) && audioEl.duration > 0)
+    ? audioEl.duration
+    : (currentPlayingSong ? currentPlayingSong.duration_seconds : 180) || 180;
 
-  const progressFill = document.getElementById('player-progress-fill');
-  if (progressFill) progressFill.style.width = `${pct * 100}%`;
+  const targetTime = pct * totalDur;
+
+  if (audioEl && audioEl.src && isFinite(audioEl.duration) && audioEl.duration > 0) {
+    audioEl.currentTime = targetTime;
+  }
+  updatePlayerProgressUI(targetTime, totalDur);
 }
 
 function setAudioVolume(val) {
@@ -229,13 +328,39 @@ function updateAudioPlayerUI() {
   if (artistEl) artistEl.innerText = currentPlayingSong.artist || 'Artista Pernambucano';
 
   if (playIcon && pauseIcon) {
-    if (isAudioPlaying) {
+    if (isAudioPlaying || isSynthPlaying) {
       playIcon.classList.add('hidden');
       pauseIcon.classList.remove('hidden');
     } else {
       playIcon.classList.remove('hidden');
       pauseIcon.classList.add('hidden');
     }
+  }
+}
+
+// Fechar Completamente o Player Global de Música
+function closeAudioPlayer() {
+  const audioEl = document.getElementById('frevia-audio-element');
+  if (audioEl) {
+    audioEl.pause();
+    audioEl.currentTime = 0;
+  }
+  stopFrevoAudioPlayback();
+  stopPlayerProgressTicker();
+  isAudioPlaying = false;
+  isSynthPlaying = false;
+
+  updatePlayerProgressUI(0, currentPlayingSong?.duration_seconds || 180);
+  updateAudioPlayerUI();
+
+  const playerBar = document.getElementById('apple-audio-player');
+  if (playerBar) {
+    playerBar.classList.add('hidden');
+  }
+
+  const lyricsModal = document.getElementById('apple-lyrics-modal');
+  if (lyricsModal) {
+    lyricsModal.classList.add('hidden');
   }
 }
 
@@ -317,7 +442,7 @@ async function playFrevoAudioPreview(songIdOrTitle) {
     const song = (window.DB?.songs || []).find(s => s.id === songIdOrTitle || s.title === songIdOrTitle) || window.DB?.songs?.[0];
     if (!song) return;
 
-    if (currentlyPlayingSongId === song.id) {
+    if (currentlyPlayingSongId === song.id && isSynthPlaying) {
       stopFrevoAudioPlayback();
       return;
     }
@@ -338,6 +463,12 @@ async function playFrevoAudioPreview(songIdOrTitle) {
     }
 
     currentlyPlayingSongId = song.id;
+    currentPlayingSong = song;
+
+    const playerBar = document.getElementById('apple-audio-player');
+    if (playerBar) {
+      playerBar.classList.remove('hidden');
+    }
 
     const btn = document.getElementById(`btn-audio-preview-${song.id}`);
     if (btn) {
@@ -359,6 +490,7 @@ async function playFrevoAudioPreview(songIdOrTitle) {
 
     let currentTime = globalAudioCtx.currentTime + 0.05;
     let noteStartTime = currentTime;
+    synthPlaybackStartTime = globalAudioCtx.currentTime;
 
     // 1. Tocar Melodia dos Metais / Instrumento Principal
     melodyNotes.forEach((n, idx) => {
@@ -405,7 +537,14 @@ async function playFrevoAudioPreview(songIdOrTitle) {
       noteStartTime += durSeconds + (0.04 * beatDuration);
     });
 
-    const totalDurationMs = (noteStartTime - globalAudioCtx.currentTime) * 1000;
+    synthPlaybackDuration = Math.max(1, noteStartTime - globalAudioCtx.currentTime);
+    isSynthPlaying = true;
+    isAudioPlaying = true;
+
+    startPlayerProgressTicker();
+    updateAudioPlayerUI();
+
+    const totalDurationMs = synthPlaybackDuration * 1000;
     const endTimeout = setTimeout(() => {
       stopFrevoAudioPlayback();
     }, totalDurationMs);
@@ -586,4 +725,7 @@ window.updateLyricsModalContent = updateLyricsModalContent;
 window.openEditLyricsModal = openEditLyricsModal;
 window.playFrevoAudioPreview = playFrevoAudioPreview;
 window.stopFrevoAudioPlayback = stopFrevoAudioPlayback;
+window.closeAudioPlayer = closeAudioPlayer;
+window.startPlayerProgressTicker = startPlayerProgressTicker;
+window.stopPlayerProgressTicker = stopPlayerProgressTicker;
 window.FrevoAudioEngine = FrevoAudioEngine;

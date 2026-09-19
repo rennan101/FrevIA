@@ -189,14 +189,31 @@ async function submitNewSong(e) {
 
   try {
     const artistId = currentUserSession.artist_id || 'general';
+    let durationSeconds = 180;
 
-    // 1. Upload de Áudio MP3
-    if (audioFileInput && audioFileInput.files && audioFileInput.files[0] && window.awsService) {
-      setUploadProgress(20, 'Enviando áudio para Amazon S3...');
-      const uploadedAudio = await window.awsService.uploadAudio(audioFileInput.files[0], artistId, (pct) => {
-        setUploadProgress(Math.floor(20 + (pct * 0.4)), `Enviando áudio (${pct}%)...`);
-      });
-      if (uploadedAudio) audioUrl = uploadedAudio;
+    // 1. Upload de Áudio MP3 / WAV e Detecção de Duração
+    if (audioFileInput && audioFileInput.files && audioFileInput.files[0]) {
+      const audioFile = audioFileInput.files[0];
+      setUploadProgress(20, 'Processando e analisando áudio...');
+
+      // Detectar duração precisa
+      try {
+        if (window.FrevoAudioEngine && typeof window.FrevoAudioEngine.decodeAudioFile === 'function') {
+          const audioBuffer = await window.FrevoAudioEngine.decodeAudioFile(audioFile);
+          if (audioBuffer && audioBuffer.duration && !isNaN(audioBuffer.duration)) {
+            durationSeconds = Math.max(10, Math.round(audioBuffer.duration));
+          }
+        }
+      } catch (e) {
+        console.warn('[Song Upload] Duração padrão adotada:', e);
+      }
+
+      if (window.awsService) {
+        const uploadedAudio = await window.awsService.uploadAudio(audioFile, artistId, (pct) => {
+          setUploadProgress(Math.floor(20 + (pct * 0.4)), `Processando áudio (${pct}%)...`);
+        });
+        if (uploadedAudio) audioUrl = uploadedAudio;
+      }
     }
     if (!audioUrl) {
       audioUrl = 'https://assets.mixkit.co/music/preview/mixkit-brazilian-carnival-brass-band-1120.mp3';
@@ -232,7 +249,7 @@ async function submitNewSong(e) {
       score_path: scoreFileUrl || 'partitura-oficial.pdf',
       audio_url: audioUrl,
       cover_url: coverUrl,
-      duration_seconds: 180,
+      duration_seconds: durationSeconds,
       plays_count: 1,
       is_popular: true,
       album_id: albumId,

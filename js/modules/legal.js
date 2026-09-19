@@ -22,9 +22,13 @@ function saveTakedownsLocal() {
 // 1. TERMOS DE USO DA PLATAFORMA
 // -----------------------------------------------------------------------------
 function openTermsModal() {
+  if (typeof pushModalHistory === 'function') pushModalHistory();
+
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
   if (!modal || !modalBody) return;
+
+  const hasHistory = window.modalHistoryStack && window.modalHistoryStack.length > 0;
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left max-h-[85vh] overflow-y-auto pr-1">
@@ -72,7 +76,13 @@ function openTermsModal() {
       </div>
 
       <div class="pt-2 border-t border-gray-100 flex gap-2">
-        <button type="button" onclick="closeModal()" class="btn btn-primary w-full text-xs rounded-xl py-2.5 font-bold shadow-md">
+        ${hasHistory ? `
+          <button type="button" onclick="goBackModal()" class="btn btn-outline flex-1 text-xs rounded-xl py-2.5 font-bold flex items-center justify-center gap-1.5">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            Voltar
+          </button>
+        ` : ''}
+        <button type="button" onclick="${hasHistory ? 'goBackModal()' : 'closeModal()'}" class="btn btn-primary flex-1 text-xs rounded-xl py-2.5 font-bold shadow-md">
           Entendido
         </button>
       </div>
@@ -86,10 +96,13 @@ function openTermsModal() {
 // 2. POLÍTICA DE PRIVACIDADE & LGPD
 // -----------------------------------------------------------------------------
 function openPrivacyModal() {
+  if (typeof pushModalHistory === 'function') pushModalHistory();
+
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
   if (!modal || !modalBody) return;
 
+  const hasHistory = window.modalHistoryStack && window.modalHistoryStack.length > 0;
   const dpoEmail = window.FREVIA_CONFIG?.DPO_CONTACT_EMAIL || 'privacidade@frevai.com.br';
 
   modalBody.innerHTML = `
@@ -143,7 +156,13 @@ function openPrivacyModal() {
       </div>
 
       <div class="pt-2 border-t border-gray-100 flex gap-2">
-        <button type="button" onclick="closeModal()" class="btn btn-primary w-full text-xs rounded-xl py-2.5 font-bold shadow-md">
+        ${hasHistory ? `
+          <button type="button" onclick="goBackModal()" class="btn btn-outline flex-1 text-xs rounded-xl py-2.5 font-bold flex items-center justify-center gap-1.5">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            Voltar
+          </button>
+        ` : ''}
+        <button type="button" onclick="${hasHistory ? 'goBackModal()' : 'closeModal()'}" class="btn btn-primary flex-1 text-xs rounded-xl py-2.5 font-bold shadow-md">
           Compreendido
         </button>
       </div>
@@ -157,9 +176,13 @@ function openPrivacyModal() {
 // 3. TERMO DE CESSÃO E LICENCIAMENTO AUTORAL PARA MESTRES & ARTISTAS
 // -----------------------------------------------------------------------------
 function openCopyrightModal() {
+  if (typeof pushModalHistory === 'function') pushModalHistory();
+
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
   if (!modal || !modalBody) return;
+
+  const hasHistory = window.modalHistoryStack && window.modalHistoryStack.length > 0;
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left max-h-[85vh] overflow-y-auto pr-1">
@@ -199,7 +222,13 @@ function openCopyrightModal() {
       </div>
 
       <div class="pt-2 border-t border-gray-100 flex gap-2">
-        <button type="button" onclick="closeModal()" class="btn btn-primary w-full text-xs rounded-xl py-2.5 font-bold shadow-md">
+        ${hasHistory ? `
+          <button type="button" onclick="goBackModal()" class="btn btn-outline flex-1 text-xs rounded-xl py-2.5 font-bold flex items-center justify-center gap-1.5">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            Voltar
+          </button>
+        ` : ''}
+        <button type="button" onclick="${hasHistory ? 'goBackModal()' : 'closeModal()'}" class="btn btn-primary flex-1 text-xs rounded-xl py-2.5 font-bold shadow-md">
           Entendido
         </button>
       </div>
@@ -213,10 +242,13 @@ function openCopyrightModal() {
 // 4. CANAL DE DENÚNCIA / TAKEDOWN DE CONTEÚDO (DIREITOS AUTORAIS / INADEQUADO)
 // -----------------------------------------------------------------------------
 function openTakedownModal(targetId = '', targetType = 'geral', targetTitle = '') {
+  if (typeof pushModalHistory === 'function') pushModalHistory();
+
   const modal = document.getElementById('global-modal');
   const modalBody = document.getElementById('modal-body');
   if (!modal || !modalBody) return;
 
+  const hasHistory = window.modalHistoryStack && window.modalHistoryStack.length > 0;
   const currentEmail = (window.currentUserSession && window.currentUserSession.email) || '';
   const currentName = (window.currentUserSession && window.currentUserSession.name) || '';
 
@@ -278,8 +310,8 @@ function openTakedownModal(targetId = '', targetType = 'geral', targetTitle = ''
         </div>
 
         <div class="flex gap-2 pt-2 border-t border-gray-100">
-          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl py-2.5 font-bold">
-            Cancelar
+          <button type="button" onclick="${hasHistory ? 'goBackModal()' : 'closeModal()'}" class="btn btn-outline flex-1 text-xs rounded-xl py-2.5 font-bold">
+            ${hasHistory ? 'Voltar' : 'Cancelar'}
           </button>
           <button type="submit" class="btn bg-rose-600 hover:bg-rose-700 text-white flex-1 text-xs rounded-xl py-2.5 font-bold shadow-md">
             Enviar Notificação

@@ -989,38 +989,63 @@ class AwsService {
       const fileName = `audio/${artistId}/${Date.now()}_${cleanName}.${ext}`;
       const s3UploadUrl = `${this.s3BaseUrl}/${fileName}`;
 
-      // Tenta upload HTTP direto com timeout de 8 segundos
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      // Se houver conexão AWS ativa, tenta PUT S3
+      if (this.isConnected()) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 6000);
 
-      if (onProgress) onProgress(45);
-      const res = await fetch(s3UploadUrl, {
-        method: 'PUT',
-        body: file,
-        signal: controller.signal,
-        headers: {
-          'Content-Type': file.type || 'audio/mpeg'
+        if (onProgress) onProgress(45);
+        const res = await fetch(s3UploadUrl, {
+          method: 'PUT',
+          body: file,
+          signal: controller.signal,
+          headers: {
+            'Content-Type': file.type || 'audio/mpeg'
+          }
+        }).catch(err => {
+          console.warn('[AWS Audio Upload] Fetch S3 falhou ou sem credenciais:', err);
+          return null;
+        });
+        clearTimeout(timeoutId);
+
+        if (res && res.ok) {
+          if (onProgress) onProgress(100);
+          return s3UploadUrl;
         }
-      }).catch(err => {
-        console.warn('[AWS Audio Upload] Fetch falhou ou timed out:', err);
-        return null;
-      });
-      clearTimeout(timeoutId);
-
-      if (onProgress) onProgress(80);
-
-      if (res && res.ok) {
-        if (onProgress) onProgress(100);
-        return s3UploadUrl;
       }
 
-      // Se falhar ou timeout, usar URL estática estruturada ou FileReader Blob URL
+      // Se offline / ambiente local ou falha no S3: converter para Data URL garantindo que o som seja 100% autêntico
+      if (onProgress) onProgress(75);
+      const dataUrl = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => {
+          try {
+            resolve(URL.createObjectURL(file));
+          } catch (e) {
+            resolve(null);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+
       if (onProgress) onProgress(100);
-      return s3UploadUrl;
+      return dataUrl || (window.URL ? URL.createObjectURL(file) : s3UploadUrl);
     } catch (err) {
-      console.warn('[AWS Audio Upload] Erro:', err);
-      if (onProgress) onProgress(100);
-      return `${this.s3BaseUrl}/audio/${artistId}/${Date.now()}_musica.mp3`;
+      console.warn('[AWS Audio Upload] Fallback para DataURL:', err);
+      try {
+        const dataUrl = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => resolve(URL.createObjectURL(file));
+          reader.readAsDataURL(file);
+        });
+        if (onProgress) onProgress(100);
+        return dataUrl;
+      } catch (e) {
+        if (onProgress) onProgress(100);
+        return URL.createObjectURL(file);
+      }
     }
   }
 
