@@ -206,17 +206,25 @@ function openNotificationsModal() {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   modalBody.innerHTML = `
-    <div class="space-y-4 text-left">
-      <div class="flex items-center justify-between pb-3 border-b border-gray-100 pr-8">
-        <div>
-          <h3 class="font-display font-bold text-lg text-ink">Notificações</h3>
-          <p class="text-xs text-muted">${unreadCount > 0 ? `${unreadCount} não lida(s)` : 'Tudo em dia!'}</p>
+    <div class="space-y-4 text-left max-h-[85vh] overflow-y-auto pr-1">
+      <div class="flex items-start gap-3.5 pb-3 border-b border-gray-100 pr-10">
+        <div class="w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
         </div>
-        ${unreadCount > 0 ? `
-          <button onclick="markAllNotificationsAsRead()" class="text-[11px] font-bold text-frevo-orange hover:underline">
-            Marcar todas como lidas
-          </button>
-        ` : ''}
+        <div class="flex-1 min-w-0 flex items-center justify-between">
+          <div>
+            <h3 class="font-display font-bold text-lg text-ink">Notificações</h3>
+            <p class="text-xs text-muted">${unreadCount > 0 ? `${unreadCount} não lida(s)` : 'Tudo em dia!'}</p>
+          </div>
+          ${unreadCount > 0 ? `
+            <button onclick="markAllNotificationsAsRead()" class="text-[11px] font-bold text-frevo-orange hover:underline">
+              Marcar lidas
+            </button>
+          ` : ''}
+        </div>
       </div>
 
       <div class="space-y-2.5 max-h-72 overflow-y-auto pr-1">

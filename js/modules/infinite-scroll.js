@@ -7,7 +7,7 @@ const InfiniteScrollManager = {
   observer: null,
   mediaObserver: null,
   state: {
-    feed: { page: 1, limit: 6 },
+    feed: { page: 1, limit: 4 },
     artists: { page: 1, limit: 8 },
     songs: { page: 1, limit: 8 },
     steps: { page: 1, limit: 6 },
@@ -66,10 +66,10 @@ const InfiniteScrollManager = {
   // Otimização de renderização virtual via CSS Containment & Content Visibility
   // Permite renderizar 500+ itens sem lag ou engasgo de layout no mobile
   applyVirtualContentOptimization() {
-    const feedCards = document.querySelectorAll('#feed-list > div');
+    const feedCards = document.querySelectorAll('#feed-list > div, .feed-card-immersive, #feed-items-stream > article');
     feedCards.forEach(card => {
       card.style.contentVisibility = 'auto';
-      card.style.containIntrinsicSize = '0 400px';
+      card.style.containIntrinsicSize = '0 520px';
     });
 
     const songCards = document.querySelectorAll('#songs-list > div, .song-card-item');

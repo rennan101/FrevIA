@@ -16,20 +16,29 @@ function openSubmitSongModal() {
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left">
-      <div class="pb-3 border-b border-gray-100 text-center">
-        <h3 class="font-display font-bold text-lg text-ink text-center">Cadastrar Nova Música</h3>
+      <div class="flex items-center gap-3 pb-3 border-b border-gray-100 pr-8">
+        <div class="w-12 h-12 rounded-2xl bg-frevo-orange/10 text-frevo-orange flex items-center justify-center flex-shrink-0 shadow-sm">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-display font-bold text-lg text-ink">Cadastrar Nova Música</h3>
+          <p class="text-xs text-muted">Adicione faixas de áudio, partituras e letras ao acervo oficial</p>
+        </div>
       </div>
 
-      <form id="new-song-form" onsubmit="submitNewSong(event)" class="space-y-3">
+      <form id="new-song-form" onsubmit="submitNewSong(event)" class="space-y-3.5">
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Título da Música *</label>
-          <input type="text" id="song-title-input" required placeholder="Ex: Passo da Fervura" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+          <label class="block text-xs font-bold text-ink uppercase tracking-wider mb-1">Título da Música *</label>
+          <input type="text" id="song-title-input" required placeholder="Ex: Passo da Fervura" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
         </div>
 
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           <div>
-            <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Gênero Tradicional</label>
-            <select id="song-genre-input" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange">
+            <label class="block text-xs font-bold text-ink uppercase tracking-wider mb-1">Gênero Tradicional</label>
+            <select id="song-genre-input" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition">
               <option value="Frevo de Rua">Frevo de Rua</option>
               <option value="Frevo Canção">Frevo Canção</option>
               <option value="Frevo de Bloco">Frevo de Bloco</option>
@@ -38,8 +47,8 @@ function openSubmitSongModal() {
             </select>
           </div>
           <div>
-            <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Vincular a Álbum</label>
-            <select id="song-album-input" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange">
+            <label class="block text-xs font-bold text-ink uppercase tracking-wider mb-1">Vincular a Álbum</label>
+            <select id="song-album-input" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition">
               <option value="">(Single / Sem Álbum)</option>
               ${artistAlbums.map(alb => `<option value="${alb.id}">${alb.title}</option>`).join('')}
             </select>
@@ -48,75 +57,78 @@ function openSubmitSongModal() {
 
         <!-- Upload de Arquivo MP3/WAV -->
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Arquivo de Áudio (MP3 / WAV) *</label>
-          <div class="p-3 bg-surface-soft border border-gray-200 rounded-xl space-y-2">
-            <input type="file" id="song-audio-file" accept="audio/*" onchange="handleAudioUploadSelection(this)" class="text-xs text-muted file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-frevo-orange/15 file:text-frevo-orange hover:file:bg-frevo-orange/25 cursor-pointer w-full" />
-            <div class="text-[10px] text-muted">Ou informe uma URL externa de áudio:</div>
-            <input type="url" id="song-audio-input" placeholder="https://exemplo.com/musica.mp3" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none" />
+          <label class="block text-xs font-bold text-ink uppercase tracking-wider mb-1">Arquivo de Áudio (MP3 / WAV) *</label>
+          <div class="p-3 bg-surface-soft border border-gray-200 rounded-2xl space-y-2">
+            <input type="file" id="song-audio-file" accept="audio/*" onchange="handleAudioUploadSelection(this)" class="text-xs text-muted file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-red-50 file:text-red-600 hover:file:bg-red-100 cursor-pointer w-full transition" />
+            <div class="text-[11px] text-muted">Ou informe uma URL externa de áudio:</div>
+            <input type="url" id="song-audio-input" placeholder="https://exemplo.com/musica.mp3" class="w-full px-3.5 py-2 text-xs border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition font-mono" />
           </div>
         </div>
 
         <!-- Upload Opcional de Partitura PDF -->
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Partitura Oficial (PDF)</label>
-          <div class="p-3 bg-surface-soft border border-gray-200 rounded-xl space-y-1.5">
-            <input type="file" id="song-score-file" accept="application/pdf" class="text-xs text-muted file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-frevo-cyan/15 file:text-frevo-cyan hover:file:bg-frevo-cyan/25 cursor-pointer w-full" />
-            <div class="text-[10px] text-muted">Envie a partitura diagramada em PDF (opcional).</div>
+          <label class="block text-xs font-bold text-ink uppercase tracking-wider mb-1">Partitura Oficial (PDF)</label>
+          <div class="p-3 bg-surface-soft border border-gray-200 rounded-2xl space-y-1.5">
+            <input type="file" id="song-score-file" accept="application/pdf" class="text-xs text-muted file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-cyan-50 file:text-cyan-700 hover:file:bg-cyan-100 cursor-pointer w-full transition" />
+            <div class="text-[11px] text-muted">Envie a partitura diagramada em PDF (opcional).</div>
           </div>
         </div>
 
         <!-- Upload de Imagem de Capa -->
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Imagem de Capa da Faixa</label>
-          <div class="p-2.5 bg-surface-soft border border-gray-200 rounded-xl space-y-1.5">
-            <input type="file" id="song-cover-file" accept="image/*" class="text-xs text-muted file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-gray-200 file:text-ink hover:file:bg-gray-300 cursor-pointer w-full" />
-            <input type="url" id="song-cover-input" placeholder="Ou URL da imagem (https://...)" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none" />
+          <label class="block text-xs font-bold text-ink uppercase tracking-wider mb-1">Imagem de Capa da Faixa</label>
+          <div class="p-3 bg-surface-soft border border-gray-200 rounded-2xl space-y-1.5">
+            <input type="file" id="song-cover-file" accept="image/*" class="text-xs text-muted file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-gray-200 file:text-ink hover:file:bg-gray-300 cursor-pointer w-full transition" />
+            <input type="url" id="song-cover-input" placeholder="Ou URL da imagem (https://...)" class="w-full px-3.5 py-2 text-xs border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
           </div>
         </div>
 
         <!-- Permissão de Download pelo Maestro -->
-        <div class="p-3 bg-surface-soft border border-gray-200 rounded-xl flex items-center justify-between">
+        <div class="p-3.5 bg-surface-soft border border-gray-200 rounded-2xl flex items-center justify-between">
           <div class="pr-3">
             <label for="song-allow-download-input" class="text-xs font-bold text-ink block cursor-pointer">Permitir Download pelo Público</label>
-            <span class="text-[10px] text-muted block">Se desmarcado, apenas você e administradores poderão baixar este áudio/partitura.</span>
+            <span class="text-[11px] text-muted block">Se desmarcado, apenas você e administradores poderão baixar este áudio/partitura.</span>
           </div>
-          <input type="checkbox" id="song-allow-download-input" checked class="w-4 h-4 rounded text-frevo-orange focus:ring-frevo-orange border-gray-300 cursor-pointer" />
+          <input type="checkbox" id="song-allow-download-input" checked class="w-4 h-4 rounded text-red-600 focus:ring-red-500 border-gray-300 cursor-pointer" />
         </div>
 
-        <!-- Letra Oficial (Manual) -->
+        <!-- Letra Oficial (Manual e Resizable) -->
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Letra Oficial</label>
-          <textarea id="song-lyrics-input" rows="4" placeholder="Insira a letra da música aqui (opcional)..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange font-mono"></textarea>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-xs font-bold text-ink uppercase tracking-wider">Letra Oficial da Música</label>
+            <span class="text-[10px] text-muted font-medium">Caixa redimensionável</span>
+          </div>
+          <textarea id="song-lyrics-input" rows="5" placeholder="Insira a letra da música completa aqui..." class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition resize-y min-h-[120px] max-h-[450px] leading-relaxed"></textarea>
         </div>
 
         <!-- Declaração de Titularidade Autoral -->
         <div class="pt-1">
-          <label class="flex items-start gap-2 cursor-pointer text-[11px] text-ink-soft select-none">
-            <input type="checkbox" id="song-copyright-consent" required checked class="mt-0.5 w-3.5 h-3.5 rounded text-frevo-orange focus:ring-frevo-orange border-gray-300" />
-            <span>Declaro ser o autor desta obra/arranjo ou possuir autorização legal, concordando com o <button type="button" onclick="openCopyrightModal()" class="text-frevo-orange font-bold hover:underline inline">Licenciamento Autoral</button>.</span>
+          <label class="flex items-start gap-2 cursor-pointer text-xs text-ink-soft select-none">
+            <input type="checkbox" id="song-copyright-consent" required checked class="mt-0.5 w-4 h-4 rounded text-red-600 focus:ring-red-500 border-gray-300" />
+            <span>Declaro ser o autor desta obra ou possuir autorização legal, concordando com o <button type="button" onclick="openCopyrightModal()" class="text-red-600 font-bold hover:underline inline">Licenciamento Autoral</button>.</span>
           </label>
         </div>
 
         <!-- Indicador de Upload & Barra de Progresso no Envio Final -->
-        <div id="submit-song-status" class="hidden p-3 bg-amber-50 rounded-xl border border-amber-200 text-left space-y-1.5">
-          <div class="flex items-center justify-between text-xs font-bold text-amber-900">
+        <div id="submit-song-status" class="hidden p-3.5 bg-red-50/70 rounded-2xl border border-red-200 text-left space-y-1.5">
+          <div class="flex items-center justify-between text-xs font-bold text-red-900">
             <span id="submit-song-status-label" class="flex items-center gap-1.5">
-              <svg class="animate-spin text-frevo-orange w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <svg class="animate-spin text-red-600 w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
               </svg>
-              Enviando mídia...
+              Enviando mídia para a nuvem...
             </span>
-            <span id="submit-upload-percentage" class="font-mono text-frevo-orange">0%</span>
+            <span id="submit-upload-percentage" class="font-mono text-red-600">0%</span>
           </div>
-          <div class="w-full bg-amber-200/60 rounded-full h-2 overflow-hidden">
-            <div id="submit-upload-progress-bar" class="bg-frevo-orange h-2 rounded-full transition-all duration-300" style="width: 15%;"></div>
+          <div class="w-full bg-red-200/60 rounded-full h-2 overflow-hidden">
+            <div id="submit-upload-progress-bar" class="bg-red-600 h-2 rounded-full transition-all duration-300" style="width: 15%;"></div>
           </div>
         </div>
 
-        <div class="flex gap-2 pt-2">
-          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl">Cancelar</button>
-          <button type="submit" id="btn-submit-song-action" class="btn btn-primary flex-1 text-xs rounded-xl shadow-md font-bold">Publicar Música</button>
+        <div class="flex items-center justify-end gap-2.5 pt-2 border-t border-gray-100">
+          <button type="button" onclick="closeModal()" class="btn btn-outline px-5 py-2.5 text-xs rounded-xl font-bold flex-1">Cancelar</button>
+          <button type="submit" id="btn-submit-song-action" class="btn btn-primary px-5 py-2.5 text-xs rounded-xl shadow-md font-bold flex-1">Publicar Música</button>
         </div>
       </form>
     </div>

@@ -127,6 +127,8 @@ body {
   border: 1px solid #EDEDED;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
   margin-bottom: 24px;
+  content-visibility: auto;
+  contain-intrinsic-size: 0 520px;
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
 }
 
@@ -140,13 +142,20 @@ body {
   position: relative;
   overflow: hidden;
   display: block;
+  background-color: #F8F6F0;
 }
 
-.feed-card-media img {
+.feed-card-media img,
+.feed-card-media video {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+.feed-card-media img {
   transition: transform 0.4s ease;
 }
 
@@ -893,12 +902,12 @@ body {
 .modal-content {
   background: #FFFFFF;
   border-radius: 28px;
-  max-width: 480px;
+  max-width: 520px;
   width: 100%;
-  max-height: 88vh;
+  max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   position: relative;
   transform: scale(0.92) translateY(12px);
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -907,6 +916,25 @@ body {
 
 .modal-overlay.open .modal-content {
   transform: scale(1) translateY(0);
+}
+
+/* Padronização de Textareas Resizable do Design System */
+textarea,
+.textarea-resizable {
+  resize: vertical !important;
+  min-height: 110px;
+  max-height: 480px;
+  scrollbar-width: thin;
+  font-family: inherit;
+  line-height: 1.5;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+textarea:focus,
+.textarea-resizable:focus {
+  outline: none;
+  border-color: #E11D48 !important;
+  box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.12) !important;
 }
 
 /* Custom Alert & Confirm Modal - FrevAI Design System */
@@ -1909,7 +1937,7 @@ body {
 }
 
 .apple-player-volume-wrap {
-  display: none;
+  display: flex;
   align-items: center;
   gap: 8px;
   background: rgba(255, 255, 255, 0.08);
@@ -1922,12 +1950,6 @@ body {
 .apple-player-volume-wrap:hover {
   background: rgba(255, 255, 255, 0.14);
   border-color: rgba(255, 255, 255, 0.2);
-}
-
-@media (min-width: 640px) {
-  .apple-player-volume-wrap {
-    display: flex;
-  }
 }
 
 .apple-volume-range {
@@ -2029,6 +2051,129 @@ body {
   border-color: #FF8A00;
   color: #FF8A00;
   transform: scale(1.08);
+}
+
+/* ==========================================================================
+   LAYOUT RESPONSIVO DO PLAYER EM TELAS MOBILE (< 640px)
+   ========================================================================== */
+@media (max-width: 640px) {
+  .apple-player-bar {
+    bottom: 72px;
+    left: 8px;
+    right: 8px;
+    padding: 8px 10px;
+    border-radius: 20px;
+    max-width: 100%;
+  }
+
+  .apple-player-inner {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "track mainbtns"
+      "scrubber scrubber"
+      "tools tools";
+    gap: 6px 8px;
+    align-items: center;
+  }
+
+  .apple-player-track-info {
+    grid-area: track;
+    min-width: 0;
+    max-width: 100%;
+    flex: none;
+    gap: 8px;
+  }
+
+  .apple-player-cover {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+  }
+
+  .apple-player-title {
+    font-size: 0.75rem;
+    max-width: 140px;
+  }
+
+  .apple-player-artist {
+    font-size: 0.65rem;
+    max-width: 140px;
+  }
+
+  .apple-player-controls-container {
+    display: contents;
+  }
+
+  .apple-player-buttons {
+    grid-area: mainbtns;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: flex-end;
+  }
+
+  .apple-player-buttons #player-shuffle-btn,
+  .apple-player-buttons #player-repeat-btn {
+    display: none;
+  }
+
+  .apple-player-btn-main {
+    width: 34px;
+    height: 34px;
+  }
+
+  .apple-player-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .apple-player-scrubber-wrap {
+    grid-area: scrubber;
+    width: 100%;
+    gap: 6px;
+    margin-top: 1px;
+  }
+
+  .apple-player-extra-actions {
+    grid-area: tools;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-width: 0;
+    flex: none;
+    gap: 4px;
+    padding-top: 4px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .apple-player-extra-actions .player-mob-tool {
+    display: flex !important;
+  }
+
+  .apple-player-volume-wrap {
+    display: flex !important;
+    padding: 3px 6px;
+    gap: 4px;
+    flex: 1;
+    max-width: 105px;
+    min-width: 60px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .apple-volume-range {
+    width: 100%;
+    min-width: 30px;
+  }
+
+  .apple-player-btn-secondary,
+  .apple-player-lyrics-btn {
+    width: 28px;
+    height: 28px;
+  }
 }
 
 /* ==========================================================================

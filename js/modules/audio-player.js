@@ -91,12 +91,12 @@ function stopFrevoAudioPlayback() {
   if (currentlyPlayingSongId) {
     const btn = document.getElementById(`btn-audio-preview-${currentlyPlayingSongId}`);
     if (btn) {
-      btn.className = 'btn bg-white border border-gray-200 hover:border-frevo-orange text-frevo-orange text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 shadow-sm transition-all';
+      btn.className = 'btn btn-primary text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 shadow-sm transition-all';
       btn.innerHTML = `
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
           <polygon points="5 3 19 12 5 21 5 3"></polygon>
         </svg>
-        Ouvir Arranjo Musical
+        Ouvir Música
       `;
     }
     currentlyPlayingSongId = null;
@@ -115,9 +115,9 @@ let isShuffleMode = false;
 let isQueuePanelOpen = false;
 
 function toggleRepeatMode() {
-  const repeatBtn = document.getElementById('player-repeat-btn');
-  const iconAll = document.getElementById('player-repeat-icon-all');
-  const iconOne = document.getElementById('player-repeat-icon-one');
+  const repeatBtns = [document.getElementById('player-repeat-btn'), document.getElementById('player-repeat-btn-mob')].filter(Boolean);
+  const iconsAll = [document.getElementById('player-repeat-icon-all'), document.getElementById('player-repeat-icon-all-mob')].filter(Boolean);
+  const iconsOne = [document.getElementById('player-repeat-icon-one'), document.getElementById('player-repeat-icon-one-mob')].filter(Boolean);
 
   if (isRepeatMode === 'off') {
     isRepeatMode = 'all';
@@ -127,38 +127,42 @@ function toggleRepeatMode() {
     isRepeatMode = 'off';
   }
 
-  if (repeatBtn) {
+  repeatBtns.forEach(btn => {
     if (isRepeatMode === 'off') {
-      repeatBtn.classList.remove('active');
-      repeatBtn.title = 'Repetir (Desativado)';
-      if (iconAll) iconAll.classList.remove('hidden');
-      if (iconOne) iconOne.classList.add('hidden');
+      btn.classList.remove('active');
+      btn.title = 'Repetir (Desativado)';
     } else if (isRepeatMode === 'all') {
-      repeatBtn.classList.add('active');
-      repeatBtn.title = 'Repetir Playlist (Ativado)';
-      if (iconAll) iconAll.classList.remove('hidden');
-      if (iconOne) iconOne.classList.add('hidden');
+      btn.classList.add('active');
+      btn.title = 'Repetir Playlist (Ativado)';
     } else if (isRepeatMode === 'one') {
-      repeatBtn.classList.add('active');
-      repeatBtn.title = 'Repetir Faixa Atual (1)';
-      if (iconAll) iconAll.classList.add('hidden');
-      if (iconOne) iconOne.classList.remove('hidden');
+      btn.classList.add('active');
+      btn.title = 'Repetir Faixa Atual (1)';
     }
-  }
+  });
+
+  iconsAll.forEach(icon => {
+    if (isRepeatMode === 'one') icon.classList.add('hidden');
+    else icon.classList.remove('hidden');
+  });
+
+  iconsOne.forEach(icon => {
+    if (isRepeatMode === 'one') icon.classList.remove('hidden');
+    else icon.classList.add('hidden');
+  });
 }
 
 function toggleShuffle() {
   isShuffleMode = !isShuffleMode;
-  const shuffleBtn = document.getElementById('player-shuffle-btn');
-  if (shuffleBtn) {
+  const shuffleBtns = [document.getElementById('player-shuffle-btn'), document.getElementById('player-shuffle-btn-mob')].filter(Boolean);
+  shuffleBtns.forEach(btn => {
     if (isShuffleMode) {
-      shuffleBtn.classList.add('active');
-      shuffleBtn.title = 'Aleatório (Ativado)';
+      btn.classList.add('active');
+      btn.title = 'Aleatório (Ativado)';
     } else {
-      shuffleBtn.classList.remove('active');
-      shuffleBtn.title = 'Aleatório (Desativado)';
+      btn.classList.remove('active');
+      btn.title = 'Aleatório (Desativado)';
     }
-  }
+  });
 }
 
 function toggleQueuePanel() {
@@ -752,7 +756,7 @@ async function playFrevoAudioPreview(songIdOrTitle) {
           <rect x="6" y="4" width="4" height="16"></rect>
           <rect x="14" y="4" width="4" height="16"></rect>
         </svg>
-        Parar Arranjo Musical
+        Parar Reprodução
       `;
     }
 

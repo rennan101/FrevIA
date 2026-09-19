@@ -110,24 +110,46 @@ function renderPostCommentsHtml(post) {
   `;
 }
 
-function renderFeedPostHtml(post) {
+function renderFeedPostHtml(post, index = 0) {
   const commentsList = (post.comments || []).map(c => renderCommentItemHtml(c, post.id)).join('');
   const postMedia = getMediaUrl(post.image || post.media_url);
   const isLiked = (currentUserSession.liked_posts || []).includes(post.id) || !!post.is_liked;
   const isSaved = (currentUserSession.saved_posts || []).includes(post.id) || !!post.is_saved;
+  const isFirstItem = index === 0;
 
   return `
     <article class="feed-card-immersive infinite-scroll-item" id="post-card-${post.id}">
       <div class="feed-card-media">
         ${(post.media_type === 'video' || post.isVideo || (post.image && post.image.match(/\.(mp4|webm|mov)(\?.*)?$/i))) ? `
-          <video src="${post.media_url || post.image}" poster="${post.cover_url || ''}" controls playsinline preload="metadata" class="w-full h-full object-cover" style="max-height: 480px;"></video>
+          <video 
+            src="${post.media_url || post.image}" 
+            poster="${post.cover_url || ''}" 
+            preload="none" 
+            controls 
+            playsinline 
+            class="w-full h-full object-cover" 
+            style="max-height: 480px;">
+          </video>
         ` : `
-          <img src="${postMedia}" alt="${post.title}" loading="lazy" decoding="async" fetchpriority="low" onerror="this.onerror=null; this.src='${DEFAULT_MEDIA_PLACEHOLDER}'" />
+          <img 
+            src="${postMedia}" 
+            alt="${post.title}" 
+            loading="${isFirstItem ? 'eager' : 'lazy'}" 
+            decoding="async" 
+            fetchpriority="${isFirstItem ? 'high' : 'low'}" 
+            onerror="this.onerror=null; this.src='${DEFAULT_MEDIA_PLACEHOLDER}'" 
+          />
         `}
 
         <!-- Top-Left Floating Author Pill -->
         <div class="floating-author-pill" onclick="openArtistProfileByAuthor('${post.author}')" title="Ver perfil de ${post.author}">
-          <img src="${getUserAvatarUrl(post.avatar)}" alt="${post.author}" decoding="async" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR_PLACEHOLDER}'" />
+          <img 
+            src="${getUserAvatarUrl(post.avatar)}" 
+            alt="${post.author}" 
+            loading="${isFirstItem ? 'eager' : 'lazy'}"
+            decoding="async" 
+            onerror="this.onerror=null; this.src='${DEFAULT_AVATAR_PLACEHOLDER}'" 
+          />
           <div class="floating-author-info">
             <div class="flex items-center gap-1.5">
               <span class="name">${post.author}</span>
@@ -426,11 +448,12 @@ function renderFeed() {
   }
 
   InfiniteScrollManager.reset('feed');
-  const initialPosts = activePosts.slice(0, InfiniteScrollManager.state.feed.limit);
+  const initialLimit = (InfiniteScrollManager.state && InfiniteScrollManager.state.feed) ? InfiniteScrollManager.state.feed.limit : 4;
+  const initialPosts = activePosts.slice(0, initialLimit);
   
   container.innerHTML = `
     <div id="feed-items-stream" class="space-y-4">
-      ${initialPosts.map(post => renderFeedPostHtml(post)).join('')}
+      ${initialPosts.map((post, idx) => renderFeedPostHtml(post, idx)).join('')}
     </div>
     <div id="sentinel-feed" class="infinite-scroll-sentinel" data-view="feed">
       ${activePosts.length > initialPosts.length ? `
@@ -459,7 +482,7 @@ function appendMoreFeed() {
   const nextPosts = activePosts.slice(start, start + limit);
 
   if (nextPosts.length > 0) {
-    const html = nextPosts.map(post => renderFeedPostHtml(post)).join('');
+    const html = nextPosts.map((post, idx) => renderFeedPostHtml(post, start + idx)).join('');
     stream.insertAdjacentHTML('beforeend', html);
   }
 
@@ -606,10 +629,18 @@ function sharePost(postId) {
   const modalBody = document.getElementById('modal-body');
 
   modalBody.innerHTML = `
-    <div class="space-y-4 text-left">
-      <div class="pb-2 border-b border-gray-100 pr-10">
-        <h3 class="font-display font-bold text-lg text-ink">Compartilhar Publicação</h3>
-        <p class="text-[11px] text-muted line-clamp-1">${post.title}</p>
+    <div class="space-y-4 text-left max-h-[85vh] overflow-y-auto pr-1">
+      <div class="flex items-start gap-3.5 pb-3 border-b border-gray-100 pr-10">
+        <div class="w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-display font-bold text-lg text-ink">Compartilhar Publicação</h3>
+          <p class="text-xs text-muted line-clamp-1">${post.title}</p>
+        </div>
       </div>
 
       <div class="grid grid-cols-3 gap-2.5 pt-1">
@@ -646,8 +677,8 @@ function sharePost(postId) {
       <div class="pt-2">
         <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1.5">Link Direto da Publicação</label>
         <div class="flex gap-2">
-          <input type="text" id="share-link-input" readonly value="${shareUrl}" class="flex-1 px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink font-mono select-all focus:outline-none" />
-          <button id="btn-copy-share-link" onclick="copyShareLink('${shareUrl}')" class="btn btn-primary text-xs px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 shadow-sm">
+          <input type="text" id="share-link-input" readonly value="${shareUrl}" class="flex-1 px-4 py-2.5 text-xs sm:text-sm border border-gray-300 rounded-xl bg-surface-soft text-ink font-mono select-all focus:outline-none" />
+          <button id="btn-copy-share-link" onclick="copyShareLink('${shareUrl}')" class="btn btn-primary text-xs sm:text-sm px-4 py-2.5 rounded-xl font-bold flex items-center gap-1.5 shadow-md">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -696,27 +727,35 @@ function openCommentsModal(postId) {
   const modalBody = document.getElementById('modal-body');
   
   modalBody.innerHTML = `
-    <div class="space-y-4 text-left">
-      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
-        <h3 class="font-display font-bold text-lg text-ink">Comentários (${(post.comments || []).length})</h3>
-        <span class="badge bg-frevo-orange/15 text-frevo-orange text-[10px] font-bold">${post.title}</span>
+    <div class="space-y-4 text-left max-h-[85vh] overflow-y-auto pr-1">
+      <div class="flex items-start gap-3.5 pb-3 border-b border-gray-100 pr-10">
+        <div class="w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-display font-bold text-lg text-ink">Comentários (${(post.comments || []).length})</h3>
+          <p class="text-xs text-muted truncate max-w-[260px]">${post.title}</p>
+        </div>
       </div>
+
       <div class="space-y-2.5 max-h-60 overflow-y-auto pr-1" id="modal-comments-list-${post.id}">
         ${(post.comments && post.comments.length > 0) ? post.comments.map(c => renderCommentItemHtml(c, post.id)).join('') : '<p class="text-xs text-muted py-4 text-center">Seja o primeiro a comentar!</p>'}
       </div>
       
       ${currentUserSession.role === 'guest' ? `
-        <div class="p-3 bg-amber-50 rounded-2xl border border-amber-100 text-center space-y-1.5">
+        <div class="p-4 bg-amber-50 rounded-2xl border border-amber-100 text-center space-y-2">
           <p class="text-xs text-amber-900 font-bold">Deseja participar da conversa?</p>
           <p class="text-[11px] text-amber-700">Faça login ou crie uma conta gratuita para comentar.</p>
-          <button onclick="openSessionModal()" class="btn btn-primary text-xs py-1.5 px-4 rounded-xl font-bold">
+          <button onclick="openSessionModal()" class="btn btn-primary text-xs py-2 px-4 rounded-xl font-bold shadow-md">
             Entrar / Criar Conta
           </button>
         </div>
       ` : `
         <div class="flex gap-2 pt-1">
-          <input type="text" id="new-comment-input" placeholder="Adicionar comentário como ${currentUserSession.name || currentUserSession.handle}..." class="flex-1 px-3 py-2.5 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
-          <button onclick="addComment('${post.id}')" class="btn btn-primary text-xs rounded-xl px-4 font-bold">Publicar</button>
+          <input type="text" id="new-comment-input" placeholder="Adicionar comentário como ${currentUserSession.name || currentUserSession.handle}..." class="flex-1 px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
+          <button onclick="addComment('${post.id}')" class="btn btn-primary text-xs sm:text-sm rounded-xl px-5 py-2.5 font-bold shadow-md">Publicar</button>
         </div>
       `}
     </div>
@@ -725,7 +764,7 @@ function openCommentsModal(postId) {
   modal.classList.add('open');
 }
 
-async function addComment(postId) {
+function addComment(postId) {
   if (currentUserSession.role === 'guest') {
     showPlatformAlert('Você precisa estar logado para comentar.', 'Atenção');
     openSessionModal();
@@ -758,11 +797,12 @@ async function addComment(postId) {
     updateCommentsDrawerUI(postId);
 
     if (window.awsService && window.awsService.isConnected() && currentUserSession.id) {
-      const saved = await window.awsService.addComment(postId, currentUserSession.id, text);
-      if (saved && saved.id) {
-        newComment.id = saved.id;
-        if (typeof savePostsLocal === 'function') savePostsLocal();
-      }
+      window.awsService.addComment(postId, currentUserSession.id, text).then(saved => {
+        if (saved && saved.id) {
+          newComment.id = saved.id;
+          if (typeof savePostsLocal === 'function') savePostsLocal();
+        }
+      });
     }
   }
 }
@@ -772,18 +812,18 @@ function openStoryModal(name, avatar, subtitle) {
   const modalBody = document.getElementById('modal-body');
   
   modalBody.innerHTML = `
-    <div class="text-center space-y-4">
+    <div class="text-center space-y-4 max-h-[85vh] overflow-y-auto pr-1">
       <div class="story-ring p-1.5 inline-block">
-        <img src="${getUserAvatarUrl(avatar)}" alt="${name}" class="w-24 h-24 rounded-full object-cover border-2 border-white" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR_PLACEHOLDER}'" />
+        <img src="${getUserAvatarUrl(avatar)}" alt="${name}" class="w-24 h-24 rounded-full object-cover border-2 border-white shadow-md" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR_PLACEHOLDER}'" />
       </div>
-      <div class="pr-10">
+      <div class="pr-0">
         <h3 class="font-display font-bold text-xl text-ink">${name}</h3>
-        <span class="text-xs text-muted">${subtitle}</span>
+        <span class="text-xs text-muted font-medium">${subtitle}</span>
       </div>
       <div class="p-4 bg-surface-soft rounded-2xl text-xs text-ink leading-relaxed border border-gray-100">
         "O frevo é a pulsação do nosso povo nas ladeiras e no asfalto."
       </div>
-      <button onclick="closeModal()" class="btn btn-primary w-full text-xs rounded-xl py-2.5">Fechar Story</button>
+      <button onclick="closeModal()" class="btn btn-primary w-full text-xs sm:text-sm rounded-xl py-2.5 font-bold shadow-md">Fechar Story</button>
     </div>
   `;
   modal.classList.add('open');

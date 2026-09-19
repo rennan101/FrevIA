@@ -653,6 +653,34 @@
 
       <!-- Ações Extras: Fila/Playlist, Volume, Letras & Fechar Player -->
       <div class="apple-player-extra-actions">
+        <!-- Botão Aleatório Mobile -->
+        <button id="player-shuffle-btn-mob" onclick="toggleShuffle()" class="apple-player-btn-secondary player-mob-tool hidden" aria-label="Modo Aleatório" title="Aleatório (Desativado)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 3 21 3 21 8"></polyline>
+            <line x1="4" y1="20" x2="21" y2="3"></line>
+            <polyline points="21 16 21 21 16 21"></polyline>
+            <line x1="15" y1="15" x2="21" y2="21"></line>
+            <line x1="4" y1="4" x2="9" y2="9"></line>
+          </svg>
+        </button>
+
+        <!-- Botão Repetir Mobile -->
+        <button id="player-repeat-btn-mob" onclick="toggleRepeatMode()" class="apple-player-btn-secondary player-mob-tool hidden" aria-label="Modo de Repetição" title="Repetir (Desativado)">
+          <svg id="player-repeat-icon-all-mob" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="17 1 21 5 17 9"></polyline>
+            <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+            <polyline points="7 23 3 19 7 15"></polyline>
+            <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+          </svg>
+          <span id="player-repeat-icon-one-mob" class="hidden text-[10px] font-mono font-bold leading-none">1</span>
+        </button>
+
+        <!-- Controle de Volume -->
+        <div class="apple-player-volume-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-white/70 flex-shrink-0"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+          <input type="range" id="player-volume-slider" min="0" max="1" step="0.05" value="0.85" oninput="setAudioVolume(this.value)" class="apple-volume-range" aria-label="Volume" />
+        </div>
+
         <!-- Botão Abrir Fila & Playlist (A Seguir) -->
         <button id="player-queue-toggle-btn" onclick="toggleQueuePanel()" class="apple-player-btn-secondary" aria-label="Fila de Reprodução e Playlist" title="Fila de Reprodução">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -665,20 +693,14 @@
           </svg>
         </button>
 
-        <!-- Controle de Volume -->
-        <div class="apple-player-volume-wrap">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-white/70 flex-shrink-0"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-          <input type="range" id="player-volume-slider" min="0" max="1" step="0.05" value="0.85" oninput="setAudioVolume(this.value)" class="apple-volume-range" aria-label="Volume" />
-        </div>
-
         <!-- Botão de Letras (Lyrics - Apenas Ícone SVG) -->
         <button id="player-lyrics-toggle-btn" onclick="toggleLyricsModal()" class="apple-player-lyrics-btn" aria-label="Ver Letra da Música" title="Letra da Música">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><line x1="9" y1="9" x2="15" y2="9"></line><line x1="9" y1="13" x2="13" y2="13"></line></svg>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><line x1="9" y1="9" x2="15" y2="9"></line><line x1="9" y1="13" x2="13" y2="13"></line></svg>
         </button>
 
         <!-- Botão Fechar Player de Música -->
-        <button onclick="closeAudioPlayer()" class="apple-player-close-btn w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white flex items-center justify-center transition-all flex-shrink-0" aria-label="Fechar Player" title="Fechar Player">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <button onclick="closeAudioPlayer()" class="apple-player-close-btn w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white flex items-center justify-center transition-all flex-shrink-0" aria-label="Fechar Player" title="Fechar Player">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>

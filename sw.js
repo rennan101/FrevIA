@@ -1,5 +1,6 @@
-// Service Worker do FrevAI — Suporte PWA Offline-First
-const CACHE_NAME = 'frevai-v14';
+// Service Worker do FrevAI — Suporte PWA Offline-First & Fast Image Cache
+const CACHE_NAME = 'frevai-v15';
+const MEDIA_CACHE_NAME = 'frevai-media-v1';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -58,7 +59,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
+          if (cache !== CACHE_NAME && cache !== MEDIA_CACHE_NAME) {
             return caches.delete(cache);
           }
         })
@@ -69,7 +70,31 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Estratégia Network First com Fallback para Cache
+  const url = event.request.url;
+  const isImageOrMedia = event.request.destination === 'image' || 
+                         url.includes('images.unsplash.com') || 
+                         url.match(/\.(webp|png|jpg|jpeg|svg|gif|avif)(\?.*)?$/i);
+
+  // Para imagens do Feed e avatares: Stale-While-Revalidate (Resposta instantânea do cache + atualização em background)
+  if (isImageOrMedia && event.request.method === 'GET') {
+    event.respondWith(
+      caches.open(MEDIA_CACHE_NAME).then((mediaCache) => {
+        return mediaCache.match(event.request).then((cachedResponse) => {
+          const fetchPromise = fetch(event.request).then((networkResponse) => {
+            if (networkResponse && networkResponse.status === 200) {
+              mediaCache.put(event.request, networkResponse.clone());
+            }
+            return networkResponse;
+          }).catch(() => cachedResponse);
+
+          return cachedResponse || fetchPromise;
+        });
+      })
+    );
+    return;
+  }
+
+  // Demais recursos: Network First com Fallback para Cache
   event.respondWith(
     fetch(event.request).catch(() => {
       return caches.match(event.request);

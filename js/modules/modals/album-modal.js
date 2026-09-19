@@ -18,25 +18,33 @@ function openSubmitAlbumModal() {
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left max-h-[85vh] overflow-y-auto pr-1">
-      <div class="pb-2 border-b border-gray-100 pr-10">
-        <h3 class="font-display font-bold text-lg text-ink">Novo Álbum / Disco</h3>
-        <p class="text-xs text-muted">Cadastre seu álbum, faça upload das faixas, organize a ordem e configure downloads</p>
+      <div class="flex items-start gap-3.5 pb-3 border-b border-gray-100 pr-10">
+        <div class="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-display font-bold text-lg text-ink">Novo Álbum / Disco</h3>
+          <p class="text-xs text-muted">Cadastre seu álbum, faça upload das faixas, organize a ordem e configure downloads</p>
+        </div>
       </div>
 
       <form id="new-album-form" onsubmit="submitNewAlbum(event)" class="space-y-3.5">
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Título do Álbum *</label>
-          <input type="text" id="album-title-input" required placeholder="Ex: Fervura Global Vol. 2" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-purple" />
+          <input type="text" id="album-title-input" required placeholder="Ex: Fervura Global Vol. 2" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 rounded-xl bg-white text-ink outline-none transition" />
         </div>
 
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-2 gap-2.5">
           <div>
             <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Ano de Lançamento</label>
-            <input type="number" id="album-year-input" value="${new Date().getFullYear()}" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-purple" />
+            <input type="number" id="album-year-input" value="${new Date().getFullYear()}" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 rounded-xl bg-white text-ink outline-none transition" />
           </div>
           <div>
             <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Gênero Principal</label>
-            <select id="album-genre-input" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-purple">
+            <select id="album-genre-input" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 rounded-xl bg-white text-ink outline-none transition">
               <option value="Frevo de Rua">Frevo de Rua</option>
               <option value="Frevo Canção">Frevo Canção</option>
               <option value="Frevo de Bloco">Frevo de Bloco</option>
@@ -48,9 +56,9 @@ function openSubmitAlbumModal() {
         <!-- Capa do Álbum -->
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Imagem de Capa do Álbum</label>
-          <div class="p-2.5 bg-surface-soft border border-gray-200 rounded-xl space-y-1.5">
-            <input type="file" id="album-cover-file" accept="image/*" class="text-xs text-muted file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-gray-200 file:text-ink hover:file:bg-gray-300 cursor-pointer w-full" />
-            <input type="url" id="album-cover-input" placeholder="Ou URL da imagem (https://...)" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none" />
+          <div class="p-3 bg-surface-soft border border-gray-200 rounded-2xl space-y-2">
+            <input type="file" id="album-cover-file" accept="image/*" class="text-xs text-muted file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-[11px] file:font-bold file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200 cursor-pointer w-full" />
+            <input type="url" id="album-cover-input" placeholder="Ou URL da imagem (https://...)" class="w-full px-3 py-2 text-xs border border-gray-300 rounded-xl bg-white text-ink focus:border-purple-500 focus:ring-2 focus:ring-purple-100 outline-none transition" />
           </div>
         </div>
 
@@ -62,7 +70,7 @@ function openSubmitAlbumModal() {
               <span id="album-tracks-counter" class="text-[10px] text-muted font-mono">0 faixas adicionadas</span>
             </div>
             
-            <label class="btn bg-frevo-purple/10 hover:bg-frevo-purple/20 text-frevo-purple border border-frevo-purple/30 text-xs px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 cursor-pointer shadow-sm">
+            <label class="btn bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 cursor-pointer shadow-sm transition">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -82,22 +90,22 @@ function openSubmitAlbumModal() {
         <div id="submit-album-status" class="hidden p-3 bg-purple-50 rounded-xl border border-purple-200 text-left space-y-1.5">
           <div class="flex items-center justify-between text-xs font-bold text-purple-900">
             <span id="submit-album-status-label" class="flex items-center gap-1.5">
-              <svg class="animate-spin text-frevo-purple w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <svg class="animate-spin text-purple-600 w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
               </svg>
               Processando e publicando álbum...
             </span>
-            <span id="submit-album-percentage" class="font-mono text-frevo-purple">0%</span>
+            <span id="submit-album-percentage" class="font-mono text-purple-700">0%</span>
           </div>
           <div class="w-full bg-purple-200/60 rounded-full h-2 overflow-hidden">
-            <div id="submit-album-progress-bar" class="bg-frevo-purple h-2 rounded-full transition-all duration-300" style="width: 10%;"></div>
+            <div id="submit-album-progress-bar" class="bg-purple-600 h-2 rounded-full transition-all duration-300" style="width: 10%;"></div>
           </div>
         </div>
 
-        <div class="flex gap-2 pt-2">
-          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl">Cancelar</button>
-          <button type="submit" id="btn-submit-album-action" class="btn bg-frevo-purple text-white hover:bg-frevo-purple/90 flex-1 text-xs rounded-xl shadow-md font-bold">Criar e Publicar Álbum</button>
+        <div class="flex gap-2.5 pt-2">
+          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs sm:text-sm py-2.5 rounded-xl font-bold">Cancelar</button>
+          <button type="submit" id="btn-submit-album-action" class="btn bg-purple-600 text-white hover:bg-purple-700 flex-1 text-xs sm:text-sm py-2.5 rounded-xl shadow-md font-bold">Criar e Publicar Álbum</button>
         </div>
       </form>
     </div>
@@ -439,55 +447,65 @@ function openSubmitShowModal() {
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left">
-      <div class="pb-2 border-b border-gray-100 pr-10">
-        <h3 class="font-display font-bold text-lg text-ink">Agendar Próximo Show</h3>
-        <p class="text-xs text-muted">Divulgue seus concertos e apresentações de Frevo</p>
+      <div class="flex items-start gap-3.5 pb-3 border-b border-gray-100 pr-10">
+        <div class="w-12 h-12 rounded-2xl bg-red-500/10 text-red-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-display font-bold text-lg text-ink">Agendar Próximo Show</h3>
+          <p class="text-xs text-muted">Divulgue seus concertos e apresentações de Frevo para a comunidade</p>
+        </div>
       </div>
 
-      <form onsubmit="submitNewShow(event)" class="space-y-3">
+      <form onsubmit="submitNewShow(event)" class="space-y-3.5">
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Título do Evento / Show *</label>
-          <input type="text" id="show-title-input" required placeholder="Ex: Noite de Frevo e Clarins" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-red" />
+          <input type="text" id="show-title-input" required placeholder="Ex: Noite de Frevo e Clarins" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
         </div>
 
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-2 gap-2.5">
           <div>
             <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Data *</label>
-            <input type="date" id="show-date-input" required class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-red" />
+            <input type="date" id="show-date-input" required class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
           </div>
           <div>
             <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Horário *</label>
-            <input type="time" id="show-time-input" required value="20:00" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-red" />
+            <input type="time" id="show-time-input" required value="20:00" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
           </div>
         </div>
 
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Local / Espaço Cultural *</label>
-          <input type="text" id="show-venue-input" required placeholder="Ex: Praça do Arsenal, Teatro Santa Isabel" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-red" />
+          <input type="text" id="show-venue-input" required placeholder="Ex: Praça do Arsenal, Teatro Santa Isabel" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
         </div>
 
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Cidade / Estado</label>
-          <input type="text" id="show-city-input" value="Recife - PE" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-red" />
+          <input type="text" id="show-city-input" value="Recife - PE" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
         </div>
 
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Link para Ingressos / Bilheteria</label>
           <div class="relative">
-            <span class="absolute left-3 top-2.5 text-muted pointer-events-none">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <span class="absolute left-3.5 top-3 text-muted pointer-events-none">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"></path>
                 <path d="M9 12h6"></path>
               </svg>
             </span>
-            <input type="url" id="show-ticket-url-input" placeholder="https://sympla.com.br/... ou https://bileto.sympla.com.br/..." class="w-full pl-9 pr-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-red font-mono" />
+            <input type="url" id="show-ticket-url-input" placeholder="https://sympla.com.br/... ou https://bileto.sympla.com.br/..." class="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition font-mono" />
           </div>
           <p class="text-[10px] text-muted mt-1">Cole o link da bilheteria oficial para outros usuários acessarem diretamente pelo ícone de ingresso.</p>
         </div>
 
-        <div class="flex gap-2 pt-2">
-          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl">Cancelar</button>
-          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl shadow-md font-bold">Publicar Show</button>
+        <div class="flex gap-2.5 pt-2">
+          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs sm:text-sm py-2.5 rounded-xl font-bold">Cancelar</button>
+          <button type="submit" class="btn btn-primary flex-1 text-xs sm:text-sm py-2.5 rounded-xl shadow-md font-bold">Publicar Show</button>
         </div>
       </form>
     </div>

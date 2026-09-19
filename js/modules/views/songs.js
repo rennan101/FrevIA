@@ -29,27 +29,30 @@ function renderSongCardHtml(song) {
   const isSelected = song.id === selectedSongId;
   const isSaved = (currentUserSession.saved_scores || []).includes(song.id);
   const isDownloadAllowed = canDownloadSong(song);
+  const isPlayingThis = (typeof currentlyPlayingSongId !== 'undefined' && currentlyPlayingSongId === song.id && typeof isAudioPlaying !== 'undefined' && isAudioPlaying);
 
   return `
     <div onclick="selectSongForDesktopViewer('${song.id}')" data-song-id="${song.id}" class="song-card-item bg-white border ${isSelected ? 'border-frevo-orange ring-2 ring-frevo-orange/30 bg-orange-50/20' : 'border-gray-200'} rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-sm hover:shadow-md transition-all infinite-scroll-item cursor-pointer">
       <div>
-        <div class="flex items-center justify-between mb-1.5">
-          <span class="badge bg-frevo-cyan/15 text-frevo-cyan text-xs font-bold">${song.genre}</span>
-          <div class="flex items-center gap-1.5">
-            <span class="badge bg-gray-100 text-muted text-[10px] font-mono font-bold">${song.downloads_count || 120} downloads</span>
-            <button onclick="event.stopPropagation(); toggleSaveScore('${song.id}')" class="p-1.5 rounded-lg text-frevo-orange hover:bg-orange-50 transition-colors" title="${isSaved ? 'Remover dos Salvos' : 'Salvar Partitura'}" aria-label="${isSaved ? 'Remover dos Salvos' : 'Salvar Partitura'}">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="${isSaved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-              </svg>
-            </button>
-          </div>
+        <div class="flex items-start justify-between gap-2 mb-1">
+          <h3 class="font-display font-bold text-base text-ink leading-snug flex-1">${song.title}</h3>
+          <button onclick="event.stopPropagation(); toggleSaveScore('${song.id}')" class="p-1 rounded-lg text-frevo-orange hover:bg-orange-50 transition-colors flex-shrink-0" title="${isSaved ? 'Remover dos Salvos' : 'Salvar Partitura'}" aria-label="${isSaved ? 'Remover dos Salvos' : 'Salvar Partitura'}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="${isSaved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          </button>
         </div>
-        <h3 class="font-display font-bold text-lg text-ink leading-snug">${song.title}</h3>
         <p class="text-xs font-bold text-frevo-orange mb-1.5">${song.artist}</p>
         <p class="text-xs text-ink-soft mb-2.5 leading-relaxed line-clamp-2">${song.description || ''}</p>
       </div>
 
       <div class="flex items-center gap-2 pt-2 border-t border-gray-100">
+        <button onclick="event.stopPropagation(); playSong('${song.id}')" class="btn ${isPlayingThis ? 'bg-frevo-red text-white' : 'btn-primary'} text-xs py-2 px-3 rounded-xl font-bold flex items-center justify-center gap-1.5 shadow-sm" title="Ouvir Música">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          Ouvir Música
+        </button>
         <button onclick="event.stopPropagation(); openScoreModal('${song.title}', '${song.artist}', '${song.id}')" class="btn btn-outline text-xs py-2 px-3 rounded-xl font-bold flex-1 flex items-center justify-center gap-1.5">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -94,7 +97,6 @@ function renderSongsDesktopViewer(songId) {
 
   const isSaved = (currentUserSession.saved_scores || []).includes(song.id);
   const profile = getSongMusicalProfile(song);
-  const isPlayingThis = (currentlyPlayingSongId === song.id);
   const isDownloadAllowed = canDownloadSong(song);
 
   viewer.innerHTML = `
@@ -102,24 +104,25 @@ function renderSongsDesktopViewer(songId) {
       <!-- Cabeçalho da Partitura & Ações -->
       <div class="flex items-start justify-between pb-3 border-b border-gray-100 gap-4">
         <div>
-          <div class="flex items-center gap-2 mb-1 flex-wrap">
-            <span class="badge bg-frevo-cyan/15 text-frevo-cyan text-xs font-bold">${song.genre}</span>
-            <span class="badge bg-gray-100 text-muted text-[11px] font-mono font-bold">${song.downloads_count || 120} downloads</span>
-            <span class="badge bg-frevo-orange/15 text-frevo-orange text-[10px] font-bold">Autêntica • 2/4</span>
-            <span class="badge bg-frevo-green/15 text-frevo-green text-[10px] font-bold">${profile.key}</span>
-          </div>
           <h2 class="font-display font-black text-2xl text-ink leading-tight">${song.title}</h2>
-          <p class="text-xs font-bold text-frevo-orange mt-0.5">${song.artist} • ${profile.lead}</p>
+          <p class="text-xs font-bold text-frevo-orange mt-1">${song.artist}</p>
+          ${song.description ? `<p class="text-xs text-ink-soft mt-1 leading-relaxed max-w-xl">${song.description}</p>` : ''}
         </div>
 
         <div class="flex items-center gap-2 flex-shrink-0">
+          <button onclick="playSong('${song.id}')" class="btn btn-primary text-xs px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-md hover:opacity-95 transition-all" title="Ouvir Música">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            Ouvir Música
+          </button>
           <button onclick="toggleSaveScore('${song.id}')" class="btn ${isSaved ? 'bg-orange-500 text-white shadow-md' : 'btn-outline text-frevo-orange border-frevo-orange hover:bg-orange-50'} p-2.5 rounded-xl font-bold flex items-center justify-center transition-all" title="${isSaved ? 'Remover dos Salvos' : 'Salvar Partitura'}" aria-label="${isSaved ? 'Remover dos Salvos' : 'Salvar Partitura'}">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="${isSaved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
             </svg>
           </button>
           ${isDownloadAllowed ? `
-            <button onclick="downloadScore('${song.id}')" class="btn btn-cyan p-2.5 rounded-xl font-bold shadow-sm flex items-center justify-center transition-all" title="Baixar Partitura em PDF Real" aria-label="Baixar Partitura em PDF Real">
+            <button onclick="downloadScore('${song.id}')" class="btn btn-cyan p-2.5 rounded-xl font-bold shadow-sm flex items-center justify-center transition-all" title="Baixar Partitura em PDF" aria-label="Baixar Partitura em PDF">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                 <polyline points="7 10 12 15 17 10"></polyline>
@@ -137,36 +140,12 @@ function renderSongsDesktopViewer(songId) {
         </div>
       </div>
 
-      <!-- Barra de Ferramentas / Prévia Sonora Sincronizada -->
-      <div class="flex items-center justify-between px-4 py-2.5 bg-surface-soft rounded-xl text-xs font-medium text-ink-soft border border-gray-100 flex-wrap gap-2">
-        <div class="flex items-center gap-2 text-xs flex-wrap">
-          <span class="w-2.5 h-2.5 rounded-full ${isPlayingThis ? 'bg-frevo-red animate-ping' : 'bg-frevo-green animate-pulse'}"></span>
-          <span>Andamento: <strong>${profile.tempoLabel}</strong></span>
-          <span class="text-gray-300">•</span>
-          <span>Tom: <strong>${profile.key}</strong></span>
-        </div>
-        <button id="btn-audio-preview-${song.id}" onclick="playFrevoAudioPreview('${song.id}')" class="btn ${isPlayingThis ? 'bg-frevo-red text-white' : 'bg-white border border-gray-200 hover:border-frevo-orange text-frevo-orange'} text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 shadow-sm transition-all">
-          ${isPlayingThis ? `
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="animate-pulse">
-              <rect x="6" y="4" width="4" height="16"></rect>
-              <rect x="14" y="4" width="4" height="16"></rect>
-            </svg>
-            Parar Arranjo Musical
-          ` : `
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-              <polygon points="5 3 19 12 5 21 5 3"></polygon>
-            </svg>
-            Ouvir Arranjo Musical
-          `}
-        </button>
-      </div>
-
       <!-- Folha de Partitura Real Estilizada -->
       <div class="real-sheet-canvas p-6 space-y-4 shadow-inner max-h-[520px] overflow-y-auto">
         <div class="text-center pb-2 border-b border-stone-300">
           <span class="text-[10px] tracking-widest uppercase text-stone-500 font-bold block mb-1">Sociedade dos Músicos do Frevo de Pernambuco</span>
           <h3 class="text-2xl font-serif font-black text-stone-900 tracking-wider uppercase">${song.title}</h3>
-          <span class="text-xs font-serif italic text-stone-700">Composição & Arranjo: ${song.artist} • ${profile.lead}</span>
+          <span class="text-xs font-serif italic text-stone-700">Composição: ${song.artist}</span>
         </div>
 
         <div class="space-y-3">

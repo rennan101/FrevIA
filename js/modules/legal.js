@@ -32,9 +32,9 @@ function openTermsModal() {
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left max-h-[85vh] overflow-y-auto pr-1">
-      <div class="flex items-start gap-3 pb-3 border-b border-gray-100 pr-8">
-        <div class="w-10 h-10 rounded-2xl bg-frevo-orange/10 text-frevo-orange flex items-center justify-center flex-shrink-0">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <div class="flex items-start gap-3.5 pb-3 border-b border-gray-100 pr-10">
+        <div class="w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
             <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -49,7 +49,7 @@ function openTermsModal() {
       </div>
 
       <div class="space-y-3.5 text-xs text-ink-soft leading-relaxed">
-        <div class="p-3 bg-surface-soft rounded-2xl border border-gray-100">
+        <div class="p-3.5 bg-surface-soft rounded-2xl border border-gray-100">
           <strong class="text-ink block font-bold mb-1">1. Objeto & Salvaguarda Cultural</strong>
           <p>O <strong>FrevAI</strong> é uma plataforma digital colaborativa dedicada à salvaguarda, difusão, preservação e fruição da tradição do Frevo de Pernambuco (Patrimônio Cultural Imaterial da Humanidade pela UNESCO). O uso da plataforma é gratuito e rege-se pelos presentes Termos.</p>
         </div>
@@ -75,14 +75,14 @@ function openTermsModal() {
         </div>
       </div>
 
-      <div class="pt-2 border-t border-gray-100 flex gap-2">
+      <div class="pt-2 border-t border-gray-100 flex gap-2.5">
         ${hasHistory ? `
-          <button type="button" onclick="goBackModal()" class="btn btn-outline flex-1 text-xs rounded-xl py-2.5 font-bold flex items-center justify-center gap-1.5">
+          <button type="button" onclick="goBackModal()" class="btn btn-outline flex-1 text-xs sm:text-sm rounded-xl py-2.5 font-bold flex items-center justify-center gap-1.5">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
             Voltar
           </button>
         ` : ''}
-        <button type="button" onclick="${hasHistory ? 'goBackModal()' : 'closeModal()'}" class="btn btn-primary flex-1 text-xs rounded-xl py-2.5 font-bold shadow-md">
+        <button type="button" onclick="${hasHistory ? 'goBackModal()' : 'closeModal()'}" class="btn btn-primary flex-1 text-xs sm:text-sm rounded-xl py-2.5 font-bold shadow-md">
           Entendido
         </button>
       </div>
@@ -107,9 +107,9 @@ function openPrivacyModal() {
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left max-h-[85vh] overflow-y-auto pr-1">
-      <div class="flex items-start gap-3 pb-3 border-b border-gray-100 pr-8">
-        <div class="w-10 h-10 rounded-2xl bg-frevo-green/15 text-frevo-green flex items-center justify-center flex-shrink-0">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <div class="flex items-start gap-3.5 pb-3 border-b border-gray-100 pr-10">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
           </svg>
         </div>
@@ -120,7 +120,7 @@ function openPrivacyModal() {
       </div>
 
       <div class="space-y-3.5 text-xs text-ink-soft leading-relaxed">
-        <div class="p-3 bg-surface-soft rounded-2xl border border-gray-100">
+        <div class="p-3.5 bg-surface-soft rounded-2xl border border-gray-100">
           <strong class="text-ink block font-bold mb-1">Compromisso com a sua Privacidade</strong>
           <p>O FrevAI respeita a sua privacidade e garante conformidade com a Lei Geral de Proteção de Dados Pessoais (LGPD). Esta política detalha como coletamos, tratamos e protegemos seus dados.</p>
         </div>
@@ -155,14 +155,14 @@ function openPrivacyModal() {
         </div>
       </div>
 
-      <div class="pt-2 border-t border-gray-100 flex gap-2">
+      <div class="pt-2 border-t border-gray-100 flex gap-2.5">
         ${hasHistory ? `
-          <button type="button" onclick="goBackModal()" class="btn btn-outline flex-1 text-xs rounded-xl py-2.5 font-bold flex items-center justify-center gap-1.5">
+          <button type="button" onclick="goBackModal()" class="btn btn-outline flex-1 text-xs sm:text-sm rounded-xl py-2.5 font-bold flex items-center justify-center gap-1.5">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
             Voltar
           </button>
         ` : ''}
-        <button type="button" onclick="${hasHistory ? 'goBackModal()' : 'closeModal()'}" class="btn btn-primary flex-1 text-xs rounded-xl py-2.5 font-bold shadow-md">
+        <button type="button" onclick="${hasHistory ? 'goBackModal()' : 'closeModal()'}" class="btn btn-primary flex-1 text-xs sm:text-sm rounded-xl py-2.5 font-bold shadow-md">
           Compreendido
         </button>
       </div>
@@ -186,9 +186,9 @@ function openCopyrightModal() {
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left max-h-[85vh] overflow-y-auto pr-1">
-      <div class="flex items-start gap-3 pb-3 border-b border-gray-100 pr-8">
-        <div class="w-10 h-10 rounded-2xl bg-frevo-purple/15 text-frevo-purple flex items-center justify-center flex-shrink-0">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <div class="flex items-start gap-3.5 pb-3 border-b border-gray-100 pr-10">
+        <div class="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"></circle>
             <path d="M15 9.354a4 4 0 1 0 0 5.292"></path>
           </svg>
@@ -200,7 +200,7 @@ function openCopyrightModal() {
       </div>
 
       <div class="space-y-3.5 text-xs text-ink-soft leading-relaxed">
-        <div class="p-3 bg-surface-soft rounded-2xl border border-gray-100">
+        <div class="p-3.5 bg-surface-soft rounded-2xl border border-gray-100">
           <strong class="text-ink block font-bold mb-1">Declaração de Titularidade & Salvaguarda</strong>
           <p>Ao cadastrar obras musicais, arranjos ou partituras no FrevAI, o compositor, maestro ou agremiação atesta ser titular legítimo dos direitos autorais patrimoniais ou devidamente autorizado para difusão pública.</p>
         </div>
@@ -221,14 +221,14 @@ function openCopyrightModal() {
         </div>
       </div>
 
-      <div class="pt-2 border-t border-gray-100 flex gap-2">
+      <div class="pt-2 border-t border-gray-100 flex gap-2.5">
         ${hasHistory ? `
-          <button type="button" onclick="goBackModal()" class="btn btn-outline flex-1 text-xs rounded-xl py-2.5 font-bold flex items-center justify-center gap-1.5">
+          <button type="button" onclick="goBackModal()" class="btn btn-outline flex-1 text-xs sm:text-sm rounded-xl py-2.5 font-bold flex items-center justify-center gap-1.5">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
             Voltar
           </button>
         ` : ''}
-        <button type="button" onclick="${hasHistory ? 'goBackModal()' : 'closeModal()'}" class="btn btn-primary flex-1 text-xs rounded-xl py-2.5 font-bold shadow-md">
+        <button type="button" onclick="${hasHistory ? 'goBackModal()' : 'closeModal()'}" class="btn btn-primary flex-1 text-xs sm:text-sm rounded-xl py-2.5 font-bold shadow-md">
           Entendido
         </button>
       </div>
@@ -254,9 +254,9 @@ function openTakedownModal(targetId = '', targetType = 'geral', targetTitle = ''
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left max-h-[85vh] overflow-y-auto pr-1">
-      <div class="flex items-start gap-3 pb-3 border-b border-gray-100 pr-8">
-        <div class="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 border border-rose-100 flex items-center justify-center flex-shrink-0">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <div class="flex items-start gap-3.5 pb-3 border-b border-gray-100 pr-10">
+        <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 border border-rose-100 flex items-center justify-center flex-shrink-0 shadow-sm">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
             <line x1="12" y1="9" x2="12" y2="13"></line>
             <line x1="12" y1="17" x2="12.01" y2="17"></line>
@@ -268,12 +268,12 @@ function openTakedownModal(targetId = '', targetType = 'geral', targetTitle = ''
         </div>
       </div>
 
-      <form id="takedown-form" onsubmit="submitTakedownReport(event)" class="space-y-3">
+      <form id="takedown-form" onsubmit="submitTakedownReport(event)" class="space-y-3.5">
         <input type="hidden" id="takedown-target-id" value="${targetId}" />
         <input type="hidden" id="takedown-target-type" value="${targetType}" />
 
         ${targetTitle ? `
-          <div class="p-2.5 bg-surface-soft rounded-xl border border-gray-200 text-xs">
+          <div class="p-3 bg-surface-soft rounded-2xl border border-gray-200 text-xs">
             <span class="text-[10px] text-muted uppercase font-bold block">Objeto da Notificação:</span>
             <strong class="text-ink">${targetTitle}</strong>
           </div>
@@ -281,7 +281,7 @@ function openTakedownModal(targetId = '', targetType = 'geral', targetTitle = ''
 
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Motivo da Notificação *</label>
-          <select id="takedown-reason" required class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange">
+          <select id="takedown-reason" required class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition">
             <option value="Direitos Autorais (Violação / Não Autorizado)">Violação de Direitos Autorais / Uso Indevido de Obra</option>
             <option value="Informação Falsa ou Imprecisa">Informação Histórica Falsa ou Biografia Imprecisa</option>
             <option value="Conteúdo Ofensivo ou Inadequado">Conteúdo Ofensivo, Discriminatório ou Inadequado</option>
@@ -292,28 +292,28 @@ function openTakedownModal(targetId = '', targetType = 'geral', targetTitle = ''
 
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Seu Nome / Razão Social *</label>
-          <input type="text" id="takedown-name" required value="${currentName}" placeholder="Nome completo do reclamante ou representante legal" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+          <input type="text" id="takedown-name" required value="${currentName}" placeholder="Nome completo do reclamante ou representante legal" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
         </div>
 
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">E-mail de Contato *</label>
-          <input type="email" id="takedown-email" required value="${currentEmail}" placeholder="seuemail@exemplo.com" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+          <input type="email" id="takedown-email" required value="${currentEmail}" placeholder="seuemail@exemplo.com" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
         </div>
 
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Detalhamento da Ocorrência *</label>
-          <textarea id="takedown-details" required rows="4" placeholder="Descreva os fatos, links de comprovação de titularidade ou o motivo detalhado para análise da moderação..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange leading-relaxed"></textarea>
+          <textarea id="takedown-details" required rows="4" placeholder="Descreva os fatos, links de comprovação de titularidade ou o motivo detalhado para análise da moderação..." class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition resize-y min-h-[110px] max-h-[450px] leading-relaxed"></textarea>
         </div>
 
-        <div class="p-3 bg-amber-50 rounded-xl border border-amber-200/80 text-[11px] text-amber-900 leading-snug">
+        <div class="p-3.5 bg-amber-50 rounded-2xl border border-amber-200/80 text-[11px] text-amber-900 leading-snug">
           <strong>Processamento Curatorial:</strong> Todas as denúncias são analisadas pelo comitê gestor do FrevAI. Caso comprovada a irregularidade, o conteúdo é imediatamente suspenso ou retificado.
         </div>
 
-        <div class="flex gap-2 pt-2 border-t border-gray-100">
-          <button type="button" onclick="${hasHistory ? 'goBackModal()' : 'closeModal()'}" class="btn btn-outline flex-1 text-xs rounded-xl py-2.5 font-bold">
+        <div class="flex gap-2.5 pt-2 border-t border-gray-100">
+          <button type="button" onclick="${hasHistory ? 'goBackModal()' : 'closeModal()'}" class="btn btn-outline flex-1 text-xs sm:text-sm rounded-xl py-2.5 font-bold">
             ${hasHistory ? 'Voltar' : 'Cancelar'}
           </button>
-          <button type="submit" class="btn bg-rose-600 hover:bg-rose-700 text-white flex-1 text-xs rounded-xl py-2.5 font-bold shadow-md">
+          <button type="submit" class="btn bg-rose-600 hover:bg-rose-700 text-white flex-1 text-xs sm:text-sm rounded-xl py-2.5 font-bold shadow-md">
             Enviar Notificação
           </button>
         </div>

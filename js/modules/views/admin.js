@@ -835,10 +835,10 @@ function openRejectArtistModal(requestId) {
   const modalBody = document.getElementById('modal-body');
 
   modalBody.innerHTML = `
-    <div class="space-y-4 text-left">
-      <div class="flex items-start gap-3 pb-3 border-b border-gray-100 pr-8">
-        <div class="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 border border-rose-100 flex items-center justify-center flex-shrink-0">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <div class="space-y-4 text-left max-h-[85vh] overflow-y-auto pr-1">
+      <div class="flex items-start gap-3.5 pb-3 border-b border-gray-100 pr-10">
+        <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 border border-rose-100 flex items-center justify-center flex-shrink-0 shadow-sm">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
             <line x1="15" y1="9" x2="9" y2="15"></line>
             <line x1="9" y1="9" x2="15" y2="15"></line>
@@ -846,17 +846,17 @@ function openRejectArtistModal(requestId) {
         </div>
         <div>
           <h3 class="font-display font-bold text-lg text-ink">Recusar Solicitação Artística</h3>
-          <p class="text-xs text-muted">Apresente a justificativa ao artista solicitante</p>
+          <p class="text-xs text-muted">Apresente a justificativa formal ao artista solicitante</p>
         </div>
       </div>
 
-      <div class="p-3 bg-surface-soft border border-gray-200 rounded-2xl flex items-center justify-between gap-3 text-xs">
+      <div class="p-3.5 bg-surface-soft border border-gray-200 rounded-2xl flex items-center justify-between gap-3 text-xs">
         <div class="min-w-0">
           <strong class="text-ink font-bold block truncate">${req.requested_name}</strong>
           <span class="text-muted block text-[11px]">${applicantName} • ${applicantHandle}</span>
           ${applicantEmail ? `<span class="text-[11px] text-gray-500 font-mono block truncate">${applicantEmail}</span>` : ''}
         </div>
-        <span class="badge bg-rose-100 text-rose-700 text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0">
+        <span class="badge bg-rose-100 text-rose-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full flex-shrink-0">
           MODERAÇÃO
         </span>
       </div>
@@ -864,27 +864,27 @@ function openRejectArtistModal(requestId) {
       <div class="space-y-1.5">
         <label class="block text-[11px] font-bold text-ink uppercase tracking-wider">Motivos frequentes (clique para preencher)</label>
         <div class="flex flex-wrap gap-1.5">
-          <button type="button" onclick="setRejectReasonPreset('Dados biográficos e referências musicais incompletos.')" class="px-2.5 py-1 text-[11px] bg-white hover:bg-gray-100 border border-gray-200 rounded-xl text-ink-soft transition">
+          <button type="button" onclick="setRejectReasonPreset('Dados biográficos e referências musicais incompletos.')" class="px-3 py-1.5 text-[11px] bg-white hover:bg-gray-100 border border-gray-200 rounded-xl text-ink-soft transition font-medium shadow-sm">
             Dados incompletos
           </button>
-          <button type="button" onclick="setRejectReasonPreset('Material artístico não condiz com as diretrizes e salvaguarda do Frevo.')" class="px-2.5 py-1 text-[11px] bg-white hover:bg-gray-100 border border-gray-200 rounded-xl text-ink-soft transition">
+          <button type="button" onclick="setRejectReasonPreset('Material artístico não condiz com as diretrizes e salvaguarda do Frevo.')" class="px-3 py-1.5 text-[11px] bg-white hover:bg-gray-100 border border-gray-200 rounded-xl text-ink-soft transition font-medium shadow-sm">
             Fora das diretrizes
           </button>
-          <button type="button" onclick="setRejectReasonPreset('Não foi possível verificar a autenticidade ou titularidade da obra.')" class="px-2.5 py-1 text-[11px] bg-white hover:bg-gray-100 border border-gray-200 rounded-xl text-ink-soft transition">
+          <button type="button" onclick="setRejectReasonPreset('Não foi possível verificar a autenticidade ou titularidade da obra.')" class="px-3 py-1.5 text-[11px] bg-white hover:bg-gray-100 border border-gray-200 rounded-xl text-ink-soft transition font-medium shadow-sm">
             Titularidade duvidosa
           </button>
-          <button type="button" onclick="setRejectReasonPreset('Solicitação duplicada ou perfil já existente no acervo.')" class="px-2.5 py-1 text-[11px] bg-white hover:bg-gray-100 border border-gray-200 rounded-xl text-ink-soft transition">
+          <button type="button" onclick="setRejectReasonPreset('Solicitação duplicada ou perfil já existente no acervo.')" class="px-3 py-1.5 text-[11px] bg-white hover:bg-gray-100 border border-gray-200 rounded-xl text-ink-soft transition font-medium shadow-sm">
             Duplicidade
           </button>
         </div>
       </div>
 
-      <div class="space-y-1">
+      <div class="space-y-1.5">
         <label for="reject-reason-textarea" class="block text-[11px] font-bold text-ink uppercase tracking-wider">Justificativa da Recusa <span class="text-rose-500">*</span></label>
-        <textarea id="reject-reason-textarea" rows="4" placeholder="Descreva de forma respeitosa o motivo pelo qual a solicitação não foi aprovada..." class="w-full px-3 py-2 text-xs border border-gray-300 focus:border-rose-500 focus:ring-2 focus:ring-rose-100 rounded-xl bg-white text-ink focus:outline-none transition leading-relaxed"></textarea>
+        <textarea id="reject-reason-textarea" rows="4" placeholder="Descreva de forma respeitosa o motivo pelo qual a solicitação não foi aprovada..." class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-rose-500 focus:ring-2 focus:ring-rose-100 rounded-xl bg-white text-ink outline-none transition resize-y min-h-[110px] max-h-[450px] leading-relaxed"></textarea>
       </div>
 
-      <div class="p-3 bg-amber-50/60 border border-amber-200/80 rounded-2xl space-y-2">
+      <div class="p-3.5 bg-amber-50/70 border border-amber-200/80 rounded-2xl space-y-2">
         <label class="flex items-center gap-2 cursor-pointer select-none">
           <input type="checkbox" id="reject-send-email-checkbox" checked class="w-4 h-4 text-rose-600 rounded border-gray-300 focus:ring-rose-500">
           <span class="text-xs font-bold text-ink">Enviar e-mail formal de notificação de recusa</span>
@@ -892,17 +892,17 @@ function openRejectArtistModal(requestId) {
         <div id="reject-email-preview-container" class="space-y-1.5 pl-6 pt-1">
           <div>
             <label class="block text-[10px] font-bold text-muted uppercase">E-mail do Solicitante</label>
-            <input type="email" id="reject-recipient-email" value="${applicantEmail}" placeholder="artista@exemplo.com" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none font-mono" />
+            <input type="email" id="reject-recipient-email" value="${applicantEmail}" placeholder="artista@exemplo.com" class="w-full px-3 py-2 text-xs border border-gray-300 rounded-xl bg-white text-ink focus:outline-none font-mono" />
           </div>
         </div>
       </div>
 
-      <div class="flex gap-2 pt-2 border-t border-gray-100">
-        <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl py-2.5 font-bold text-ink">
+      <div class="flex gap-2.5 pt-2 border-t border-gray-100">
+        <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs sm:text-sm rounded-xl py-2.5 font-bold text-ink">
           Cancelar
         </button>
-        <button type="button" onclick="submitRejectArtistRequest('${req.id}')" class="btn bg-rose-600 hover:bg-rose-700 text-white flex-1 text-xs rounded-xl py-2.5 font-bold shadow-md transition flex items-center justify-center gap-1.5">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <button type="button" onclick="submitRejectArtistRequest('${req.id}')" class="btn bg-rose-600 hover:bg-rose-700 text-white flex-1 text-xs sm:text-sm rounded-xl py-2.5 font-bold shadow-md transition flex items-center justify-center gap-1.5">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
           Confirmar Recusa
@@ -1121,29 +1121,37 @@ function openNewPostModal() {
   const modalBody = document.getElementById('modal-body');
 
   modalBody.innerHTML = `
-    <div class="space-y-4 text-left">
-      <div class="flex items-center justify-between pb-2 border-b border-gray-100 pr-8">
+    <div class="space-y-4 text-left max-h-[85vh] overflow-y-auto pr-1">
+      <div class="flex items-start gap-3.5 pb-3 border-b border-gray-100 pr-10">
+        <div class="w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 20H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1"></path>
+            <path d="M18 2h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+            <polyline points="7 10 12 10"></polyline>
+            <polyline points="7 14 12 14"></polyline>
+          </svg>
+        </div>
         <div>
           <h3 class="font-display font-bold text-lg text-ink">Publicar Nova Notícia no Feed</h3>
           <p class="text-xs text-muted">Upload de fotos, vídeos e novidades para a comunidade</p>
         </div>
       </div>
 
-      <form onsubmit="submitNewPost(event)" class="space-y-3">
+      <form onsubmit="submitNewPost(event)" class="space-y-3.5">
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase mb-1">Título da Publicação *</label>
-          <input type="text" id="new-post-title" required placeholder="Ex: Abertura Oficial do Carnaval do Recife" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+          <input type="text" id="new-post-title" required placeholder="Ex: Abertura Oficial do Carnaval do Recife" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
         </div>
 
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase mb-1">Autor / Responsável *</label>
-          <input type="text" id="new-post-author" required value="${currentUserSession.name}" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+          <input type="text" id="new-post-author" required value="${currentUserSession.name}" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
         </div>
 
-        <div class="p-3 bg-surface-soft rounded-2xl border border-gray-200 space-y-2">
+        <div class="p-3.5 bg-surface-soft rounded-2xl border border-gray-200 space-y-2.5">
           <label class="block text-[11px] font-bold text-ink uppercase">Mídia do Post (Foto ou Vídeo)</label>
           <div class="flex items-center gap-2">
-            <label class="btn btn-outline text-xs px-3 py-2 rounded-xl cursor-pointer flex items-center gap-1.5 font-bold flex-1 justify-center bg-white hover:bg-gray-50">
+            <label class="btn btn-outline text-xs px-3.5 py-2.5 rounded-xl cursor-pointer flex items-center gap-1.5 font-bold flex-1 justify-center bg-white hover:bg-gray-50 border border-gray-300 shadow-sm transition">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                 <polyline points="17 8 12 3 7 8"></polyline>
@@ -1155,8 +1163,8 @@ function openNewPostModal() {
           </div>
 
           <div class="pt-1">
-            <label class="block text-[10px] font-bold text-muted uppercase mb-0.5">Ou cole a URL da Mídia / Imagem</label>
-            <input type="url" id="new-post-media-url" placeholder="https://exemplo.com/video-ou-foto.mp4" oninput="document.getElementById('new-post-media-type').value = this.value.match(/\\.(mp4|webm|mov)(\\?.*)?$/i) ? 'video' : 'image'" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none font-mono" />
+            <label class="block text-[10px] font-bold text-muted uppercase mb-1">Ou cole a URL da Mídia / Imagem</label>
+            <input type="url" id="new-post-media-url" placeholder="https://exemplo.com/video-ou-foto.mp4" oninput="document.getElementById('new-post-media-type').value = this.value.match(/\\.(mp4|webm|mov)(\\?.*)?$/i) ? 'video' : 'image'" class="w-full px-3.5 py-2 text-xs border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none font-mono" />
             <input type="hidden" id="new-post-media-type" value="image" />
           </div>
 
@@ -1165,17 +1173,17 @@ function openNewPostModal() {
 
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase mb-1">Conteúdo da Notícia *</label>
-          <textarea id="new-post-content" rows="4" required placeholder="Escreva a notícia completa..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none"></textarea>
+          <textarea id="new-post-content" rows="4" required placeholder="Escreva a notícia completa..." class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition resize-y min-h-[110px] max-h-[450px] leading-relaxed"></textarea>
         </div>
 
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase mb-1">Tags (separadas por vírgula)</label>
-          <input type="text" id="new-post-tags" placeholder="Frevo, Carnaval, Recife" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+          <input type="text" id="new-post-tags" placeholder="Frevo, Carnaval, Recife" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
         </div>
 
         <div class="flex gap-2 pt-2 border-t border-gray-100">
-          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl py-2.5 font-bold text-ink">Cancelar</button>
-          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl py-2.5 font-bold shadow-md">Publicar no Feed</button>
+          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs sm:text-sm rounded-xl py-2.5 font-bold text-ink">Cancelar</button>
+          <button type="submit" class="btn btn-primary flex-1 text-xs sm:text-sm rounded-xl py-2.5 font-bold shadow-md">Publicar no Feed</button>
         </div>
       </form>
     </div>
@@ -1264,23 +1272,29 @@ function openEditPostModal(postId) {
   const isVideo = post.media_type === 'video' || (mediaUrl && mediaUrl.match(/\.(mp4|webm|mov)(\?.*)?$/i));
 
   modalBody.innerHTML = `
-    <div class="space-y-4 text-left">
-      <div class="flex items-center justify-between pb-2 border-b border-gray-100 pr-8">
+    <div class="space-y-4 text-left max-h-[85vh] overflow-y-auto pr-1">
+      <div class="flex items-start gap-3.5 pb-3 border-b border-gray-100 pr-10">
+        <div class="w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+          </svg>
+        </div>
         <div>
           <h3 class="font-display font-bold text-lg text-ink">Editar Notícia</h3>
           <p class="text-xs text-muted">Atualize as informações, fotos ou vídeos da publicação</p>
         </div>
       </div>
 
-      <form onsubmit="saveEditPost(event, '${post.id}')" class="space-y-3">
+      <form onsubmit="saveEditPost(event, '${post.id}')" class="space-y-3.5">
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase mb-1">Título</label>
-          <input type="text" id="edit-post-title" value="${post.title}" required class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+          <input type="text" id="edit-post-title" value="${post.title}" required class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
         </div>
 
-        <div class="p-3 bg-surface-soft rounded-2xl border border-gray-200 space-y-2">
+        <div class="p-3.5 bg-surface-soft rounded-2xl border border-gray-200 space-y-2.5">
           <label class="block text-[11px] font-bold text-ink uppercase">Mídia do Post (Foto ou Vídeo)</label>
-          <label class="btn btn-outline text-xs px-3 py-2 rounded-xl cursor-pointer flex items-center gap-1.5 font-bold justify-center bg-white hover:bg-gray-50">
+          <label class="btn btn-outline text-xs px-3.5 py-2.5 rounded-xl cursor-pointer flex items-center gap-1.5 font-bold justify-center bg-white hover:bg-gray-50 border border-gray-300 shadow-sm transition">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
               <polyline points="17 8 12 3 7 8"></polyline>
@@ -1291,8 +1305,8 @@ function openEditPostModal(postId) {
           </label>
           
           <div class="pt-1">
-            <label class="block text-[10px] font-bold text-muted uppercase mb-0.5">URL da Mídia</label>
-            <input type="url" id="edit-post-media-url" value="${mediaUrl}" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none font-mono" />
+            <label class="block text-[10px] font-bold text-muted uppercase mb-1">URL da Mídia</label>
+            <input type="url" id="edit-post-media-url" value="${mediaUrl}" class="w-full px-3.5 py-2 text-xs border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none font-mono" />
             <input type="hidden" id="edit-post-media-type" value="${isVideo ? 'video' : 'image'}" />
           </div>
 
@@ -1311,12 +1325,12 @@ function openEditPostModal(postId) {
 
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase mb-1">Conteúdo</label>
-          <textarea id="edit-post-content" rows="4" required class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none">${post.content}</textarea>
+          <textarea id="edit-post-content" rows="4" required class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition resize-y min-h-[110px] max-h-[450px] leading-relaxed">${post.content}</textarea>
         </div>
 
         <div class="flex gap-2 pt-2 border-t border-gray-100">
-          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl py-2.5 font-bold text-ink">Cancelar</button>
-          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl py-2.5 font-bold shadow-md">Salvar Alterações</button>
+          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs sm:text-sm rounded-xl py-2.5 font-bold text-ink">Cancelar</button>
+          <button type="submit" class="btn btn-primary flex-1 text-xs sm:text-sm rounded-xl py-2.5 font-bold shadow-md">Salvar Alterações</button>
         </div>
       </form>
     </div>
@@ -1366,23 +1380,29 @@ function openNewMapPointModal() {
   const modalBody = document.getElementById('modal-body');
 
   modalBody.innerHTML = `
-    <div class="space-y-4 text-left">
-      <div class="flex items-center justify-between pb-2 border-b border-gray-100 pr-8">
+    <div class="space-y-4 text-left max-h-[85vh] overflow-y-auto pr-1">
+      <div class="flex items-start gap-3.5 pb-3 border-b border-gray-100 pr-10">
+        <div class="w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+        </div>
         <div>
           <h3 class="font-display font-bold text-lg text-ink">Adicionar Ponto ao Mapa Cultural</h3>
           <p class="text-xs text-muted">Localize o endereço com confirmação precisa no Google Maps</p>
         </div>
       </div>
 
-      <form onsubmit="submitNewMapPoint(event)" class="space-y-3">
+      <form onsubmit="submitNewMapPoint(event)" class="space-y-3.5">
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase mb-1">Nome do Ponto Cultural *</label>
-          <input type="text" id="new-map-name" required placeholder="Ex: Sede do Galo da Madrugada" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+          <input type="text" id="new-map-name" required placeholder="Ex: Sede do Galo da Madrugada" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
         </div>
 
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase mb-1">Categoria *</label>
-          <select id="new-map-cat" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none">
+          <select id="new-map-cat" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition">
             <option value="Agremiação Histórica">Agremiação Histórica</option>
             <option value="Museu / Centro Cultural">Museu / Centro Cultural</option>
             <option value="Polo de Carnaval">Polo de Carnaval</option>
@@ -1391,12 +1411,12 @@ function openNewMapPointModal() {
           </select>
         </div>
 
-        <div class="p-3 bg-surface-soft rounded-2xl border border-gray-200 space-y-2.5">
+        <div class="p-3.5 bg-surface-soft rounded-2xl border border-gray-200 space-y-2.5">
           <div>
             <label class="block text-[11px] font-bold text-ink uppercase mb-1">Endereço Completo *</label>
             <div class="flex gap-2">
-              <input type="text" id="new-map-addr" required placeholder="Ex: Rua da Concórdia, 1024, Recife - PE" class="flex-1 px-3 py-2 text-xs border border-gray-200 rounded-xl bg-white text-ink focus:outline-none" oninput="resetMapConfirmation()" />
-              <button type="button" id="btn-find-address" onclick="findAddressOnGoogleMaps()" class="btn btn-primary text-xs px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 shadow-sm whitespace-nowrap">
+              <input type="text" id="new-map-addr" required placeholder="Ex: Rua da Concórdia, 1024, Recife - PE" class="flex-1 px-3.5 py-2 text-xs border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none" oninput="resetMapConfirmation()" />
+              <button type="button" id="btn-find-address" onclick="findAddressOnGoogleMaps()" class="btn btn-primary text-xs px-4 py-2 rounded-xl font-bold flex items-center gap-1.5 shadow-sm whitespace-nowrap">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                   <circle cx="11" cy="11" r="8"></circle>
                   <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -1435,12 +1455,12 @@ function openNewMapPointModal() {
 
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase mb-1">Descrição e Relevância Cultural *</label>
-          <textarea id="new-map-desc" rows="3" required placeholder="História, fundação e relevância para o Frevo..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none"></textarea>
+          <textarea id="new-map-desc" rows="3" required placeholder="História, fundação e relevância para o Frevo..." class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition resize-y min-h-[110px] max-h-[450px] leading-relaxed"></textarea>
         </div>
 
         <div class="flex gap-2 pt-2 border-t border-gray-100">
-          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl py-2.5 font-bold text-ink">Cancelar</button>
-          <button type="submit" id="btn-submit-map-point" class="btn btn-primary flex-1 text-xs rounded-xl py-2.5 font-bold shadow-md">Salvar Ponto</button>
+          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs sm:text-sm rounded-xl py-2.5 font-bold text-ink">Cancelar</button>
+          <button type="submit" id="btn-submit-map-point" class="btn btn-primary flex-1 text-xs sm:text-sm rounded-xl py-2.5 font-bold shadow-md">Salvar Ponto</button>
         </div>
       </form>
     </div>
@@ -1589,28 +1609,34 @@ function openNewHistoryModal() {
   const modalBody = document.getElementById('modal-body');
 
   modalBody.innerHTML = `
-    <div class="space-y-4 text-left">
-      <div class="flex items-center justify-between pb-2 border-b border-gray-100 pr-8">
+    <div class="space-y-4 text-left max-h-[85vh] overflow-y-auto pr-1">
+      <div class="flex items-start gap-3.5 pb-3 border-b border-gray-100 pr-10">
+        <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
+        </div>
         <div>
           <h3 class="font-display font-bold text-lg text-ink">Adicionar Marco Histórico</h3>
           <p class="text-xs text-muted">Documentos, fotografias de época e registros da memória do Frevo</p>
         </div>
       </div>
 
-      <form onsubmit="submitNewHistory(event)" class="space-y-3">
+      <form onsubmit="submitNewHistory(event)" class="space-y-3.5">
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase mb-1">Título do Marco *</label>
-          <input type="text" id="new-hist-title" required placeholder="Ex: Criação da Troça Pitombeira dos Quatro Cantos" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+          <input type="text" id="new-hist-title" required placeholder="Ex: Criação da Troça Pitombeira dos Quatro Cantos" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
         </div>
 
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase mb-1">Período / Data Histórica *</label>
-          <input type="text" id="new-hist-period" required placeholder="Ex: Carnaval de 1947" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+          <input type="text" id="new-hist-period" required placeholder="Ex: Carnaval de 1947" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
         </div>
 
-        <div class="p-3 bg-surface-soft rounded-2xl border border-gray-200 space-y-2">
+        <div class="p-3.5 bg-surface-soft rounded-2xl border border-gray-200 space-y-2.5">
           <label class="block text-[11px] font-bold text-ink uppercase">Documento / Mídia de Época (Foto ou Vídeo)</label>
-          <label class="btn btn-outline text-xs px-3 py-2 rounded-xl cursor-pointer flex items-center gap-1.5 font-bold justify-center bg-white hover:bg-gray-50">
+          <label class="btn btn-outline text-xs px-3.5 py-2.5 rounded-xl cursor-pointer flex items-center gap-1.5 font-bold justify-center bg-white hover:bg-gray-50 border border-gray-300 shadow-sm transition">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
               <polyline points="17 8 12 3 7 8"></polyline>
@@ -1621,8 +1647,8 @@ function openNewHistoryModal() {
           </label>
 
           <div class="pt-1">
-            <label class="block text-[10px] font-bold text-muted uppercase mb-0.5">Ou cole o link do arquivo</label>
-            <input type="url" id="new-hist-media-url" placeholder="https://exemplo.com/registro-historico.jpg" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none font-mono" />
+            <label class="block text-[10px] font-bold text-muted uppercase mb-1">Ou cole o link do arquivo</label>
+            <input type="url" id="new-hist-media-url" placeholder="https://exemplo.com/registro-historico.jpg" class="w-full px-3.5 py-2 text-xs border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none font-mono" />
             <input type="hidden" id="new-hist-media-type" value="image" />
           </div>
 
@@ -1631,17 +1657,17 @@ function openNewHistoryModal() {
 
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase mb-1">Conteúdo Histórico Documentado *</label>
-          <textarea id="new-hist-content" rows="3" required placeholder="Relato documentado, contexto social e fatos comprovados..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none"></textarea>
+          <textarea id="new-hist-content" rows="3" required placeholder="Relato documentado, contexto social e fatos comprovados..." class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition resize-y min-h-[110px] max-h-[450px] leading-relaxed"></textarea>
         </div>
 
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase mb-1">Fonte / Acervo Responsável *</label>
-          <input type="text" id="new-hist-source" required placeholder="Ex: Fundação Joaquim Nabuco / Paço do Frevo" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+          <input type="text" id="new-hist-source" required placeholder="Ex: Fundação Joaquim Nabuco / Paço do Frevo" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
         </div>
 
         <div class="flex gap-2 pt-2 border-t border-gray-100">
-          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl py-2.5 font-bold text-ink">Cancelar</button>
-          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl py-2.5 font-bold shadow-md">Salvar Marco</button>
+          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs sm:text-sm rounded-xl py-2.5 font-bold text-ink">Cancelar</button>
+          <button type="submit" class="btn btn-primary flex-1 text-xs sm:text-sm rounded-xl py-2.5 font-bold shadow-md">Salvar Marco</button>
         </div>
       </form>
     </div>
@@ -1695,29 +1721,35 @@ function openEditHistoryModal(historyId) {
   const modalBody = document.getElementById('modal-body');
 
   modalBody.innerHTML = `
-    <div class="space-y-4 text-left">
-      <div class="flex items-center justify-between pb-2 border-b border-gray-100 pr-8">
+    <div class="space-y-4 text-left max-h-[85vh] overflow-y-auto pr-1">
+      <div class="flex items-start gap-3.5 pb-3 border-b border-gray-100 pr-10">
+        <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+          </svg>
+        </div>
         <div>
           <h3 class="font-display font-bold text-lg text-ink">Editar Marco Histórico</h3>
           <p class="text-xs text-muted">Atualize as informações cronológicas e documentais do registro</p>
         </div>
       </div>
 
-      <form onsubmit="submitEditHistory(event, '${item.id}')" class="space-y-3">
+      <form onsubmit="submitEditHistory(event, '${item.id}')" class="space-y-3.5">
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase mb-1">Título do Marco *</label>
-          <input type="text" id="edit-hist-title" required value="${item.title ? item.title.replace(/"/g, '&quot;') : ''}" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+          <input type="text" id="edit-hist-title" required value="${item.title ? item.title.replace(/"/g, '&quot;') : ''}" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
         </div>
 
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase mb-1">Período / Data Histórica *</label>
-          <input type="text" id="edit-hist-period" required value="${item.period ? item.period.replace(/"/g, '&quot;') : ''}" placeholder="Ex: 9 de Fevereiro de 1907" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+          <input type="text" id="edit-hist-period" required value="${item.period ? item.period.replace(/"/g, '&quot;') : ''}" placeholder="Ex: 9 de Fevereiro de 1907" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
           <p class="text-[10px] text-muted mt-0.5">Ao salvar, o card será realocado para a posição temporal exata na linha do tempo.</p>
         </div>
 
-        <div class="p-3 bg-surface-soft rounded-2xl border border-gray-200 space-y-2">
+        <div class="p-3.5 bg-surface-soft rounded-2xl border border-gray-200 space-y-2.5">
           <label class="block text-[11px] font-bold text-ink uppercase">Documento / Mídia de Época (Foto ou Vídeo)</label>
-          <label class="btn btn-outline text-xs px-3 py-2 rounded-xl cursor-pointer flex items-center gap-1.5 font-bold justify-center bg-white hover:bg-gray-50">
+          <label class="btn btn-outline text-xs px-3.5 py-2.5 rounded-xl cursor-pointer flex items-center gap-1.5 font-bold justify-center bg-white hover:bg-gray-50 border border-gray-300 shadow-sm transition">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
               <polyline points="17 8 12 3 7 8"></polyline>
@@ -1728,8 +1760,8 @@ function openEditHistoryModal(historyId) {
           </label>
 
           <div class="pt-1">
-            <label class="block text-[10px] font-bold text-muted uppercase mb-0.5">Ou cole o link do arquivo</label>
-            <input type="url" id="edit-hist-media-url" value="${item.media_url || item.image_url || ''}" placeholder="https://exemplo.com/registro-historico.jpg" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none font-mono" />
+            <label class="block text-[10px] font-bold text-muted uppercase mb-1">Ou cole o link do arquivo</label>
+            <input type="url" id="edit-hist-media-url" value="${item.media_url || item.image_url || ''}" placeholder="https://exemplo.com/registro-historico.jpg" class="w-full px-3.5 py-2 text-xs border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none font-mono" />
             <input type="hidden" id="edit-hist-media-type" value="${item.media_type || 'image'}" />
           </div>
 
@@ -1748,17 +1780,17 @@ function openEditHistoryModal(historyId) {
 
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase mb-1">Conteúdo Histórico Documentado *</label>
-          <textarea id="edit-hist-content" rows="3" required class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none">${item.content || ''}</textarea>
+          <textarea id="edit-hist-content" rows="3" required class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition resize-y min-h-[110px] max-h-[450px] leading-relaxed">${item.content || ''}</textarea>
         </div>
 
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase mb-1">Fonte / Acervo Responsável *</label>
-          <input type="text" id="edit-hist-source" required value="${item.source ? item.source.replace(/"/g, '&quot;') : ''}" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+          <input type="text" id="edit-hist-source" required value="${item.source ? item.source.replace(/"/g, '&quot;') : ''}" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
         </div>
 
         <div class="flex gap-2 pt-2 border-t border-gray-100">
-          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl py-2.5 font-bold text-ink">Cancelar</button>
-          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl py-2.5 font-bold shadow-md">Salvar Alterações</button>
+          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs sm:text-sm rounded-xl py-2.5 font-bold text-ink">Cancelar</button>
+          <button type="submit" class="btn btn-primary flex-1 text-xs sm:text-sm rounded-xl py-2.5 font-bold shadow-md">Salvar Alterações</button>
         </div>
       </form>
     </div>
@@ -1808,24 +1840,29 @@ function openNewStepModal() {
   const modalBody = document.getElementById('modal-body');
 
   modalBody.innerHTML = `
-    <div class="space-y-4 text-left">
-      <div class="flex items-center justify-between pb-2 border-b border-gray-100 pr-8">
+    <div class="space-y-4 text-left max-h-[85vh] overflow-y-auto pr-1">
+      <div class="flex items-start gap-3.5 pb-3 border-b border-gray-100 pr-10">
+        <div class="w-12 h-12 rounded-2xl bg-red-500/10 text-red-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+        </div>
         <div>
           <h3 class="font-display font-bold text-lg text-ink">Adicionar Passo de Frevo</h3>
           <p class="text-xs text-muted">Cadastre passos técnicos com demonstração em vídeo ou imagem</p>
         </div>
       </div>
 
-      <form onsubmit="submitNewStep(event)" class="space-y-3">
+      <form onsubmit="submitNewStep(event)" class="space-y-3.5">
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase mb-1">Nome do Passo *</label>
-          <input type="text" id="new-step-name" required placeholder="Ex: Saci-Pererê" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+          <input type="text" id="new-step-name" required placeholder="Ex: Saci-Pererê" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
         </div>
 
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="block text-[11px] font-bold text-ink uppercase mb-1">Dificuldade *</label>
-            <select id="new-step-difficulty" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none">
+            <select id="new-step-difficulty" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition">
               <option value="Iniciante">Iniciante</option>
               <option value="Intermediário">Intermediário</option>
               <option value="Avançado">Avançado</option>
@@ -1834,7 +1871,7 @@ function openNewStepModal() {
 
           <div>
             <label class="block text-[11px] font-bold text-ink uppercase mb-1">Categoria *</label>
-            <select id="new-step-category" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none">
+            <select id="new-step-category" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition">
               <option value="Tradicional">Tradicional</option>
               <option value="Acrobático">Acrobático</option>
               <option value="Tesouras">Tesouras</option>
@@ -1843,9 +1880,9 @@ function openNewStepModal() {
           </div>
         </div>
 
-        <div class="p-3 bg-surface-soft rounded-2xl border border-gray-200 space-y-2">
+        <div class="p-3.5 bg-surface-soft rounded-2xl border border-gray-200 space-y-2.5">
           <label class="block text-[11px] font-bold text-ink uppercase">Demonstração Visual (Vídeo ou Foto)</label>
-          <label class="btn btn-outline text-xs px-3 py-2 rounded-xl cursor-pointer flex items-center gap-1.5 font-bold justify-center bg-white hover:bg-gray-50">
+          <label class="btn btn-outline text-xs px-3.5 py-2.5 rounded-xl cursor-pointer flex items-center gap-1.5 font-bold justify-center bg-white hover:bg-gray-50 border border-gray-300 shadow-sm transition">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
               <polyline points="17 8 12 3 7 8"></polyline>
@@ -1856,8 +1893,8 @@ function openNewStepModal() {
           </label>
 
           <div class="pt-1">
-            <label class="block text-[10px] font-bold text-muted uppercase mb-0.5">Ou URL externa da demonstração</label>
-            <input type="url" id="new-step-media-url" placeholder="https://exemplo.com/demonstracao-passo.mp4" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none font-mono" />
+            <label class="block text-[10px] font-bold text-muted uppercase mb-1">Ou URL externa da demonstração</label>
+            <input type="url" id="new-step-media-url" placeholder="https://exemplo.com/demonstracao-passo.mp4" class="w-full px-3.5 py-2 text-xs border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none font-mono" />
             <input type="hidden" id="new-step-media-type" value="video" />
           </div>
 
@@ -1866,17 +1903,17 @@ function openNewStepModal() {
 
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase mb-1">Descrição Curta *</label>
-          <input type="text" id="new-step-desc" required placeholder="Breve resumo da movimentação corporal e ritmo..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none" />
+          <input type="text" id="new-step-desc" required placeholder="Breve resumo da movimentação corporal e ritmo..." class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
         </div>
 
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase mb-1">Instruções de Execução (Passo a Passo) *</label>
-          <textarea id="new-step-instructions" rows="4" required placeholder="1. Posição inicial dos pés&#10;2. Movimento de sombrinha&#10;3. Salto e aterrissagem..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none leading-relaxed"></textarea>
+          <textarea id="new-step-instructions" rows="4" required placeholder="1. Posição inicial dos pés&#10;2. Movimento de sombrinha&#10;3. Salto e aterrissagem..." class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition resize-y min-h-[110px] max-h-[450px] leading-relaxed"></textarea>
         </div>
 
         <div class="flex gap-2 pt-2 border-t border-gray-100">
-          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl py-2.5 font-bold text-ink">Cancelar</button>
-          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl py-2.5 font-bold shadow-md">Salvar Passo</button>
+          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs sm:text-sm rounded-xl py-2.5 font-bold text-ink">Cancelar</button>
+          <button type="submit" class="btn btn-primary flex-1 text-xs sm:text-sm rounded-xl py-2.5 font-bold shadow-md">Salvar Passo</button>
         </div>
       </form>
     </div>
@@ -1927,36 +1964,46 @@ function openNewArtistModal() {
   const modalBody = document.getElementById('modal-body');
 
   modalBody.innerHTML = `
-    <div class="space-y-4 text-left">
-      <div class="pb-2 border-b border-gray-100 pr-10">
-        <h3 class="font-display font-bold text-lg text-ink">Cadastrar Novo Artista</h3>
-        <p class="text-[11px] text-muted">Cadastre a conta oficial do artista. Ele receberá um e-mail de confirmação para acessar a plataforma com a senha padrão.</p>
+    <div class="space-y-4 text-left max-h-[85vh] overflow-y-auto pr-1">
+      <div class="flex items-start gap-3.5 pb-3 border-b border-gray-100 pr-10">
+        <div class="w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="8.5" cy="7" r="4"></circle>
+            <line x1="20" y1="8" x2="20" y2="14"></line>
+            <line x1="23" y1="11" x2="17" y2="11"></line>
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-display font-bold text-lg text-ink">Cadastrar Novo Artista</h3>
+          <p class="text-xs text-muted">Cadastre a conta oficial do artista com notificação automática</p>
+        </div>
       </div>
 
       <div id="new-artist-error-msg" class="hidden text-xs text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-200 flex items-start gap-2"></div>
 
-      <form id="new-artist-form" onsubmit="submitNewArtist(event)" class="space-y-3">
+      <form id="new-artist-form" onsubmit="submitNewArtist(event)" class="space-y-3.5">
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase mb-1">Nome do Responsável / Nome Completo *</label>
-          <input type="text" id="new-artist-owner-name" required placeholder="Ex: Roberto Silva" oninput="document.getElementById('new-artist-error-msg')?.classList.add('hidden')" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+          <input type="text" id="new-artist-owner-name" required placeholder="Ex: Roberto Silva" oninput="document.getElementById('new-artist-error-msg')?.classList.add('hidden')" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
         </div>
 
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase mb-1">Nome de Usuário (@) *</label>
-          <input type="text" id="new-artist-handle" required placeholder="@orquestrasomdaterra" oninput="formatSignupHandleInput(this); document.getElementById('new-artist-error-msg')?.classList.add('hidden')" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange font-medium" />
+          <input type="text" id="new-artist-handle" required placeholder="@orquestrasomdaterra" oninput="formatSignupHandleInput(this); document.getElementById('new-artist-error-msg')?.classList.add('hidden')" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition font-medium" />
           <span class="block text-[10px] text-muted mt-0.5">Identificador exclusivo na comunidade (ex: @maestroduda).</span>
         </div>
 
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase mb-1">E-mail de Acesso *</label>
-          <input type="email" id="new-artist-email" required placeholder="artista@culturape.com" oninput="document.getElementById('new-artist-error-msg')?.classList.add('hidden')" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+          <input type="email" id="new-artist-email" required placeholder="artista@culturape.com" oninput="document.getElementById('new-artist-error-msg')?.classList.add('hidden')" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
           <span class="block text-[10px] text-muted mt-0.5">O artista receberá neste e-mail a confirmação para acessar a conta.</span>
         </div>
 
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase mb-1">Senha Padrão *</label>
           <div class="relative">
-            <input type="password" id="new-artist-password" required minlength="6" value="Frevo2026@" placeholder="Mínimo 6 caracteres" oninput="document.getElementById('new-artist-error-msg')?.classList.add('hidden')" class="w-full pl-3 pr-10 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+            <input type="password" id="new-artist-password" required minlength="6" value="Frevo2026@" placeholder="Mínimo 6 caracteres" oninput="document.getElementById('new-artist-error-msg')?.classList.add('hidden')" class="w-full pl-4 pr-10 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
             <button type="button" onclick="togglePasswordVisibility('new-artist-password', this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-ink transition-colors" aria-label="Ver senha" title="Ver senha">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -1967,15 +2014,15 @@ function openNewArtistModal() {
           <span class="block text-[10px] text-muted mt-0.5">Senha de primeiro acesso que o artista usará para entrar.</span>
         </div>
 
-        <div class="space-y-2.5 p-3 rounded-xl bg-frevo-orange/5 border border-frevo-orange/20">
+        <div class="space-y-3 p-3.5 rounded-2xl bg-surface-soft border border-gray-200">
           <div>
-            <label class="block text-[10px] font-bold text-ink uppercase mb-0.5">Nome Artístico / Grupo / Orquestra *</label>
-            <input type="text" id="new-artist-name" required placeholder="Ex: Orquestra Som da Terra" oninput="document.getElementById('new-artist-error-msg')?.classList.add('hidden')" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+            <label class="block text-[10px] font-bold text-ink uppercase mb-1">Nome Artístico / Grupo / Orquestra *</label>
+            <input type="text" id="new-artist-name" required placeholder="Ex: Orquestra Som da Terra" oninput="document.getElementById('new-artist-error-msg')?.classList.add('hidden')" class="w-full px-3.5 py-2 text-xs border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
           </div>
 
           <div>
-            <label class="block text-[10px] font-bold text-ink uppercase mb-0.5">Gênero Tradicional</label>
-            <select id="new-artist-genre" onchange="handleGenreSelectChange('new-artist-genre', 'new-artist-custom-genre-container')" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange">
+            <label class="block text-[10px] font-bold text-ink uppercase mb-1">Gênero Tradicional</label>
+            <select id="new-artist-genre" onchange="handleGenreSelectChange('new-artist-genre', 'new-artist-custom-genre-container')" class="w-full px-3.5 py-2 text-xs border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition">
               <option value="Frevo de Rua">Frevo de Rua</option>
               <option value="Frevo Canção">Frevo Canção</option>
               <option value="Frevo de Bloco">Frevo de Bloco</option>
@@ -1984,24 +2031,24 @@ function openNewArtistModal() {
               <option value="Outro">Outro</option>
             </select>
             <div id="new-artist-custom-genre-container" class="mt-1.5 hidden">
-              <input type="text" id="new-artist-custom-genre" placeholder="Especifique o gênero tradicional..." class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+              <input type="text" id="new-artist-custom-genre" placeholder="Especifique o gênero tradicional..." class="w-full px-3.5 py-2 text-xs border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
             </div>
           </div>
 
           <div>
-            <label class="block text-[10px] font-bold text-ink uppercase mb-0.5">WhatsApp / Contato</label>
-            <input type="text" id="new-artist-whatsapp" placeholder="(81) 99999-9999" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+            <label class="block text-[10px] font-bold text-ink uppercase mb-1">WhatsApp / Contato</label>
+            <input type="text" id="new-artist-whatsapp" placeholder="(81) 99999-9999" class="w-full px-3.5 py-2 text-xs border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
           </div>
 
           <div>
-            <label class="block text-[10px] font-bold text-ink uppercase mb-0.5">Mini-Biografia / Histórico Cultural</label>
-            <textarea id="new-artist-bio" rows="2" placeholder="Trajetória cultural, participações no carnaval e histórico..." class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange"></textarea>
+            <label class="block text-[10px] font-bold text-ink uppercase mb-1">Mini-Biografia / Histórico Cultural</label>
+            <textarea id="new-artist-bio" rows="3" placeholder="Trajetória cultural, participações no carnaval e histórico..." class="w-full px-3.5 py-2 text-xs border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition resize-y min-h-[110px] max-h-[450px] leading-relaxed"></textarea>
           </div>
         </div>
 
-        <div class="flex gap-2 pt-2">
-          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs rounded-xl">Cancelar</button>
-          <button type="submit" id="new-artist-submit-btn" class="btn btn-primary flex-1 text-xs rounded-xl font-bold">Cadastrar Artista</button>
+        <div class="flex gap-2 pt-2 border-t border-gray-100">
+          <button type="button" onclick="closeModal()" class="btn btn-outline flex-1 text-xs sm:text-sm rounded-xl py-2.5 font-bold text-ink">Cancelar</button>
+          <button type="submit" id="new-artist-submit-btn" class="btn btn-primary flex-1 text-xs sm:text-sm rounded-xl py-2.5 font-bold shadow-md">Cadastrar Artista</button>
         </div>
       </form>
     </div>
@@ -2151,7 +2198,7 @@ function openUserDetailsModal(userId) {
   if (!modal || !modalBody) return;
 
   modalBody.innerHTML = `
-    <div class="space-y-4 text-left">
+    <div class="space-y-4 text-left max-h-[85vh] overflow-y-auto pr-1">
       <div class="flex items-start gap-3.5 pb-3 border-b border-gray-100 pr-8">
         <img 
           src="${getUserAvatarUrl(user.avatar)}" 
@@ -2170,33 +2217,33 @@ function openUserDetailsModal(userId) {
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-        <div class="p-2.5 bg-surface-soft rounded-xl border border-gray-100 space-y-0.5">
+        <div class="p-3 bg-surface-soft rounded-2xl border border-gray-100 space-y-1">
           <span class="text-[10px] font-bold text-muted uppercase tracking-wider block">E-mail</span>
           <span class="text-ink font-mono font-medium block truncate">${user.email || 'Não informado'}</span>
         </div>
-        <div class="p-2.5 bg-surface-soft rounded-xl border border-gray-100 space-y-0.5">
+        <div class="p-3 bg-surface-soft rounded-2xl border border-gray-100 space-y-1">
           <span class="text-[10px] font-bold text-muted uppercase tracking-wider block">Telefone / WhatsApp</span>
           <span class="text-ink font-mono font-medium block truncate">${user.phone || 'Não informado'}</span>
         </div>
-        <div class="p-2.5 bg-surface-soft rounded-xl border border-gray-100 space-y-0.5">
+        <div class="p-3 bg-surface-soft rounded-2xl border border-gray-100 space-y-1">
           <span class="text-[10px] font-bold text-muted uppercase tracking-wider block">Localização</span>
           <span class="text-ink font-medium block truncate">${user.city || 'Recife, PE'}</span>
         </div>
-        <div class="p-2.5 bg-surface-soft rounded-xl border border-gray-100 space-y-0.5">
+        <div class="p-3 bg-surface-soft rounded-2xl border border-gray-100 space-y-1">
           <span class="text-[10px] font-bold text-muted uppercase tracking-wider block">Status da Conta</span>
           <span class="text-green-700 font-bold block capitalize">${user.status || 'Ativo'}</span>
         </div>
       </div>
 
-      <div class="space-y-1">
+      <div class="space-y-1.5">
         <span class="text-[10px] font-bold text-muted uppercase tracking-wider block">Biografia Cultural</span>
-        <div class="p-3 bg-surface-soft rounded-xl border border-gray-100 text-xs text-ink leading-relaxed">
+        <div class="p-3.5 bg-surface-soft rounded-2xl border border-gray-100 text-xs text-ink leading-relaxed">
           ${user.bio || 'Nenhuma biografia fornecida pelo usuário.'}
         </div>
       </div>
 
       <div class="flex gap-2 pt-2 border-t border-gray-100">
-        <button type="button" onclick="closeModal()" class="btn btn-outline w-full text-xs rounded-xl py-2.5 font-bold">
+        <button type="button" onclick="closeModal()" class="btn btn-outline w-full text-xs sm:text-sm rounded-xl py-2.5 font-bold">
           Fechar
         </button>
       </div>

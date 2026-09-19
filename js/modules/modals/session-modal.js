@@ -76,12 +76,19 @@ function openSessionModal() {
   const modalBody = document.getElementById('modal-body');
 
   const isGuest = currentUserSession.role === 'guest';
-
   modalBody.innerHTML = `
     <div class="space-y-4 text-left">
-      <div class="pb-2 border-b border-gray-100 pr-10">
-        <h3 class="font-display font-bold text-lg text-ink">${isGuest ? 'Acessar o FrevAI' : 'Minha Conta FrevAI'}</h3>
-        <p class="text-[11px] text-muted">${isGuest ? 'Entre ou cadastre-se para vivenciar o universo do Frevo' : `Logado como: ${currentUserSession.name}`}</p>
+      <div class="flex items-start gap-3.5 pb-3 border-b border-gray-100 pr-10">
+        <div class="w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-display font-bold text-lg text-ink">${isGuest ? 'Acessar o FrevAI' : 'Minha Conta FrevAI'}</h3>
+          <p class="text-xs text-muted">${isGuest ? 'Entre ou cadastre-se para vivenciar o universo do Frevo' : `Logado como: ${currentUserSession.name}`}</p>
+        </div>
       </div>
 
       ${isGuest ? `
@@ -97,11 +104,11 @@ function openSessionModal() {
 
         ${currentAuthTab === 'login' ? `
           <!-- Formulário de Login (E-mail e Senha) -->
-          <form onsubmit="handleEmailLogin(event)" class="space-y-3">
-            <div id="login-error-msg" class="hidden text-xs text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-200 flex items-start gap-2"></div>
+          <form onsubmit="handleEmailLogin(event)" class="space-y-3.5">
+            <div id="login-error-msg" class="hidden text-xs text-red-600 bg-red-50 p-3 rounded-xl border border-red-200 flex items-start gap-2"></div>
             <div>
               <label class="block text-[11px] font-bold text-ink uppercase mb-1">E-mail</label>
-              <input type="email" id="auth-email" required placeholder="seuemail@exemplo.com" oninput="document.getElementById('login-error-msg')?.classList.add('hidden')" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+              <input type="email" id="auth-email" required placeholder="seuemail@exemplo.com" oninput="document.getElementById('login-error-msg')?.classList.add('hidden')" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
             </div>
             <div>
               <div class="flex items-center justify-between mb-1">
@@ -111,44 +118,44 @@ function openSessionModal() {
                 </button>
               </div>
               <div class="relative">
-                <input type="password" id="auth-password" required placeholder="••••••••" oninput="document.getElementById('login-error-msg')?.classList.add('hidden')" class="w-full pl-3 pr-10 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
-                <button type="button" onclick="togglePasswordVisibility('auth-password', this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-ink transition-colors" aria-label="Ver senha" title="Ver senha">
+                <input type="password" id="auth-password" required placeholder="••••••••" oninput="document.getElementById('login-error-msg')?.classList.add('hidden')" class="w-full pl-4 pr-11 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
+                <button type="button" onclick="togglePasswordVisibility('auth-password', this)" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-ink transition-colors" aria-label="Ver senha" title="Ver senha">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path>
+                    <circle cx="12" cy="7" r="3"></circle>
                   </svg>
                 </button>
               </div>
             </div>
-            <button type="submit" class="btn btn-primary w-full text-xs rounded-xl py-2.5 font-bold shadow-md">
+            <button type="submit" class="btn btn-primary w-full text-xs sm:text-sm rounded-xl py-2.5 font-bold shadow-md">
               Entrar
             </button>
           </form>
         ` : `
           <!-- Formulário de Cadastro (Fã vs Artista) -->
-          <form onsubmit="handleEmailSignUp(event)" class="space-y-3">
-            <div id="signup-error-msg" class="hidden text-xs text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-200 flex items-start gap-2"></div>
+          <form onsubmit="handleEmailSignUp(event)" class="space-y-3.5">
+            <div id="signup-error-msg" class="hidden text-xs text-red-600 bg-red-50 p-3 rounded-xl border border-red-200 flex items-start gap-2"></div>
             <div>
               <label class="block text-[11px] font-bold text-ink uppercase mb-1">Nome Completo *</label>
-              <input type="text" id="signup-name" required placeholder="Seu nome ou como quer ser chamado" oninput="document.getElementById('signup-error-msg')?.classList.add('hidden')" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+              <input type="text" id="signup-name" required placeholder="Seu nome ou como quer ser chamado" oninput="document.getElementById('signup-error-msg')?.classList.add('hidden')" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
             </div>
             <div>
               <label class="block text-[11px] font-bold text-ink uppercase mb-1">Nome de Usuário (@) *</label>
-              <input type="text" id="signup-handle" required placeholder="@seunome" oninput="formatSignupHandleInput(this)" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange font-medium" />
+              <input type="text" id="signup-handle" required placeholder="@seunome" oninput="formatSignupHandleInput(this)" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition font-medium" />
               <span class="block text-[10px] text-muted mt-0.5">Identificador exclusivo na comunidade (ex: @mariasilva).</span>
             </div>
             <div>
               <label class="block text-[11px] font-bold text-ink uppercase mb-1">E-mail *</label>
-              <input type="email" id="signup-email" required placeholder="seuemail@exemplo.com" oninput="document.getElementById('signup-error-msg')?.classList.add('hidden')" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+              <input type="email" id="signup-email" required placeholder="seuemail@exemplo.com" oninput="document.getElementById('signup-error-msg')?.classList.add('hidden')" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
             </div>
             <div>
               <label class="block text-[11px] font-bold text-ink uppercase mb-1">Criar Senha *</label>
               <div class="relative">
-                <input type="password" id="signup-password" required minlength="6" placeholder="Mínimo 6 caracteres" oninput="document.getElementById('signup-error-msg')?.classList.add('hidden')" class="w-full pl-3 pr-10 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
-                <button type="button" onclick="togglePasswordVisibility('signup-password', this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-ink transition-colors" aria-label="Ver senha" title="Ver senha">
+                <input type="password" id="signup-password" required minlength="6" placeholder="Mínimo 6 caracteres" oninput="document.getElementById('signup-error-msg')?.classList.add('hidden')" class="w-full pl-4 pr-11 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
+                <button type="button" onclick="togglePasswordVisibility('signup-password', this)" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-ink transition-colors" aria-label="Ver senha" title="Ver senha">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path>
+                    <circle cx="12" cy="7" r="3"></circle>
                   </svg>
                 </button>
               </div>
@@ -195,6 +202,7 @@ function openSessionModal() {
               <div>
                 <label class="block text-[10px] font-bold text-ink uppercase mb-0.5">WhatsApp / Contato</label>
                 <input type="text" id="signup-artist-whatsapp" placeholder="(81) 99999-9999" class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+              </div>
               <div class="pt-1">
                 <label class="flex items-start gap-2 cursor-pointer text-[11px] text-ink-soft select-none">
                   <input type="checkbox" id="signup-terms-consent-artist" required checked class="mt-0.5 w-3.5 h-3.5 rounded text-frevo-orange focus:ring-frevo-orange border-gray-300" />
@@ -317,21 +325,29 @@ function openForgotPasswordModal() {
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left">
-      <div class="pb-2 border-b border-gray-100 pr-10">
-        <h3 class="font-display font-bold text-lg text-ink">Recuperar Senha</h3>
-        <p class="text-[11px] text-muted">Informe seu e-mail cadastrado para receber as instruções de redefinição de senha.</p>
+      <div class="flex items-start gap-3.5 pb-3 border-b border-gray-100 pr-10">
+        <div class="w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-display font-bold text-lg text-ink">Recuperar Senha</h3>
+          <p class="text-xs text-muted">Informe seu e-mail cadastrado para receber as instruções de redefinição de senha.</p>
+        </div>
       </div>
 
-      <div id="forgot-error-msg" class="hidden text-xs text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-200 flex items-start gap-2"></div>
+      <div id="forgot-error-msg" class="hidden text-xs text-red-600 bg-red-50 p-3 rounded-xl border border-red-200 flex items-start gap-2"></div>
       <div id="forgot-success-msg" class="hidden text-xs text-emerald-700 bg-emerald-50 p-3 rounded-xl border border-emerald-200 leading-relaxed"></div>
 
-      <form id="forgot-password-form" onsubmit="handleForgotPasswordSubmit(event)" class="space-y-3">
+      <form id="forgot-password-form" onsubmit="handleForgotPasswordSubmit(event)" class="space-y-3.5">
         <div>
           <label class="block text-[11px] font-bold text-ink uppercase mb-1">E-mail Cadastrado *</label>
-          <input type="email" id="forgot-email" required placeholder="seuemail@exemplo.com" oninput="document.getElementById('forgot-error-msg')?.classList.add('hidden')" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+          <input type="email" id="forgot-email" required placeholder="seuemail@exemplo.com" oninput="document.getElementById('forgot-error-msg')?.classList.add('hidden')" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
         </div>
 
-        <button type="submit" id="forgot-submit-btn" class="btn btn-primary w-full text-xs rounded-xl py-2.5 font-bold shadow-md">
+        <button type="submit" id="forgot-submit-btn" class="btn btn-primary w-full text-xs sm:text-sm rounded-xl py-2.5 font-bold shadow-md">
           Enviar Link de Recuperação
         </button>
       </form>
@@ -389,14 +405,142 @@ async function handleForgotPasswordSubmit(e) {
 }
 
 async function loginWithGoogle() {
+  openGoogleAuthModal();
+}
+
+function openGoogleAuthModal() {
+  const modalBody = document.getElementById('modal-body');
+  if (!modalBody) return;
+  
+  modalBody.innerHTML = `
+    <div class="space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center flex-shrink-0">
+          <svg width="24" height="24" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-display font-bold text-lg text-ink">Entrar com a Google</h3>
+          <p class="text-xs text-muted">Acesse ou crie sua conta FrevAI de forma rápida e segura</p>
+        </div>
+      </div>
+
+      <form id="google-auth-direct-form" onsubmit="handleGoogleAuthSubmit(event)" class="space-y-3.5 pt-2">
+        <div>
+          <label class="block text-xs font-bold text-ink mb-1">Seu E-mail da Conta Google *</label>
+          <input type="email" id="google-auth-email" required placeholder="seu.email@gmail.com" class="w-full px-3.5 py-2.5 text-xs border border-gray-300 rounded-xl bg-surface-soft text-ink focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-ink mb-1">Seu Nome Completo (Opcional)</label>
+          <input type="text" id="google-auth-name" placeholder="Ex: Maria Freire" class="w-full px-3.5 py-2.5 text-xs border border-gray-300 rounded-xl bg-surface-soft text-ink focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
+        </div>
+
+        <div class="pt-2 flex items-center gap-2">
+          <button type="button" onclick="openSessionModal('signup')" class="btn btn-outline flex-1 py-2.5 rounded-xl text-xs font-bold">
+            Voltar
+          </button>
+          <button type="submit" class="btn bg-blue-600 hover:bg-blue-700 text-white flex-1 py-2.5 rounded-xl text-xs font-bold shadow-md transition-all flex items-center justify-center gap-2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M5 12h14"></path>
+              <path d="M12 5l7 7-7 7"></path>
+            </svg>
+            Continuar com Google
+          </button>
+        </div>
+      </form>
+    </div>
+  `;
+  openModal();
+}
+
+async function handleGoogleAuthSubmit(e) {
+  e.preventDefault();
+  const email = document.getElementById('google-auth-email')?.value?.trim();
+  const nameInput = document.getElementById('google-auth-name')?.value?.trim();
+  if (!email) return;
+
+  const name = nameInput || email.split('@')[0];
+  const handle = '@' + email.split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g, '');
+  const googleId = 'google_' + btoa(email).replace(/[^a-zA-Z0-9]/g, '').slice(0, 16);
+
   if (window.awsService && window.awsService.isConnected()) {
     try {
-      window.awsService.signInWithGoogle();
+      let dbProfile = await window.awsService.getProfile(googleId);
+      if (!dbProfile) {
+        dbProfile = await window.awsService.upsertProfile({
+          id: googleId,
+          email: email,
+          display_name: name,
+          name: name,
+          handle: handle,
+          role: 'user',
+          avatar_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4285F4&color=fff&rounded=true`
+        });
+      }
+
+      const isApprovedArtist = dbProfile?.role === 'artist' && dbProfile?.artist_id;
+      const userRole = dbProfile?.role === 'admin' ? 'admin' : isApprovedArtist ? 'artist' : 'user';
+
+      currentUserSession = {
+        id: googleId,
+        role: userRole,
+        name: dbProfile?.display_name || name,
+        handle: dbProfile?.handle || handle,
+        avatar: dbProfile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4285F4&color=fff&rounded=true`,
+        email: email,
+        artist_id: isApprovedArtist ? dbProfile.artist_id : null,
+        artist_request_status: dbProfile?.artist_request_status || 'none',
+        favorites: [],
+        saved_scores: ['s1', 's3'],
+        saved_posts: ['p1', 'p2'],
+        liked_posts: ['p1']
+      };
+
+      const social = await window.awsService.getUserSocialState(googleId);
+      if (social) {
+        currentUserSession.favorites = social.favoriteArtistIds || [];
+      }
     } catch (err) {
-      showAlertModal('Falha na comunicação com o Amazon Cognito / Google OAuth: ' + err.message);
+      console.warn('[Google Auth] Erro ao sincronizar AWS:', err);
     }
-  } else {
-    switchTestRole('user');
+  }
+
+  if (!currentUserSession || currentUserSession.role === 'guest') {
+    currentUserSession = {
+      id: googleId,
+      role: 'user',
+      name: name,
+      handle: handle,
+      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4285F4&color=fff&rounded=true`,
+      email: email,
+      artist_id: null,
+      artist_request_status: 'none',
+      favorites: ['a1'],
+      saved_scores: ['s1', 's3'],
+      saved_posts: ['p1', 'p2'],
+      liked_posts: ['p1']
+    };
+  }
+
+  if (typeof currentUserProfile !== 'undefined') {
+    currentUserProfile.name = currentUserSession.name;
+    currentUserProfile.handle = currentUserSession.handle;
+    currentUserProfile.email = email;
+    currentUserProfile.avatar = currentUserSession.avatar;
+  }
+
+  saveCurrentSession();
+  updateProfileUI();
+  closeModal();
+
+  if (typeof showPlatformAlert === 'function') {
+    showPlatformAlert(`Conta Google conectada com sucesso!\n\nBem-vindo ao FrevAI, ${name}!`, 'Login Google');
+  } else if (typeof showAlertModal === 'function') {
+    showAlertModal(`Conta Google conectada com sucesso!\n\nBem-vindo ao FrevAI, ${name}!`);
   }
 }
 
@@ -745,29 +889,36 @@ function openArtistRequestModal() {
   const hasHistory = window.modalHistoryStack && window.modalHistoryStack.length > 0;
 
   modalBody.innerHTML = `
-    <div class="space-y-4 text-left">
-      <div class="pb-2 border-b border-gray-100 pr-10">
-        <h3 class="font-display font-bold text-lg text-ink">Solicitar Perfil de Artista</h3>
-        <p class="text-xs text-muted">Junte-se à galeria de mestres e fazedores de cultura do Frevo</p>
+    <div class="space-y-4 text-left max-h-[85vh] overflow-y-auto pr-1">
+      <div class="flex items-start gap-3.5 pb-3 border-b border-gray-100 pr-10">
+        <div class="w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-display font-bold text-lg text-ink">Solicitar Perfil de Artista</h3>
+          <p class="text-xs text-muted">Junte-se à galeria de mestres e fazedores de cultura do Frevo</p>
+        </div>
       </div>
 
-      <div class="p-3 bg-frevo-orange/10 border border-frevo-orange/30 rounded-2xl text-xs text-ink space-y-1">
-        <div class="font-bold flex items-center gap-1.5 text-frevo-orange">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-          Como funciona a aprovação?
+      <div class="p-3.5 bg-orange-50/80 border border-orange-200/70 rounded-2xl text-xs text-ink space-y-1.5">
+        <div class="font-bold flex items-center gap-1.5 text-orange-700">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          Como funciona a aprovação de curadoria?
         </div>
-        <p class="text-[11px] text-muted">Você continuará navegando como folião normalmente. O comitê de gestão analisará suas informações e, após a aprovação, as abas de partituras, álbuns e shows serão liberadas no seu perfil.</p>
+        <p class="text-[11px] text-orange-950/80 leading-relaxed">Você continuará navegando como folião normalmente. O comitê gestor analisará suas informações e, após a aprovação, as abas de partituras, álbuns e shows serão liberadas no seu perfil.</p>
       </div>
 
-      <form onsubmit="handleArtistRequestSubmit(event)" class="space-y-3">
+      <form onsubmit="handleArtistRequestSubmit(event)" class="space-y-3.5">
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Nome Artístico / Grupo / Orquestra *</label>
-          <input type="text" id="req-artist-name" required placeholder="Ex: Orquestra Frevo Tropical" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Nome Artístico / Grupo / Orquestra *</label>
+          <input type="text" id="req-artist-name" required placeholder="Ex: Orquestra Frevo Tropical" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
         </div>
 
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Gênero Tradicional</label>
-          <select id="req-artist-genre" onchange="handleGenreSelectChange('req-artist-genre', 'req-custom-genre-container')" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange">
+          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Gênero Tradicional</label>
+          <select id="req-artist-genre" onchange="handleGenreSelectChange('req-artist-genre', 'req-custom-genre-container')" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition">
             <option value="Frevo de Rua">Frevo de Rua</option>
             <option value="Frevo Canção">Frevo Canção</option>
             <option value="Frevo de Bloco">Frevo de Bloco</option>
@@ -775,32 +926,32 @@ function openArtistRequestModal() {
             <option value="Frevo Contemporâneo">Frevo Contemporâneo</option>
             <option value="Outro">Outro</option>
           </select>
-          <div id="req-custom-genre-container" class="mt-1.5 hidden">
-            <input type="text" id="req-custom-genre" placeholder="Especifique o gênero tradicional..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+          <div id="req-custom-genre-container" class="mt-2 hidden">
+            <input type="text" id="req-custom-genre" placeholder="Especifique o gênero tradicional..." class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
           </div>
         </div>
 
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Breve Biografia / Histórico</label>
-          <textarea id="req-artist-bio" rows="3" placeholder="Conte um pouco sobre sua trajetória no Frevo, participações em carnavais ou festivais..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange"></textarea>
+          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Breve Biografia / Histórico Cultural</label>
+          <textarea id="req-artist-bio" rows="4" placeholder="Conte um pouco sobre sua trajetória no Frevo, participações em carnavais ou festivais..." class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition resize-y min-h-[110px] max-h-[450px] leading-relaxed"></textarea>
         </div>
 
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-2 gap-2.5">
           <div>
-            <label class="block text-[11px] font-bold text-ink uppercase mb-1">Instagram (@usuario)</label>
-            <input type="text" id="req-artist-instagram" placeholder="@seuinstagram" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+            <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Instagram (@usuario)</label>
+            <input type="text" id="req-artist-instagram" placeholder="@seuinstagram" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition font-medium" />
           </div>
           <div>
-            <label class="block text-[11px] font-bold text-ink uppercase mb-1">WhatsApp de Contato</label>
-            <input type="text" id="req-artist-whatsapp" placeholder="(81) 99999-9999" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+            <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">WhatsApp de Contato</label>
+            <input type="text" id="req-artist-whatsapp" placeholder="(81) 99999-9999" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition font-mono" />
           </div>
         </div>
 
-        <div class="flex gap-2 pt-2">
-          <button type="button" onclick="${hasHistory ? 'goBackModal()' : 'closeModal()'}" class="btn btn-outline flex-1 text-xs rounded-xl">
+        <div class="flex gap-2.5 pt-2">
+          <button type="button" onclick="${hasHistory ? 'goBackModal()' : 'closeModal()'}" class="btn btn-outline flex-1 text-xs sm:text-sm py-2.5 rounded-xl font-bold">
             ${hasHistory ? 'Voltar' : 'Cancelar'}
           </button>
-          <button type="submit" class="btn btn-primary flex-1 text-xs rounded-xl shadow-md font-bold">Enviar para Curadoria</button>
+          <button type="submit" class="btn btn-primary flex-1 text-xs sm:text-sm py-2.5 rounded-xl shadow-md font-bold">Enviar para Curadoria</button>
         </div>
       </form>
     </div>
@@ -897,6 +1048,8 @@ window.formatSignupHandleInput = formatSignupHandleInput;
 window.openForgotPasswordModal = openForgotPasswordModal;
 window.handleForgotPasswordSubmit = handleForgotPasswordSubmit;
 window.loginWithGoogle = loginWithGoogle;
+window.openGoogleAuthModal = openGoogleAuthModal;
+window.handleGoogleAuthSubmit = handleGoogleAuthSubmit;
 window.handleEmailLogin = handleEmailLogin;
 window.handleEmailSignUp = handleEmailSignUp;
 window.openArtistRequestModal = openArtistRequestModal;

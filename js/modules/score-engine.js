@@ -428,41 +428,17 @@ function openScoreModal(title, artist, songId) {
   modalBody.innerHTML = `
     <div class="space-y-4 text-left">
       <div class="pb-2 border-b border-gray-100 pr-10">
-        <h3 class="font-display font-bold text-lg text-ink">Partitura &amp; Arranjo Musical</h3>
-        <p class="text-[11px] text-muted">Acervo Digital Oficial da Salvaguarda • ${profile.key}</p>
-      </div>
-
-      <div class="p-4 bg-surface-soft border border-gray-100 rounded-2xl space-y-2 text-left">
-        <div class="flex items-center justify-between">
-          <span class="badge bg-frevo-cyan/20 text-ink text-[11px] font-bold">${song.genre}</span>
-          <span class="badge bg-gray-100 text-muted text-[10px] font-mono font-bold">${song.downloads_count || 120} downloads</span>
-        </div>
         <h3 class="font-display font-bold text-lg text-ink leading-tight">${song.title}</h3>
-        <p class="text-xs font-bold text-frevo-orange">${song.artist} • ${profile.lead}</p>
-        <p class="text-xs text-muted leading-relaxed">${song.description || 'Partitura oficial formatada com pauta musical, grade de arranjo e letra completa.'}</p>
-      </div>
-
-      <!-- Barra de andamento e prévia sonora -->
-      <div class="flex items-center justify-between px-4 py-2.5 bg-surface-soft rounded-xl text-xs font-medium text-ink-soft border border-gray-100 flex-wrap gap-2">
-        <div class="flex items-center gap-2 text-xs flex-wrap">
-          <span class="w-2.5 h-2.5 rounded-full ${isPlayingThis ? 'bg-frevo-red animate-ping' : 'bg-frevo-green animate-pulse'}"></span>
-          <span>Andamento: <strong>${profile.tempoLabel}</strong></span>
-          <span class="text-gray-300">•</span>
-          <span>Tom: <strong>${profile.key}</strong></span>
-        </div>
-        <button onclick="playFrevoAudioPreview('${song.id}')" class="btn ${isPlayingThis ? 'bg-frevo-red text-white' : 'bg-white border border-gray-200 hover:border-frevo-orange text-frevo-orange'} text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 shadow-sm transition-all">
-          ${isPlayingThis
-            ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg> Parar`
-            : `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Ouvir Prévia`}
-        </button>
+        <p class="text-xs font-bold text-frevo-orange mt-0.5">${song.artist}</p>
+        ${song.description ? `<p class="text-xs text-muted leading-relaxed mt-1">${song.description}</p>` : ''}
       </div>
 
       <!-- Folha de Partitura Real com Pentagrama SVG -->
-      <div class="real-sheet-canvas p-4 space-y-3 shadow-inner overflow-y-auto" style="max-height: 320px;">
+      <div class="real-sheet-canvas p-4 space-y-3 shadow-inner overflow-y-auto" style="max-height: 340px;">
         <div class="text-center pb-2 border-b border-stone-300">
           <span class="text-[9px] tracking-widest uppercase text-stone-500 font-bold block mb-0.5">Sociedade dos Músicos do Frevo de Pernambuco</span>
           <h4 class="text-xl font-serif font-black text-stone-900 tracking-wider uppercase">${song.title}</h4>
-          <span class="text-[11px] font-serif italic text-stone-700">Composição &amp; Arranjo: ${song.artist} • ${profile.lead}</span>
+          <span class="text-[11px] font-serif italic text-stone-700">Composição: ${song.artist}</span>
         </div>
         <div class="space-y-3">
           ${renderStaveSvgHtml(profile.stave1, profile.keyAccidentals, profile.stave1Title)}
@@ -483,6 +459,12 @@ function openScoreModal(title, artist, songId) {
             Voltar
           </button>
         ` : ''}
+        <button onclick="playSong('${song.id}')" class="btn btn-primary text-xs rounded-xl shadow-md py-3 px-4 font-bold flex items-center justify-center gap-2 flex-1" title="Ouvir Música">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          Ouvir Música
+        </button>
         ${canDownloadSong(song) ? `
           <button onclick="downloadScore('${song.id}')" class="btn btn-cyan flex-1 text-xs rounded-xl shadow-md py-3 font-bold flex items-center justify-center gap-2">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -490,7 +472,7 @@ function openScoreModal(title, artist, songId) {
               <polyline points="7 10 12 15 17 10"></polyline>
               <line x1="12" y1="15" x2="12" y2="3"></line>
             </svg>
-            Baixar Partitura em PDF
+            Baixar PDF
           </button>
         ` : `
           <div class="flex-1 p-3 bg-gray-50 border border-gray-200 rounded-xl text-center text-xs text-muted flex items-center justify-center gap-2 font-medium">
@@ -498,7 +480,7 @@ function openScoreModal(title, artist, songId) {
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
               <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
             </svg>
-            Download não habilitado pelo maestro
+            Download restrito
           </div>
         `}
       </div>

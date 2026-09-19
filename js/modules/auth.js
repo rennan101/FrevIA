@@ -1090,49 +1090,57 @@ function openEditProfileModal() {
   if (!modal || !modalBody) return;
 
   modalBody.innerHTML = `
-    <div class="space-y-4 text-left">
-      <div class="pb-2 border-b border-gray-100 pr-10">
-        <h3 class="font-display font-bold text-lg text-ink">Editar Perfil</h3>
-        <p class="text-[11px] text-muted">Atualize seus dados públicos na comunidade do Frevo</p>
+    <div class="space-y-4 text-left max-h-[85vh] overflow-y-auto pr-1">
+      <div class="flex items-start gap-3.5 pb-3 border-b border-gray-100 pr-10">
+        <div class="w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-display font-bold text-lg text-ink">Editar Perfil</h3>
+          <p class="text-xs text-muted">Atualize seus dados públicos na comunidade do Frevo</p>
+        </div>
       </div>
 
       <form onsubmit="saveProfileChanges(event)" class="space-y-3.5">
         <!-- Foto de Perfil -->
-        <div class="flex items-center gap-3.5">
-          <img id="edit-avatar-preview" src="${getUserAvatarUrl(currentUserSession.avatar)}" alt="Avatar" class="w-16 h-16 rounded-full object-cover border border-gray-200" />
-          <div>
-            <label class="btn btn-outline text-xs px-3 py-1.5 rounded-xl font-bold cursor-pointer inline-flex items-center gap-1.5">
+        <div class="flex items-center gap-3.5 p-3 bg-surface-soft rounded-2xl border border-gray-100">
+          <img id="edit-avatar-preview" src="${getUserAvatarUrl(currentUserSession.avatar)}" alt="Avatar" class="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm flex-shrink-0" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR_PLACEHOLDER}'" />
+          <div class="min-w-0 flex-1">
+            <label class="btn btn-outline text-xs px-3.5 py-2 rounded-xl font-bold cursor-pointer inline-flex items-center gap-1.5 bg-white hover:bg-gray-50 transition shadow-sm">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
               Alterar Foto
               <input type="file" accept="image/*" class="hidden" onchange="handleUserAvatarUpload(event)" />
             </label>
-            <p class="text-[10px] text-muted mt-1">PNG ou JPG até 5MB</p>
+            <p class="text-[10px] text-muted mt-1">Formatos PNG, WEBP ou JPG até 5MB</p>
           </div>
         </div>
 
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Nome Completo *</label>
-          <input type="text" id="edit-profile-name" required value="${currentUserSession.name || ''}" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Nome Completo *</label>
+          <input type="text" id="edit-profile-name" required value="${currentUserSession.name || ''}" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition" />
         </div>
 
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Nome de Usuário (@) *</label>
-          <input type="text" id="edit-profile-handle" required value="${currentUserSession.handle || ''}" oninput="formatSignupHandleInput(this)" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange font-medium" />
+          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Nome de Usuário (@) *</label>
+          <input type="text" id="edit-profile-handle" required value="${currentUserSession.handle || ''}" oninput="formatSignupHandleInput(this)" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition font-medium" />
         </div>
 
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Biografia</label>
-          <textarea id="edit-profile-bio" rows="3" placeholder="Conte um pouco sobre sua relação com o Frevo..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange resize-none">${currentUserSession.bio || ''}</textarea>
+          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Biografia Cultural</label>
+          <textarea id="edit-profile-bio" rows="4" placeholder="Conte um pouco sobre sua relação com o Frevo..." class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition resize-y min-h-[110px] max-h-[450px] leading-relaxed">${currentUserSession.bio || ''}</textarea>
         </div>
 
         <div>
-          <label class="block text-[11px] font-bold text-ink uppercase mb-1">Instagram (@)</label>
-          <input type="text" id="edit-profile-instagram" value="${(currentUserSession.socials && currentUserSession.socials.instagram) || ''}" placeholder="@seuinstagram" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl bg-surface-soft text-ink focus:outline-none focus:ring-2 focus:ring-frevo-orange" />
+          <label class="block text-[11px] font-bold text-ink uppercase tracking-wider mb-1">Instagram (@)</label>
+          <input type="text" id="edit-profile-instagram" value="${(currentUserSession.socials && currentUserSession.socials.instagram) || ''}" placeholder="@seuinstagram" class="w-full px-4 py-2.5 text-xs sm:text-sm border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-100 rounded-xl bg-white text-ink outline-none transition font-medium" />
         </div>
 
-        <div class="pt-2 flex items-center justify-end gap-2">
-          <button type="button" onclick="closeModal()" class="btn btn-outline px-4 py-2 text-xs rounded-xl font-bold">Cancelar</button>
-          <button type="submit" class="btn btn-primary px-5 py-2 text-xs rounded-xl font-bold shadow-md">Salvar Alterações</button>
+        <div class="pt-2 flex items-center justify-end gap-2.5">
+          <button type="button" onclick="closeModal()" class="btn btn-outline px-4 py-2.5 text-xs sm:text-sm rounded-xl font-bold flex-1">Cancelar</button>
+          <button type="submit" class="btn btn-primary px-5 py-2.5 text-xs sm:text-sm rounded-xl font-bold shadow-md flex-1">Salvar Alterações</button>
         </div>
       </form>
     </div>
@@ -1178,9 +1186,17 @@ function openSettingsModal() {
 
   modalBody.innerHTML = `
     <div class="space-y-4 text-left">
-      <div class="pb-2 border-b border-gray-100 pr-10">
-        <h3 class="font-display font-bold text-lg text-ink">Configurações</h3>
-        <p class="text-[11px] text-muted">Ajustes da conta e preferências do FrevAI</p>
+      <div class="flex items-start gap-3.5 pb-3 border-b border-gray-100 pr-10">
+        <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 text-cyan-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-display font-bold text-lg text-ink">Configurações</h3>
+          <p class="text-xs text-muted">Ajustes da conta e preferências do FrevAI</p>
+        </div>
       </div>
 
       <div class="space-y-3">
