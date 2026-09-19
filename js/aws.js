@@ -458,6 +458,19 @@ class AwsService {
     }
   }
 
+  async deleteSong(id) {
+    if (!id || !this.apiGatewayUrl) return true;
+    try {
+      const res = await fetch(`${this.apiGatewayUrl}/songs/${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
+      return res.ok;
+    } catch (err) {
+      console.warn('[AWS Songs] Falha ao excluir música:', err);
+      return false;
+    }
+  }
+
   // ============================================================================
   // ÁLBUNS & DISCOGRAFIA (CRUD NO BACKEND AWS)
   // ============================================================================

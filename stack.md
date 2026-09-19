@@ -254,6 +254,7 @@ description text
 lyrics text
 score_path text
 cover_url text
+allow_download boolean default true
 status text
 submitted_by uuid references profiles(id)
 published_at timestamptz

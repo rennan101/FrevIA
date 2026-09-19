@@ -1,0 +1,215 @@
+// ==============================================================================
+// FREVAI - SISTEMA DE NOTIFICAÇÕES & PUSH COM DEEP LINKING
+// ==============================================================================
+
+function getVisibleNotificationsForCurrentSession() {
+  if (typeof loadNotificationsLocal === 'function') loadNotificationsLocal();
+  const session = window.currentUserSession || {};
+  const currentUserId = session.id;
+  const userRole = session.role || 'guest';
+  const isAdmin = userRole === 'admin';
+
+  return (window.DB?.notifications || []).filter(n => {
+    // 1. Notificação explicitamente direcionada a um usuário específico (ex: recusa/aprovação individual)
+    if (n.forUserId) {
+      return n.forUserId === currentUserId;
+    }
+    // 2. Notificação direcionada a um cargo específico (ex: 'admin' para moderação compartilhada)
+    if (n.forRole) {
+      if (n.forRole === 'admin') return isAdmin;
+      return n.forRole === userRole;
+    }
+    // 3. Notificação global de difusão (broadcast) para a comunidade
+    return true;
+  });
+}
+
+function updateNotificationBadge() {
+  const badge = document.getElementById('header-notification-badge');
+  if (!badge) return;
+  const visibleNotifs = getVisibleNotificationsForCurrentSession();
+  const unreadCount = visibleNotifs.filter(n => !n.read).length;
+  badge.style.display = unreadCount > 0 ? 'block' : 'none';
+}
+
+function sendCulturalPushNotification({ title, message, url, type, targetId }) {
+  if (!('Notification' in window)) return;
+
+  const notifUrl = url || (type === 'post' ? `/#feed?post=${targetId}` : `/#songs?score=${targetId}`);
+
+  if (Notification.permission === 'granted') {
+    if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+      navigator.serviceWorker.ready.then(registration => {
+        registration.showNotification(title, {
+          body: message,
+          icon: 'assets/icons/icon-192x192.png',
+          badge: 'assets/icons/icon-192x192.png',
+          vibrate: [100, 50, 100],
+          data: {
+            url: notifUrl,
+            type,
+            targetId
+          }
+        });
+      }).catch(err => {
+        console.warn('SW push notification fallback:', err);
+      });
+    } else {
+      try {
+        const nativeNotif = new Notification(title, {
+          body: message,
+          icon: 'assets/icons/icon-192x192.png'
+        });
+        nativeNotif.onclick = () => {
+          window.focus();
+          handleNotificationClick(null, type, targetId);
+        };
+      } catch (e) {}
+    }
+  } else if (Notification.permission !== 'denied') {
+    Notification.requestPermission();
+  }
+}
+
+function markAllNotificationsAsRead() {
+  const visible = getVisibleNotificationsForCurrentSession();
+  const visibleIds = new Set(visible.map(n => n.id));
+  (window.DB?.notifications || []).forEach(n => {
+    if (visibleIds.has(n.id)) {
+      n.read = true;
+    }
+  });
+  if (typeof saveNotificationsLocal === 'function') saveNotificationsLocal();
+  updateNotificationBadge();
+  openNotificationsModal();
+}
+
+function handleNotificationClick(notifId, type, targetId) {
+  if (notifId) {
+    const notif = (window.DB?.notifications || []).find(n => n.id === notifId);
+    if (notif) notif.read = true;
+    if (typeof saveNotificationsLocal === 'function') saveNotificationsLocal();
+  }
+  updateNotificationBadge();
+  if (typeof closeModal === 'function') closeModal();
+
+  if (type === 'post') {
+    if (typeof switchView === 'function') switchView('feed');
+    setTimeout(() => {
+      const el = document.getElementById(`post-card-${targetId}`) || document.querySelector(`[data-post-id="${targetId}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('highlight-pulse');
+        setTimeout(() => el.classList.remove('highlight-pulse'), 3500);
+      }
+    }, 280);
+  } else if (type === 'score') {
+    if (typeof switchView === 'function') switchView('songs');
+    const song = (window.DB?.songs || []).find(s => s.id === targetId);
+    if (song) {
+      setTimeout(() => {
+        if (typeof openScoreModal === 'function') openScoreModal(song.title, song.artist, song.id);
+      }, 250);
+    }
+  } else if (type === 'artist_request') {
+    if (typeof switchView === 'function') switchView('admin');
+    if (typeof currentAdminTab !== 'undefined') window.currentAdminTab = 'artists';
+    document.querySelectorAll('.admin-tab-pill').forEach(b => {
+      b.classList.toggle('active', b.innerText.toLowerCase().includes('solicitaç') || b.innerText.toLowerCase().includes('artista'));
+    });
+    if (typeof renderAdminCMS === 'function') renderAdminCMS();
+  } else if (type === 'artist_rejected') {
+    if (typeof loadNotificationsLocal === 'function') loadNotificationsLocal();
+    const notif = (window.DB?.notifications || []).find(n => n.id === notifId);
+    const feedback = notif ? notif.message : 'Sua solicitação artística não pôde ser aprovada no momento.';
+    if (typeof showAlertModal === 'function') {
+      showAlertModal(
+        `${feedback}\n\nVocê pode atualizar seus dados biográficos e links artísticos na aba de perfil e enviar uma nova solicitação a qualquer momento.`,
+        { title: 'Parecer da Curadoria', type: 'info' }
+      );
+    }
+  } else if (type === 'artist_approved') {
+    if (typeof switchView === 'function') switchView('profile');
+    if (typeof showAlertModal === 'function') {
+      showAlertModal(
+        'Parabéns! Seu perfil de Artista Oficial já está ativo. Você já pode cadastrar partituras e gerenciar suas obras.',
+        { title: 'Artista Verificado', type: 'success' }
+      );
+    }
+  }
+}
+
+// Modal do Sino de Notificações
+function openNotificationsModal() {
+  const modal = document.getElementById('global-modal');
+  const modalBody = document.getElementById('modal-body');
+  const notifications = getVisibleNotificationsForCurrentSession();
+  const unreadCount = notifications.filter(n => !n.read).length;
+
+  modalBody.innerHTML = `
+    <div class="space-y-4 text-left">
+      <div class="flex items-center justify-between pb-3 border-b border-gray-100 pr-8">
+        <div>
+          <h3 class="font-display font-bold text-lg text-ink">Notificações Culturais</h3>
+          <p class="text-xs text-muted">${unreadCount > 0 ? `${unreadCount} não lida(s)` : 'Tudo em dia!'}</p>
+        </div>
+        ${unreadCount > 0 ? `
+          <button onclick="markAllNotificationsAsRead()" class="text-[11px] font-bold text-frevo-orange hover:underline">
+            Marcar todas como lidas
+          </button>
+        ` : ''}
+      </div>
+
+      <div class="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+        ${notifications.length > 0 ? notifications.map(notif => `
+          <div onclick="handleNotificationClick('${notif.id}', '${notif.type}', '${notif.targetId}')" class="notification-item p-3.5 ${notif.read ? 'bg-white border border-gray-100 opacity-80' : 'bg-surface-soft border border-frevo-orange/30 shadow-sm'} rounded-2xl flex items-start gap-3 cursor-pointer hover:border-frevo-orange transition-all">
+            <div class="relative flex-shrink-0">
+              <img src="${notif.author_avatar || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80'}" alt="${notif.author || 'FrevAI'}" class="w-10 h-10 rounded-full object-cover border border-gray-200" />
+              <div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-white ${notif.type === 'score' ? 'bg-frevo-cyan' : notif.type === 'artist_request' ? 'bg-frevo-green' : notif.type === 'artist_rejected' ? 'bg-rose-500' : notif.type === 'artist_approved' ? 'bg-emerald-500' : 'bg-frevo-orange'}">
+                ${notif.type === 'score' 
+                  ? '<svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>' 
+                  : notif.type === 'artist_request'
+                    ? '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>'
+                    : notif.type === 'artist_rejected'
+                      ? '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>'
+                      : notif.type === 'artist_approved'
+                        ? '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>'
+                        : '<svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>'}
+              </div>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-1 mb-0.5">
+                <strong class="text-ink text-xs font-bold truncate block">${notif.title}</strong>
+                ${!notif.read ? '<span class="w-2 h-2 rounded-full bg-frevo-orange flex-shrink-0 animate-pulse"></span>' : ''}
+              </div>
+              <p class="text-[11px] text-ink-soft leading-snug line-clamp-2">${notif.message}</p>
+              <div class="flex items-center justify-between mt-1.5 pt-1 border-t border-gray-100/60">
+                <span class="text-[10px] text-muted font-medium">${notif.time_ago || 'Recentemente'}</span>
+                <span class="text-[10px] font-bold text-frevo-orange flex items-center gap-0.5">
+                  ${notif.type === 'score' ? 'Ver Partitura' : notif.type === 'artist_request' ? 'Revisar no CMS' : notif.type === 'artist_rejected' ? 'Ver Justificativa' : notif.type === 'artist_approved' ? 'Acessar Perfil' : 'Ver no Feed'} &rarr;
+                </span>
+              </div>
+            </div>
+          </div>
+        `).join('') : `
+          <div class="p-6 text-center bg-surface-soft rounded-2xl border border-gray-100">
+            <p class="text-xs text-muted">Nenhuma notificação recebida ainda.</p>
+          </div>
+        `}
+      </div>
+
+      <button onclick="closeModal()" class="btn btn-outline w-full text-xs rounded-xl py-2 font-bold text-ink">
+        Fechar
+      </button>
+    </div>
+  `;
+
+  modal.classList.add('open');
+}
+
+window.getVisibleNotificationsForCurrentSession = getVisibleNotificationsForCurrentSession;
+window.updateNotificationBadge = updateNotificationBadge;
+window.sendCulturalPushNotification = sendCulturalPushNotification;
+window.markAllNotificationsAsRead = markAllNotificationsAsRead;
+window.handleNotificationClick = handleNotificationClick;
+window.openNotificationsModal = openNotificationsModal;

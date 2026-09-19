@@ -85,6 +85,7 @@ CREATE TABLE IF NOT EXISTS public.songs (
   duration_seconds INT DEFAULT 0,
   plays_count INT DEFAULT 0,
   downloads_count INT DEFAULT 0,
+  allow_download BOOLEAN DEFAULT true,
   is_popular BOOLEAN DEFAULT false,
   status content_status DEFAULT 'published',
   created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
