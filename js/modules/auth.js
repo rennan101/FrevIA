@@ -37,6 +37,7 @@ function getCoverUrl(url) {
 }
 
 let currentUserSession = {
+  id: 'guest',
   role: 'guest', // Inicia como visitante sem login por padrão
   name: 'Visitante',
   handle: '@visitante',
@@ -333,16 +334,13 @@ function loadAlbumsLocal() {
     const saved = localStorage.getItem('frevai_custom_albums');
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        const existingIds = new Set((DB.albums || []).map(a => a.id));
-        for (const item of parsed) {
-          if (!existingIds.has(item.id)) {
-            DB.albums.unshift(item);
-          }
-        }
+      if (Array.isArray(parsed)) {
+        DB.albums = parsed;
+        return;
       }
     }
   } catch (e) {}
+  saveAlbumsLocal();
 }
 
 function saveAlbumsLocal() {
@@ -356,16 +354,13 @@ function loadSongsLocal() {
     const saved = localStorage.getItem('frevai_custom_songs');
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        const existingIds = new Set((DB.songs || []).map(s => s.id));
-        for (const item of parsed) {
-          if (!existingIds.has(item.id)) {
-            DB.songs.unshift(item);
-          }
-        }
+      if (Array.isArray(parsed)) {
+        DB.songs = parsed;
+        return;
       }
     }
   } catch (e) {}
+  saveSongsLocal();
 }
 
 function saveSongsLocal() {
@@ -546,6 +541,7 @@ function switchTestRole(role, silent = false) {
 
   if (role === 'admin') {
     currentUserSession = {
+      id: 'user-admin-1',
       role: 'admin',
       name: 'Administrador FrevAI',
       handle: '@admin_cultura',
@@ -559,6 +555,7 @@ function switchTestRole(role, silent = false) {
     };
   } else if (role === 'artist') {
     currentUserSession = {
+      id: 'user-forro-2',
       role: 'artist',
       name: 'Maestro Forró',
       handle: '@maestroforro',
@@ -572,6 +569,7 @@ function switchTestRole(role, silent = false) {
     };
   } else if (role === 'user') {
     currentUserSession = {
+      id: 'user-foliao-3',
       role: 'user',
       name: 'Folião do Passo',
       handle: '@foliao_recife',
@@ -585,6 +583,7 @@ function switchTestRole(role, silent = false) {
     };
   } else {
     currentUserSession = {
+      id: 'guest',
       role: 'guest',
       name: 'Visitante',
       handle: '@visitante',
@@ -938,6 +937,11 @@ function renderProfileGallery() {
               <button onclick="openScoreModal('${s.title}', '${s.artist}', '${s.id}')" class="p-1.5 text-muted hover:text-ink rounded-lg bg-gray-50 hover:bg-gray-100" title="Ver Partitura">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
               </button>
+              ${isArtist ? `
+                <button onclick="event.stopPropagation(); deleteSong('${s.id}')" class="p-1.5 text-rose-500 hover:text-white hover:bg-rose-600 rounded-lg bg-rose-50 transition-colors" title="Excluir Música">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+              ` : ''}
             </div>
           </div>
         `).join('')}
@@ -989,8 +993,15 @@ function renderProfileGallery() {
         ` : `
           <div class="grid grid-cols-2 gap-3">
             ${albums.map(a => `
-              <div onclick="openAlbumDetails('${a.id}')" class="p-3 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group">
-                <img src="${getCoverUrl(a.cover_url || a.cover)}" alt="${a.title}" class="w-full aspect-square rounded-xl object-cover mb-2" onerror="this.onerror=null; this.src='${DEFAULT_COVER_PLACEHOLDER}'" />
+              <div onclick="openAlbumDetails('${a.id}')" class="p-3 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group relative">
+                <div class="relative mb-2">
+                  <img src="${getCoverUrl(a.cover_url || a.cover)}" alt="${a.title}" class="w-full aspect-square rounded-xl object-cover" onerror="this.onerror=null; this.src='${DEFAULT_COVER_PLACEHOLDER}'" />
+                  ${isArtist ? `
+                    <button onclick="event.stopPropagation(); deleteAlbum('${a.id}')" class="absolute top-2 right-2 p-1.5 bg-white/90 hover:bg-rose-600 text-gray-600 hover:text-white rounded-lg shadow transition-colors" title="Excluir Álbum">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </button>
+                  ` : ''}
+                </div>
                 <h4 class="font-display font-bold text-xs text-ink truncate">${a.title}</h4>
                 <p class="text-[10px] text-muted truncate">${a.release_year || a.year || '2024'} · ${a.tracks_count || (a.tracks || []).length || 10} faixas</p>
               </div>

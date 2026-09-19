@@ -371,17 +371,33 @@ async function submitNewAlbum(e) {
 }
 
 async function deleteAlbum(albumId) {
-  if (currentUserSession.role !== 'artist' && currentUserSession.role !== 'admin') {
-    showAlertModal('Apenas o artista ou administradores podem excluir este álbum.');
+  const album = (DB.albums || []).find(a => a.id === albumId);
+  const isOwner = currentUserSession && (
+    currentUserSession.role === 'admin' ||
+    (album && album.artist_id === currentUserSession.artist_id) ||
+    (album && album.author_id === currentUserSession.artist_id) ||
+    (album && album.submitted_by === currentUserSession.id) ||
+    (album && album.artist && currentUserSession.name && album.artist.toLowerCase().trim() === currentUserSession.name.toLowerCase().trim())
+  );
+
+  if (!isOwner && currentUserSession.role !== 'admin') {
+    showAlertModal('Apenas o artista/maestro responsável ou administradores podem excluir este álbum.');
     return;
   }
-  if (confirm('Deseja realmente excluir este álbum?')) {
+  if (confirm(`Deseja realmente excluir o álbum "${album ? album.title : 'selecionado'}" permanentemente?`)) {
     DB.albums = (DB.albums || []).filter(a => a.id !== albumId);
     if (typeof saveAlbumsLocal === 'function') saveAlbumsLocal();
     if (window.awsService && window.awsService.isConnected()) {
-      await window.awsService.deleteAlbum(albumId);
+      try {
+        await window.awsService.deleteAlbum(albumId);
+      } catch (err) {
+        console.warn('Erro ao excluir no AWS:', err);
+      }
     }
+    if (typeof closeModal === 'function') closeModal();
     if (typeof renderProfileGallery === 'function') renderProfileGallery();
+    if (typeof renderSongs === 'function') renderSongs();
+    showAlertModal('Álbum excluído com sucesso.');
   }
 }
 
@@ -626,6 +642,12 @@ function openAlbumDetails(albumId) {
       </div>
 
       <div class="pt-2 flex gap-2">
+        ${(currentUserSession && (currentUserSession.role === 'admin' || (album && album.artist_id === currentUserSession.artist_id) || (album && album.author_id === currentUserSession.artist_id) || (album && album.submitted_by === currentUserSession.id) || (album && album.artist && currentUserSession.name && album.artist.toLowerCase().trim() === currentUserSession.name.toLowerCase().trim()))) ? `
+          <button type="button" onclick="deleteAlbum('${album.id}')" class="btn bg-rose-600 hover:bg-rose-700 text-white text-xs rounded-xl py-2.5 px-4 font-bold flex items-center justify-center gap-1.5 transition-colors shadow-sm" title="Excluir Álbum">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            Excluir Álbum
+          </button>
+        ` : ''}
         ${hasHistory ? `
           <button type="button" onclick="goBackModal()" class="btn btn-outline flex-1 text-xs rounded-xl py-2.5 font-bold flex items-center justify-center gap-1.5">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>

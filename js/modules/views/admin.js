@@ -275,12 +275,13 @@ async function renderAdminCMS() {
         <div class="p-3.5 bg-surface-soft rounded-2xl border border-gray-200/80 flex items-center justify-between gap-3 text-xs text-muted">
           <div class="flex items-center gap-2">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-frevo-green">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
             </svg>
-            <span>Persistência garantida via LocalStorage e sincronização com Amazon DynamoDB / PostgreSQL</span>
+            <span>Métricas e estatísticas consolidadas e atualizadas diariamente às 00:00 (Horário de Brasília)</span>
           </div>
           <button onclick="renderAdminCMS()" class="text-[11px] text-frevo-orange font-bold hover:underline whitespace-nowrap">
-            Atualizar Dados
+            Atualizar Agora
           </button>
         </div>
       </div>

@@ -304,8 +304,14 @@ async function deleteSong(songId) {
   closeAllSongActionMenus();
   const song = (DB.songs || []).find(s => s.id === songId);
   if (!song) return;
-  const isOwner = currentUserSession && (song.author_id === currentUserSession.artist_id || song.artist_id === currentUserSession.artist_id);
-  if (!isOwner && currentUserSession.role !== 'admin') {
+  const isOwner = currentUserSession && (
+    currentUserSession.role === 'admin' ||
+    song.author_id === currentUserSession.artist_id ||
+    song.artist_id === currentUserSession.artist_id ||
+    (song.submitted_by && song.submitted_by === currentUserSession.id) ||
+    (song.artist && currentUserSession.name && song.artist.toLowerCase().trim() === currentUserSession.name.toLowerCase().trim())
+  );
+  if (!isOwner) {
     showAlertModal('Apenas o compositor desta obra ou administradores podem excluí-la.');
     return;
   }
@@ -320,7 +326,8 @@ async function deleteSong(songId) {
       }
     }
     if (typeof renderProfileGallery === 'function') renderProfileGallery();
-    renderSongs();
+    if (typeof renderSongs === 'function') renderSongs();
+    if (typeof renderSongsDesktopViewer === 'function') renderSongsDesktopViewer();
     showAlertModal('Música excluída com sucesso.');
   }
 }
