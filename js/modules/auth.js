@@ -1140,7 +1140,7 @@ function openEditProfileModal() {
 
         <div class="pt-2 flex items-center justify-end gap-2.5">
           <button type="button" onclick="closeModal()" class="btn btn-outline px-4 py-2.5 text-xs sm:text-sm rounded-xl font-bold flex-1">Cancelar</button>
-          <button type="submit" class="btn btn-primary px-5 py-2.5 text-xs sm:text-sm rounded-xl font-bold shadow-md flex-1">Salvar Alterações</button>
+          <button type="submit" id="btn-save-profile" class="btn btn-primary px-5 py-2.5 text-xs sm:text-sm rounded-xl font-bold shadow-md flex-1">Salvar</button>
         </div>
       </form>
     </div>
@@ -1150,33 +1150,112 @@ function openEditProfileModal() {
 }
 
 async function saveProfileChanges(event) {
-  event.preventDefault();
-  const name = document.getElementById('edit-profile-name').value.trim();
-  const handle = document.getElementById('edit-profile-handle').value.trim();
-  const bio = document.getElementById('edit-profile-bio').value.trim();
-  const instagram = document.getElementById('edit-profile-instagram').value.trim();
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  
+  const nameInput = document.getElementById('edit-profile-name');
+  const handleInput = document.getElementById('edit-profile-handle');
+  const bioInput = document.getElementById('edit-profile-bio');
+  const instagramInput = document.getElementById('edit-profile-instagram');
+  const submitBtn = document.getElementById('btn-save-profile');
 
-  if (!name || !handle) {
-    showAlertModal('Por favor, preencha seu nome e nome de usuário.');
+  const name = nameInput ? nameInput.value.trim() : (currentUserSession.name || '');
+  let handle = handleInput ? handleInput.value.trim() : (currentUserSession.handle || '');
+  const bio = bioInput ? bioInput.value.trim() : (currentUserSession.bio || '');
+  const instagram = instagramInput ? instagramInput.value.trim() : '';
+
+  if (!name) {
+    showAlertModal('Por favor, preencha seu nome completo.');
     return;
   }
 
-  const handleCheck = await isHandleTaken(handle, currentUserSession.id);
-  if (handleCheck.taken && handle.toLowerCase() !== (currentUserSession.handle || '').toLowerCase()) {
-    showAlertModal(handleCheck.reason || 'Este nome de usuário já está em uso.');
+  if (!handle) {
+    showAlertModal('Por favor, preencha seu nome de usuário (@).');
     return;
   }
 
-  currentUserSession.name = name;
-  currentUserSession.handle = handle.startsWith('@') ? handle : '@' + handle;
-  currentUserSession.bio = bio;
-  currentUserSession.socials = currentUserSession.socials || {};
-  currentUserSession.socials.instagram = instagram;
+  if (!handle.startsWith('@')) {
+    handle = '@' + handle;
+  }
 
-  saveCurrentSession();
-  closeModal();
-  updateProfileUI();
-  showAlertModal('Perfil atualizado com sucesso!', { type: 'success' });
+  const cleanHandle = '@' + handle.substring(1).toLowerCase().replace(/[^a-z0-9_]/g, '');
+  if (cleanHandle.length < 3) {
+    showAlertModal('O nome de usuário deve conter pelo menos 2 caracteres após o @.');
+    return;
+  }
+
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerText = 'Salvando...';
+  }
+
+  try {
+    const currentHandleClean = (currentUserSession.handle || '').toLowerCase();
+    if (cleanHandle.toLowerCase() !== currentHandleClean) {
+      const handleCheck = await isHandleTaken(cleanHandle, currentUserSession.id);
+      if (handleCheck && handleCheck.taken) {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerText = 'Salvar';
+        }
+        showAlertModal(handleCheck.reason || 'Este nome de usuário já está em uso.');
+        return;
+      }
+    }
+
+    currentUserSession.name = name;
+    currentUserSession.handle = cleanHandle;
+    currentUserSession.bio = bio;
+    currentUserSession.socials = currentUserSession.socials || {};
+    currentUserSession.socials.instagram = instagram;
+
+    if (typeof currentUserProfile !== 'undefined') {
+      currentUserProfile.name = currentUserSession.name;
+      currentUserProfile.handle = currentUserSession.handle;
+      currentUserProfile.bio = currentUserSession.bio;
+      currentUserProfile.socials = currentUserSession.socials;
+    }
+
+    // Persistir localmente
+    saveCurrentSession();
+
+    // Sincronizar com AWS de forma segura em background se disponível
+    if (window.awsService && window.awsService.isConnected() && currentUserSession.id && currentUserSession.role !== 'guest') {
+      window.awsService.upsertProfile({
+        id: currentUserSession.id,
+        email: currentUserSession.email
+      }, {
+        display_name: name,
+        handle: cleanHandle,
+        bio: bio,
+        role: currentUserSession.role,
+        avatar_url: currentUserSession.avatar
+      }).catch(err => console.warn('[AWS Profile Sync] Aviso ao atualizar na nuvem:', err));
+    }
+
+    // Fechar modal e atualizar interface
+    if (typeof closeModal === 'function') {
+      closeModal();
+    } else {
+      const modal = document.getElementById('global-modal');
+      if (modal) modal.classList.remove('open');
+    }
+
+    updateProfileUI();
+    if (typeof renderProfileGallery === 'function') renderProfileGallery();
+    if (typeof renderFeed === 'function') renderFeed();
+
+    showAlertModal('Perfil salvo com sucesso!', { type: 'success' });
+  } catch (err) {
+    console.error('[Save Profile] Erro ao salvar:', err);
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerText = 'Salvar';
+    }
+    showAlertModal('Ocorreu um erro ao salvar o perfil. Tente novamente.');
+  }
 }
 
 function openSettingsModal() {
