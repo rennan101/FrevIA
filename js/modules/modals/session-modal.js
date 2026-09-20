@@ -461,12 +461,37 @@ async function handleForgotPasswordSubmit(e) {
   }
 }
 
+function isMobileOrIos() {
+  const ua = navigator.userAgent || navigator.vendor || window.opera || '';
+  return /iPad|iPhone|iPod|android/i.test(ua) || (navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
+}
+
 async function loginWithGoogle() {
   const clientId = window.FREVIA_CONFIG?.GOOGLE_CLIENT_ID;
   const isRealGoogleClientId = clientId && !clientId.includes('frevai-auth') && clientId.includes('.apps.googleusercontent.com');
 
-  // 1. Se houver um Client ID real configurado no Google Cloud Console, abrir o seletor nativo
-  if (isRealGoogleClientId && window.google && window.google.accounts && window.google.accounts.oauth2) {
+  if (!isRealGoogleClientId) {
+    openGoogleAuthModal();
+    return;
+  }
+
+  const currentOrigin = window.location.origin + window.location.pathname;
+  const cleanOrigin = currentOrigin.replace(/\/+$/, '');
+  const isMobile = isMobileOrIos();
+
+  // Em dispositivos móveis / iOS (Safari, Chrome iOS, PWA):
+  // O Google bloqueia estritamente janelas popups/iframes/webviews com o erro "não obedece à política de OAuth 2.0".
+  // A solução 100% oficial e compatível com iOS é o Redirecionamento de Topo (Full Window Redirect).
+  if (isMobile) {
+    const redirectUri = encodeURIComponent(cleanOrigin);
+    const nonce = 'frevai_' + Date.now();
+    const googleOAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(clientId)}&redirect_uri=${redirectUri}&response_type=token%20id_token&scope=email%20profile%20openid&prompt=select_account&nonce=${nonce}`;
+    window.location.href = googleOAuthUrl;
+    return;
+  }
+
+  // Em Computador (Desktop): Tentar Google Identity Services Token Client
+  if (window.google && window.google.accounts && window.google.accounts.oauth2) {
     try {
       const client = window.google.accounts.oauth2.initTokenClient({
         client_id: clientId,
@@ -494,8 +519,9 @@ async function loginWithGoogle() {
           }
         },
         error_callback: (err) => {
-          console.warn('[Google OAuth] Erro ou cancelamento:', err);
-          openGoogleAuthModal();
+          console.warn('[Google OAuth] Erro no popup desktop:', err);
+          const redirectUri = encodeURIComponent(cleanOrigin);
+          window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(clientId)}&redirect_uri=${redirectUri}&response_type=token%20id_token&scope=email%20profile%20openid&prompt=select_account&nonce=frevai_${Date.now()}`;
         }
       });
 
@@ -506,8 +532,9 @@ async function loginWithGoogle() {
     }
   }
 
-  // 2. Se o Client ID ainda não estiver cadastrado no console do Google Cloud, abrir o modal de login seguro
-  openGoogleAuthModal();
+  // Fallback geral com redirecionamento de topo
+  const redirectUri = encodeURIComponent(cleanOrigin);
+  window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(clientId)}&redirect_uri=${redirectUri}&response_type=token%20id_token&scope=email%20profile%20openid&prompt=select_account&nonce=frevai_${Date.now()}`;
 }
 
 async function authenticateWithGoogleProfile({ name, email, avatar, sub }) {

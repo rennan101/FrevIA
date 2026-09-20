@@ -103,44 +103,72 @@ class AwsService {
       const params = new URLSearchParams(hash.substring(1));
       const idToken = params.get('id_token');
       const accessToken = params.get('access_token');
-      if (idToken) {
+
+      // Limpar hash da URL imediatamente sem perder os dados
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+
+      (async () => {
         try {
-          const base64Url = idToken.split('.')[1];
-          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-          const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-          const payload = JSON.parse(jsonPayload);
-          
-          const email = payload.email || '';
-          const name = payload.given_name || payload.name || (email ? email.split('@')[0] : 'Folião');
-          const avatar = payload.picture || null;
-          const sub = payload.sub || email;
+          let email = '';
+          let name = '';
+          let avatar = null;
+          let sub = '';
 
-          // Limpar hash da URL imediatamente sem perder os dados
-          window.history.replaceState(null, '', window.location.pathname + window.location.search);
-
-          (async () => {
+          if (idToken) {
             try {
-              let profile = await this.getProfile(sub);
-              if (!profile) {
-                profile = await this.upsertProfile({
-                  id: sub,
-                  email: email,
-                  user_metadata: { display_name: name, avatar_url: avatar }
-                });
-              }
+              const base64Url = idToken.split('.')[1];
+              const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+              const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+              const payload = JSON.parse(jsonPayload);
+              email = payload.email || '';
+              name = payload.given_name || payload.name || (email ? email.split('@')[0] : 'Folião');
+              avatar = payload.picture || null;
+              sub = payload.sub || email;
+            } catch (e) {
+              console.warn('[AWS] Erro ao decodificar id_token:', e);
+            }
+          }
 
-              // Carregar estado social existente no backend AWS (likes, salvos, favoritos)
-              const social = await this.getUserSocialState(sub);
-              const favs = social?.favoriteArtistIds || [];
-              if (typeof DB !== 'undefined' && DB.posts && social) {
-                DB.posts.forEach(p => {
-                  p.is_liked = (social.likedPostIds || []).includes(p.id);
-                  p.is_saved = (social.savedPostIds || []).includes(p.id);
-                });
+          if (!email && accessToken) {
+            try {
+              const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                headers: { Authorization: `Bearer ${accessToken}` }
+              });
+              if (res.ok) {
+                const googleUser = await res.json();
+                email = googleUser.email || '';
+                name = googleUser.name || googleUser.given_name || (email ? email.split('@')[0] : 'Folião');
+                avatar = googleUser.picture || null;
+                sub = googleUser.sub || email;
               }
+            } catch (e) {
+              console.warn('[AWS] Erro ao obter dados do userinfo com access_token:', e);
+            }
+          }
 
-              const isApprovedArtist = profile?.role === 'artist' && profile?.artist_id;
-              const userRole = profile?.role === 'admin' ? 'admin' : (isApprovedArtist ? 'artist' : 'user');
+          if (!email && !sub) return;
+
+          let profile = await this.getProfile(sub || email);
+          if (!profile) {
+            profile = await this.upsertProfile({
+              id: sub || email,
+              email: email,
+              user_metadata: { display_name: name, avatar_url: avatar }
+            });
+          }
+
+          // Carregar estado social existente no backend AWS (likes, salvos, favoritos)
+          const social = await this.getUserSocialState(sub || email);
+          const favs = social?.favoriteArtistIds || [];
+          if (typeof DB !== 'undefined' && DB.posts && social) {
+            DB.posts.forEach(p => {
+              p.is_liked = (social.likedPostIds || []).includes(p.id);
+              p.is_saved = (social.savedPostIds || []).includes(p.id);
+            });
+          }
+
+          const isApprovedArtist = profile?.role === 'artist' && profile?.artist_id;
+          const userRole = profile?.role === 'admin' ? 'admin' : (isApprovedArtist ? 'artist' : 'user');
 
               const sessionObj = {
                 id: sub,
@@ -179,15 +207,11 @@ class AwsService {
                 }
               });
             } catch (err) {
-              console.error('[Cognito OAuth Callback] Erro ao sincronizar sessão:', err);
+              console.error('[OAuth Callback] Erro ao sincronizar sessão:', err);
             }
           })();
-        } catch (e) {
-          console.error('[Cognito OAuth] Erro ao decodificar token:', e);
         }
       }
-    }
-  }
 
   // ============================================================================
   // AUTENTICAÇÃO COGNITO (EMAIL E SENHA)
