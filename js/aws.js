@@ -91,10 +91,14 @@ class AwsService {
   // OAUTH & GOOGLE FEDERATION
   // ============================================================================
   signInWithGoogle() {
-    const currentOrigin = window.location.origin + window.location.pathname;
-    const redirectUri = encodeURIComponent(currentOrigin);
-    const oauthUrl = `https://${this.cognitoDomain}/oauth2/authorize?identity_provider=Google&redirect_uri=${redirectUri}&response_type=token&client_id=${this.clientId}&scope=email+openid+profile`;
-    window.location.href = oauthUrl;
+    if (typeof window.loginWithGoogle === 'function') {
+      window.loginWithGoogle();
+      return;
+    }
+    const googleClientId = window.FREVIA_CONFIG?.GOOGLE_CLIENT_ID || this.clientId;
+    const redirectUri = encodeURIComponent(window.location.origin);
+    const nonce = 'frevai_' + Date.now();
+    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(googleClientId)}&redirect_uri=${redirectUri}&response_type=token%20id_token&scope=email%20profile%20openid&prompt=select_account&nonce=${nonce}`;
   }
 
   checkOAuthCallback() {

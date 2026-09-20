@@ -475,15 +475,13 @@ async function loginWithGoogle() {
     return;
   }
 
-  const currentOrigin = window.location.origin + window.location.pathname;
-  const cleanOrigin = currentOrigin.replace(/\/+$/, '');
+  // O redirect_uri deve ser exatamente o origin autorizado no Google Cloud Console (sem path extra como /index.html)
+  const redirectUri = encodeURIComponent(window.location.origin);
   const isMobile = isMobileOrIos();
 
   // Em dispositivos móveis / iOS (Safari, Chrome iOS, PWA):
-  // O Google bloqueia estritamente janelas popups/iframes/webviews com o erro "não obedece à política de OAuth 2.0".
-  // A solução 100% oficial e compatível com iOS é o Redirecionamento de Topo (Full Window Redirect).
+  // O Google bloqueia popups/webviews. O redirecionamento de topo (Full Window Redirect) é o padrão oficial.
   if (isMobile) {
-    const redirectUri = encodeURIComponent(cleanOrigin);
     const nonce = 'frevai_' + Date.now();
     const googleOAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(clientId)}&redirect_uri=${redirectUri}&response_type=token%20id_token&scope=email%20profile%20openid&prompt=select_account&nonce=${nonce}`;
     window.location.href = googleOAuthUrl;
@@ -519,8 +517,7 @@ async function loginWithGoogle() {
           }
         },
         error_callback: (err) => {
-          console.warn('[Google OAuth] Erro no popup desktop:', err);
-          const redirectUri = encodeURIComponent(cleanOrigin);
+          console.warn('[Google OAuth] Erro no popup desktop, redirecionando:', err);
           window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(clientId)}&redirect_uri=${redirectUri}&response_type=token%20id_token&scope=email%20profile%20openid&prompt=select_account&nonce=frevai_${Date.now()}`;
         }
       });
@@ -533,7 +530,6 @@ async function loginWithGoogle() {
   }
 
   // Fallback geral com redirecionamento de topo
-  const redirectUri = encodeURIComponent(cleanOrigin);
   window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(clientId)}&redirect_uri=${redirectUri}&response_type=token%20id_token&scope=email%20profile%20openid&prompt=select_account&nonce=frevai_${Date.now()}`;
 }
 
